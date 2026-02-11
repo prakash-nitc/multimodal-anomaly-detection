@@ -1,0 +1,269 @@
+\documentclass[12pt, a4paper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage[numbers]{natbib}
+
+% Formatting
+\onehalfspacing
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% ============ TITLE PAGE ============
+\begin{center}
+    {\large \textbf{National Institute of Technology Calicut}}\\[0.3cm]
+    {\normalsize Department of Computer Science \& Engineering}\\[1.5cm]
+    
+    {\Large \textbf{Research Proposal}}\\[0.8cm]
+    
+    {\LARGE \textbf{Zero-Shot Multimodal Anomaly Detection\\[0.3cm] in Industrial Quality Inspection\\[0.3cm] using Vision-Language Models}}\\[1.5cm]
+    
+    {\large M.Tech Project Phase -- 1}\\[0.5cm]
+    {\large CS6196E / CS6296E / CS6396E}\\[1.5cm]
+    
+    \begin{tabular}{rl}
+        \textbf{Student:} & [Your Name] \\
+        \textbf{Roll No:} & [Your Roll Number] \\
+        \textbf{Guide:} & Prof.\ [Professor Name] \\
+        \textbf{Date:} & February 2026 \\
+    \end{tabular}
+\end{center}
+
+\newpage
+
+% ============ 1. INTRODUCTION ============
+\section{Introduction}
+
+Anomaly detection in industrial manufacturing is a critical quality control task that involves identifying defective products on production lines. Traditional inspection methods rely on human experts, which is expensive, slow, and error-prone. Deep learning-based anomaly detection has shown remarkable progress, but most existing methods operate on a \textbf{single modality} (typically images) and require extensive normal training data for each new product category \cite{bergmann2019mvtec}.
+
+Recent breakthroughs in \textbf{Vision-Language Models (VLMs)} such as CLIP \cite{radford2021clip} and \textbf{Multimodal Large Language Models (MLLMs)} such as LLaVA \cite{liu2023llava} and GPT-4V have opened new possibilities. These models jointly understand images and text, enabling \textbf{zero-shot} anomaly detection --- detecting defects without any task-specific training, using only natural language descriptions of normal and abnormal conditions.
+
+This research investigates the application of VLMs and MLLMs for multimodal anomaly detection in industrial quality inspection, with a focus on developing a structured prompting framework that achieves robust performance without task-specific fine-tuning.
+
+% ============ 2. BACKGROUND ============
+\section{Background}
+
+\subsection{Anomaly Detection in Manufacturing}
+
+Industrial anomaly detection aims to identify products that deviate from expected ``normal'' appearance. The key challenge is that anomalies are rare, diverse, and often subtle. The MVTec Anomaly Detection (MVTec AD) dataset \cite{bergmann2019mvtec} is the standard benchmark, containing 15 industrial product categories with pixel-level anomaly annotations.
+
+\subsection{Vision-Language Models (VLMs)}
+
+CLIP (Contrastive Language-Image Pre-training) \cite{radford2021clip} is trained on 400 million image-text pairs to learn a shared embedding space where images and text descriptions can be directly compared. This enables zero-shot classification: given an image, CLIP can determine which text description best matches it, without any additional training.
+
+\subsection{Multimodal Large Language Models (MLLMs)}
+
+Models like LLaVA \cite{liu2023llava} and GPT-4V extend large language models with visual understanding capabilities. They can analyze images, reason about their content, and generate detailed textual descriptions --- making them potentially powerful tools for anomaly detection and explanation.
+
+% ============ 3. LITERATURE REVIEW ============
+\section{Literature Review}
+
+We categorize existing approaches into three groups:
+
+\subsection{Traditional Deep Learning Methods}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{PatchCore} \cite{roth2022patchcore}: Extracts patch-level features from pre-trained networks and stores them in a memory bank. Anomalies are detected via nearest-neighbor distance. Achieves 99.1\% image-AUROC on MVTec AD but requires normal training samples for each category.
+    
+    \item \textbf{PaDiM} \cite{defard2020padim}: Models patch-level feature distributions using multivariate Gaussians and detects anomalies via Mahalanobis distance. Achieves 95.3\% image-AUROC.
+    
+    \item \textbf{STFPM} \cite{wang2021stfpm}: Uses teacher-student feature pyramid matching to detect anomalies through feature discrepancy.
+\end{itemize}
+
+\textbf{Limitation:} All these methods require separate training on normal samples for each product category, limiting scalability and adaptability.
+
+\subsection{CLIP-Based Zero-Shot Methods}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{WinCLIP} \cite{jeong2023winclip}: Pioneering work applying CLIP to industrial AD. Uses compositional prompt ensembles and sliding windows for anomaly classification and segmentation. Achieves 91.8\% image-AUROC in zero-shot setting on MVTec AD.
+    
+    \item \textbf{AnomalyCLIP} \cite{zhou2024anomalyclip}: Employs learnable, object-agnostic prompt tokens that generalize across product categories, significantly improving cross-domain performance.
+    
+    \item \textbf{CLIP-AD} \cite{chen2023clipad}: Introduces a staged dual-path architecture with separate global and local feature paths for improved anomaly segmentation.
+\end{itemize}
+
+\textbf{Limitation:} These methods leverage only CLIP's feature space. They cannot provide natural language explanations of detected anomalies, and prompt design remains largely manual.
+
+\subsection{MLLM-Based Methods}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{AnomalyGPT} \cite{gu2024anomalygpt}: First LVLM-based approach for industrial AD. Fine-tunes a vision-language model on simulated anomaly data. Provides natural language descriptions of defects and supports multi-turn dialogue.
+    
+    \item \textbf{GPT-4V Evaluation} \cite{cao2023gpt4v}: Systematically evaluates GPT-4V for anomaly detection across multiple domains. Shows promising zero-shot capability but inconsistent performance on fine-grained defects.
+    
+    \item \textbf{MMAD Benchmark} \cite{jiang2025mmad}: Introduces a comprehensive benchmark with 7 subtasks to evaluate MLLMs for industrial AD. Shows even GPT-4o has significant room for improvement.
+\end{itemize}
+
+\textbf{Limitation:} MLLM-based methods are new and underexplored. A systematic study of prompting strategies and their combination with established VLM features is lacking.
+
+% ============ 4. RESEARCH GAP ============
+\section{Research Gap}
+
+Based on our literature survey, we identify the following gaps:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Limited exploration of MLLMs for industrial AD:} While AnomalyGPT requires fine-tuning and GPT-4V is a closed-source API, the potential of open-source MLLMs (LLaVA, etc.) with structured prompting remains underexplored.
+    
+    \item \textbf{No systematic prompt engineering framework:} Existing CLIP-based methods use ad-hoc prompt templates. A systematic study of how prompt design (templates, state words, context descriptions) impacts anomaly detection performance is lacking.
+    
+    \item \textbf{Gap between VLM and MLLM approaches:} Current methods use either CLIP or MLLMs independently. The combination of CLIP's strong visual features with MLLM's reasoning and explanation capabilities has not been explored.
+\end{enumerate}
+
+% ============ 5. PROBLEM STATEMENT ============
+\section{Proposed Problem Statement}
+
+\begin{quote}
+\textit{``To investigate and develop a zero-shot multimodal anomaly detection framework that leverages Vision-Language Models and Multimodal Large Language Models for industrial quality inspection, featuring a structured prompting strategy that enables robust defect detection and natural language explanation without task-specific fine-tuning.''}
+\end{quote}
+
+% ============ 6. PROPOSED METHODOLOGY ============
+\section{Proposed Methodology}
+
+The proposed framework consists of three main components:
+
+\subsection{Component 1: VLM-Based Anomaly Scoring}
+Use pre-trained CLIP to compute anomaly scores by comparing image features with carefully designed text prompts describing normal and anomalous conditions. Employ multi-scale window-based feature extraction (inspired by WinCLIP) for both image-level classification and pixel-level segmentation.
+
+\subsection{Component 2: Structured Prompt Engineering}
+Systematically design and evaluate different prompting strategies:
+\begin{itemize}
+    \item \textbf{Template variations:} ``a photo of a [state] [object]'', ``a [state] [object] in a factory'', etc.
+    \item \textbf{State word variations:} damaged, defective, broken, abnormal, flawed, etc.
+    \item \textbf{Compositional ensembles:} combining multiple prompts for robust scoring.
+\end{itemize}
+
+\subsection{Component 3: MLLM-Based Reasoning and Explanation}
+Leverage an open-source MLLM (LLaVA) to:
+\begin{itemize}
+    \item Provide natural language descriptions of detected anomalies
+    \item Reason about anomaly type and severity
+    \item Generate explanations for quality inspection reports
+\end{itemize}
+
+% ============ 7. EXPECTED CONTRIBUTIONS ============
+\section{Expected Contributions}
+
+\begin{enumerate}[leftmargin=*]
+    \item A systematic evaluation of VLM and MLLM-based approaches for zero-shot industrial anomaly detection on standard benchmarks.
+    \item A structured prompt engineering framework for anomaly detection with analysis of what prompt strategies work best.
+    \item A combined VLM + MLLM pipeline that provides both quantitative anomaly scores and natural language defect explanations.
+    \item Comprehensive benchmarking across 15 industrial product categories with comparison against traditional methods.
+\end{enumerate}
+
+% ============ 8. DATASETS & TOOLS ============
+\section{Datasets and Tools}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Dataset:} MVTec AD (15 categories, 5,354 images) \cite{bergmann2019mvtec}; VisA (for generalization study)
+    \item \textbf{Models:} OpenCLIP (ViT-B/32, ViT-L/14), LLaVA
+    \item \textbf{Baseline Library:} Anomalib (Intel) for traditional method comparison
+    \item \textbf{Metrics:} Image-level AUROC, Pixel-level AUROC, F1-Score
+    \item \textbf{Framework:} PyTorch, HuggingFace Transformers
+\end{itemize}
+
+% ============ 9. TIMELINE ============
+\section{Timeline}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llp{8cm}@{}}
+\toprule
+\textbf{Semester} & \textbf{Period} & \textbf{Tasks} \\
+\midrule
+Sem 2 (Current) & Jan--May 2026 & Literature survey, problem formulation, environment setup, preliminary experiments \\
+\addlinespace
+Sem 3 & Jul--Dec 2026 & Core implementation of VLM and MLLM pipelines, baseline experiments, prompt engineering study \\
+\addlinespace
+Sem 4 & Jan--May 2027 & Ablation studies, generalization experiments, thesis writing, paper submission \\
+\bottomrule
+\end{tabular}
+\caption{Proposed research timeline}
+\end{table}
+
+% ============ REFERENCES ============
+\bibliographystyle{plainnat}
+
+\begin{thebibliography}{10}
+
+\bibitem{bergmann2019mvtec}
+P.~Bergmann, M.~Fauser, D.~Sattlegger, and C.~Steger.
+\newblock MVTec AD --- A comprehensive real-world dataset for unsupervised anomaly detection.
+\newblock In \emph{CVPR}, 2019.
+
+\bibitem{radford2021clip}
+A.~Radford et~al.
+\newblock Learning transferable visual models from natural language supervision.
+\newblock In \emph{ICML}, 2021.
+
+\bibitem{liu2023llava}
+H.~Liu, C.~Li, Q.~Wu, and Y.~J.~Lee.
+\newblock Visual instruction tuning.
+\newblock In \emph{NeurIPS}, 2023.
+
+\bibitem{roth2022patchcore}
+K.~Roth, L.~Pemula, J.~Zepeda, B.~Sch{\"o}lkopf, T.~Brox, and P.~Gehler.
+\newblock Towards total recall in industrial anomaly detection.
+\newblock In \emph{CVPR}, 2022.
+
+\bibitem{defard2020padim}
+T.~Defard, A.~Setkov, A.~Loesch, and R.~Audigier.
+\newblock PaDiM: A patch distribution modeling framework for anomaly detection and localization.
+\newblock In \emph{ICPR}, 2020.
+
+\bibitem{wang2021stfpm}
+G.~Wang, S.~Han, E.~Ding, and D.~Huang.
+\newblock Student-teacher feature pyramid matching for anomaly detection.
+\newblock \emph{arXiv:2103.04257}, 2021.
+
+\bibitem{jeong2023winclip}
+J.~Jeong, Y.~Zou, T.~Kim, D.~Zhang, A.~Ravichandran, and O.~Dabeer.
+\newblock WinCLIP: Zero-/few-shot anomaly classification and segmentation.
+\newblock In \emph{CVPR}, 2023.
+
+\bibitem{zhou2024anomalyclip}
+Q.~Zhou et~al.
+\newblock AnomalyCLIP: Object-agnostic prompt learning for zero-shot anomaly detection.
+\newblock In \emph{ICLR}, 2024.
+
+\bibitem{chen2023clipad}
+X.~Chen et~al.
+\newblock CLIP-AD: A language-guided staged dual-path model for zero-shot anomaly detection.
+\newblock \emph{arXiv:2311.00453}, 2023.
+
+\bibitem{gu2024anomalygpt}
+Z.~Gu et~al.
+\newblock AnomalyGPT: Detecting industrial anomalies using large vision-language models.
+\newblock In \emph{AAAI}, 2024.
+
+\bibitem{cao2023gpt4v}
+Y.~Cao et~al.
+\newblock Exploring the grounding potential of VLMs for generic anomaly detection.
+\newblock \emph{arXiv}, 2023.
+
+\bibitem{jiang2025mmad}
+X.~Jiang et~al.
+\newblock MMAD: Multi-modal anomaly detection benchmark.
+\newblock In \emph{ICLR}, 2025.
+
+\end{thebibliography}
+
+\end{document}
