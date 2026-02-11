@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (too large for git)
+data/
+datasets/
+*.tar.gz
+*.zip
+
+# Model weights (too large for git)
+weights/
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.bin
+
+# Results (optional — uncomment if you want to track results)
+# results/logs/
+
+# Secrets
+.env
+*.key
