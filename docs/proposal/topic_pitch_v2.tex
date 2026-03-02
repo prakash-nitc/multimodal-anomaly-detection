@@ -1,0 +1,196 @@
+\documentclass[12pt, a4paper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage[numbers]{natbib}
+\usepackage{array}
+\usepackage{tabularx}
+
+% Formatting
+\onehalfspacing
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% ============ HEADER ============
+\begin{center}
+    {\large \textbf{National Institute of Technology Calicut}}\\[0.2cm]
+    {\normalsize Department of Computer Science \& Engineering}\\[0.8cm]
+    
+    {\Large \textbf{Proposed Research Topic}}\\[0.4cm]
+    
+    {\large \textbf{Multimodal Anomaly Detection in Industrial Quality Inspection\\ using Vision-Language Models}}\\[0.8cm]
+    
+    \begin{tabular}{rl}
+        \textbf{Student:} & [Your Name] \\
+        \textbf{Roll No:} & [Your Roll Number] \\
+        \textbf{Guide:} & Prof.\ [Professor Name] \\
+        \textbf{Date:} & February 13, 2026 \\
+    \end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+\hrule
+\vspace{0.5cm}
+
+% ============ 1. AREA OF INTEREST ============
+\section{Area of Interest}
+
+\textbf{Multimodal anomaly detection} involves using multiple types of data (e.g., images and text) together to identify items that deviate from expected normal patterns. In industrial manufacturing, this translates to automated quality inspection --- detecting product defects such as scratches, dents, missing components, or structural damage on production lines.
+
+Current anomaly detection methods predominantly rely on \textbf{single-modality} (image-only) approaches and require training on normal samples for every new product category, which limits their scalability. Recent advances in \textbf{Vision-Language Models} (VLMs) offer a promising alternative by jointly understanding images and natural language, potentially enabling \textbf{zero-shot} anomaly detection --- detecting defects without any product-specific training.
+
+% ============ 2. INITIAL FINDINGS ============
+\section{Initial Findings from Literature}
+
+I studied several recent works in this area. Here are the key findings from three representative papers:
+
+\subsection{Paper 1: WinCLIP \cite{jeong2023winclip}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{What they did:} Applied the CLIP vision-language model for zero-shot anomaly detection in manufacturing. Used text prompts like ``a photo of a damaged [product]'' vs ``a photo of a normal [product]'' and a sliding window approach for defect localization.
+    \item \textbf{Key result:} Achieved 91.8\% image-level AUROC on the MVTec AD benchmark \textbf{without any training}, competitive with many supervised methods.
+    \item \textbf{Limitation:} Relies on hand-crafted prompts; cannot explain \textit{why} something is anomalous.
+    \item \textbf{Code:} \url{https://github.com/caoyunkang/WinClip}
+\end{itemize}
+
+\subsection{Paper 2: AnomalyGPT \cite{gu2024anomalygpt}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{What they did:} Used a Large Vision-Language Model (LVLM) fine-tuned on simulated anomaly data for industrial defect detection. The model can detect anomalies, localize them, and describe them in natural language through dialogue.
+    \item \textbf{Key result:} Achieves state-of-the-art results on MVTec AD with the added ability to \textit{explain} detected defects in words.
+    \item \textbf{Limitation:} Requires fine-tuning on simulated data; not truly zero-shot.
+    \item \textbf{Code:} \url{https://github.com/CASIA-IVA-Lab/AnomalyGPT}
+\end{itemize}
+
+\subsection{Paper 3: MMAD Benchmark \cite{jiang2025mmad}}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{What they did:} Created a comprehensive benchmark to evaluate Multimodal LLMs (GPT-4o, Claude, open-source models) on industrial anomaly detection across 7 subtasks.
+    \item \textbf{Key result:} Even the best models (GPT-4o) show \textbf{significant room for improvement}, indicating this is an open and active research problem.
+    \item \textbf{Takeaway:} There is a clear opportunity to develop better MLLM-based anomaly detection approaches.
+    \item \textbf{Code:} \url{https://github.com/jam-cc/MMAD}
+\end{itemize}
+
+% ============ 3. IDENTIFIED GAP ============
+\section{Preliminary Research Gap}
+
+From these papers, I observe:
+\begin{enumerate}[leftmargin=*]
+    \item CLIP-based methods (WinCLIP) work well for zero-shot scoring but cannot explain anomalies.
+    \item MLLM-based methods (AnomalyGPT) can explain anomalies but require fine-tuning.
+    \item Current MLLMs (as shown by MMAD benchmark) still perform poorly out-of-the-box for industrial anomaly detection.
+\end{enumerate}
+
+\textbf{Gap:} A systematic study of how to effectively use Vision-Language Models and open-source MLLMs (e.g., LLaVA) together for zero-shot anomaly detection --- combining quantitative scoring with natural language reasoning --- is currently lacking.
+
+% ============ 4. PROPOSED DIRECTION ============
+\section{Proposed Research Direction}
+
+I would like to investigate:
+
+\begin{quote}
+\textit{``How can pre-trained Vision-Language Models and Multimodal Large Language Models be effectively leveraged for zero-shot anomaly detection in industrial quality inspection, achieving robust defect detection and interpretable explanations without task-specific training?''}
+\end{quote}
+
+\textbf{Proposed approach:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Stage 1 --- VLM-based anomaly scoring:} Use CLIP with structured prompt engineering to compute anomaly scores at image and pixel level. Explore prompt variations and compositional ensembles for robust detection.
+    \item \textbf{Stage 2 --- MLLM-based reasoning:} For images flagged as anomalous, use an open-source MLLM (LLaVA) to generate natural language descriptions of the detected defect --- its type, location, and severity.
+    \item \textbf{Stage 3 --- Systematic evaluation:} Benchmark this two-stage hybrid pipeline against traditional baselines (PatchCore, PaDiM) and existing VLM methods (WinCLIP, AnomalyCLIP) on MVTec AD and VisA datasets.
+\end{itemize}
+
+The novelty lies in the \textbf{hybrid two-stage pipeline} (CLIP for scoring + MLLM for reasoning) and the \textbf{systematic prompt engineering study} --- neither of which has been explored in prior work.
+
+% ============ 5. PAPERS FOR FURTHER REVIEW ============
+\section{Papers for Further Review}
+
+In addition to the three papers studied above, I plan to review the following works along with their publicly available code for a deeper understanding and implementation reference:
+
+\begin{table}[h]
+\centering
+\small
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}p{0.7cm}p{5.5cm}p{1.2cm}X@{}}
+\toprule
+\textbf{No.} & \textbf{Paper} & \textbf{Venue} & \textbf{Code Repository} \\
+\midrule
+1 & AnomalyCLIP: Object-Agnostic Prompt Learning for Zero-Shot Anomaly Detection \cite{zhou2024anomalyclip} & ICLR 2024 & \url{https://github.com/zqhang/AnomalyCLIP} \\
+\addlinespace
+2 & PatchCore: Towards Total Recall in Industrial Anomaly Detection \cite{roth2022patchcore} & CVPR 2022 & \url{https://github.com/amazon-science/patchcore-inspection} \\
+\addlinespace
+3 & LLaVA: Visual Instruction Tuning \cite{liu2023llava} & NeurIPS 2023 & \url{https://github.com/haotian-liu/LLaVA} \\
+\addlinespace
+4 & Anomalib: A Deep Learning Library for Anomaly Detection \cite{anomalib2022} & -- & \url{https://github.com/openvinotoolkit/anomalib} \\
+\bottomrule
+\end{tabularx}
+\caption{Additional papers and code repositories for review}
+\end{table}
+
+\textbf{Purpose of reviewing these works:}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{AnomalyCLIP} --- To study learnable prompt optimization for anomaly detection, which directly informs my prompt engineering study.
+    \item \textbf{PatchCore} --- The strongest supervised baseline (99.1\% AUROC); essential for comparison and to understand the upper-bound of traditional methods.
+    \item \textbf{LLaVA} --- The open-source MLLM I plan to use for Stage 2 (defect reasoning and explanation). I will study its architecture and inference pipeline.
+    \item \textbf{Anomalib} --- Intel's anomaly detection library implementing multiple baselines. This will serve as the experimental framework for running and comparing traditional methods efficiently.
+\end{itemize}
+
+% ============ 6. NEXT STEPS ============
+\section{Next Steps}
+
+\begin{itemize}[leftmargin=*]
+    \item Review the above papers and their codebases in detail
+    \item Set up the experimental environment (Python, PyTorch, Anomalib, OpenCLIP)
+    \item Run preliminary experiments with CLIP on MVTec AD to establish initial baselines
+    \item Formalize the problem statement and detailed methodology
+    \item Prepare a comprehensive literature survey for mid-semester review
+\end{itemize}
+
+% ============ REFERENCES ============
+\begin{thebibliography}{10}
+
+\bibitem{jeong2023winclip}
+J.~Jeong, Y.~Zou, T.~Kim, D.~Zhang, A.~Ravichandran, and O.~Dabeer.
+\newblock WinCLIP: Zero-/few-shot anomaly classification and segmentation.
+\newblock In \emph{CVPR}, 2023.
+
+\bibitem{gu2024anomalygpt}
+Z.~Gu et~al.
+\newblock AnomalyGPT: Detecting industrial anomalies using large vision-language models.
+\newblock In \emph{AAAI}, 2024.
+
+\bibitem{jiang2025mmad}
+X.~Jiang et~al.
+\newblock MMAD: Multi-modal anomaly detection benchmark.
+\newblock In \emph{ICLR}, 2025.
+
+\bibitem{zhou2024anomalyclip}
+Q.~Zhou et~al.
+\newblock AnomalyCLIP: Object-agnostic prompt learning for zero-shot anomaly detection.
+\newblock In \emph{ICLR}, 2024.
+
+\bibitem{roth2022patchcore}
+K.~Roth, L.~Pemula, J.~Zepeda, B.~Sch{\"o}lkopf, T.~Brox, and P.~Gehler.
+\newblock Towards total recall in industrial anomaly detection.
+\newblock In \emph{CVPR}, 2022.
+
+\bibitem{liu2023llava}
+H.~Liu, C.~Li, Q.~Wu, and Y.~J.~Lee.
+\newblock Visual instruction tuning.
+\newblock In \emph{NeurIPS}, 2023.
+
+\bibitem{anomalib2022}
+S.~Akcay et~al.
+\newblock Anomalib: A deep learning library for anomaly detection.
+\newblock In \emph{IEEE ICIP}, 2022.
+
+\end{thebibliography}
+
+\end{document}
