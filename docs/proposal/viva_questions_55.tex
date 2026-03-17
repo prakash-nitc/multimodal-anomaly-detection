@@ -1,0 +1,369 @@
+\documentclass[12pt, a4paper]{article}
+
+% ============ PACKAGES ============
+\usepackage[margin=0.85in]{geometry}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+\onehalfspacing
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black}
+
+% Custom colors
+\definecolor{qcolor}{RGB}{0, 80, 130}
+\definecolor{abox}{RGB}{240, 248, 255}
+\definecolor{catcolor}{RGB}{180, 50, 50}
+
+% tcolorbox styles
+\tcbuselibrary{skins, breakable}
+
+\newtcolorbox{qa}[1][]{
+    colback=abox,
+    colframe=qcolor,
+    breakable,
+    left=4pt, right=4pt, top=4pt, bottom=4pt,
+    boxrule=0.6pt,
+    #1
+}
+
+% Header
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Panel Q\&A Preparation}
+\fancyhead[R]{\small Multimodal Anomaly Detection}
+\fancyfoot[C]{\thepage}
+
+\titleformat{\section}{\Large\bfseries\color{qcolor}}{}{0em}{}[\vspace{-0.3em}\rule{\textwidth}{0.5pt}]
+\titleformat{\subsection}{\large\bfseries\color{catcolor}}{}{0em}{}
+
+\begin{document}
+
+\begin{center}
+{\Huge\bfseries\color{qcolor} Panel Q\&A Preparation}\\[0.3cm]
+{\Large 55 Likely Questions with Detailed Answers}\\[0.5cm]
+{\large Multimodal Anomaly Detection using Vision-Language Models}\\[0.3cm]
+\rule{0.7\textwidth}{0.5pt}\\[0.3cm]
+{\normalsize March 2026}
+\end{center}
+
+\tableofcontents
+\newpage
+
+%==========================================================
+\section{Foundational Concepts (Q1--Q12)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q1. What is anomaly detection? Why is it important?}\\[4pt]
+\textbf{A:} Anomaly detection is the task of identifying observations that deviate significantly from the expected normal pattern. It is important because anomalies often signal critical events --- a surface crack on a turbine blade, a suspicious lesion in a medical scan, unusual activity in a surveillance feed, or a defective product on a manufacturing line. Catching these early can prevent equipment failure, improve patient outcomes, enhance security, or reduce waste. The challenge lies in the fact that anomalies are rare, diverse, and unpredictable, making it impractical to collect labelled examples of every possible anomaly type.
+\end{qa}
+
+\begin{qa}
+\textbf{Q2. Why is anomaly detection treated as a one-class / unsupervised problem?}\\[4pt]
+\textbf{A:} In most real-world settings, normal data is abundant and easy to collect, while anomalies are extremely rare (often $<$1\% of all observations). A crack on a ceramic tile looks nothing like a missing thread on a screw, and both look entirely different from an abnormal shadow in a surveillance clip. It is infeasible to enumerate and collect samples of every possible anomaly type. Therefore, we train the model only on normal data and define anomalies as anything that deviates from the learned distribution of normality.
+\end{qa}
+
+\begin{qa}
+\textbf{Q3. What is AUROC and why is it the standard metric instead of accuracy?}\\[4pt]
+\textbf{A:} AUROC (Area Under the Receiver Operating Characteristic curve) measures how well a model ranks anomalous samples above normal ones, across all possible decision thresholds. It ranges from 50\% (random guessing) to 100\% (perfect separation). We use it instead of accuracy because anomaly detection datasets are heavily imbalanced. For instance, if 95\% of images are normal, a model that always predicts ``normal'' would get 95\% accuracy but be completely useless. AUROC is threshold-independent and reflects ranking quality, making it far more informative.
+\end{qa}
+
+\begin{qa}
+\textbf{Q4. What other evaluation metrics exist besides AUROC?}\\[4pt]
+\textbf{A:} \textbf{F1-score} --- the harmonic mean of precision and recall, useful when a specific decision threshold is chosen. \textbf{Average Precision (AP)} --- area under the Precision-Recall curve, particularly useful for highly imbalanced datasets. \textbf{Per-Region Overlap (PRO)} --- a pixel-level metric that weighs all anomaly regions equally regardless of their size, ensuring small defects are not overshadowed by large ones. \textbf{Pixel-level AUROC} --- same as image-level AUROC but applied to each pixel's prediction vs.\ ground-truth mask, measuring localisation quality.
+\end{qa}
+
+\begin{qa}
+\textbf{Q5. What is zero-shot learning? How does it differ from few-shot?}\\[4pt]
+\textbf{A:} \textbf{Zero-shot} means the model can perform a task on categories or domains it has never seen during training. It relies entirely on pre-trained knowledge and text-based descriptions. \textbf{Few-shot} ($k$-shot) provides $k$ reference examples (e.g., 1--4 normal images) to calibrate the model. In our context, WinCLIP is zero-shot (uses only text prompts, no reference images), WinCLIP+ is few-shot (adds reference images), and PatchCore requires full training data (hundreds of images per category).
+\end{qa}
+
+\begin{qa}
+\textbf{Q6. What is CLIP and how does it work?}\\[4pt]
+\textbf{A:} CLIP (Contrastive Language-Image Pre-training) is a foundation model by OpenAI that jointly learns to understand images and text. It has two encoders: an image encoder (Vision Transformer, ViT) and a text encoder (Transformer). Both project their inputs into a shared 512-dimensional embedding space. It was trained on approximately 400 million image-text pairs from the internet using contrastive learning --- matching image-text pairs are pulled close together in the embedding space while non-matching pairs are pushed apart. At inference, zero-shot classification works by computing cosine similarity between an image embedding and candidate text embeddings; the closest text description is the predicted class.
+\end{qa}
+
+\begin{qa}
+\textbf{Q7. What is contrastive learning?}\\[4pt]
+\textbf{A:} Contrastive learning is a self-supervised training paradigm where the model learns by comparing. For a batch of $N$ image-text pairs, the $N$ correct (matching) pairs are pulled together in the embedding space, while the $N^2 - N$ incorrect (non-matching) pairs are pushed apart. The loss function used is symmetric cross-entropy over cosine similarities (also called InfoNCE loss). The model learns meaningful representations without explicit category labels --- purely from the structure of paired data. This enables CLIP to develop a rich, general-purpose understanding of visual concepts.
+\end{qa}
+
+\begin{qa}
+\textbf{Q8. What is cosine similarity and why is it used?}\\[4pt]
+\textbf{A:} Cosine similarity measures the angle between two vectors: $\cos(\theta) = \frac{\mathbf{a} \cdot \mathbf{b}}{||\mathbf{a}|| \cdot ||\mathbf{b}||}$. It ranges from $-1$ (opposite directions) to $+1$ (identical direction). We use it because it is scale-invariant --- it captures semantic similarity regardless of vector magnitude. In CLIP, if an image embedding and text embedding have high cosine similarity (e.g., $>0.8$), they represent the same concept. It is also computationally efficient and well-suited for comparing normalised embeddings.
+\end{qa}
+
+\begin{qa}
+\textbf{Q9. What is a Vision Transformer (ViT)?}\\[4pt]
+\textbf{A:} A Vision Transformer divides an input image into fixed-size patches (e.g., $16{\times}16$ or $32{\times}32$ pixels), flattens each patch into a vector, adds learned positional embeddings to retain spatial information, and processes the sequence through a standard Transformer encoder with self-attention layers. Each patch becomes a ``token,'' analogous to a word in NLP. A special [CLS] token is prepended, and its output serves as the global image representation. Common variants include ViT-B/32 (base model, $32{\times}32$ patches) and ViT-L/14 (larger model, $14{\times}14$ patches --- higher resolution, better for fine-grained tasks).
+\end{qa}
+
+\begin{qa}
+\textbf{Q10. What is the difference between a VLM (like CLIP) and an MLLM (like LLaVA)?}\\[4pt]
+\textbf{A:} \textbf{CLIP} is a \textit{discriminative} model --- it matches images and text by computing similarity scores but cannot generate text on its own. It tells you ``this image is 85\% similar to the description `damaged surface.'\,'' \textbf{LLaVA} is a \textit{generative} model --- it takes an image and a text prompt as input and produces free-form natural language output. It can say ``There appears to be a hairline fracture running diagonally across the upper-left region, roughly 3\,mm in length.'' CLIP excels at scoring, LLaVA excels at reasoning and explanation. Our framework combines both.
+\end{qa}
+
+\begin{qa}
+\textbf{Q11. How does LLaVA work architecturally?}\\[4pt]
+\textbf{A:} LLaVA has three main components: (1) a \textbf{visual encoder} --- a frozen CLIP ViT that extracts image patch features; (2) a \textbf{projection layer} --- a lightweight linear or MLP layer that maps visual feature vectors into the embedding space the language model understands; (3) a \textbf{large language model} (Vicuna or LLaMA) that processes the combined visual + text tokens and generates a natural language response. It was trained via visual instruction tuning --- fine-tuning on image-text instruction-following data so it can answer questions about images.
+\end{qa}
+
+\begin{qa}
+\textbf{Q12. What is the embedding space? Why do we project images and text into the same space?}\\[4pt]
+\textbf{A:} An embedding space is a continuous vector space where semantically similar items are placed close together. By projecting both images and text into the \textit{same} shared embedding space, we can directly compare them using distance metrics like cosine similarity. This cross-modal alignment is what enables zero-shot capabilities --- we can describe an anomaly in words (``a scratched surface'') and find images that match that description without ever training on those specific images. Without a shared space, comparing images to text would require labelled pairs for every specific task.
+\end{qa}
+
+%==========================================================
+\section{Dataset Questions (Q13--Q17)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q13. What is the MVTec AD dataset? Why is it the standard benchmark?}\\[4pt]
+\textbf{A:} MVTec AD (Anomaly Detection) was published at CVPR 2019 by Bergmann et al. It contains 5,354 high-resolution images spanning 15 categories --- 10 objects (bottle, cable, capsule, hazelnut, metal nut, pill, screw, toothbrush, transistor, zipper) and 5 textures (carpet, grid, leather, tile, wood). The training set contains only defect-free images, while the test set includes both normal and various anomalous samples. Every anomalous image has \textbf{pixel-level ground-truth masks} showing exactly where the defect is. It is considered the standard because virtually every anomaly detection paper since 2019 reports results on it, enabling direct cross-paper comparison.
+\end{qa}
+
+\begin{qa}
+\textbf{Q14. Are there other datasets besides MVTec AD?}\\[4pt]
+\textbf{A:} Yes. \textbf{VisA} (Visual Anomaly) features more complex multi-instance images. \textbf{MVTec LOCO AD} covers logical constraint anomalies such as missing components (e.g., a transistor board missing a capacitor). \textbf{GoodsAD} focuses on retail product inspection. The \textbf{MMAD benchmark} (ICLR 2025) aggregates images from all four datasets, creating 39,672 questions across 8,366 images. We plan to use MVTec AD as the primary benchmark and VisA for generalisation studies.
+\end{qa}
+
+\begin{qa}
+\textbf{Q15. What kinds of defects does MVTec AD contain?}\\[4pt]
+\textbf{A:} The dataset covers a broad spectrum: scratches, dents, cracks, holes, contamination, colour defects, cuts, bent components, broken edges, missing parts, structural anomalies, and thread irregularities. Each category has its own characteristic defect types --- for example, screw images contain scratched heads and manipulated threads, while carpet textures may show cuts, colours, or metal contamination.
+\end{qa}
+
+\begin{qa}
+\textbf{Q16. Why use pixel-level annotations? What is anomaly localisation?}\\[4pt]
+\textbf{A:} Pixel-level annotations (ground-truth masks) show \textit{exactly which pixels} belong to the anomaly. \textbf{Anomaly localisation} goes beyond image-level detection (``this image is defective'') to answer ``where exactly is the defect in the image?'' This is crucial for practical deployment --- a quality inspector needs to know not just that a product is defective but precisely where the defect is located so corrective action can be taken. Pixel-level AUROC and PRO are the standard metrics for evaluating localisation quality.
+\end{qa}
+
+\begin{qa}
+\textbf{Q17. Is MVTec AD only for manufacturing? How does it apply to other domains?}\\[4pt]
+\textbf{A:} While MVTec AD was originally designed with manufacturing in mind, the underlying challenge --- detecting visual deviations from a learned notion of normality --- is domain-agnostic. The same techniques can be applied to medical imaging (finding lesions in scans), agriculture (detecting crop disease from aerial imagery), surveillance (spotting unusual activity), infrastructure monitoring (finding cracks in bridges), and more. We use MVTec AD as a standardised evaluation testbed, but our framework is designed to generalise across any visual domain.
+\end{qa}
+
+%==========================================================
+\section{Paper 1: PatchCore (Q18--Q23)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q18. What is PatchCore and what does it achieve?}\\[4pt]
+\textbf{A:} PatchCore (CVPR 2022, by Roth et al.) is a memory-bank-based anomaly detection method that achieves \textbf{99.1\% image-level AUROC} on MVTec AD --- the strongest conventional baseline. It works by extracting patch-level features from a pre-trained WideResNet-50, storing them in a memory bank representing ``normal appearance,'' and detecting anomalies at test time via nearest-neighbour distance: test patches that are far from all stored normal features are flagged as anomalous.
+\end{qa}
+
+\begin{qa}
+\textbf{Q19. What is coreset subsampling in PatchCore?}\\[4pt]
+\textbf{A:} Without subsampling, PatchCore's memory bank would contain millions of patch features (e.g., 1000 images $\times$ 784 patches = 784,000 features), making nearest-neighbour search prohibitively slow. Coreset subsampling uses a greedy minimax facility-location algorithm that iteratively selects the point farthest from all already-selected points, ensuring maximum coverage of the feature space. Reducing to roughly 1\% of the original features maintains 99\%+ of the detection accuracy while making inference 10--100$\times$ faster and reducing storage requirements by two orders of magnitude.
+\end{qa}
+
+\begin{qa}
+\textbf{Q20. Why does PatchCore use intermediate CNN layers instead of the final layer?}\\[4pt]
+\textbf{A:} Final layers of a CNN encode high-level semantic information (``this is a screw'') but lose fine-grained spatial detail. Intermediate layers (layers 2 and 3 of WideResNet-50) preserve spatial features like edges, textures, and local patterns that are essential for detecting small, subtle defects. They offer the best trade-off between semantic richness and spatial resolution. Neighbouring patches are also pooled together to incorporate local context.
+\end{qa}
+
+\begin{qa}
+\textbf{Q21. How does PatchCore compute the final anomaly score?}\\[4pt]
+\textbf{A:} Each test patch's anomaly score is the distance to its nearest neighbour in the memory bank. The image-level anomaly score is a \textbf{softmax-weighted aggregation} of the top patch-level scores --- this is more robust than simply taking the maximum (which is noise-sensitive). The pixel-level anomaly map is formed by upsampling patch-level scores back to the original image resolution.
+\end{qa}
+
+\begin{qa}
+\textbf{Q22. What are PatchCore's limitations? Why do we need something better?}\\[4pt]
+\textbf{A:} Three key limitations: (1) It requires a dedicated set of normal training images (200+) for each new category. Adding support for a new domain means collecting data and rebuilding the memory bank from scratch. (2) It is not scalable --- supporting 1000 product types would require 1000 separate memory banks. (3) Its output is limited to numerical scores and coarse heatmaps. It tells a user \textit{that} something is wrong but never \textit{what} is wrong or \textit{why}. There are no natural-language explanations. These limitations motivate the shift to zero-shot VLM-based methods.
+\end{qa}
+
+\begin{qa}
+\textbf{Q23. How is PatchCore different from PaDiM?}\\[4pt]
+\textbf{A:} Both are patch-based methods. PaDiM models each patch position as a multivariate Gaussian distribution (mean + covariance matrix) and uses Mahalanobis distance for anomaly scoring. PatchCore stores actual feature vectors in a memory bank and uses nearest-neighbour distance. PatchCore outperforms PaDiM ($\sim$99.1\% vs.\ $\sim$97.5\%) because it does not assume features follow a Gaussian distribution and preserves richer information via the explicit memory bank. However, PaDiM has lower storage requirements since it stores only statistical parameters rather than raw features.
+\end{qa}
+
+%==========================================================
+\section{Paper 2: WinCLIP (Q24--Q30)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q24. What is WinCLIP and what is its core idea?}\\[4pt]
+\textbf{A:} WinCLIP (CVPR 2023, by Jeong et al.) is the first method to apply CLIP to anomaly detection in a fully zero-shot manner. Its core idea is to leverage CLIP's pre-trained visual-textual alignment for anomaly detection without any training on domain-specific data. It achieves \textbf{91.8\% image-level AUROC} and \textbf{85.1\% pixel-level AUROC} on MVTec AD in the zero-shot setting.
+\end{qa}
+
+\begin{qa}
+\textbf{Q25. What is the Compositional Prompt Ensemble (CPE)?}\\[4pt]
+\textbf{A:} A single prompt like ``a damaged screw'' is too narrow to capture all possible defect types. CPE addresses this by generating many prompts, combining multiple sentence templates (``a photo of a \{state\} \{category\}'', ``a \{state\} \{category\} for inspection'', etc.) with several state words for normal (\textit{flawless, perfect, good, unblemished}) and anomaly (\textit{damaged, broken, defective, flawed}). All normal-prompt embeddings are averaged into a single \textbf{normal prototype vector}, and all anomaly-prompt embeddings into an \textbf{anomaly prototype vector}. This ensemble makes scoring far more robust than any individual prompt.
+\end{qa}
+
+\begin{qa}
+\textbf{Q26. Why does WinCLIP use sliding windows?}\\[4pt]
+\textbf{A:} CLIP was designed for whole-image understanding, but defects are often small and localised (a 2mm scratch on a 1000px image). If we feed the whole image to CLIP, the defect signal gets lost in the global features. WinCLIP addresses this by sliding overlapping windows at multiple spatial scales (small, medium, global) across the image. For each window, ViT patch tokens outside the window are masked, yielding a localised feature vector. Each window embedding is compared to text prototypes via cosine similarity, producing a local anomaly score. Aggregating scores across all windows and scales yields a pixel-level anomaly heatmap.
+\end{qa}
+
+\begin{qa}
+\textbf{Q27. What is WinCLIP+ and how does it differ from WinCLIP?}\\[4pt]
+\textbf{A:} WinCLIP+ is the few-shot extension. When $k$ normal reference images are available, it adds a vision-based reference association step --- comparing test image features directly against reference features using nearest-neighbour search (similar to PatchCore but without training). The text-based score (from CPE) and vision-based score (from references) are fused. This consistently improves over pure zero-shot WinCLIP because the visual references provide concrete examples of what ``normal'' looks like for that specific domain.
+\end{qa}
+
+\begin{qa}
+\textbf{Q28. Why can't we just use CLIP directly without WinCLIP's modifications?}\\[4pt]
+\textbf{A:} CLIP computes a single global embedding for the entire image. This works well for image classification (``is this a cat or dog?'') but fails for anomaly detection because: (1) defects are typically small and localised, so their signal is overwhelmed by the dominant normal features in the global embedding; (2) CLIP provides no localisation --- even if it detected an anomaly, it cannot tell you where it is; (3) a single prompt is fragile and sensitive to phrasing. WinCLIP's sliding windows, multi-scale features, and prompt ensembles address all three shortcomings.
+\end{qa}
+
+\begin{qa}
+\textbf{Q29. What is the significance of WinCLIP's 91.8\% zero-shot AUROC?}\\[4pt]
+\textbf{A:} It demonstrates that a pre-trained VLM can detect anomalies without ever seeing a single example from the target domain. While 91.8\% is below PatchCore's 99.1\%, PatchCore requires dedicated training data for each category. For practical scenarios where collecting training data for hundreds or thousands of product types is infeasible, WinCLIP's zero-shot capability represents a significant practical advancement. Narrowing the gap between 91.8\% and 99.1\% while maintaining zero-shot operation is precisely the research opportunity we target.
+\end{qa}
+
+\begin{qa}
+\textbf{Q30. What are WinCLIP's main limitations?}\\[4pt]
+\textbf{A:} (1) The text prompts are \textbf{hand-crafted} without any systematic study of which templates and state words work best. Performance is sensitive to prompt choice. (2) Prompts are \textbf{category-dependent} --- they contain the object name, so you need to know what product you are inspecting. (3) No \textbf{natural-language explanations} --- only numerical scores and heatmaps, no description of what the defect looks like. (4) The multi-scale sliding window approach is computationally expensive, requiring many forward passes.
+\end{qa}
+
+%==========================================================
+\section{Paper 3: AnomalyCLIP (Q31--Q35)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q31. What problem does AnomalyCLIP solve that WinCLIP does not?}\\[4pt]
+\textbf{A:} CLIP was originally trained to distinguish between object categories (``dog'' vs.\ ``cat''), not object states (``normal screw'' vs.\ ``damaged screw''). When WinCLIP uses a prompt like ``a damaged screw,'' CLIP focuses more on the word ``screw'' than on ``damaged.'' AnomalyCLIP addresses this object-category bias by learning object-agnostic prompts that capture the abstract concepts of normality and abnormality without mentioning any specific object category, achieving better cross-domain generalisation.
+\end{qa}
+
+\begin{qa}
+\textbf{Q32. What is prompt learning / prompt tuning?}\\[4pt]
+\textbf{A:} Instead of modifying the entire model (full fine-tuning, which is computationally expensive), prompt learning optimises only a small set of \textbf{continuous token embeddings} prepended to the input while keeping the base model (CLIP) completely frozen. These learned ``soft prompts'' guide the model's attention toward task-relevant features. Think of it as finding the perfect question to ask, rather than retraining the model's brain. It is highly parameter-efficient: optimising $\sim$1000 parameters rather than hundreds of millions.
+\end{qa}
+
+\begin{qa}
+\textbf{Q33. What does ``object-agnostic'' mean in AnomalyCLIP's context?}\\[4pt]
+\textbf{A:} AnomalyCLIP's prompts do not reference any specific object category. The prompt format is $[V_1][V_2]\ldots[V_M][\text{normal}]$ and $[V_1'][V_2']\ldots[V_M'][\text{anomalous}]$, where $V_i$ are continuous learnable vectors. Instead of ``a damaged \textit{screw},'' these learned vectors capture the universal, abstract concept of ``anomalous appearance'' that transfers across product types. This means the same prompts work for screws, bottles, carpets, or any new category without modification.
+\end{qa}
+
+\begin{qa}
+\textbf{Q34. How does AnomalyCLIP compare to WinCLIP numerically?}\\[4pt]
+\textbf{A:} AnomalyCLIP achieves approximately \textbf{94\% image-level AUROC} on MVTec AD, a noticeable improvement over WinCLIP's 91.8\%. More importantly, it shows substantially better \textbf{cross-domain generalisation} --- when evaluated on 17 datasets, its performance on unseen categories is much more consistent than WinCLIP's, because the learned prompts are not tied to specific object names.
+\end{qa}
+
+\begin{qa}
+\textbf{Q35. What are AnomalyCLIP's limitations?}\\[4pt]
+\textbf{A:} (1) Despite being zero-shot at test time, it \textbf{requires a one-time training phase} with labelled anomaly data from some source domains. (2) The learned prompts are \textbf{continuous vectors with no human-readable interpretation} --- we cannot understand what visual cues the model has learned. (3) There is risk of \textbf{overfitting to training categories}. (4) Like WinCLIP, it provides only scores and heatmaps with \textbf{no natural-language explanations}.
+\end{qa}
+
+%==========================================================
+\section{Paper 4: AnomalyGPT (Q36--Q41)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q36. What is AnomalyGPT and what makes it unique?}\\[4pt]
+\textbf{A:} AnomalyGPT (AAAI 2024, by Gu et al.) is the first system to apply a fine-tuned MLLM to anomaly detection. Unlike all previous methods that output only scores and heatmaps, AnomalyGPT can describe anomalies in natural language (``There is a crack on the upper-left surface''), provide pixel-level localisation, make a threshold-free detection decision, and support multi-turn dialogue where a user can ask follow-up questions about defect type, severity, and possible causes. It achieves 94.1\% image-level AUROC on MVTec AD in a 1-shot setting.
+\end{qa}
+
+\begin{qa}
+\textbf{Q37. What are the four components of AnomalyGPT's architecture?}\\[4pt]
+\textbf{A:} (1) \textbf{Frozen Image Encoder} (CLIP ViT): extracts multi-layer patch features capturing both low-level details (edges, textures) and high-level structure. (2) \textbf{Image Decoder}: computes patch-wise similarity between visual features and text embeddings for ``normal'' / ``abnormal,'' generating a pixel-level localisation map. (3) \textbf{Linear Projection Layer}: maps visual features from ViT space into the LLM's embedding space, bridging the two modalities. (4) \textbf{Prompt Learner}: converts localisation results into learnable prompt tokens that carry visual anomaly information into the LLM for language generation.
+\end{qa}
+
+\begin{qa}
+\textbf{Q38. How does AnomalyGPT handle the scarcity of real anomaly training data?}\\[4pt]
+\textbf{A:} It uses \textbf{NSA (Novelty Synthesis for Anomaly)} to generate synthetic defects. Random textures, patterns, or distortions are computationally pasted onto normal product images to simulate damage. Corresponding natural-language descriptions are paired with each synthetic sample (e.g., ``There is a surface defect on the upper-left region''). This gives the model both visual and textual supervision for anomaly understanding without needing real defective samples. Only the image decoder, prompt learner, and projection layer are trained; the ViT and LLM backbones remain frozen.
+\end{qa}
+
+\begin{qa}
+\textbf{Q39. What is ``threshold-free'' detection in AnomalyGPT?}\\[4pt]
+\textbf{A:} Traditional methods output a continuous anomaly score, and a human must manually set a threshold to decide what counts as ``anomalous.'' This threshold varies per category and dataset, making deployment cumbersome. AnomalyGPT bypasses this by having the LLM directly output a binary decision in natural language: ``Yes, this image is defective'' or ``No, this image appears normal.'' The model learns when to say ``yes'' or ``no'' during training, eliminating the need for manual threshold tuning.
+\end{qa}
+
+\begin{qa}
+\textbf{Q40. Why is AnomalyGPT not zero-shot despite using a pre-trained LLM?}\\[4pt]
+\textbf{A:} AnomalyGPT's pre-trained LLM (Vicuna) has general visual understanding but does not natively understand anomaly-specific concepts like defect localisation, severity estimation, or manufacturing terminology. The fine-tuning step on synthetic anomaly data teaches the model these specialised capabilities. Without fine-tuning, the base LLM would produce vague or incorrect anomaly descriptions. This fine-tuning requirement means you cannot simply deploy AnomalyGPT on a new domain without first generating synthetic training data for that domain.
+\end{qa}
+
+\begin{qa}
+\textbf{Q41. What is the risk of hallucination in AnomalyGPT?}\\[4pt]
+\textbf{A:} Because the LLM backbone is a generative model, there is an inherent risk of it producing plausible-sounding but factually incorrect descriptions --- ``hallucinations.'' For instance, it might describe a scratch that does not actually exist, or misidentify the location of a real defect. In safety-critical applications (medical devices, aerospace components), such false descriptions could be dangerous. This is one reason our framework delegates \textit{detection scoring} to CLIP (which is deterministic) and uses the MLLM only for \textit{explanation}, reducing the consequences of hallucination.
+\end{qa}
+
+%==========================================================
+\section{Paper 5: MMAD Benchmark (Q42--Q46)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q42. What is MMAD and why was it created?}\\[4pt]
+\textbf{A:} MMAD (Multi-Modal Anomaly Detection, ICLR 2025) is a large-scale benchmark designed to systematically evaluate how well current MLLMs handle anomaly detection tasks. It was created because prior studies lacked a standardised, comprehensive evaluation framework for assessing MLLM capabilities in anomaly detection. It contains \textbf{39,672 multiple-choice questions} from \textbf{8,366 images} across four datasets (MVTec AD, MVTec LOCO AD, VisA, GoodsAD).
+\end{qa}
+
+\begin{qa}
+\textbf{Q43. What seven subtasks does MMAD evaluate?}\\[4pt]
+\textbf{A:} (1) \textbf{Anomaly classification} --- is this image normal or anomalous? (2) \textbf{Anomaly localisation} --- in which region does the anomaly appear? (3) \textbf{Anomaly type classification} --- what kind of anomaly (scratch, crack, missing part)? (4) \textbf{Severity assessment} --- how severe is it? (5) \textbf{Defect description} --- describe the anomaly in natural language. (6) \textbf{Root cause analysis} --- what might have caused this? (7) \textbf{Repair suggestion} --- how could it be fixed? These span a comprehensive range of practical anomaly understanding needs.
+\end{qa}
+
+\begin{qa}
+\textbf{Q44. What were MMAD's key findings about current MLLMs?}\\[4pt]
+\textbf{A:} The best model, GPT-4o, achieves only \textbf{74.9\% average accuracy} --- far below the $>$95\% needed for reliable deployment. Open-source MLLMs perform even worse. All models handle general object-level questions (``what is this?'') much better than anomaly-specific ones (``is this region defective?''). This reveals that current MLLMs lack fine-grained understanding of visual irregularities. Two training-free improvement strategies --- reference-image augmentation and chain-of-thought prompting --- offered only modest gains.
+\end{qa}
+
+\begin{qa}
+\textbf{Q45. What does MMAD tell us about the viability of using MLLMs alone?}\\[4pt]
+\textbf{A:} MMAD provides \textit{empirical evidence} that stand-alone MLLMs are not yet reliable enough for anomaly detection. Even the most capable commercial models fall short. This finding directly motivates our hybrid approach: rather than expecting an MLLM to handle both detection and explanation, we delegate the scoring to a specialised VLM (CLIP) and use the MLLM only where it excels --- generating natural-language explanations of regions already flagged by CLIP.
+\end{qa}
+
+\begin{qa}
+\textbf{Q46. Which models were evaluated in MMAD?}\\[4pt]
+\textbf{A:} Proprietary models: GPT-4o, GPT-4V, Claude 3.5 Sonnet, Gemini 1.5 Pro. Open-source models: LLaVA-NeXT, InternVL2, Qwen-VL. Also the specialised AnomalyGPT. GPT-4o performed best overall, but still fell short of practical requirements. Open-source models showed particularly poor performance on fine-grained spatial reasoning tasks like anomaly localisation and severity assessment.
+\end{qa}
+
+%==========================================================
+\section{Research Gaps and Proposed Framework (Q47--Q55)}
+%==========================================================
+
+\begin{qa}
+\textbf{Q47. What are the three research gaps you identified?}\\[4pt]
+\textbf{A:} \textbf{Gap 1:} No principled prompt engineering study for CLIP-based anomaly detection. WinCLIP uses ad-hoc prompts; AnomalyCLIP bypasses the problem by learning opaque prompts. Nobody has systematically studied which prompt designs work best and why.\\[3pt]
+\textbf{Gap 2:} Limited exploration of open-source MLLMs for anomaly reasoning. AnomalyGPT requires fine-tuning; MMAD shows off-the-shelf MLLMs are insufficient alone. But nobody has tested open-source MLLMs \textit{when paired with a strong VLM} that pre-identifies the anomaly.\\[3pt]
+\textbf{Gap 3:} No hybrid VLM+MLLM pipeline. Every existing method treats these as separate tools. Nobody has combined CLIP's scoring with an MLLM's reasoning in a single unified framework.
+\end{qa}
+
+\begin{qa}
+\textbf{Q48. Describe your proposed two-stage framework.}\\[4pt]
+\textbf{A:} \textbf{Stage 1 (CLIP-Based Scoring):} A frozen CLIP model processes the input image using structured prompt ensembles and multi-scale sliding windows. It outputs an image-level anomaly score and a pixel-level anomaly heatmap.\\[3pt]
+\textbf{Stage 2 (LLaVA Reasoning):} For images flagged as anomalous (score exceeds threshold), the original image and the heatmap from Stage~1 are fed to LLaVA along with a structured prompt. LLaVA describes the flagged region --- anomaly type, location, estimated extent, and possible causes --- in natural language.\\[3pt]
+The key insight is that each component operates in its zone of strength: CLIP handles precise numerical scoring; LLaVA handles explanation and reasoning.
+\end{qa}
+
+\begin{qa}
+\textbf{Q49. Why not just use one model for everything?}\\[4pt]
+\textbf{A:} Because no single model excels at both tasks. CLIP is excellent at computing precise anomaly scores but cannot explain its findings. MLLMs can generate explanations but, as MMAD demonstrated, their standalone detection accuracy (74.9\% for GPT-4o) is insufficient. By splitting the pipeline into scoring + explanation, we let each model do what it does best. Additionally, the MLLM is called only for flagged images, not every single image, which reduces computational cost significantly.
+\end{qa}
+
+\begin{qa}
+\textbf{Q50. What is your prompt engineering study and why is it a contribution?}\\[4pt]
+\textbf{A:} We plan a systematic ablation across multiple dimensions of prompt design: (1) template structure (declarative vs.\ interrogative vs.\ descriptive), (2) state-word vocabulary (specific vs.\ general, positive vs.\ negative framing), (3) domain context (with and without category names), and (4) ensemble composition (number of prompts, aggregation strategy). By evaluating on held-out categories, we aim to derive generalisable guidelines for prompt design. This fills a gap because WinCLIP's prompt choices were never justified, and the principles likely generalise to other visual grounding tasks.
+\end{qa}
+
+\begin{qa}
+\textbf{Q51. Why use LLaVA specifically? Why not GPT-4V?}\\[4pt]
+\textbf{A:} Three reasons: (1) \textbf{Open-source} --- LLaVA is freely available, making our research fully reproducible. GPT-4V is a proprietary API that could change or be discontinued at any time. (2) \textbf{No API costs} --- running experiments with GPT-4V on thousands of images would be prohibitively expensive. (3) \textbf{Research contribution} --- showing what can be achieved with open-source models benefits the broader research community. Our framework can be extended to other MLLMs (InternVL, Qwen-VL, etc.) as they mature.
+\end{qa}
+
+\begin{qa}
+\textbf{Q52. What results do you expect? What would be considered a success?}\\[4pt]
+\textbf{A:} For Stage 1 (CLIP scoring), we target zero-shot AUROC competitive with WinCLIP's 91.8\% or better, ideally approaching AnomalyCLIP's $\sim$94\% through better prompt design. For Stage 2 (LLaVA reasoning), success means accurate, relevant natural-language descriptions of detected anomalies --- evaluated through human assessment using MMAD's seven-subtask framework. The overall contribution is not just the numbers but the \textit{hybrid framework itself}: demonstrating that VLM+MLLM pairing yields results superior to either component alone, with zero training.
+\end{qa}
+
+\begin{qa}
+\textbf{Q53. What tools and libraries will you use?}\\[4pt]
+\textbf{A:} \textbf{PyTorch} for deep learning. \textbf{OpenCLIP} (open-source CLIP implementation) for the VLM backbone. \textbf{HuggingFace Transformers} for LLaVA and other MLLMs. \textbf{Anomalib} (by Intel) for reproducing traditional baselines like PatchCore and PaDiM. All are open-source and well-maintained. For computation, we can use Google Colab or Kaggle for free GPU access, since we are performing inference with pre-trained models rather than training from scratch.
+\end{qa}
+
+\begin{qa}
+\textbf{Q54. Is this research feasible within the given timeline?}\\[4pt]
+\textbf{A:} Yes. The models (CLIP, LLaVA) are pre-trained and publicly available; we do not need to train anything from scratch. The datasets (MVTec AD, VisA) are freely downloadable. Semester~3 (Jul--Dec 2026) focuses on implementing the pipeline, running prompt engineering experiments, and reproducing baselines. Semester~4 (Jan--May 2027) covers ablation studies, cross-domain experiments, and thesis writing. A single experiment on MVTec AD takes approximately 30--60 minutes with a standard GPU. The computational requirements are modest.
+\end{qa}
+
+\begin{qa}
+\textbf{Q55. What is the novelty of your work? How is it different from everything else?}\\[4pt]
+\textbf{A:} Two pillars of novelty: (1) The \textbf{systematic prompt-engineering study} fills a gap that neither WinCLIP (untested hand-crafted prompts) nor AnomalyCLIP (opaque learned prompts) has addressed. We provide the first structured, empirical investigation of prompt design for anomaly detection. (2) The \textbf{hybrid two-stage VLM+MLLM architecture} is, to our knowledge, the first approach to combine a VLM's scoring with an MLLM's reasoning in a single, \textit{training-free, open-source} pipeline. No existing work does both.
+\end{qa}
+
+\end{document}
