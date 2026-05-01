@@ -1,0 +1,221 @@
+% ============================================================
+% Research Progress Report — Video Anomaly Detection
+% Maintainable Overleaf document for regular professor updates
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{natbib}
+\usepackage{parskip}
+
+% --- Colors ---
+\definecolor{sectionblue}{HTML}{1A5276}
+\definecolor{linkblue}{HTML}{2471A3}
+\definecolor{highlightbg}{HTML}{EBF5FB}
+\definecolor{accentgreen}{HTML}{1E8449}
+
+% --- Hyperlink Style ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkblue,
+    citecolor=linkblue,
+    urlcolor=linkblue
+}
+
+% --- Section Formatting ---
+\titleformat{\section}{\Large\bfseries\color{sectionblue}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{sectionblue}}{}{0em}{}
+
+% --- Header / Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\textcolor{gray}{Research Progress Report}}
+\rhead{\small\textcolor{gray}{Video Anomaly Detection}}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ============================================================
+\begin{document}
+
+% --- Title Block ---
+\begin{center}
+    {\LARGE\bfseries Research Progress Report}\\[6pt]
+    {\large Multimodal Anomaly Detection --- Video Extension}\\[12pt]
+    \textcolor{gray}{\today}\\[4pt]
+    \textcolor{gray}{Last updated: March 23, 2026}
+\end{center}
+
+\vspace{1em}
+
+% ============================================================
+\section{Research Direction}
+% ============================================================
+
+Our current work focuses on extending the \textbf{zero-shot CLIP + MLLM anomaly detection pipeline} from static industrial images to \textbf{Video Anomaly Detection (VAD)}. The key idea is to treat video as a sequence of frames, apply per-frame VLM-based anomaly scoring, and use MLLMs to generate natural-language explanations for detected anomalies.
+
+The following papers have been studied to understand the state-of-the-art in training-free and reasoning-based video anomaly detection using Vision-Language Models.
+
+\vspace{0.5em}
+
+% ============================================================
+\section{Papers Studied}
+% ============================================================
+
+% ------------------------------------------------------------
+\subsection{Paper 1: LAVAD --- Training-free Video Anomaly Detection}
+% ------------------------------------------------------------
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+    \toprule
+    \textbf{Title}   & Harnessing Large Language Models for Training-free Video Anomaly Detection \\
+    \textbf{Authors}  & Luca Zanella, Willi Menapace, Massimiliano Mancini, Yiming Wang, Elisa Ricci \\
+    \textbf{Venue}    & \textbf{CVPR 2024} (IEEE/CVF Conference on Computer Vision and Pattern Recognition) \\
+    \textbf{arXiv}    & \url{https://arxiv.org/abs/2404.01014} \\
+    \bottomrule
+\end{tabularx}
+
+\vspace{0.8em}
+
+\textbf{Problem Addressed.}
+Existing video anomaly detection methods require training on domain-specific data, making them costly to deploy in new environments. Any change in domain necessitates fresh data collection and model retraining.
+
+\textbf{Proposed Method.}
+LAVAD introduces a \textit{training-free} paradigm for VAD by combining pre-trained Vision-Language Models (VLMs) and Large Language Models (LLMs):
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Frame Captioning:} A VLM-based captioning model generates textual descriptions for each video frame.
+    \item \textbf{LLM-based Temporal Reasoning:} The captions are fed to an LLM via a structured prompting mechanism that enables temporal aggregation and anomaly score estimation across frames.
+    \item \textbf{Cross-modal Refinement:} Modality-aligned VLMs are used to clean noisy captions and refine the LLM-generated anomaly scores using cross-modal similarity.
+\end{enumerate}
+
+\textbf{Key Results.}
+\begin{itemize}[leftmargin=1.5em]
+    \item Evaluated on \textbf{UCF-Crime} and \textbf{XD-Violence} --- two large-scale real-world surveillance datasets.
+    \item Outperforms both \textit{unsupervised} and \textit{one-class} methods \textbf{without any training or data collection}.
+    \item Demonstrates that LLMs can serve as effective temporal anomaly reasoners when guided with proper prompts.
+\end{itemize}
+
+\textbf{Relevance to Our Work.}
+This paper directly validates our proposed approach of using a zero-shot VLM + LLM pipeline for video anomaly detection. Our CLIP scoring stage mirrors their VLM usage, and our MLLM explanation stage extends their LLM reasoning with richer, multimodal explanations.
+
+\vspace{1.5em}
+
+% ------------------------------------------------------------
+\subsection{Paper 2: VAD-R1 --- Video Anomaly Reasoning with Chain-of-Thought}
+% ------------------------------------------------------------
+
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+    \toprule
+    \textbf{Title}   & VAD-R1: Towards Video Anomaly Reasoning via Perception-to-Cognition Chain-of-Thought \\
+    \textbf{Authors}  & (Multiple authors; see arXiv) \\
+    \textbf{Venue}    & \textbf{NeurIPS 2025} (39th Conference on Neural Information Processing Systems) \\
+    \textbf{arXiv}    & \url{https://arxiv.org/abs/2505.19877} \\
+    \bottomrule
+\end{tabularx}
+
+\vspace{0.8em}
+
+\textbf{Problem Addressed.}
+Current VAD methods focus on \textit{detecting} anomalies (binary classification) but do not \textit{explain} or \textit{reason} about why an event is anomalous---limiting their practical utility in real-world deployment.
+
+\textbf{Proposed Method.}
+VAD-R1 introduces a new task called \textbf{Video Anomaly Reasoning (VAR)} and proposes an MLLM-based framework with a structured \textbf{Perception-to-Cognition Chain-of-Thought (P2C-CoT)}:
+\begin{enumerate}[leftmargin=1.5em]
+    \item \textbf{Perception Stage:}
+    \begin{itemize}
+        \item \textit{Global Observation:} The model surveys the overall video environment.
+        \item \textit{Focused Inspection:} Suspicious clips are identified and analyzed to determine \textit{what}, \textit{when}, and \textit{where} anomalies occur.
+    \end{itemize}
+    \item \textbf{Cognition Stage:}
+    \begin{itemize}
+        \item \textit{Shallow Cognition:} Assesses abnormality based on visual cues and explains why the event is anomalous.
+        \item \textit{Deep Cognition:} Reasons about underlying causes, violated norms, and potential consequences.
+    \end{itemize}
+    \item \textbf{AVA-GRPO:} An improved reinforcement learning algorithm with a self-verification mechanism to enhance the MLLM's anomaly reasoning capability.
+\end{enumerate}
+
+\textbf{Key Results.}
+\begin{itemize}[leftmargin=1.5em]
+    \item Introduces the \textbf{Vad-Reasoning} dataset specifically constructed for the VAR task.
+    \item Outperforms existing open-source and proprietary models on both VAD and VAR benchmarks.
+    \item Demonstrates that structured chain-of-thought reasoning significantly improves anomaly understanding over simple detection.
+\end{itemize}
+
+\textbf{Relevance to Our Work.}
+Our pipeline's Stage~2 (MLLM Reasoning) aims to provide natural-language explanations for flagged anomalous frames. VAD-R1 formalizes this as the VAR task and shows that perception-to-cognition reasoning is the right paradigm. Their P2C-CoT approach can inform how we design prompts for our MLLM explanation module.
+
+\vspace{1.5em}
+
+% ============================================================
+\section{Summary of Insights}
+% ============================================================
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}l X X@{}}
+    \toprule
+    \textbf{Aspect} & \textbf{LAVAD (CVPR 2024)} & \textbf{VAD-R1 (NeurIPS 2025)} \\
+    \midrule
+    Core contribution & Training-free VAD using VLM + LLM & MLLM-based anomaly reasoning with CoT \\
+    Training required & None (zero-shot) & RL fine-tuning (AVA-GRPO) \\
+    VLM/LLM role & Frame captioning + temporal scoring & Perception-to-cognition reasoning \\
+    Datasets used & UCF-Crime, XD-Violence & Vad-Reasoning (new) \\
+    Key takeaway for us & Validates training-free VLM pipeline & Informs our MLLM explanation design \\
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================
+\section{Progress Timeline}
+% ============================================================
+
+% Add entries here as you make progress — newest first
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}l X@{}}
+    \toprule
+    \textbf{Date} & \textbf{Activity} \\
+    \midrule
+    March 23, 2026 & Studied LAVAD (CVPR 2024) and VAD-R1 (NeurIPS 2025); documented summaries. \\
+    March 2, 2026  & Discussion with professor --- decided to extend pipeline to video anomaly detection. \\
+    % Add more rows as you progress...
+    \bottomrule
+\end{tabularx}
+\end{table}
+
+% ============================================================
+\section{Next Steps}
+% ============================================================
+
+\begin{enumerate}[leftmargin=1.5em]
+    \item Study domain adaptation methods for cross-scene video anomaly detection (DA-VAD, Ada-VAD).
+    \item Explore CLIP-based weakly-supervised VAD approaches (VadCLIP, HeadCLIP).
+    \item Begin implementation of frame extraction pipeline on UCF-Crime dataset.
+    \item Design domain-adaptive prompt templates for surveillance and traffic scenes.
+\end{enumerate}
+
+% ============================================================
+% REFERENCES — Add BibTeX entries as needed
+% ============================================================
+\vspace{1em}
+\section{References}
+
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2em]
+    \item L.~Zanella, W.~Menapace, M.~Mancini, Y.~Wang, and E.~Ricci, ``Harnessing Large Language Models for Training-free Video Anomaly Detection,'' in \textit{Proc. IEEE/CVF CVPR}, 2024. \href{https://arxiv.org/abs/2404.01014}{arXiv:2404.01014}
+    
+    \item VAD-R1 Authors, ``VAD-R1: Towards Video Anomaly Reasoning via Perception-to-Cognition Chain-of-Thought,'' in \textit{Proc. NeurIPS}, 2025. \href{https://arxiv.org/abs/2505.19877}{arXiv:2505.19877}
+\end{enumerate}
+
+\end{document}

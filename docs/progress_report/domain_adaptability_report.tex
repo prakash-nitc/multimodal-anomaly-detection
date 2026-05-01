@@ -1,0 +1,103 @@
+\documentclass[12pt, a4paper]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage[numbers]{natbib}
+
+% Formatting
+\onehalfspacing
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% ============ TITLE PAGE ============
+\begin{center}
+    {\large \textbf{National Institute of Technology Calicut}}\\[0.3cm]
+    {\normalsize Department of Computer Science \& Engineering}\\[1.5cm]
+    
+    {\Large \textbf{Research Progress Report}}\\[0.8cm]
+    
+    {\LARGE \textbf{Integrating Domain Adaptability in Multimodal Video Anomaly Detection}}\\[1.5cm]
+    
+    {\large Based on Literature Review of arXiv:2412.18298}\\[1.5cm]
+    
+    \begin{tabular}{rl}
+        \textbf{Student:} & [Your Name] \\
+        \textbf{Roll No:} & [Your Roll Number] \\
+        \textbf{Guide:} & Prof.\ [Professor Name] \\
+        \textbf{Date:} & \today \\
+    \end{tabular}
+\end{center}
+
+\newpage
+
+% ============ 1. INTRODUCTION ============
+\section{Objective of the Report}
+
+Following the guidance to investigate domain adaptability and Video Anomaly Detection (VAD) within the scope of our project, an extensive review of the highly relevant 2024 survey paper, \textit{``Quo Vadis, Anomaly Detection? LLMs and VLMs in the Spotlight''} (arXiv:2412.18298) was conducted. 
+
+While the exact terminology of ``domain adaptability'' varies across recent literature, its functional equivalents manifest as \textbf{Training-Free/Few-Shot Detection} and \textbf{Open-world/Class-Agnostic Detection}. This report outlines the critical findings from the referenced survey and identifies highly relevant papers that provide architectural frameworks for integrating domain adaptability into our current zero-shot multimodal anomaly detection project.
+
+% ============ 2. KEY FINDINGS ============
+\section{Key Findings on Domain Adaptability from Recent Literature}
+
+The 2024 survey emphatically points to the integration of Large Language Models (LLMs) and Vision-Language Models (VLMs) as the primary enablers for robust, adaptable anomaly detection in dynamic environments. Traditional models overfit to specific camera angles, backgrounds, or lighting conditions (the Source Domain), leading to severe performance degradation when deployed in a new setting (the Target Domain).
+
+To counteract this, the literature proposes the following domain-adaptive directions:
+
+\begin{itemize}
+    \item \textbf{Training-Free Adaptability:} Utilizing predefined logical semantic capabilities of LLMs to act completely zero-shot, bypassing the need for target-domain training.
+    \item \textbf{Open-Vocabulary Scoring:} Decoupling visual feature extraction from anomaly classification, allowing normal states to be dynamically prompted textually rather than hardcoded.
+    \item \textbf{Temporal Modularity:} Employing lightweight temporal network layers over frozen vision encoders to bridge domain shifts without altering the core semantic understanding of the model.
+\end{itemize}
+
+% ============ 3. MOST RELEVANT PAPERS ============
+\section{Most Relevant Papers Identified for Our Project}
+
+From the extensive catalog of works analyzed in the 2024 survey, the following three papers stand out as the most relevant to our project's goal of achieving zero-shot domain adaptability in Video Anomaly Detection:
+
+\subsection{OVVAD (Open-Vocabulary Video Anomaly Detection)}
+\textbf{Core Concept:} OVVAD tackles open-world adaptability by decoupling anomaly detection from specific classifications. It introduces an architecture that utilizes a Graph Convolutional Network (GCN) as a ``temporal adapter'' sitting on top of frozen CLIP visual encoders.\\
+\textbf{Relevance to Project:} This paper perfectly aligns with our requirement for domain adaptability. Instead of training the massive foundational VLM on a new factory environment, we can simply train or dynamically adjust a lightweight temporal adapter, leaving the zero-shot capabilities of the VLM intact.
+
+\subsection{VERA (Explainable VAD via Verbalized Learning)}
+\textbf{Core Concept:} VERA introduces the concept of ``verbalized learning'' to enable entirely training-free anomaly detection, achieving high cross-domain robustness without modifying underlying model parameters.\\
+\textbf{Relevance to Project:} This directly resolves the problem of adapting to new domains. By verbalizing the context of a new domain (e.g., ``A darkly lit conveyor belt segment'') directly into the VLM prompts, the model dynamically adjusts its baseline of normality at runtime.
+
+\subsection{LAVAD (Harnessing LLMs for Training-Free VAD)}
+\textbf{Core Concept:} LAVAD completely bypasses dataset-specific training by employing pre-trained LLMs to aggregate temporal sequence descriptions to detect logical anomalies in events.\\
+\textbf{Relevance to Project:} This represents the ultimate zero-shot domain adaptation. It confirms our hypothesis that given a robust Vision encoder, the LLM module can adapt cross-domain through reasoning rather than backpropagation.
+
+% ============ 4. IMPLEMENTATION ROADMAP ============
+\section{Proposed Integration Roadmap for the Project}
+
+Based on these findings, we propose the following upgrades to our current \textit{Zero-Shot Multimodal Anomaly Detection} framework:
+
+\begin{enumerate}
+    \item \textbf{Adapting Component 1 (Visual Scoring):} Move from static spatial bounding boxes to analyzing sequences of frames via a frozen CLIP vision encoder. Feed these sequence features into a lightweight Temporal Adapter (inspired by OVVAD). This securely captures motion dynamics without locking the model to a specific layout.
+    \item \textbf{Adapting Component 2 (Prompt Engineering):} Transition from static manual prompts to \textit{Verbalized Prompting} (inspired by VERA). The system will dynamically generate the domain context into text at runtime, mapping the visual input to a customized semantic domain context.
+    \item \textbf{Adapting Component 3 (Reasoning and Explanation):} Utilize the LLM to score events against a massive open-vocabulary list of normal states. By analyzing temporal behavior over visual feature drifts, anomalous events can be isolated and flagged independently of the specific background environment.
+\end{enumerate}
+
+\section{Conclusion}
+The deep dive into the recent survey (arXiv:2412.18298) confirms that domain adaptability in Video Anomaly Detection is best achieved through synergistic multimodal configurations. By integrating training-free VLM methodologies and lightweight temporal adapters, our project holds extreme promise in functioning robustly across dynamic and unrestricted industrial domains.
+
+\end{document}

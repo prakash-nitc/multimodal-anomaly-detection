@@ -27,7 +27,7 @@ env/
 Thumbs.db
 
 # Data (too large for git)
-data/
+/data/
 datasets/
 *.tar.gz
 *.zip
