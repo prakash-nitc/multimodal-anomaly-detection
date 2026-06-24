@@ -143,9 +143,10 @@ target for a strong MTech thesis), not CVPR/ICCV main track.
 
 ## 7. Parallel track — resume ML project (placement double-dip)
 
-A productized slice of the research, **not** a separate project. Lives in its own repo at
-`p:\Research\clip-anomaly-detection\` (`app.py`, `benchmark.py`, `README.md`). Already has a
-real headline: **88.5% image-level AUROC on MVTec AD, zero training data** (within ~4 pts of a
-trained OC-SVM, beats it on all texture categories). Remaining steps are the user's: create a
-Hugging Face account, deploy the Gradio app to Spaces → public link for the resume.
-(An older duplicate exists at `clip-zero-shot-anomaly/` — `clip-anomaly-detection` is canonical.)
+A productized slice of the research, **not** a separate project. Single repo (deduplicated
+2026-06-25) at **`C:\project\clip-anomaly-detection\`** — moved out of `p:\Research\`. Has
+LICENSE; `app.py` (Gradio demo) + `benchmark.py` (reproducible MVTec benchmark). Real headline:
+**88.5% image-level AUROC on MVTec AD, zero training data** (within ~4 pts of a trained OC-SVM,
+beats it on all texture categories). Remaining steps are the user's: rename the GitHub repo to
+`clip-anomaly-detection` and `git push` the pending LICENSE commit; then create a Hugging Face
+account and deploy the Gradio app to Spaces → public link for the resume.
