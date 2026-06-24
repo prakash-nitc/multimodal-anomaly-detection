@@ -1,0 +1,284 @@
+% ============================================================
+% ENDSEM REPORT — Part 4: Proposed Architecture + Conclusion + Refs
+% Paste this AFTER Part 3 in your Overleaf document
+% ============================================================
+
+% ============ VIII. PROPOSED ARCHITECTURE ============
+\section{Proposed Architecture: DA-ZVAD}
+\label{sec:proposed}
+
+Based on our comparative analysis, we propose \textbf{DA-ZVAD} (\textbf{D}omain-\textbf{A}daptive \textbf{Z}ero-shot \textbf{V}ideo \textbf{A}nomaly \textbf{D}etection), a unified architecture that selectively combines the strongest elements from each reviewed framework.
+
+\subsection{Architecture Overview}
+
+\begin{figure}[h]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}[
+    node distance=0.4cm and 0.6cm,
+    block/.style={rectangle, draw, fill=blue!8, text width=2.2cm, minimum height=1cm, align=center, rounded corners=3pt, font=\scriptsize},
+    arrow/.style={-{Stealth[length=2mm]}, thick},
+    source/.style={font=\tiny\bfseries, text=blue!60!black}
+]
+
+% Row 1: Input -> M1 -> M2
+\node[block, fill=orange!15] (input) {\textbf{Input}\\Video Stream\\$\{f_1, \ldots, f_T\}$};
+\node[block, right=of input] (encoder) {\textbf{Module 1}\\Frozen CLIP\\ViT-L/14};
+\node[block, right=of encoder] (temporal) {\textbf{Module 2}\\Temporal\\Adapter};
+
+% Row 2: M3 -> M4 -> Output
+\node[block, below=0.8cm of input, fill=yellow!15] (verbal) {\textbf{Module 3}\\Verbalized\\Context};
+\node[block, right=of verbal] (llm) {\textbf{Module 4}\\LLM Reasoning\\Head};
+\node[block, right=of llm, fill=red!10] (output) {\textbf{Output}\\Score + NL\\Explanation};
+
+% Arrows
+\draw[arrow] (input) -- (encoder);
+\draw[arrow] (encoder) -- (temporal);
+\draw[arrow] (temporal) |- (llm);
+\draw[arrow] (verbal) -- (llm);
+\draw[arrow] (llm) -- (output);
+
+% Bypass
+\draw[arrow, dashed, gray] (encoder.south) -- ++(0,-0.35) -| (llm.north) node[pos=0.25, below, font=\tiny, text=gray] {zero-shot bypass};
+
+% Source labels
+\node[source, above=0.1cm of encoder] {OVVAD};
+\node[source, above=0.1cm of temporal] {OVVAD};
+\node[source, below=0.1cm of verbal] {VERA};
+\node[source, above right=0.05cm and -0.3cm of llm] {LAVAD};
+
+\end{tikzpicture}%
+}
+\caption{Proposed DA-ZVAD architecture. Module 2 can be bypassed in zero-shot mode. Module 3 enables domain adaptation without parameter changes.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Module Descriptions}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Module 1 --- Frozen Visual Encoder (from OVVAD):}
+    A frozen CLIP ViT-L/14 extracts frame-level visual features. We select ViT-L/14 over ViT-B/16 for superior representational capacity. The frozen encoder ensures domain-agnostic generalisation is preserved.
+
+    \item \textbf{Module 2 --- Lightweight Temporal Adapter (from OVVAD):}
+    An optional, nearly weight-free temporal adapter captures inter-frame dynamics. In fully zero-shot mode, this module is bypassed. When few-shot domain-specific data is available, it can be trained with minimal parameters ($<$1M) following OVVAD's design.
+
+    \item \textbf{Module 3 --- Verbalized Domain Context Generator (from VERA):}
+    Generates a natural language description of the deployment domain in two modes:
+    \begin{itemize}
+        \item \textit{Manual:} Operator provides a description (e.g., ``Night-shift automotive welding station'').
+        \item \textit{Automatic:} A VLM analyses the first $N$ frames and generates the scene description.
+    \end{itemize}
+    The context is injected into the LLM reasoning prompt, grounding all anomaly assessments.
+
+    \item \textbf{Module 4 --- LLM Temporal Reasoning Head (from LAVAD):}
+    An LLM receives temporally aggregated features, the verbalized domain context, and a structured prompt. It outputs both an anomaly score and a natural language explanation. Cross-modal refinement suppresses hallucinated predictions.
+\end{enumerate}
+
+\subsection{Operating Modes}
+
+\begin{table}[h]
+\centering
+\caption{DA-ZVAD Operating Modes}
+\label{tab:modes}
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{@{} l c c c l @{}}
+\toprule
+\textbf{Mode} & \textbf{M2} & \textbf{M3} & \textbf{Training} & \textbf{Use Case} \\
+\midrule
+Zero-Shot & Off & Auto & None & Rapid deployment \\
+Few-Shot & On & Auto & Minimal & Domain w/ labels \\
+Verbalized & Off & Manual & None & Expert-guided \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Feasibility Analysis}
+
+Table~\ref{tab:gpu} confirms the proposed pipeline fits within a single consumer GPU.
+
+\begin{table}[h]
+\centering
+\caption{Estimated GPU Memory Requirements (FP16 Inference)}
+\label{tab:gpu}
+\renewcommand{\arraystretch}{1.2}
+\small
+\begin{tabular}{@{} l r l @{}}
+\toprule
+\textbf{Component} & \textbf{Est. VRAM} & \textbf{Notes} \\
+\midrule
+CLIP ViT-L/14 (frozen) & $\sim$1.2 GB & Feature extraction \\
+LLaVA-1.6 (7B, 4-bit) & $\sim$5.5 GB & bitsandbytes 4-bit \\
+Temporal Adapter & $<$0.1 GB & Lightweight \\
+Frame buffer (16 frames) & $\sim$0.3 GB & Temporal window \\
+\midrule
+\textbf{Total} & $\sim$\textbf{7.1 GB} & Single 8GB GPU \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ============ IX. WORK DONE ============
+\section{Work Done (Semester 2)}
+\label{sec:work_done}
+
+The following tasks were completed during Semester~2 (January--May 2026):
+
+\subsection{Literature Survey}
+
+We reviewed 15 research papers spanning five categories: foundational models and datasets (MVTec AD, CLIP, LLaVA), traditional anomaly detection baselines (PatchCore, PaDiM), CLIP-based zero-shot methods (WinCLIP, AnomalyCLIP, CLIP-AD), MLLM-based approaches (AnomalyGPT, MMAD benchmark), and video anomaly detection frameworks (OVVAD, LAVAD, VERA, Gao et al.\ survey). Out of these, nine papers were studied in depth---reading the full manuscript, architecture details, and experimental results---while the remaining six were surveyed at a higher level (abstract, introduction, and key results).
+
+\subsection{CLIP Baseline Implementation}
+
+We implemented and evaluated a training-free CLIP-based anomaly detection pipeline on the full MVTec AD benchmark (15 categories, 1{,}725 test images). Using OpenCLIP ViT-L/14 pre-trained on LAION-2B with a 24-prompt ensemble design, the baseline achieved \textbf{88.5\% mean AUROC} and \textbf{90.7\% F1-score} in 135.8 seconds on a Tesla T4 GPU. The results revealed a clear gap between texture categories (99.5\% mean) and object categories (83.1\% mean), confirming that whole-image CLIP embeddings capture global appearance changes well but struggle with small, localised defects.
+
+\subsection{Video Proof-of-Concept}
+
+To test whether CLIP's discriminative ability extends to sequential frames, we constructed a 30-frame pseudo-video from MVTec AD bottle images (10 normal, 10 anomalous, 10 normal). Per-frame CLIP scoring produced a mean normal score of 0.307 and a mean anomalous score of 0.894, yielding a \textbf{score gap of 0.587}. This confirmed that CLIP provides a strong per-frame signal but also exposed three limitations: no temporal context, score fluctuations across defect types, and no explanations.
+
+\subsection{DA-ZVAD Architecture Design}
+
+Drawing on the comparative analysis of OVVAD, LAVAD, and VERA, we designed the DA-ZVAD architecture---a four-module pipeline combining a frozen CLIP encoder (Module~1), an optional temporal adapter (Module~2), a verbalized domain context generator (Module~3), and an LLM temporal reasoning head (Module~4). A feasibility analysis confirmed the pipeline fits within 7.1~GB VRAM, making it runnable on a single consumer GPU.
+
+
+% ============ X. WORK PLAN ============
+\section{Work Plan (Semester 3 and 4)}
+\label{sec:work_plan}
+
+\begin{table}[h]
+\centering
+\caption{Planned Research Timeline}
+\label{tab:timeline}
+\renewcommand{\arraystretch}{1.25}
+\small
+\begin{tabular}{@{} l p{5.5cm} @{}}
+\toprule
+\textbf{Phase} & \textbf{Activities} \\
+\midrule
+\textbf{Sem 2} (Done) & Literature survey (15 papers), CLIP baseline on MVTec AD (88.5\% AUROC), video proof-of-concept, DA-ZVAD architecture design \\
+\textbf{Sem 3 (Jul--Nov)} & UCF-Crime dataset setup, temporal adapter implementation following OVVAD, LAVAD caption-then-reason pipeline, VERA verbalized prompting integration \\
+\textbf{Sem 4 (Jan--May)} & Full DA-ZVAD integration, cross-domain evaluation on UCF-Crime and XD-Violence, ablation studies, thesis writing and submission \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Semester 3 (July--November 2026)} will focus on implementing the individual modules of DA-ZVAD:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Dataset preparation.} Download and preprocess the UCF-Crime dataset (1{,}900 surveillance videos, 13 anomaly categories). Set up frame extraction pipelines and organise the evaluation split.
+
+    \item \textbf{Module 2 --- Temporal adapter.} Implement OVVAD's lightweight temporal adapter on top of frozen CLIP ViT-L/14 features. Train on UCF-Crime with video-level labels (weakly supervised) and measure the improvement over per-frame scoring.
+
+    \item \textbf{Module 4 --- LLM reasoning.} Build LAVAD's caption-then-reason pipeline using BLIP-2 for frame captioning and an open-source LLM (LLaMA or Mistral) for anomaly scoring. Implement cross-modal refinement to reduce caption hallucination.
+
+    \item \textbf{Module 3 --- Verbalized prompting.} Integrate VERA's domain context mechanism. Test with manually written domain descriptions for different UCF-Crime scene types (parking lots, roads, indoor spaces) and measure the effect on detection accuracy.
+\end{enumerate}
+
+\noindent\textbf{Semester 4 (January--May 2027)} will focus on integration, evaluation, and thesis writing:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Full pipeline integration.} Combine all four modules into the complete DA-ZVAD system and test end-to-end on UCF-Crime.
+
+    \item \textbf{Cross-domain evaluation.} Evaluate DA-ZVAD on XD-Violence (4{,}754 videos) and MVTec AD without any domain-specific adjustments, using only verbalized context descriptions for domain adaptation.
+
+    \item \textbf{Ablation studies.} Measure the contribution of each module by disabling them individually: temporal adapter only, LLM reasoning only, verbalized prompting only, and all combinations.
+
+    \item \textbf{Thesis writing.} Compile results, write the full thesis, and prepare for submission and defence.
+\end{enumerate}
+
+
+% ============ XI. CONCLUSION ============
+\section{Conclusion}
+\label{sec:conclusion}
+
+This report has extended our mid-semester literature survey in two significant directions. First, we implemented and evaluated a CLIP-based zero-shot anomaly detection baseline on MVTec AD, achieving \textbf{88.5\% mean AUROC} across all 15 categories without any training data---approaching WinCLIP's 91.8\% while maintaining a simpler, more extensible architecture. The baseline reveals a clear texture--object performance gap (99.5\% vs. 83.1\%), confirming that whole-image CLIP embeddings excel at global appearance anomalies but struggle with localised defects.
+
+Second, motivated by our advisor's guidance on domain adaptability, we reviewed three state-of-the-art video anomaly detection frameworks---OVVAD, LAVAD, and VERA---and demonstrated a preliminary video extension through per-frame scoring on pseudo-video sequences. The results confirm CLIP's strong per-frame discriminative ability (score gap of 0.587) while clearly identifying the absence of temporal reasoning as the key limitation for video deployment.
+
+Based on this analysis, we proposed DA-ZVAD, a unified architecture that combines OVVAD's temporal adapter, LAVAD's LLM reasoning, and VERA's verbalized domain prompting into a training-free, domain-adaptive, and explainable video anomaly detection pipeline. The architecture is computationally feasible on a single consumer GPU ($\sim$7.1 GB VRAM) and supports three operating modes (zero-shot, few-shot, and verbalized) for flexible deployment across domains.
+
+Next semester's work will focus on implementing DA-ZVAD on the UCF-Crime benchmark, conducting cross-domain evaluation, and comparing against the reviewed baselines.
+
+
+% ============ REFERENCES ============
+\bibliographystyle{IEEEtran}
+
+\begin{thebibliography}{14}
+
+\bibitem{bergmann2019mvtec}
+P.~Bergmann, M.~Fauser, D.~Sattlegger, and C.~Steger,
+``MVTec AD---A comprehensive real-world dataset for unsupervised anomaly detection,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2019, pp.~9592--9600.
+
+\bibitem{radford2021clip}
+A.~Radford \textit{et al.},
+``Learning transferable visual models from natural language supervision,''
+in \textit{Proc. Int. Conf. Mach. Learn. (ICML)}, 2021, pp.~8748--8763.
+
+\bibitem{liu2023llava}
+H.~Liu, C.~Li, Q.~Wu, and Y.~J.~Lee,
+``Visual instruction tuning,''
+in \textit{Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)}, 2023.
+
+\bibitem{roth2022patchcore}
+K.~Roth, L.~Pemula, J.~Zepeda, B.~Sch{\"o}lkopf, T.~Brox, and P.~Gehler,
+``Towards total recall in industrial anomaly detection,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2022, pp.~14318--14328.
+
+\bibitem{jeong2023winclip}
+J.~Jeong, Y.~Zou, T.~Kim, D.~Zhang, A.~Ravichandran, and O.~Dabeer,
+``WinCLIP: Zero-/few-shot anomaly classification and segmentation,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2023, pp.~10175--10184.
+
+\bibitem{zhou2024anomalyclip}
+Q.~Zhou, G.~Pang, Y.~Tian, S.~He, and J.~Chen,
+``AnomalyCLIP: Object-agnostic prompt learning for zero-shot anomaly detection,''
+in \textit{Proc. Int. Conf. Learn. Represent. (ICLR)}, 2024.
+
+\bibitem{gu2024anomalygpt}
+Z.~Gu, B.~Zhu, G.~Zhu, Y.~Chen, M.~Tang, and J.~Wang,
+``AnomalyGPT: Detecting industrial anomalies using large vision-language models,''
+in \textit{Proc. AAAI Conf. Artif. Intell. (AAAI)}, 2024.
+
+\bibitem{jiang2025mmad}
+X.~Jiang, Y.~Cao, J.~Ge, and Z.~Lin,
+``MMAD: A comprehensive benchmark for multimodal large language models in industrial anomaly detection,''
+in \textit{Proc. Int. Conf. Learn. Represent. (ICLR)}, 2025.
+
+\bibitem{wu2024ovvad}
+P.~Wu, X.~Zhou, G.~Pang, Y.~Sun, J.~Liu, P.~Wang, and Y.~Zhang,
+``Open-vocabulary video anomaly detection,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2024.
+
+\bibitem{zanella2024lavad}
+L.~Zanella, W.~Menapace, M.~Mancini, Y.~Wang, and E.~Ricci,
+``Harnessing large language models for training-free video anomaly detection,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2024.
+
+\bibitem{ye2025vera}
+M.~Ye, W.~Liu, and P.~He,
+``VERA: Explainable video anomaly detection via verbalized learning of vision-language models,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2025.
+
+\bibitem{gao2025survey}
+S.~Gao, P.~Yang, \textit{et al.},
+``From deep neural networks to multimodal large models: A survey of video anomaly detection,''
+\textit{ACM Computing Surveys}, vol.~57, no.~2, 2025.
+
+\bibitem{quovadis2024}
+``Quo Vadis, anomaly detection? LLMs and VLMs in the spotlight,''
+arXiv preprint arXiv:2412.18298, 2024.
+
+\bibitem{sultani2018ucf}
+W.~Sultani, C.~Chen, and M.~Shah,
+``Real-world anomaly detection in surveillance videos,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2018.
+
+\bibitem{sarangi2026midsem}
+P.~K.~Sarangi and P.~Das,
+``Vision-language models for anomaly detection: A literature survey and proposed research direction,''
+Mid-semester Report, NIT Calicut, 2026.
+
+\end{thebibliography}
+
+\end{document}

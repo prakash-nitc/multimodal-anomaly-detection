@@ -1,0 +1,106 @@
+% ============================================================
+% ENDSEM REPORT — Part 1: Preamble + Title + Abstract + Intro
+% Paste this FIRST in your Overleaf document
+% ============================================================
+
+\documentclass[conference]{IEEEtran}
+
+% ---- Packages ----
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{tabularx}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds, calc, decorations.pathreplacing}
+\pgfplotsset{compat=1.18}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\begin{document}
+
+% ============ TITLE ============
+\title{Zero-Shot Multimodal Anomaly Detection Using\\Vision-Language Models: From Static Images to\\Video — A Literature Survey, Baseline Implementation,\\and Proposed Research Direction}
+
+\author{
+\IEEEauthorblockN{Prakash Kumar Sarangi}
+\IEEEauthorblockA{Department of Computer Science \& Engineering\\
+National Institute of Technology Calicut\\
+Roll No: M251250CS\\
+Email: prakash\_m251250cs@nitc.ac.in}
+\and
+\IEEEauthorblockN{Prof. Dr. Pranesh Das}
+\IEEEauthorblockA{Department of Computer Science \& Engineering\\
+National Institute of Technology Calicut\\
+Assistant Professor\\
+Email: praneshdas@nitc.ac.in}
+}
+
+\maketitle
+
+% ============ ABSTRACT ============
+\begin{abstract}
+Anomaly detection---identifying data points that deviate from expected patterns---is critical across industrial quality inspection, surveillance, and medical imaging. Traditional deep learning approaches require large volumes of domain-specific training data and provide only numerical scores without explaining \textit{what} is anomalous. Vision-Language Models (VLMs) such as CLIP enable zero-shot anomaly detection by comparing images against textual descriptions, while Multimodal Large Language Models (MLLMs) can articulate anomalies in natural language. This report extends our mid-semester literature survey in two directions. First, we implement and evaluate a CLIP-based zero-shot baseline on the MVTec AD benchmark, achieving \textbf{88.5\% mean AUROC} across all 15 categories without any training. Second, motivated by our professor's guidance, we pivot toward \textbf{Video Anomaly Detection (VAD)}, reviewing three state-of-the-art frameworks---OVVAD, LAVAD, and VERA---that extend VLMs to temporal video analysis. We demonstrate a preliminary video extension by applying per-frame CLIP scoring to pseudo-video sequences, confirming CLIP's discriminative ability (mean anomaly score gap of 0.587 between normal and defective frames) while identifying the absence of temporal reasoning as a key limitation. Based on this analysis, we propose DA-ZVAD, a unified domain-adaptive zero-shot video anomaly detection architecture that combines OVVAD's temporal adapter, LAVAD's LLM reasoning, and VERA's verbalized domain prompting.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Anomaly Detection, Vision-Language Models, CLIP, Video Anomaly Detection, Zero-Shot Learning, Multimodal LLM, Domain Adaptation, Prompt Engineering
+\end{IEEEkeywords}
+
+% ============ I. INTRODUCTION ============
+\section{Introduction}
+
+Anomaly detection---the problem of identifying observations that deviate from expected patterns---is a long-standing problem across several real-world domains. Manufacturing lines rely on it to catch surface defects before products ship. Surveillance systems use it to detect unusual activity in video feeds. Medical imaging depends on it to flag suspicious regions in scans. In each scenario, the core task remains the same: given a stream of predominantly normal data, identify the rare items that deviate.
+
+Over the past decade, deep-learning-based approaches have improved results on standard benchmarks. Feature-extraction methods such as PatchCore~\cite{roth2022patchcore} achieve near-perfect accuracy, yet they carry two fundamental drawbacks. First, they require a dedicated set of normal reference samples for every new category or domain. Second, their outputs are limited to numerical scores and coarse heatmaps---they indicate \textit{that} something is wrong, but never \textit{what} is wrong or \textit{why}.
+
+The emergence of Vision-Language Models (VLMs) offers an alternative worth exploring. CLIP~\cite{radford2021clip}, trained on approximately 400 million image-text pairs, learns to represent images and natural language in a joint embedding space, enabling zero-shot recognition without domain-specific training. Separately, Multimodal Large Language Models (MLLMs) such as LLaVA~\cite{liu2023llava} combine visual encoders with large-scale language models, making it possible to reason about visual content in natural language.
+
+\textbf{Contributions of this report.} Building on our mid-semester literature survey~\cite{sarangi2026midsem}, which reviewed five foundational papers in image-based anomaly detection, this end-semester report makes the following contributions:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Baseline Implementation:} We implement and evaluate a CLIP-based zero-shot anomaly detection baseline on the full MVTec AD benchmark (15 categories), achieving 88.5\% mean AUROC without any training data (Section~\ref{sec:baseline}).
+
+    \item \textbf{Video AD Literature Extension:} Motivated by our advisor's guidance on domain adaptability, we review three state-of-the-art Video Anomaly Detection frameworks---OVVAD~\cite{wu2024ovvad}, LAVAD~\cite{zanella2024lavad}, and VERA~\cite{ye2025vera}---that extend VLMs to temporal video analysis (Section~\ref{sec:video_ad}).
+
+    \item \textbf{Preliminary Video Extension:} We demonstrate per-frame CLIP scoring on pseudo-video sequences constructed from MVTec AD images, confirming CLIP's discriminative ability while identifying the need for temporal reasoning (Section~\ref{sec:video_experiment}).
+
+    \item \textbf{Proposed Architecture:} We propose DA-ZVAD, a unified architecture combining temporal adapters, LLM reasoning, and verbalized domain prompting for domain-adaptive zero-shot video anomaly detection (Section~\ref{sec:proposed}).
+\end{enumerate}
+
+The remainder of this paper is structured as follows. Section~\ref{sec:background} provides background on datasets, models, and metrics. Section~\ref{sec:image_ad} reviews image-based anomaly detection methods. Section~\ref{sec:video_ad} presents the video AD frameworks studied post-midsem. Section~\ref{sec:comparative} provides a comparative analysis. Section~\ref{sec:research_gap} identifies the research gap. Section~\ref{sec:problem_statement} states the problem and objectives. Section~\ref{sec:formulation} gives the mathematical formulation. Section~\ref{sec:baseline} details our baseline implementation and results. Section~\ref{sec:video_experiment} describes the video extension experiment. Section~\ref{sec:proposed} presents the proposed architecture. Section~\ref{sec:work_done} summarises work completed so far. Section~\ref{sec:work_plan} outlines the plan for the remaining semesters. Section~\ref{sec:conclusion} concludes the report.
+
+% ============ II. BACKGROUND ============
+\section{Background and Preliminaries}
+\label{sec:background}
+
+\subsection{The Anomaly Detection Problem}
+
+Anomaly detection is typically cast as a one-class or unsupervised learning problem. During training, the system has access only to normal samples; during testing, it must classify new samples as normal or anomalous. This formulation reflects practical reality: normal data is abundant, while anomalies are rare, diverse, and difficult to anticipate.
+
+\subsection{Evaluation Metrics}
+
+The standard evaluation metric is the \textbf{Area Under the Receiver Operating Characteristic curve (AUROC)}, which measures how well a model ranks anomalous samples above normal ones regardless of decision threshold, ranging from 50\% (random) to 100\% (perfect). Complementary metrics include the \textbf{F1-score} (requiring a threshold) and \textbf{Average Precision}.
+
+\subsection{Benchmark Datasets}
+
+\textbf{MVTec AD}~\cite{bergmann2019mvtec} is the standard evaluation benchmark, comprising 5,354 high-resolution images spanning 15 categories---10 objects and 5 textures---with pixel-level anomaly annotations. For video anomaly detection, \textbf{UCF-Crime}~\cite{sultani2018ucf} (1,900 surveillance videos, 13 anomaly types) and \textbf{XD-Violence} (4,754 videos) serve as primary benchmarks.
+
+\subsection{Vision-Language Models}
+
+\textbf{CLIP}~\cite{radford2021clip} learns joint image-text representations via contrastive pre-training on 400M image-text pairs. Given an image, CLIP computes cosine similarity with text embeddings of candidate descriptions, enabling zero-shot classification. For anomaly detection, text prompts describe normal and abnormal states (e.g., ``a photo of a good bottle'' vs. ``a photo of a damaged bottle''), and the model's confidence in the abnormal description serves as the anomaly score.
+
+% END OF PART 1 — Continue with Part 2

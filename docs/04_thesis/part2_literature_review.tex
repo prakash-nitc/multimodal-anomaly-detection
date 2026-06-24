@@ -1,0 +1,79 @@
+% ============================================================
+% ENDSEM REPORT — Part 2: Literature Review (Image AD + Video AD)
+% Paste this AFTER Part 1 in your Overleaf document
+% ============================================================
+
+% ============ III. IMAGE-BASED ANOMALY DETECTION ============
+\section{Image-Based Anomaly Detection: Literature Review}
+\label{sec:image_ad}
+
+This section summarises the five papers reviewed in our mid-semester report, which form the foundation for the image-based anomaly detection baseline.
+
+\subsection{PatchCore~\cite{roth2022patchcore} (CVPR 2022)}
+
+PatchCore extracts patch-level features from a pre-trained CNN, stores representative normal features in a \textbf{memory bank} using coreset subsampling, and detects anomalies via nearest-neighbour distance. It achieves \textbf{99.1\% image-level AUROC} on MVTec AD---the strongest traditional baseline. However, it requires normal training samples for each category and provides no explanations.
+
+\subsection{WinCLIP~\cite{jeong2023winclip} (CVPR 2023)}
+
+WinCLIP is the first major work applying CLIP to industrial anomaly detection in a zero-shot setting. It introduces \textbf{Compositional Prompt Ensembles (CPE)}---combining multiple text templates with state words (flawless, damaged, broken, etc.)---and a \textbf{multi-scale sliding window approach} for pixel-level localisation. It achieves \textbf{91.8\% image-level AUROC} on MVTec AD without any training. Its limitation is reliance on hand-crafted prompts with no systematic study of which prompts work best.
+
+\subsection{AnomalyCLIP~\cite{zhou2024anomalyclip} (ICLR 2024)}
+
+AnomalyCLIP addresses WinCLIP's reliance on hand-crafted prompts by introducing \textbf{learnable object-agnostic text prompts}. The model learns universal prompt embeddings that capture ``normal'' vs. ``anomalous'' across all categories. It achieves approximately \textbf{94\% image-level AUROC} on MVTec AD with significantly better cross-domain generalisation than hand-crafted methods.
+
+\subsection{AnomalyGPT~\cite{gu2024anomalygpt} (AAAI 2024)}
+
+AnomalyGPT is the first paper to use a \textbf{Large Vision-Language Model (LVLM)} for industrial anomaly detection. It fine-tunes a multimodal LLM on synthetically generated anomaly data, achieving \textbf{94.1\% AUROC} with 1-shot reference. Critically, it provides \textbf{natural language explanations} of detected defects. However, it is not truly zero-shot as it requires fine-tuning.
+
+\subsection{MMAD Benchmark~\cite{jiang2025mmad} (ICLR 2025)}
+
+MMAD evaluates how well current MLLMs perform on industrial anomaly detection across \textbf{seven subtasks}: anomaly classification, localisation, type classification, severity assessment, defect description, root cause analysis, and repair suggestion. Key finding: even GPT-4o achieves only moderate accuracy, \textbf{validating the research gap} that motivates our hybrid approach.
+
+% ============ IV. VIDEO ANOMALY DETECTION ============
+\section{Video Anomaly Detection: Post-Midsem Literature}
+\label{sec:video_ad}
+
+Following our advisor's suggestion to investigate domain adaptability, we turned to Video Anomaly Detection (VAD) as a useful extension of our image-based work. Gao et al.~\cite{gao2025survey}, in their survey published in \textit{ACM Computing Surveys}, trace how VAD has moved from traditional DNN-based methods toward multimodal large models. Using the ``Quo Vadis'' survey~\cite{quovadis2024} as our starting point, we selected three recent frameworks that fit our VLM-based approach.
+
+\subsection{OVVAD~\cite{wu2024ovvad} — Open-Vocabulary Video Anomaly Detection (CVPR 2024)}
+
+OVVAD decouples video anomaly detection into two complementary sub-tasks: (i) class-agnostic binary detection, and (ii) class-specific open-vocabulary categorisation of both seen and unseen anomaly types.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Visual Backbone:} Frozen CLIP ViT-B/16 image encoder, preserving zero-shot generalisation.
+    \item \textbf{Temporal Adapter (TA):} A lightweight, nearly weight-free module placed atop frozen CLIP features to capture inter-frame temporal dependencies without overfitting to source domain distributions.
+    \item \textbf{Semantic Knowledge Injection (SKI):} Injects external textual knowledge (via LLMs or category descriptions) into the visual feature pipeline, bridging the semantic gap.
+    \item \textbf{Anomaly Synthesis:} Pseudo-novel anomaly videos are synthesised during training to expose the model to unseen categories.
+    \item \textbf{Performance:} 86.40\% AUC on UCF-Crime.
+\end{itemize}
+
+\textbf{Key Takeaway:} The frozen encoder + lightweight temporal adapter approach shows that temporal modelling can be added on top of a pre-trained VLM without hurting its generalisation ability.
+
+\subsection{LAVAD~\cite{zanella2024lavad} — Harnessing LLMs for Training-Free VAD (CVPR 2024)}
+
+LAVAD introduces a ``caption-then-reason'' pipeline requiring \textbf{zero training}---no fine-tuning, no learned modules, no domain-specific data.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Frame Captioning:} BLIP-2 generates dense textual descriptions for each video frame, converting the visual stream into natural language.
+    \item \textbf{Temporal Aggregation:} Captions from temporally adjacent frames are grouped; an LLM produces ``temporal summaries'' capturing dynamic scene evolution.
+    \item \textbf{Anomaly Scoring:} The LLM assigns anomaly scores (0--1) to temporal summaries based on semantic reasoning, bypassing learned scoring heads.
+    \item \textbf{Cross-Modal Refinement:} Video-text embedding similarity refines LLM scores to suppress noisy or hallucinated predictions.
+    \item \textbf{Performance:} Outperforms all unsupervised VAD methods on UCF-Crime (+6.08\% over GCL).
+\end{itemize}
+
+\textbf{Key Takeaway:} An LLM can serve as the reasoning engine for anomaly detection through language alone, but raw VLM captions require cross-modal grounding for reliable scoring.
+
+\subsection{VERA~\cite{ye2025vera} — Explainable VAD via Verbalized Learning (CVPR 2025)}
+
+VERA builds on the training-free idea by introducing \textit{verbalized learning}---the model's understanding of normality is expressed and adjusted entirely through natural language.
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Verbalized Context Prompting:} Instead of training domain-specific features, VERA verbalizes the deployment context directly into the VLM's prompt (e.g., ``A dimly lit warehouse corridor with conveyor belts''), dynamically adjusting the baseline of normality.
+    \item \textbf{Scene-Adaptive Reasoning:} Anomalies are reasoned about \textit{relative to the verbalized context}---a ``running person'' is normal in a sports arena but anomalous in a restricted warehouse.
+    \item \textbf{Explainability:} Every detection includes a natural language explanation grounded in the verbalized context.
+    \item \textbf{Cross-Domain Generalization:} Maintains accuracy when transferred across domains (surveillance $\rightarrow$ industrial, indoor $\rightarrow$ outdoor) without changing any parameters.
+\end{itemize}
+
+\textbf{Key Takeaway:} Verbalized prompting is the simplest mechanism for domain adaptation---it removes the need for any adapter training when switching domains, requiring only a textual description of the new environment.
+
+% END OF PART 2 — Continue with Part 3
