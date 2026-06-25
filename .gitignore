@@ -26,9 +26,10 @@ env/
 .DS_Store
 Thumbs.db
 
-# Data (too large for git)
+# Data (too large for git) — anchored to repo root so it does NOT match the
+# da_zvad/datasets/ source package.
 /data/
-datasets/
+/datasets/
 *.tar.gz
 *.zip
 
@@ -40,8 +41,13 @@ checkpoints/
 *.ckpt
 *.bin
 
-# Results (optional — uncomment if you want to track results)
-# results/logs/
+# Generated experiment outputs (regenerable — keep .gitkeep, ignore artifacts)
+results/logs/*.json
+results/tables/*.csv
+results/figures/*.png
+
+# Editor / Office temp files
+~$*
 
 # Secrets
 .env
