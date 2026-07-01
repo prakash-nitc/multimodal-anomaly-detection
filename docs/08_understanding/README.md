@@ -11,7 +11,11 @@ Every note follows the same structure:
 3. **How it works** — plain-language walkthrough (no jargon without explanation)
 4. **Key terms** — the vocabulary you must be comfortable with
 5. **What to say if asked** — likely questions with short, honest answers
-6. **What's next** — how this phase feeds the next one
+6. **Self-quiz** — recall questions (answers at the end); do them without looking back
+7. **What's next** — how this phase feeds the next one
+
+Reading is not enough for a review: finish each note's self-quiz, and before any
+panel/viva, run at least two mock-QA rounds against the collected questions.
 
 | Note | Covers |
 |---|---|

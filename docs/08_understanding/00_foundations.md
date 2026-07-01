@@ -110,7 +110,40 @@ code changes.
 
 ---
 
-## 6. What's next
+## 6. Self-quiz (answer before peeking)
+
+1. In one sentence: how can CLIP classify a defect it was never trained on?
+2. What exactly does an AUROC of 0.885 mean? Why is it threshold-independent?
+3. Why do we use *ensembles* of prompts instead of one sentence?
+4. Why did CLIP score ~99% on textures but ~83% on objects in MVTec?
+5. What problem does temporal smoothing (M2) solve, and why does it need no training?
+6. Where—precisely—does domain adaptation happen in this pipeline?
+7. Which modules are implemented and which is a stub, right now?
+8. What is the difference between "zero-shot" and "training-free" as we use them?
+
+<details><summary>Answers</summary>
+
+1. CLIP embeds images and text in one space, so similarity to the sentence "a damaged X"
+   vs. "a flawless X" is itself a classifier — the language prior replaces training.
+2. Pick one random anomalous and one random normal sample: 88.5% chance the anomalous one
+   gets the higher score. It evaluates the *ranking* of scores, so no threshold is involved.
+3. One phrasing is noisy; averaging several phrasings of the same concept gives a stabler
+   text embedding (less sensitivity to word choice).
+4. Texture defects change the image's *global* appearance, which a whole-image embedding
+   captures; object defects are small and local, below the resolution of one global vector.
+5. Raw per-frame scores fluctuate; isolated spikes cause false alarms. A moving average
+   keeps multi-frame events and damps single-frame noise — it's just arithmetic on scores,
+   no parameters to learn.
+6. In the text (M3): the scene description is injected into both prompt ensembles, so
+   "normal" is re-defined for that environment — zero parameter updates.
+7. M1 (CLIP encoder), M2 (temporal), M3 (context), datasets, and evaluation are implemented;
+   M4 (LLM reasoning) is an interface with a clearly-marked stub.
+8. Zero-shot = handles categories/anomalies never seen in training. Training-free = we never
+   update any weights anywhere. Ours is both; a fine-tuned open-vocabulary model would be
+   zero-shot but not training-free.
+</details>
+
+## 7. What's next
 
 1. **Phase-0 probe:** measure the zero-shot detector on real ShanghaiTech frames
    (frame-level AUROC) — this number decides how we weight detection vs. explanation in the
