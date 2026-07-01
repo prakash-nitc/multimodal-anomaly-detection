@@ -149,7 +149,7 @@ Anomaly: "a person running suspiciously", "an unattended bag", "unusual crowd ga
 
 1. **Demonstrates domain-agnosticism** — same zero-shot pipeline works on factory products AND surveillance video
 2. **Broader impact** — video anomaly detection has applications in security, traffic, healthcare
-3. **More impressive for placements** — shows versatility and practical AI engineering skills
+3. **Demonstrates engineering versatility** — one framework serves both images and video, showing practical AI engineering skill
 4. **Stronger publication potential** — "cross-domain zero-shot anomaly detection" is a more compelling story
 5. **Professor's explicit suggestion** — aligns with advisor expectations
 
