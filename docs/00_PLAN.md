@@ -1,152 +1,112 @@
-# Research Plan — Semester 3 & 4 (DA-ZVAD)
+# Research Plan — Semester 3 & 4
 
-> **Canonical planning document.** Supersedes the older `2nd_year_plan.md`.
-> Last updated: 2026-06-25. Share this with the guide; revise after his sign-off.
-
----
-
-## 0. One-line thesis
-
-> *A **training-free** vision-language + LLM pipeline for video anomaly detection,
-> with **verbalized domain context** and **natural-language explanations**, evaluated
-> **across industrial and surveillance domains**.*
-
-This is the de-risked **DA-ZVAD** spine: the fully training-free configuration is the
-thesis; the trained temporal adapter is an optional Sem-4 upgrade, never a dependency.
-Breadth (and the "this is a lot of work" impression) comes from **sweeps and ablations**,
-not from re-implementing three papers' training loops.
+> **DA-ZVAD: Domain-Adaptive Zero-shot Video Anomaly Detection.**
+> Canonical project plan. Last updated: 2026-07-02.
 
 ---
 
-## 1. Working context & constraints
+## 1. Thesis statement
 
-- **Priority order:** placements first, research second — but Sem-3/Sem-4 grades depend
-  on execution, and a paper is expected in the final semester.
-- **Division of labour:** the assistant carries all code, experiments, debugging,
-  analysis, plots, and writing. The user runs **batched, paste-ready GPU commands** on the
-  college machine and returns the output, learns a small high-yield defense kit, and owns
-  the guide/professor interface.
-- **Non-negotiables:** results are **real** (the user actually runs them); every artifact
-  ships with a plain-language "how to explain this" companion for the viva.
-- **Compute:** college GPU available — compute is not the bottleneck; *debugging time* is.
-  This is why the critical path avoids training loops.
+> A **training-free** vision-language + LLM pipeline for video anomaly detection, with
+> **verbalized domain context** and **natural-language explanations**, evaluated
+> **across industrial and surveillance domains**.
 
-**Effort key (used below):** 🟦 assistant produces · 🟩 user's bounded GPU step ·
-🎓 guide checkpoint · ⭐ artifact that reads as "serious work" to the panel.
+The framework operates without task-specific training: a frozen CLIP encoder scores frames
+against natural-language prompt ensembles; training-free temporal aggregation smooths the
+score sequence; a verbalized scene description adapts the notion of "normal" to a new
+environment with zero parameter updates; and an MLLM produces a natural-language explanation
+for each flagged event.
 
 ---
 
-## 2. Semester 3 (Jul–Dec 2026) — Build the core result
+## 2. Key milestones
 
-**Goal:** end the semester with a complete, reproducible **results chapter** — multi-dataset
-AUC + a large ablation grid + an explanation gallery. That chapter *is* the end-sem review
-and doubles as the draft paper's results section.
-
-### Phase 0 — Foundation + de-risk (Jul, wk 1–2)
-- 🟦 Reproducibility scaffold: configs, fixed seeds, logging, a standard **frame-level AUC**
-  evaluation harness (do once so Sem 4 is "write," not "rerun").
-- 🟦 Dataset prep scripts for **ShanghaiTech** + **CUHK Avenue** (MVTec already in hand).
-- 🟦 **De-risk probe:** naive per-frame CLIP scoring on ShanghaiTech.
-- 🟩 Download datasets + run the probe → paste the number.
-- **🚦 Decision gate:** probe ≥ ~75% → detection can be a co-headline; ~60s (likely) →
-  explanations become the headline and detection is "supporting." Plan continues either way;
-  only emphasis shifts. 🎓 Share the number with the guide.
-
-### Phase 1 — Detector + temporal + context (Aug, wk 3–6)
-- 🟦 Frame-level CLIP scoring on **3 datasets** (ShanghaiTech, Avenue, MVTec).
-- 🟦 **Training-free temporal aggregation** (score smoothing) + window-size sweep.
-- 🟦 **Verbalized context** (Module 3) — per-domain prompts + with/without ablation.
-- 🟩 One batched run → CSVs.
-- **Deliverable ⭐:** AUC tables on 3 datasets + temporal-window sweep plot + context ablation.
-
-### 🎓 Mid-sem review (~Sep)
-- 🟦 Slides + script built from the Phase-1 tables. Already reads as substantial
-  (3 datasets × multiple configurations).
-
-### Phase 2 — LLM reasoning + the big grid (Sep–Oct, wk 7–12)
-- 🟦 MLLM (LLaVA / caption-then-reason) on flagged frames → **natural-language explanations**.
-- 🟦 **Full ablation matrix:** {M1, M1+M2, M1+M3, M1+M2+M3, +M4} × 3 datasets × 3 seeds.
-- 🟦 **Sweeps:** sampling FPS, CLIP backbone (ViT-B/16 vs ViT-L/14), threshold.
-- 🟦 **Failure-case analysis** — curated examples of where it breaks and why.
-- 🟩 One overnight batch run → CSVs.
-- **Deliverable ⭐:** ~30–50-row ablation matrix · sweep plots · explanation gallery · failure cases.
-
-### Phase 3 — Consolidate + end-sem (Nov–Dec, wk 13–16)
-- 🟦 **Results chapter** draft (tables + plots + cross-domain analysis).
-- 🟦 Updated viva defense kit + end-sem deck.
-- **🎓 End-sem review:** defend the complete results story.
-
-**Sem-3 deliverables:** reproducible code · AUC on 3 datasets · ~40-row ablation grid ·
-3–4 sweeps with plots · multi-seed error bars · explanation gallery · failure analysis ·
-results-chapter draft · viva kit.
+| When | Milestone |
+|---|---|
+| Mid-July 2026 | Plan discussion with the research guide |
+| **September 2026** | **Panel review — presentation (slides) + report (IEEE format) + demonstration** |
+| Nov/Dec 2026 | End-semester review — complete results |
+| Jan–Feb 2027 | Paper draft (target: workshop / mid-tier journal) |
+| Mar–May 2027 | Thesis writing, submission, defense |
 
 ---
 
-## 3. Semester 4 (Jan–May 2027) — Paper + thesis
+## 3. Architecture and implementation status
 
-**Goal:** convert Sem-3 results into a submitted paper and a finished thesis. The trained
-adapter is an optional upgrade gated on placement status — never a dependency.
+| Module | Role | Status |
+|---|---|---|
+| M1 — Frozen CLIP encoder (ViT-L/14) | frame → anomaly score via language prompts | ✅ implemented |
+| M2 — Temporal aggregation | training-free smoothing of score sequences | ✅ implemented |
+| M3 — Verbalized domain context | scene description grounds "what is normal" | ✅ implemented |
+| M4 — LLM reasoning | natural-language explanation per flagged frame | 🔶 interface defined; implementation in progress |
+| Datasets | MVTec AD, ShanghaiTech, CUHK Avenue adapters | ✅ / in progress |
+| Evaluation | frame-level AUROC / AP / F1 + ablation runner | ✅ implemented |
 
-### Phase 4 — Write the paper (Jan–Feb)
-- 🟦 Full paper draft from Sem-3 results.
-- **Target venue:** workshop / mid-tier — WACV/BMVC/ICIP workshop, or
-  *Pattern Recognition Letters* / *Neurocomputing*.
-- 🎓 Guide reviews + submits.
+Code: `da_zvad/` package (modular, configuration-driven — every module is a config toggle,
+so the ablation study is produced by configuration alone). End-to-end smoke test:
+`python -m da_zvad.demo`.
 
-### Phase 5 — ⚠️ Stretch: trained temporal adapter (Feb–Mar, gated)
-- **Only if placements wrapped:** lightweight OVVAD-style adapter trained on ShanghaiTech
-  weak labels → one extra "learned DA" results row + ablation.
-- **If not:** stays as thesis future-work (fully defensible). No dependency.
-
-### Phase 6 — Thesis + defense (Mar–May)
-- 🟦 Assemble thesis (paper → 2–3 chapters + extended analysis + existing survey).
-- 🟦 Final deck + full viva kit + dry-run Q&A.
-- **🎓 Thesis submission + defense.**
+Foundation result (Semester 2): CLIP zero-shot baseline at **88.5% image-level AUROC on
+MVTec AD** with zero training data.
 
 ---
 
-## 4. Decision points for the guide
+## 4. Semester 3 work plan (working back from the September review)
 
-1. **Datasets:** ShanghaiTech + Avenue primary, MVTec for cross-domain, UCF-Crime optional.
-   (UCF-Crime is 100+ GB and harder — recommend against it as primary.)
-2. **Training-free spine** as the thesis, trained adapter as a Sem-4 stretch — agree, or does
-   he want the learned adapter as a core contribution? (Raises effort + a zero-shot-vs-trained
-   tension that must then be defended carefully.)
-3. **Framing / venue:** explanation-led empirical cross-domain study; workshop/mid-tier target.
-4. **Confirm the real department review dates** so milestones pin to them.
-
----
-
-## 5. Novelty framing (say it precisely)
-
-Lead claim is a **training-free, verbalized-context, explainable VAD pipeline + an empirical
-study of where zero-shot VLM AD works and fails across domains** — a *study*, not a SOTA bet,
-so it cannot be proven wrong in a viva. The "first method satisfying all five desiderata
-(zero-shot, training-free, explainable, temporal, domain-adaptive)" table is a *summary*, not
-the primary claim — a reviewer who knows VERA (CVPR 2025) will otherwise read it as
-"VERA + a temporal adapter."
-
-Domain adaptation here is **training-free / source-free / test-time** (adapt "what is normal"
-via a text description, zero parameter updates) — *not* learned/adversarial DA. State it that
-way to pre-empt the "where is your domain aligner?" question.
+| Phase | Period | Activities → Deliverable |
+|---|---|---|
+| A — Baseline measurement | early July | Zero-shot detector measured on ShanghaiTech (frame-level AUROC) → baseline number + prompt/smoothing comparison |
+| B — Core results | mid-July–Aug | Detection results on two surveillance benchmarks + MVTec; first ablation table; first explanation examples (M4) |
+| C — Review package | late Aug | IEEE-format report, slides, live demonstration script |
+| D — Panel review | September | Presentation + demo |
+| E — Full evaluation | Oct–Nov | Complete ablation grid (multi-seed), failure-case analysis, cross-domain consolidation → draft results chapter |
 
 ---
 
-## 6. Risk posture
+## 5. Datasets and evaluation
 
-The trained adapter is a bonus, never a dependency. A bad placement season cannot sink the
-thesis or paper, because the training-free cross-domain result stands on its own.
-**Publication calibration:** "reputable" = workshop / mid-tier conference / journal (a normal
-target for a strong MTech thesis), not CVPR/ICCV main track.
+- **MVTec AD** — industrial images (15 categories); cross-domain reference point.
+- **ShanghaiTech Campus** — surveillance video, frame-level ground truth; primary video benchmark.
+- **CUHK Avenue** (or UCSD Ped2 as alternative) — second video benchmark.
+- Metrics: image/frame-level **AUROC** (standard for these benchmarks), AP, best-F1;
+  qualitative assessment of generated explanations.
 
 ---
 
-## 7. Parallel track — resume ML project (placement double-dip)
+## 6. Semester 4 work plan
 
-A productized slice of the research, **not** a separate project. Single repo (deduplicated
-2026-06-25) at **`C:\project\clip-anomaly-detection\`** — moved out of `p:\Research\`. Has
-LICENSE; `app.py` (Gradio demo) + `benchmark.py` (reproducible MVTec benchmark). Real headline:
-**88.5% image-level AUROC on MVTec AD, zero training data** (within ~4 pts of a trained OC-SVM,
-beats it on all texture categories). Remaining steps are the user's: rename the GitHub repo to
-`clip-anomaly-detection` and `git push` the pending LICENSE commit; then create a Hugging Face
-account and deploy the Gradio app to Spaces → public link for the resume.
+1. **Paper** (Jan–Feb): written from Semester-3 results. Candidate venues: computer-vision
+   workshop (CVPR/WACV), ICIP, or journals with rolling submission (Pattern Recognition
+   Letters, Neurocomputing).
+2. **Optional extension:** a lightweight learned temporal adapter (few-shot) behind the
+   existing M2 interface — treated as an enhancement, not a dependency; the training-free
+   results stand alone.
+3. **Thesis** (Mar–May): Semester-3/4 results become the core chapters; the existing
+   literature survey and proposal provide the remainder.
+
+---
+
+## 7. Risk management
+
+- No training loops on the critical path — removes the largest schedule risk.
+- The contribution is framed as a training-free framework **plus an empirical cross-domain
+  study** (where zero-shot VLM detection works and where it fails) — informative regardless
+  of absolute benchmark numbers.
+- Dataset contingency: UCSD Ped2 substitutes for CUHK Avenue if sourcing is a problem;
+  UCF-Crime, if requested, is handled as a subset evaluation.
+
+---
+
+## 8. Documentation convention
+
+Each completed phase is accompanied by a plain-language technical note in
+`docs/08_understanding/` (what was built, why, how it works, key terms). These serve as
+the project's running technical documentation and as preparation material for reviews.
+
+---
+
+## 9. Related repository
+
+A standalone demonstration of the underlying zero-shot technique (industrial defect
+detection on MVTec AD with an interactive UI) is maintained separately at
+`github.com/prakash-nitc/clip-anomaly-detection`.
