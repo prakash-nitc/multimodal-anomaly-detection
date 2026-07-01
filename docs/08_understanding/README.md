@@ -17,8 +17,15 @@ Every note follows the same structure:
 Reading is not enough for a review: finish each note's self-quiz, and before any
 panel/viva, run at least two mock-QA rounds against the collected questions.
 
+**Read in order** — later notes assume the earlier ones:
+
 | Note | Covers |
 |---|---|
-| [00_foundations.md](00_foundations.md) | The core idea, CLIP, the DA-ZVAD architecture, the framework code, the MVTec baseline |
+| [00_ml_basics.md](00_ml_basics.md) | ML from zero: training vs inference, embeddings, softmax, ViT, contrastive learning, metrics — each tied to where it appears in our project |
+| [01_foundations.md](01_foundations.md) | The core idea, CLIP, the DA-ZVAD architecture, the framework code, the MVTec baseline |
 
 *(New notes are added here as phases complete.)*
+
+**Concepts-first rule:** every phase note introduces any *new* concept in plain language
+before showing the implementation that uses it — you should never meet an unexplained term
+after reading in order.
