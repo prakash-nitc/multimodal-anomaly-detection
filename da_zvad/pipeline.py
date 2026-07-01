@@ -14,9 +14,44 @@ from .config import DAZVADConfig
 from .prompts import get_prompts
 from .context import VerbalizedContext
 from .temporal import TemporalAggregator
-from .reasoning import StubReasoner
 from .datasets.base import FrameSequence
 from . import evaluation
+
+
+def select_explanation_frames(predictions: np.ndarray, scores: np.ndarray,
+                              budget: int = 8) -> List[int]:
+    """Pick the peak-score frame of each contiguous flagged event.
+
+    One explanation per *event* (not per frame): cheaper, non-redundant, and the
+    peak frame is where the anomaly is most visible. Events are ranked by peak
+    score; at most ``budget`` are kept.
+    """
+    predictions = np.asarray(predictions, dtype=int)
+    scores = np.asarray(scores, dtype=float)
+    events = []  # (peak_score, peak_index)
+    start = None
+    for i, p in enumerate(predictions):
+        if p == 1 and start is None:
+            start = i
+        elif p == 0 and start is not None:
+            seg = slice(start, i)
+            peak = start + int(np.argmax(scores[seg]))
+            events.append((scores[peak], peak))
+            start = None
+    if start is not None:
+        seg = slice(start, len(predictions))
+        peak = start + int(np.argmax(scores[seg]))
+        events.append((scores[peak], peak))
+    events.sort(reverse=True)
+    return sorted(idx for _, idx in events[:budget])
+
+
+def build_reasoner(config: DAZVADConfig):
+    if config.reasoner == "llava":
+        from .reasoning import LlavaReasoner
+        return LlavaReasoner(model_id=config.llava_model, device=config.device)
+    from .reasoning import StubReasoner
+    return StubReasoner()
 
 
 class DAZVADPipeline:
@@ -26,8 +61,8 @@ class DAZVADPipeline:
         self.context = VerbalizedContext(config.domain_description) if config.use_context else None
         # M2 temporal (optional)
         self.temporal = TemporalAggregator(config.temporal_window) if config.use_temporal else None
-        # M4 reasoning (optional; stub for now)
-        self.reasoner = StubReasoner() if config.use_reasoning else None
+        # M4 reasoning (optional; stub or LLaVA per config)
+        self.reasoner = build_reasoner(config) if config.use_reasoning else None
         self._encoder = None  # M1, lazy
 
     # ---- M3: build the (optionally context-grounded) prompt ensembles ----
@@ -56,7 +91,8 @@ class DAZVADPipeline:
         explanations = {}
         if self.reasoner is not None:
             ctx = self.config.domain_description
-            for i in np.where(preds == 1)[0]:
+            chosen = select_explanation_frames(preds, agg, self.config.max_explanations)
+            for i in chosen:
                 frame = seq.frames[i] if i < len(seq.frames) else None
                 explanations[int(i)] = self.reasoner.explain(frame, ctx, float(agg[i]))
 

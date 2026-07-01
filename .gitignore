@@ -45,6 +45,7 @@ checkpoints/
 results/logs/*.json
 results/tables/*.csv
 results/figures/*.png
+results/raw/
 
 # Editor / Office temp files
 ~$*

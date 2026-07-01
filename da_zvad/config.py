@@ -32,7 +32,12 @@ class DAZVADConfig:
     # --- module toggles (ablation switches) ---
     use_temporal: bool = True               # M2 temporal aggregation
     use_context: bool = True                # M3 verbalized domain context
-    use_reasoning: bool = False             # M4 LLM reasoning (heavy; stub for now)
+    use_reasoning: bool = False             # M4 LLM reasoning
+
+    # --- M4 reasoning ---
+    reasoner: str = "stub"                  # stub | llava (llava needs a GPU)
+    llava_model: str = "llava-hf/llava-1.5-7b-hf"
+    max_explanations: int = 8               # explain at most N events per sequence
 
     # --- M2 temporal ---
     temporal_window: int = 5                # moving-average window (frames)
