@@ -52,9 +52,13 @@ class CLIPEncoder:
             return F.normalize(feats.mean(dim=0, keepdim=True), dim=-1)
 
     def score_frame(self, image, normal_embed, abnormal_embed) -> float:
-        """Anomaly score for one PIL image = P(abnormal)."""
+        """Anomaly score for one frame (PIL image or file path) = P(abnormal)."""
         import torch
         import torch.nn.functional as F
+
+        if isinstance(image, str):
+            from PIL import Image
+            image = Image.open(image).convert("RGB")
 
         self._ensure_loaded()
         with torch.no_grad():

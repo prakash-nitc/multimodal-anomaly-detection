@@ -17,7 +17,8 @@ class DAZVADConfig:
     dataset: str = "synthetic"              # synthetic | mvtec | shanghaitech | avenue
     data_root: Optional[str] = None
     category: Optional[str] = None          # e.g. MVTec category ("bottle")
-    sample_fps: int = 2                     # video frame sampling rate
+    sample_fps: int = 2                     # video frame sampling rate (video files)
+    frame_step: int = 1                     # stride for frame-folder datasets
 
     # --- M1: visual encoder ---
     clip_model: str = "ViT-L-14"
