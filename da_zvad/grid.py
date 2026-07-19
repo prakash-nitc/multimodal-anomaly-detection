@@ -40,16 +40,22 @@ class DatasetSpec:
         return f"{self.dataset}/{self.category}" if self.category else self.dataset
 
 
-def _cache_key(spec: DatasetSpec, use_context: bool, cfg: DAZVADConfig) -> str:
-    parts = [spec.dataset, spec.category or "", "ctx" if use_context else "noctx",
+def _cache_key(spec: DatasetSpec, ctx_name: str, cfg: DAZVADConfig) -> str:
+    parts = [spec.dataset, spec.category or "", ctx_name,
              cfg.clip_model.replace("/", "-"), f"step{cfg.frame_step}"]
     return "_".join(p for p in parts if p)
 
 
-def _score_or_load(spec: DatasetSpec, use_context: bool, base: DAZVADConfig,
-                   raw_dir: str) -> Dict:
-    """Return {"scores": [np.ndarray...], "labels": [np.ndarray...], "names": [...]}."""
-    key = _cache_key(spec, use_context, base)
+def _score_or_load(spec: DatasetSpec, ctx_name: str, use_context: bool,
+                   base: DAZVADConfig, raw_dir: str,
+                   description: str = None) -> Dict:
+    """Score a dataset under one named context variant (cached by variant name).
+
+    ``description`` overrides the spec's scene description — this is what lets
+    the context sweep inject a deliberately WRONG domain description while
+    everything else stays identical.
+    """
+    key = _cache_key(spec, ctx_name, base)
     path = os.path.join(raw_dir, key + ".npz")
     if os.path.isfile(path):
         z = np.load(path, allow_pickle=True)
@@ -60,7 +66,7 @@ def _score_or_load(spec: DatasetSpec, use_context: bool, base: DAZVADConfig,
 
     cfg = replace(base, dataset=spec.dataset, data_root=spec.data_root,
                   category=spec.category, domain=spec.domain,
-                  domain_description=spec.description,
+                  domain_description=description if description is not None else spec.description,
                   use_context=use_context, use_temporal=False, use_reasoning=False)
     pipeline = DAZVADPipeline(cfg)
     seqs = get_dataset(cfg).sequences()
@@ -98,7 +104,8 @@ def run_grid(specs: List[DatasetSpec],
 
     for spec in specs:
         for use_ctx in context_options:
-            data = _score_or_load(spec, use_ctx, base, raw_dir)
+            ctx_name = "ctx" if use_ctx else "noctx"   # cache keys stay compatible
+            data = _score_or_load(spec, ctx_name, use_ctx, base, raw_dir)
             if verbose:
                 src = "cache" if data.get("cached") else "scored"
                 n_frames = sum(len(s) for s in data["scores"])
