@@ -1,0 +1,419 @@
+% ============================================================
+% Report — Domain Adaptability in Video Anomaly Detection:
+%          Literature Landscape, Model Choices, and Gap Analysis
+% Prepared in response to the guide's directive (July 2026):
+%   (1) research the domain-adaptability literature more deeply,
+%   (2) identify which models each line of work uses,
+%   (3) identify gaps, and justify which model we will use.
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{parskip}
+\usepackage{longtable}
+
+% --- Colors ---
+\definecolor{sectionblue}{HTML}{1A5276}
+\definecolor{linkblue}{HTML}{2471A3}
+\definecolor{highlightbg}{HTML}{EBF5FB}
+\definecolor{accentgreen}{HTML}{1E8449}
+
+% --- Hyperlink Style ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=linkblue,
+    citecolor=linkblue,
+    urlcolor=linkblue,
+    pdftitle={Domain Adaptability in Video Anomaly Detection},
+    pdfauthor={Prakash Kumar Sarangi}
+}
+
+% --- Section Formatting ---
+\titleformat{\section}{\Large\bfseries\color{sectionblue}}{\thesection}{0.6em}{}[\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{sectionblue}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+
+% --- Header / Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small\textcolor{gray}{Domain Adaptability in VAD --- Findings Report}}
+\rhead{\small\textcolor{gray}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ============================================================
+\begin{document}
+
+% ============ TITLE PAGE ============
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+
+{\large National Institute of Technology Calicut}\\[0.2cm]
+{\normalsize Department of Computer Science and Engineering}\\[1.8cm]
+
+{\Large\bfseries Domain Adaptability in Video Anomaly Detection:}\\[0.4cm]
+{\Large\bfseries Literature Landscape, Model Choices, and Gap Analysis}\\[1.5cm]
+
+{\normalsize\itshape
+A report prepared in response to the guide's directive to research the
+domain-adaptability literature in greater depth, identify the models used
+by existing approaches, identify open gaps, and justify the model chosen
+for this thesis.}\\[2cm]
+
+\begin{tabular}{rl}
+    \textbf{Student:}     & Prakash Kumar Sarangi \\
+    \textbf{Programme:}   & M.Tech, Computer Science and Engineering \\
+    \textbf{Roll No.:}    & \underline{\hspace{4cm}} \\
+    \textbf{Guide:}       & \underline{\hspace{4cm}} \\
+    \textbf{Date:}        & \today \\
+\end{tabular}
+
+\vfill
+{\small Working title of the thesis project: \textbf{DA-ZVAD} --- Domain-Adaptive
+Zero-shot Video Anomaly Detection}
+\end{titlepage}
+
+% ============================================================
+\section{Objective of This Report}
+% ============================================================
+
+Following the discussion with the guide, this report addresses three specific
+requests: (i) a deeper survey of the literature on \textbf{domain adaptability}
+in video anomaly detection (VAD), (ii) an explicit account of \textbf{which
+models} each line of work relies upon, and (iii) an identification of
+\textbf{gaps} in the literature together with a justification of the model
+combination chosen for this thesis, DA-ZVAD.
+
+\textbf{Scope of ``domain adaptability.''} In this literature, the term covers
+a spectrum of approaches --- from fully supervised adversarial domain
+adaptation, through few-shot / meta-learned scene adaptation, to fully
+training-free transfer via frozen vision-language models (VLMs) and large
+language models (LLMs). This report organises the literature along that
+spectrum rather than treating it as a single homogeneous category, since the
+cost, assumptions, and applicability of each family differ substantially.
+
+% ============================================================
+\section{The Domain-Adaptability Landscape: Four Lanes}
+% ============================================================
+
+The reviewed literature falls into four lanes, ordered by decreasing cost of
+adapting to a new (target) domain.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.35}
+\begin{tabularx}{\textwidth}{@{}l L{3.1cm} X@{}}
+\toprule
+\textbf{Lane} & \textbf{Target-domain cost} & \textbf{Representative work} \\
+\midrule
+A. Learned / adversarial DA & Target data + a training run & Ada-VAD, DA-VAD, Industrial-AdaVAD \\
+B. Meta-learning / few-shot scene adaptation & A few target frames + gradient steps & Lu \textit{et al.} (ECCV'20), Anomaly Crossing, adversarial-diffusion few-shot VAD \\
+C. Zero-shot cross-domain (vision-only) & None at target time (source training still required) & zxVAD (WACV'23) \\
+D. Training-free VLM/LLM-based & None --- all components frozen at inference & LAVAD, VERA, AnyAnomaly, MM-VAD (2026) \\
+\bottomrule
+\end{tabularx}
+\caption{The four lanes of domain-adaptability approaches in VAD, by adaptation cost.}
+\end{table}
+
+\subsection{Lane A --- Learned / Adversarial Domain Adaptation}
+
+\textbf{Ada-VAD} (SIAM SDM 2024) tackles the few-shot cross-domain VAD problem
+in two stages: a pretraining stage that synthesises abnormal samples and
+trains a domain-invariant predictor using a self-supervised prediction task,
+followed by an adaptation stage that fine-tunes on a handful of target-domain
+frames using adversarial training to mitigate distribution shift.
+\textit{Model used:} a 3D-convolutional / autoencoder-style future-frame
+predictor --- no vision-language model is involved.
+
+\textbf{DA-VAD} (2025) is weakly supervised and treats video-level and
+clip-level features as distinct source and target domains, inserting explicit
+\textit{domain aligner} modules between them to reduce overfitting to a
+specific scene's visual statistics. \textit{Model used:} I3D-style clip
+features with alignment heads.
+
+\textbf{Industrial-AdaVAD} (\textit{Mathematics}, 2025) targets
+resource-constrained industrial deployments and proposes a multilayer
+adversarial domain-adaptation mechanism for cross-scene transfer at the
+edge. \textit{Model used:} a lightweight CNN backbone with adversarial
+discriminators.
+
+\textit{Common limitation of Lane A:} each new deployment requires target
+data and an explicit training run; the adapted model becomes scene-specific;
+none of these methods produces natural-language explanations of detected
+anomalies.
+
+\subsection{Lane B --- Meta-Learning and Few-Shot Scene Adaptation}
+
+The foundational work here is \textbf{Lu \textit{et al.}, ``Few-shot
+Scene-adaptive Anomaly Detection''} (ECCV 2020), which applies MAML-style
+meta-learning across many training scenes so that a future-frame-prediction
+GAN can adapt to an unseen scene from only a handful of frames.
+\textbf{Anomaly Crossing} explicitly reframes cross-domain VAD as a
+cross-domain few-shot learning problem, fusing source and target
+representations. A more recent \textbf{adversarial-diffusion} approach
+(\textit{Neurocomputing}, 2024) replaces the GAN generator with a diffusion
+model adapted per scene from few samples.
+
+\textit{Common limitation of Lane B:} adaptation still requires gradient
+updates per scene, and the backbone models predate the VLM era (GANs,
+autoencoders, 3D-CNNs) --- there is no language interface and no
+explanation capability.
+
+\subsection{Lane C --- Zero-Shot Cross-Domain, Vision-Only}
+
+\textbf{zxVAD} (WACV 2023) is the closest \textit{non-VLM} relative of the
+present thesis: it performs cross-domain VAD \textbf{without any target-domain
+adaptation}. A \textit{Normalcy Classifier} learns to contrast normal-event
+features against pseudo-abnormal features synthesised by an
+\textit{untrained} convolutional network that pastes foreign objects into
+normal frames --- avoiding the cost of collecting real anomalies. The
+backbone remains a future-frame-prediction network.
+
+\textit{Limitation:} the source model is still trained (on the source
+domain); ``normal'' is defined purely by learned visual statistics, with no
+mechanism to \textit{tell} the system what normal means in a new scene; no
+explanations are produced; and evaluation stays within the surveillance
+domain family (no industrial-to-surveillance transfer is studied).
+
+\subsection{Lane D --- Training-Free VLM/LLM Methods (2024--2026): The Active Frontier}
+
+This is the most active lane and the one this thesis builds on directly.
+
+\textbf{LAVAD} (CVPR 2024) is fully training-free: a BLIP-2-based captioner
+converts frames to text, a Llama-family LLM scores temporal windows of these
+captions for anomalousness, and an ImageBind-style cross-modal similarity
+step cleans noisy captions. It is strong on UCF-Crime and XD-Violence but
+chains three large frozen models and has no explicit mechanism for injecting
+domain context.
+
+\textbf{VERA} (CVPR 2025) keeps its VLM backbone (InternVL2) entirely frozen
+and instead makes only a set of \textit{guiding questions} learnable; these
+questions are optimised offline, on source data, through a learner/optimiser
+VLM interaction, and the model is explainable by construction. A key
+observation for our positioning: VERA's verbalisation is \textbf{learned at
+training time on the source domain}, not adapted at test time on a new
+domain --- cross-domain transfer of the learned questions is not the problem
+VERA studies.
+
+\textbf{AnyAnomaly} (2025) introduces \textit{customizable} VAD: a
+user-supplied text description of what should count as an anomaly drives a
+zero-shot large vision-language model (LVLM) through segment-level,
+context-aware visual question answering, with no training at all. It is the
+clearest precedent for using text to define the task at inference time,
+though it verbalises the \textit{anomaly}, not the \textit{scene/normality}.
+
+\textbf{MM-VAD} (2026) reframes training-free VAD as \textit{adaptive
+test-time inference}: caption-derived scene representations are projected
+into hyperbolic space and reasoned over by a frozen LLM via adaptive
+question answering. Together with several concurrent 2025--2026 works ---
+MoniTor (online training-free VAD), MLLM-based zero-shot VAD without real
+anomaly examples, sparse-reasoning frameworks over frozen large models, and
+latent-manifold steering in frozen MLLMs --- this confirms that the field is
+moving decisively toward training-free, test-time reasoning pipelines.
+Weakly supervised CLIP-prompt approaches such as VadCLIP and HeadCLIP sit
+between Lanes A and D: CLIP-based, but with learnable prompt tokens that
+still require training.
+
+\textit{Common blind spot of Lane D:} every method in this lane is developed
+and evaluated \textbf{within the surveillance-video domain only}. None
+isolates domain adaptation as the measured variable --- there is no study
+that (i) moves a single training-free pipeline across genuinely different
+domain families (industrial inspection and surveillance video), (ii) injects
+the target domain purely as a \textbf{test-time text description} rather
+than a learned prompt or question set, and (iii) ablates \textbf{which
+component of the pipeline actually carries the cross-domain transfer}.
+
+% ============================================================
+\section{Which Models Each Line of Work Uses}
+% ============================================================
+
+Table~\ref{tab:models} summarises, for every reviewed line of work, the
+backbone model(s) used, whether any component is trained, whether a language
+channel exists for injecting domain context, and whether the method produces
+explanations. The final row states the model combination used in this
+thesis (DA-ZVAD) for direct comparison.
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.4}
+\small
+\begin{tabularx}{\textwidth}{@{}L{3.4cm} X c c c@{}}
+\toprule
+\textbf{Work} & \textbf{Backbone(s)} & \textbf{Trained?} & \textbf{Language channel} & \textbf{Explains?} \\
+\midrule
+Ada-VAD / DA-VAD / Industrial-AdaVAD & 3D-CNN / I3D / autoencoder + adversarial heads & Yes (source \& target) & None & No \\
+Lu \textit{et al.} (ECCV'20) & Future-frame-prediction GAN + MAML & Yes (meta + per-scene) & None & No \\
+zxVAD & Frame-prediction CNN + untrained-CNN anomaly synthesis & Yes (source only) & None & No \\
+LAVAD & BLIP-2 + Llama-family LLM + ImageBind & No & Captions (implicit) & Partial \\
+VERA & InternVL2 (frozen); guiding questions learned & Verbal parameters only & Learned guiding questions & Yes \\
+AnyAnomaly & Open LVLM with VQA & No & User-defined anomaly text & Partial \\
+MM-VAD (2026) & Frame captioner + frozen LLM (hyperbolic reps.) & No & Adaptive QA & Partial \\
+\midrule
+\textbf{DA-ZVAD (this thesis)} & \textbf{Frozen OpenCLIP ViT-L/14 + LLaVA-1.5-7B (4-bit)} & \textbf{No --- nothing, anywhere} & \textbf{Test-time verbalised scene context} & \textbf{Yes} \\
+\bottomrule
+\end{tabularx}
+\caption{Model choices across the reviewed literature, compared with the model combination used in this thesis.}
+\label{tab:models}
+\end{table}
+
+% ============================================================
+\section{Identified Gaps}
+% ============================================================
+
+Five gaps emerge from the comparison above.
+
+\begin{enumerate}[leftmargin=1.6em, itemsep=0.5em]
+    \item \textbf{G1 --- No cross-domain-family evaluation.} No VLM-based
+    method is evaluated across genuinely different domain families
+    (industrial inspection \textit{and} surveillance video) with a single
+    frozen pipeline. zxVAD achieves zero-shot transfer but stays within
+    surveillance-style domains; every Lane D method is surveillance-only.
+
+    \item \textbf{G2 --- No test-time, language-only domain injection.} VERA
+    verbalises \textit{scene reasoning} but the verbalisation is learned
+    offline on source data; AnyAnomaly verbalises the \textit{anomaly}, not
+    the \textit{scene}. No method describes the target scene/normality in
+    text purely at test time, with zero optimisation, and measures the
+    resulting effect under domain shift.
+
+    \item \textbf{G3 --- No component-wise transfer ablation.} No existing
+    study quantifies \textit{which} component of a training-free pipeline
+    (visual backbone, prompt wording, verbalised context, or temporal
+    aggregation) is responsible for --- or limits --- cross-domain transfer.
+
+    \item \textbf{G4 --- Explanation quality under domain shift is
+    unstudied.} VERA demonstrates explainability, but only within its
+    (single) training domain; how explanation quality behaves when the
+    scene changes has not been examined anywhere in the literature reviewed.
+
+    \item \textbf{G5 --- No minimal, single-GPU, fully training-free
+    stack.} LAVAD, the strongest fully training-free baseline, chains three
+    large models (captioner, LLM, cross-modal refiner). A minimal
+    training-free stack that still supports domain adaptation and
+    explanation, and fits a single consumer GPU, does not yet exist in the
+    literature.
+\end{enumerate}
+
+% ============================================================
+\section{Model Justification: Why CLIP ViT-L/14 + LLaVA-1.5-7B for DA-ZVAD}
+% ============================================================
+
+DA-ZVAD is designed to target G1--G5 jointly, using a single frozen pipeline:
+a frozen OpenCLIP ViT-L/14 visual encoder for zero-shot anomaly scoring, a
+training-free temporal aggregation stage, a \textbf{test-time verbalised
+scene-context} module (in contrast to VERA's offline-learned questions), and
+a frozen LLaVA-1.5-7B (4-bit) reasoning stage for natural-language
+explanations. Every stage remains frozen; nothing is trained anywhere in the
+pipeline.
+
+The specific model choice is justified as follows:
+
+\begin{itemize}[leftmargin=1.6em, itemsep=0.4em]
+    \item \textbf{CLIP ViT-L/14} is the common visual backbone of the
+    zero-shot anomaly-detection literature (the WinCLIP lineage, AnomalyCLIP,
+    and related work), which keeps our cross-domain AUROC numbers directly
+    comparable to published baselines rather than confounded by a different
+    encoder.
+    \item \textbf{LLaVA-1.5-7B in 4-bit quantisation} is the lightest capable
+    open multimodal LLM available (approximately 5.5\,GB of VRAM), which lets
+    the entire stack --- encoder, temporal module, context module, and
+    reasoning module --- run on a single consumer-grade GPU (a T4-class or
+    RTX-3060-class card), in deliberate contrast to LAVAD's three-model
+    chain (addressing G5).
+    \item \textbf{Keeping every component frozen} makes the domain-adaptation
+    claim clean and attributable: since no parameters are updated anywhere,
+    any measured change in performance when the verbalised scene description
+    changes can be attributed to the \textit{text}, not to hidden weight
+    updates --- directly addressing G2 and enabling the component ablation
+    of G3.
+\end{itemize}
+
+% ============================================================
+\section{Next Steps}
+% ============================================================
+
+\begin{enumerate}[leftmargin=1.6em, itemsep=0.4em]
+    \item Run the zero-shot detection probe on real ShanghaiTech video to
+    obtain the first frame-level AUROC number for the training-free
+    pipeline (Sem-3 Phase~A deliverable).
+    \item Execute the industrial\,$\leftrightarrow$\,surveillance
+    cross-domain evaluation (MVTec AD $\leftrightarrow$ ShanghaiTech / CUHK
+    Avenue) to directly address G1.
+    \item Run the module on/off ablation grid (visual backbone, temporal
+    aggregation, verbalised context, reasoning) to address G3.
+    \item Evaluate explanation quality specifically under domain shift
+    (source-domain vs.\ target-domain prompts) to address G4.
+    \item Incorporate guide feedback on this report and finalise the
+    positioning of the cross-domain, test-time verbalised-context
+    contribution (G2) as the central claim of the thesis.
+\end{enumerate}
+
+% ============================================================
+\section{References}
+% ============================================================
+
+\begin{enumerate}[label={[\arabic*]}, leftmargin=2.2em, itemsep=0.3em]
+
+\item S.\ Aich, J.-C.\ Chiang, and P.\ Wang, ``Cross-Domain Video Anomaly
+Detection without Target Domain Adaptation,'' in \textit{Proc.\ IEEE/CVF
+WACV}, 2023. \href{https://arxiv.org/abs/2212.07010}{arXiv:2212.07010}
+
+\item ``Ada-VAD: Domain Adaptable Video Anomaly Detection,'' in
+\textit{Proc.\ SIAM Int.\ Conf.\ on Data Mining (SDM)}, 2024.
+\href{https://epubs.siam.org/doi/10.1137/1.9781611978032.73}{doi:10.1137/1.9781611978032.73}
+
+\item Y.\ Lu, F.\ Yu, M.\ K.\ K.\ Reddy, and Y.\ Wang, ``Few-Shot
+Scene-Adaptive Anomaly Detection,'' in \textit{Proc.\ ECCV}, 2020.
+
+\item ``Anomaly Crossing: New Horizons for Video Anomaly Detection as
+Cross-Domain Few-Shot Learning,'' 2021.
+\href{https://arxiv.org/abs/2112.06320}{arXiv:2112.06320}
+
+\item ``Adversarial Diffusion for Few-Shot Scene-Adaptive Video Anomaly
+Detection,'' \textit{Neurocomputing}, 2024.
+
+\item ``Industrial-AdaVAD: Adaptive Industrial Video Anomaly Detection
+Empowered by Edge Intelligence,'' \textit{Mathematics}, vol.\ 13, no.\ 17,
+2025.
+
+\item L.\ Zanella, W.\ Menapace, M.\ Mancini, Y.\ Wang, and E.\ Ricci,
+``Harnessing Large Language Models for Training-Free Video Anomaly
+Detection,'' in \textit{Proc.\ IEEE/CVF CVPR}, 2024.
+\href{https://arxiv.org/abs/2404.01014}{arXiv:2404.01014}
+
+\item M.\ Ye, W.\ Liu, and P.\ He, ``VERA: Explainable Video Anomaly
+Detection via Verbalized Learning of Vision-Language Models,'' in
+\textit{Proc.\ IEEE/CVF CVPR}, 2025.
+\href{https://arxiv.org/abs/2412.01095}{arXiv:2412.01095}
+
+\item ``AnyAnomaly: Zero-Shot Customizable Video Anomaly Detection with
+LVLM,'' 2025. \href{https://arxiv.org/abs/2503.04504}{arXiv:2503.04504}
+
+\item ``MM-VAD: Geometry-Aware Semantic Reasoning for Training-Free Video
+Anomaly Detection,'' 2026.
+\href{https://arxiv.org/abs/2603.13374}{arXiv:2603.13374}
+
+\item X.\ Ding, ``Quo Vadis, Anomaly Detection? LLMs and VLMs in the
+Spotlight,'' 2024.
+\href{https://arxiv.org/abs/2412.18298}{arXiv:2412.18298}
+
+\item P.\ Wu \textit{et al.}, ``Open-Vocabulary Video Anomaly Detection,''
+in \textit{Proc.\ IEEE/CVF CVPR}, 2024.
+
+\end{enumerate}
+
+\end{document}
