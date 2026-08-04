@@ -24,6 +24,7 @@ panel/viva, run at least two mock-QA rounds against the collected questions.
 | [00_ml_basics.md](00_ml_basics.md) | ML from zero: training vs inference, embeddings, softmax, ViT, contrastive learning, metrics — each tied to where it appears in our project |
 | [01_foundations.md](01_foundations.md) | The core idea, CLIP, the DA-ZVAD architecture, the framework code, the MVTec baseline |
 | [02_experiments_and_gaps.md](02_experiments_and_gaps.md) | The DA landscape (four lanes), the three experiments (grid, context sweep with mismatched negative control, explanations under shift), micro vs macro AUROC |
+| [03_domain_adaptation_deep_dive.md](03_domain_adaptation_deep_dive.md) | **Study guide for the guide's 6 survey papers**: formal DA theory, the four shift types, classical vs LLM-era adaptation, DA across fields, and why concept shift is our genuine gap. Includes oral-defense targets + self-quiz |
 
 *(New notes are added here as phases complete.)*
 
