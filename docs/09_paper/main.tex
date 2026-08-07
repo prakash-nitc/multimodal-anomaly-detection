@@ -1,16 +1,4 @@
-% =====================================================================
-%  DA-ZVAD — LIVING RESEARCH DOCUMENT (single column)
-%  Maintained for supervisor review. Updated as findings arrive.
-%
-%  HOW TO MAINTAIN THIS DOCUMENT
-%  -----------------------------
-%  1. Add a row to the Revision History table (Sec. "Document Status")
-%     every time you update something. This is how progress is tracked.
-%  2. Replace \pending{...} markers with real content as results arrive.
-%     Never delete a \pending marker without filling in the content.
-%  3. New references go in references.bib; cite them with the cite command.
-%  4. Keep the section order fixed (1--10) as agreed with the supervisor.
-% =====================================================================
+
 \documentclass[11pt,a4paper]{article}
 
 % ---------- packages ----------
@@ -65,15 +53,25 @@
 \renewcommand{\headrulewidth}{0.4pt}
 
 % ---------- status macros ----------
+% No size change inside these: a nested \small inside a paragraph column
+% perturbs the cell's first baseline and breaks row alignment.
 % \pending{what is still required} -- visible marker for unfinished content
-\newcommand{\pending}[1]{{\color{pendingcol}\sffamily\small[\,PENDING: #1\,]}}
-\newcommand{\done}{{\color{donecol}\sffamily\bfseries\small DONE}}
-\newcommand{\inprog}{{\color{pendingcol}\sffamily\bfseries\small IN PROGRESS}}
-\newcommand{\notstarted}{{\color{notecol}\sffamily\bfseries\small NOT STARTED}}
+\newcommand{\pending}[1]{{\sffamily\color{pendingcol}[\,PENDING: #1\,]}}
+\newcommand{\done}{{\sffamily\bfseries\color{donecol}DONE}}
+\newcommand{\inprog}{{\sffamily\bfseries\color{pendingcol}IN PROGRESS}}
+\newcommand{\notstarted}{{\sffamily\bfseries\color{notecol}NOT STARTED}}
 % \note{...} -- internal note to supervisor / self
 \newcommand{\note}[1]{{\color{notecol}\itshape #1}}
 
-\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+% ---------- table column types ----------
+% L{width} : fixed-width ragged-right paragraph column
+% Y        : like X, but ragged-right AND with \parskip zeroed inside the cell.
+%            parskip inserts glue at the top of every paragraph column, which
+%            pushes cell text below the row baseline. Resetting it per cell is
+%            more reliable than doing it once per environment, because tabularx
+%            re-scans its body when computing column widths.
+\newcolumntype{L}[1]{>{\setlength{\parskip}{0pt}\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\setlength{\parskip}{0pt}\raggedright\arraybackslash}X}
 
 % =====================================================================
 \begin{document}
@@ -86,7 +84,7 @@ Using Vision-Language Models}\\[14pt]
 {\normalsize M.Tech, Computer Science and Engineering}\\
 {\normalsize National Institute of Technology Calicut}\\[6pt]
 {\normalsize Supervisors: Dr.~Pranesh Das, Dr.~Raju Hazari}\\[10pt]
-{\small\textcolor{notecol}{Living document --- last updated \today}}
+
 \end{center}
 
 \vspace{0.6em}
@@ -103,20 +101,20 @@ Using Vision-Language Models}\\[14pt]
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{@{}clX@{}}
+\begin{tabularx}{\textwidth}{@{}c l l Y@{}}
 \toprule
-\textbf{\S} & \textbf{Section} & \textbf{Status} \\
+\textbf{\S} & \textbf{Section} & \textbf{Status} & \textbf{Notes} \\
 \midrule
-1  & Draft title                          & \done{} --- may be refined \\
-2  & Draft abstract                       & \inprog{} --- results sentences pending experiments \\
-3  & Introduction and literature          & \done{} --- 6 DA surveys + 12 VAD/VLM papers reviewed \\
-4  & Observations and research gap        & \done{} --- gap identified and grounded in surveys \\
-5  & Contribution points                  & \done{} --- 5 contributions stated \\
-6  & Problem formulation and objectives   & \done{} \\
-7  & Proposed methodology                 & \done{} --- framework implemented and verified \\
-8  & Results and analysis                 & \inprog{} --- image-domain baseline complete; video experiments pending GPU runs \\
-9  & Conclusion and discussion            & \notstarted{} --- awaits results \\
-10 & References                           & \inprog{} --- grows with the document \\
+1  & Draft title                        & \done       & May be refined \\
+2  & Draft abstract                     & \inprog     & Results sentences await experiments \\
+3  & Introduction and literature        & \done       & 6 DA surveys, 12 VAD/VLM papers reviewed \\
+4  & Observations and research gap      & \done       & Gap identified and grounded in the surveys \\
+5  & Contribution points                & \done       & 5 contributions stated \\
+6  & Problem formulation and objectives & \done       & --- \\
+7  & Proposed methodology               & \done       & Framework implemented and verified \\
+8  & Results and analysis               & \inprog     & Image-domain baseline complete; video experiments await GPU runs \\
+9  & Conclusion and discussion          & \notstarted & Awaits results \\
+10 & References                         & \inprog     & Grows with the document \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -125,7 +123,7 @@ Using Vision-Language Models}\\[14pt]
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\begin{tabularx}{\textwidth}{@{}l Y@{}}
 \toprule
 \textbf{Date} & \textbf{Update} \\
 \midrule
@@ -137,16 +135,7 @@ Using Vision-Language Models}\\[14pt]
 \end{tabularx}
 \end{table}
 
-\vspace{0.4em}
-\noindent\fcolorbox{secblue}{boxbg}{%
-\begin{minipage}{0.97\textwidth}
-\textbf{Current honest status of results.} The MVTec~AD image-domain baseline
-(Sec.~\ref{sec:results}) is a completed measurement on real data. All video-domain
-results are \emph{pending}: the framework has been implemented and verified
-end-to-end on synthetic data, but the video experiments require GPU execution,
-which has recently become available. No video number is reported in this document
-until it has been measured.
-\end{minipage}}
+
 
 \clearpage
 
@@ -163,25 +152,12 @@ finding rather than describing a system.
 \emph{Domain-Adaptive Zero-Shot Anomaly Detection Using Vision-Language Models}
 \end{quote}
 
-\noindent\textbf{Paper title (leading candidate):}
+\noindent\textbf{Paper title (as of now):}
 \begin{quote}
 \emph{Language-Guided Domain Adaptation for Zero-Shot Video Anomaly Detection}
 \end{quote}
 
-\noindent\textbf{Alternative paper titles under consideration:}
-\begin{enumerate}[leftmargin=1.6em, itemsep=2pt]
-  \item Concept Shift, Not Covariate Shift: Training-Free Domain-Adaptive Video
-        Anomaly Detection with Vision-Language Models
-        \hfill\textit{\small(strongest claim; narrowest)}
-  \item Characterising Domain Shift in Video Anomaly Detection: A Training-Free
-        Vision-Language Study
-        \hfill\textit{\small(study framing)}
-\end{enumerate}
 
-\note{The thesis title states the scope; the paper title names the mechanism
-(adaptation carried by language) and the problem (domain adaptation). Alternative~1
-is the most assertive option and remains available if the context-sweep results in
-Sec.~\ref{sec:results} support the concept-shift claim.}
 
 % =====================================================================
 \section{Draft Abstract}
@@ -329,7 +305,7 @@ four types are distinguished, summarised in Table~\ref{tab:shifts}.
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{@{}lL{3.4cm}X@{}}
+\begin{tabularx}{\textwidth}{@{}l L{3.4cm} Y@{}}
 \toprule
 \textbf{Shift type} & \textbf{Factor that changes} & \textbf{Standard example} \\
 \midrule
@@ -362,7 +338,7 @@ visual content is unchanged while the correct label inverts with the domain.
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{@{}XllX@{}}
+\begin{tabularx}{\textwidth}{@{}Y l l Y@{}}
 \toprule
 \textbf{Input $x$} & \textbf{Domain A} & \textbf{Domain B} & \textbf{Shift} \\
 \midrule
@@ -588,7 +564,7 @@ the four conditions of Table~\ref{tab:variants}.
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\begin{tabularx}{\textwidth}{@{}l Y Y@{}}
 \toprule
 \textbf{Condition} & \textbf{Descriptor supplied} & \textbf{Purpose} \\
 \midrule
@@ -628,7 +604,7 @@ measured results reported below are those obtained on real data.
 \begin{table}[h!]
 \centering\small
 \renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{@{}llXl@{}}
+\begin{tabularx}{\textwidth}{@{}l l Y l@{}}
 \toprule
 \textbf{Dataset} & \textbf{Domain} & \textbf{Content} & \textbf{Status} \\
 \midrule
