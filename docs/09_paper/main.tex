@@ -8,7 +8,7 @@
 %     every time you update something. This is how progress is tracked.
 %  2. Replace \pending{...} markers with real content as results arrive.
 %     Never delete a \pending marker without filling in the content.
-%  3. New references go in references.bib, cited with \cite{key}.
+%  3. New references go in references.bib; cite them with the cite command.
 %  4. Keep the section order fixed (1--10) as agreed with the supervisor.
 % =====================================================================
 \documentclass[11pt,a4paper]{article}
@@ -89,12 +89,9 @@
 
 % =====================================================================
 \section*{Document Status}
-\addcontentsline{toc}{section}{Document Status}
 % ---------------------------------------------------------------------
-\note{This document is maintained continuously. The table below records what is
-complete, what is in progress, and what is not yet started, so that progress can
-be reviewed at any time. Content that has not yet been produced is marked inline
-with a \pending{} marker rather than left blank or written speculatively.}
+\note{Maintained continuously. Content not yet produced is marked inline with a
+\pending{} marker rather than left blank or written speculatively.}
 
 \vspace{0.5em}
 \begin{table}[h!]
@@ -164,8 +161,7 @@ Anomaly Detection with Vision-Language Models}
         Zero-Shot Video Anomaly Detection
 \end{enumerate}
 
-\note{The primary title states a falsifiable claim rather than describing a system,
-and names the specific technical contribution (the shift-type characterisation).}
+\note{The primary title states a falsifiable claim rather than describing a system.}
 
 % =====================================================================
 \section{Draft Abstract}
@@ -270,7 +266,7 @@ universal).
 
 \subsection{Domain adaptation beyond vision}
 The mechanism of adaptation changes substantially in the language-model era.
-Fan et al.~\citep{fan2025llm}, reviewing LLM adaptation for geotechnical
+Fan et al.~\citep{fan2026llm}, reviewing LLM adaptation for geotechnical
 engineering, describe four strategies forming ``a continuum balancing cost,
 complexity, and performance'': \emph{prompt engineering} (lowest cost, immediate
 and flexible, but ``often lacks depth and robustness''), \emph{retrieval-augmented
@@ -279,6 +275,25 @@ task precision, highest cost in compute and labels). The relevant structural
 observation is that in this paradigm the model may remain unchanged while the
 \emph{input context} carries the adaptation---a category absent from the visual DA
 taxonomies above, which predate foundation models.
+
+\subsection{Domain adaptation within video anomaly detection}
+Work applying DA specifically to VAD falls into three groups, distinguished by
+what the target domain costs. \emph{Learned adaptation} requires target data and a
+training run: Ada-VAD~\citep{adavad2024} pretrains a domain-invariant predictor
+with synthesised abnormal samples and then adapts adversarially to a few target
+frames. \emph{Meta-learned scene adaptation} reduces but does not remove that cost:
+Lu et al.~\citep{lu2020fewshot} meta-train across many scenes so that a
+future-frame-prediction model adapts to an unseen scene from a handful of frames.
+\emph{Zero-shot cross-domain} methods remove the target-time cost entirely:
+zxVAD~\citep{aich2023zxvad} performs cross-domain VAD without any target
+adaptation, contrasting normal features against pseudo-anomalies synthesised by an
+untrained network.
+
+Two properties are common to all three. First, each still trains a model on source
+data, so the notion of normality is fixed by source visual statistics. Second, and
+decisively for the present work, none provides a channel through which an operator
+can \emph{state} what normality means in the target environment; adaptation is
+mediated entirely by pixels and parameters, never by language.
 
 % =====================================================================
 \section{Observations from Literature and Research Gap}
@@ -301,7 +316,9 @@ four types are distinguished, summarised in Table~\ref{tab:shifts}.
 Covariate shift        & $p(x)$      & Same objects under a different camera, lighting, or weather \\
 Conditional shift      & $p(x\mid y)$ & A class appears differently across domains \\
 Label / target shift   & $p(y)$      & Class proportions differ between domains \\
-\textbf{Concept shift} & $p(y\mid x)$ & \textbf{The same input carries a different label} (a tomato classified as a vegetable in one country and a fruit in another) \\
+\textbf{Concept shift} & $p(y\mid x)$ &
+  \textbf{The same input carries a different label} (a tomato classified as a
+  vegetable in one country and a fruit in another) \\
 \bottomrule
 \end{tabularx}
 \caption{The four types of domain shift.}
@@ -391,7 +408,7 @@ exceed the state of the art in detection accuracy.}
         in which every model is frozen and domain adaptation is performed solely by
         a natural-language description of the deployment scene supplied at test
         time. This transplants the lowest-cost strategy of the LLM adaptation
-        continuum~\citep{fan2025llm} into a vision task, and requires neither
+        continuum~\citep{fan2026llm} into a vision task, and requires neither
         target-domain data nor gradient updates.
 
   \item \textbf{Evaluation protocol.} We introduce a four-condition context sweep
@@ -503,7 +520,8 @@ used for scoring and the generated explanations.}
   notion of normality in the specific environment. This module is the adaptation
   mechanism of the framework.
   \item[M4 --- Reasoning and explanation.] For each detected event, a frozen
-  multimodal LLM (LLaVA-1.5-7B, 4-bit quantised) receives the peak-scoring frame
+  multimodal LLM (LLaVA-1.5-7B~\citep{liu2023llava}, 4-bit quantised) receives
+  the peak-scoring frame
   together with the domain descriptor and produces a natural-language explanation.
   The prompt explicitly permits the model to report that nothing appears wrong,
   which limits ungrounded assertions.
@@ -557,7 +575,9 @@ the four conditions of Table~\ref{tab:variants}.
 \texttt{none}       & M3 disabled; prompt ensembles only & Lower reference \\
 \texttt{generic}    & ``a generic scene''                & Controls for the mere presence of context \\
 \texttt{matched}    & Correct description of the scene   & The proposed operating condition \\
-\texttt{mismatched} & Description of the \emph{wrong} domain family (industrial text on surveillance data, and conversely) & \textbf{Falsifying control} \\
+\texttt{mismatched} &
+  Description of the \emph{wrong} domain family (industrial text on
+  surveillance data, and conversely) & \textbf{Falsifying control} \\
 \bottomrule
 \end{tabularx}
 \caption{The four conditions of the context sweep. All models, frames, thresholds
@@ -743,7 +763,7 @@ established and will be retained:}
   \item The contribution is a characterisation, a mechanism, and a measurement
         protocol; it is not a new adaptation algorithm.
   \item Prompt-based adaptation occupies the lowest-cost, lowest-robustness point
-        of the adaptation continuum~\citep{fan2025llm}, and is evaluated as such.
+        of the adaptation continuum~\citep{fan2026llm}, and is evaluated as such.
   \item Explanation assessment is qualitative at the present scale.
   \item \pending{additional limitations identified during experimentation}
 \end{itemize}

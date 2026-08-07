@@ -1,148 +1,214 @@
-% ============================================================
-% References — DA-ZVAD living paper
-% Add new entries at the bottom of the relevant block.
-% ============================================================
+% =====================================================================
+%  References — DA-ZVAD living document
+%  Convention: one field per line, fields aligned, entries alphabetical
+%  within each block. Add new entries to the end of the relevant block.
+% =====================================================================
 
-% ---------- Domain adaptation surveys (guide's reading list) ----------
+% ---------------------------------------------------------------------
+%  Domain adaptation — surveys and theory
+% ---------------------------------------------------------------------
+@article{fan2026llm,
+  author  = {Fan, Lei and Liu, Fangxue and Chen, Cheng},
+  title   = {Domain Adaptation of Large Language Models for Geotechnical Applications},
+  journal = {Solid Earth Sciences},
+  year    = {2026},
+  note    = {Art. no. 100285},
+  doi     = {10.1016/j.sesci.2025.100285}
+}
+
+@article{kouw2018introduction,
+  author  = {Kouw, Wouter M. and Loog, Marco},
+  title   = {An Introduction to Domain Adaptation and Transfer Learning},
+  journal = {arXiv preprint arXiv:1812.11806},
+  year    = {2018}
+}
+
+@article{liu2022deep,
+  author  = {Liu, Xiaofeng and Yoo, Chaehwa and Xing, Fangxu and Oh, Hyejin and
+             El Fakhri, Georges and Kang, Je-Won and Woo, Jonghye},
+  title   = {Deep Unsupervised Domain Adaptation: A Review of Recent Advances
+             and Perspectives},
+  journal = {APSIPA Transactions on Signal and Information Processing},
+  year    = {2022},
+  note    = {arXiv:2208.07422}
+}
+
 @article{patel2015visual,
-  author  = {Patel, Vishal M. and Gopalan, Raghuraman and Li, Ruonan and Chellappa, Rama},
+  author  = {Patel, Vishal M. and Gopalan, Raghuraman and Li, Ruonan and
+             Chellappa, Rama},
   title   = {Visual Domain Adaptation: A Survey of Recent Advances},
   journal = {IEEE Signal Processing Magazine},
-  volume  = {32}, number = {3}, pages = {53--69}, year = {2015}
+  volume  = {32},
+  number  = {3},
+  pages   = {53--69},
+  year    = {2015}
+}
+
+@article{singhal2023domain,
+  author  = {Singhal, Peeyush and Walambe, Rahee and Ramanna, Sheela and
+             Kotecha, Ketan},
+  title   = {Domain Adaptation: Challenges, Methods, Datasets, and Applications},
+  journal = {IEEE Access},
+  volume  = {11},
+  pages   = {6973--7020},
+  year    = {2023}
 }
 
 @article{wang2018deep,
   author  = {Wang, Mei and Deng, Weihong},
   title   = {Deep Visual Domain Adaptation: A Survey},
   journal = {Neurocomputing},
-  volume  = {312}, pages = {135--153}, year = {2018}
+  volume  = {312},
+  pages   = {135--153},
+  year    = {2018}
 }
 
 @article{wilson2020survey,
   author  = {Wilson, Garrett and Cook, Diane J.},
   title   = {A Survey of Unsupervised Deep Domain Adaptation},
   journal = {ACM Computing Surveys},
-  volume  = {51}, number = {5}, year = {2020}
+  volume  = {51},
+  number  = {5},
+  year    = {2020}
 }
 
-@article{liu2022deep,
-  author  = {Liu, Xiaofeng and Yoo, Chaehwa and Xing, Fangxu and Oh, Hyejin and
-             El Fakhri, Georges and Kang, Je-Won and Woo, Jonghye},
-  title   = {Deep Unsupervised Domain Adaptation: A Review of Recent Advances and Perspectives},
-  journal = {APSIPA Transactions on Signal and Information Processing},
-  year    = {2022}, note = {arXiv:2208.07422}
-}
-
-@article{singhal2023domain,
-  author  = {Singhal, Peeyush and Walambe, Rahee and Ramanna, Sheela and Kotecha, Ketan},
-  title   = {Domain Adaptation: Challenges, Methods, Datasets, and Applications},
-  journal = {IEEE Access},
-  volume  = {11}, pages = {6973--7020}, year = {2023}
-}
-
-@article{fan2025llm,
-  author  = {Fan, Lei and Liu, Fangxue and Chen, Cheng},
-  title   = {Domain Adaptation of Large Language Models for Geotechnical Applications},
-  year    = {2025}
-}
-
-@article{kouw2018introduction,
-  author  = {Kouw, Wouter M. and Loog, Marco},
-  title   = {An Introduction to Domain Adaptation and Transfer Learning},
-  journal = {arXiv preprint arXiv:1812.11806}, year = {2018}
-}
-
-% ---------- Vision-language foundation models ----------
-@inproceedings{radford2021clip,
-  author    = {Radford, Alec and Kim, Jong Wook and Hallacy, Chris and others},
-  title     = {Learning Transferable Visual Models from Natural Language Supervision},
-  booktitle = {Proc. Int. Conf. Machine Learning (ICML)}, year = {2021}
-}
-
+% ---------------------------------------------------------------------
+%  Vision-language and multimodal foundation models
+% ---------------------------------------------------------------------
 @inproceedings{liu2023llava,
   author    = {Liu, Haotian and Li, Chunyuan and Wu, Qingyang and Lee, Yong Jae},
   title     = {Visual Instruction Tuning},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)}, year = {2023}
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2023}
 }
 
-% ---------- Zero-shot / training-free anomaly detection ----------
+@inproceedings{radford2021clip,
+  author    = {Radford, Alec and Kim, Jong Wook and Hallacy, Chris and
+               Ramesh, Aditya and Goh, Gabriel and Agarwal, Sandhini and
+               Sastry, Girish and Askell, Amanda and Mishkin, Pamela and
+               Clark, Jack and Krueger, Gretchen and Sutskever, Ilya},
+  title     = {Learning Transferable Visual Models from Natural Language
+               Supervision},
+  booktitle = {Proc. International Conference on Machine Learning (ICML)},
+  pages     = {8748--8763},
+  year      = {2021}
+}
+
+% ---------------------------------------------------------------------
+%  Zero-shot and training-free anomaly detection (image domain)
+% ---------------------------------------------------------------------
+@inproceedings{bergmann2019mvtec,
+  author    = {Bergmann, Paul and Fauser, Michael and Sattlegger, David and
+               Steger, Carsten},
+  title     = {{MVTec AD} --- A Comprehensive Real-World Dataset for
+               Unsupervised Anomaly Detection},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {9592--9600},
+  year      = {2019}
+}
+
 @inproceedings{jeong2023winclip,
-  author    = {Jeong, Jongheon and Zou, Yang and Kim, Taewan and Zhang, Dongqing and
-               Ravichandran, Avinash and Dabeer, Onkar},
+  author    = {Jeong, Jongheon and Zou, Yang and Kim, Taewan and Zhang, Dongqing
+               and Ravichandran, Avinash and Dabeer, Onkar},
   title     = {{WinCLIP}: Zero-/Few-Shot Anomaly Classification and Segmentation},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2023}
-}
-
-@inproceedings{zhou2024anomalyclip,
-  author    = {Zhou, Qihang and Pang, Guansong and Tian, Yu and He, Shibo and Chen, Jiming},
-  title     = {{AnomalyCLIP}: Object-Agnostic Prompt Learning for Zero-Shot Anomaly Detection},
-  booktitle = {Proc. Int. Conf. Learning Representations (ICLR)}, year = {2024}
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {19606--19616},
+  year      = {2023}
 }
 
 @inproceedings{roth2022patchcore,
   author    = {Roth, Karsten and Pemula, Latha and Zepeda, Joaquin and
                Sch{\"o}lkopf, Bernhard and Brox, Thomas and Gehler, Peter},
   title     = {Towards Total Recall in Industrial Anomaly Detection},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2022}
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {14318--14328},
+  year      = {2022}
 }
 
-@inproceedings{bergmann2019mvtec,
-  author    = {Bergmann, Paul and Fauser, Michael and Sattlegger, David and Steger, Carsten},
-  title     = {{MVTec AD} --- A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2019}
+@inproceedings{zhou2024anomalyclip,
+  author    = {Zhou, Qihang and Pang, Guansong and Tian, Yu and He, Shibo and
+               Chen, Jiming},
+  title     = {{AnomalyCLIP}: Object-Agnostic Prompt Learning for Zero-Shot
+               Anomaly Detection},
+  booktitle = {Proc. International Conference on Learning Representations (ICLR)},
+  year      = {2024}
 }
 
-% ---------- Video anomaly detection ----------
-@inproceedings{zanella2024lavad,
-  author    = {Zanella, Luca and Menapace, Willi and Mancini, Massimiliano and
-               Wang, Yiming and Ricci, Elisa},
-  title     = {Harnessing Large Language Models for Training-Free Video Anomaly Detection},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2024}
+% ---------------------------------------------------------------------
+%  Video anomaly detection
+% ---------------------------------------------------------------------
+@article{anyanomaly2025,
+  % TODO: add author list from the arXiv page before submission
+  title   = {{AnyAnomaly}: Zero-Shot Customizable Video Anomaly Detection
+             with {LVLM}},
+  journal = {arXiv preprint arXiv:2503.04504},
+  year    = {2025}
 }
 
-@inproceedings{ye2025vera,
-  author    = {Ye, Muchao and Liu, Weiyang and He, Pan},
-  title     = {{VERA}: Explainable Video Anomaly Detection via Verbalized Learning of Vision-Language Models},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2025}
+@inproceedings{adavad2024,
+  % TODO: add author list from the SDM proceedings before submission
+  title     = {{Ada-VAD}: Domain Adaptable Video Anomaly Detection},
+  booktitle = {Proc. SIAM International Conference on Data Mining (SDM)},
+  year      = {2024},
+  doi       = {10.1137/1.9781611978032.73}
+}
+
+@inproceedings{aich2023zxvad,
+  author    = {Aich, Abhishek and Peng, Kuan-Chuan and Roy-Chowdhury, Amit K.},
+  title     = {Cross-Domain Video Anomaly Detection without Target Domain
+               Adaptation},
+  booktitle = {Proc. IEEE/CVF Winter Conf. Applications of Computer Vision (WACV)},
+  year      = {2023},
+  note      = {arXiv:2212.07010}
+}
+
+@inproceedings{lu2013avenue,
+  author    = {Lu, Cewu and Shi, Jianping and Jia, Jiaya},
+  title     = {Abnormal Event Detection at 150 {FPS} in {MATLAB}},
+  booktitle = {Proc. IEEE International Conference on Computer Vision (ICCV)},
+  pages     = {2720--2727},
+  year      = {2013}
+}
+
+@inproceedings{lu2020fewshot,
+  author    = {Lu, Yiwei and Yu, Frank and Reddy, Mahesh Kumar Krishna and
+               Wang, Yang},
+  title     = {Few-Shot Scene-Adaptive Anomaly Detection},
+  booktitle = {Proc. European Conference on Computer Vision (ECCV)},
+  year      = {2020}
+}
+
+@inproceedings{liu2018shanghaitech,
+  author    = {Liu, Wen and Luo, Weixin and Lian, Dongze and Gao, Shenghua},
+  title     = {Future Frame Prediction for Anomaly Detection --- A New Baseline},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {6536--6545},
+  year      = {2018}
 }
 
 @inproceedings{wu2024ovvad,
   author    = {Wu, Peng and Zhou, Xuerong and Pang, Guansong and Sun, Yujia and
                Liu, Jing and Wang, Peng and Zhang, Yanning},
   title     = {Open-Vocabulary Video Anomaly Detection},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2024}
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2024}
 }
 
-@article{anyanomaly2025,
-  title   = {{AnyAnomaly}: Zero-Shot Customizable Video Anomaly Detection with {LVLM}},
-  journal = {arXiv preprint arXiv:2503.04504}, year = {2025}
+@inproceedings{ye2025vera,
+  author    = {Ye, Muchao and Liu, Weiyang and He, Pan},
+  title     = {{VERA}: Explainable Video Anomaly Detection via Verbalized
+               Learning of Vision-Language Models},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2025},
+  note      = {arXiv:2412.01095}
 }
 
-@inproceedings{aich2023zxvad,
-  author    = {Aich, Abhishek and Peng, Kuan-Chuan and Roy-Chowdhury, Amit K.},
-  title     = {Cross-Domain Video Anomaly Detection without Target Domain Adaptation},
-  booktitle = {Proc. IEEE/CVF WACV}, year = {2023}
-}
-
-@inproceedings{advad2024,
-  title     = {{Ada-VAD}: Domain Adaptable Video Anomaly Detection},
-  booktitle = {Proc. SIAM Int. Conf. Data Mining (SDM)}, year = {2024}
-}
-
-@inproceedings{lu2020fewshot,
-  author    = {Lu, Yiwei and Yu, Frank and Reddy, Mahesh Kumar Krishna and Wang, Yang},
-  title     = {Few-Shot Scene-Adaptive Anomaly Detection},
-  booktitle = {Proc. European Conf. Computer Vision (ECCV)}, year = {2020}
-}
-
-@inproceedings{liu2018shanghaitech,
-  author    = {Liu, Wen and Luo, Weixin and Lian, Dongze and Gao, Shenghua},
-  title     = {Future Frame Prediction for Anomaly Detection --- A New Baseline},
-  booktitle = {Proc. IEEE/CVF CVPR}, year = {2018}
-}
-
-@inproceedings{lu2013avenue,
-  author    = {Lu, Cewu and Shi, Jianping and Jia, Jiaya},
-  title     = {Abnormal Event Detection at 150 FPS in {MATLAB}},
-  booktitle = {Proc. IEEE Int. Conf. Computer Vision (ICCV)}, year = {2013}
+@inproceedings{zanella2024lavad,
+  author    = {Zanella, Luca and Menapace, Willi and Mancini, Massimiliano and
+               Wang, Yiming and Ricci, Elisa},
+  title     = {Harnessing Large Language Models for Training-Free Video
+               Anomaly Detection},
+  booktitle = {Proc. IEEE/CVF Conf. Computer Vision and Pattern Recognition (CVPR)},
+  year      = {2024},
+  note      = {arXiv:2404.01014}
 }
