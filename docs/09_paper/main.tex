@@ -1,0 +1,767 @@
+% =====================================================================
+%  DA-ZVAD — LIVING RESEARCH DOCUMENT (single column)
+%  Maintained for supervisor review. Updated as findings arrive.
+%
+%  HOW TO MAINTAIN THIS DOCUMENT
+%  -----------------------------
+%  1. Add a row to the Revision History table (Sec. "Document Status")
+%     every time you update something. This is how progress is tracked.
+%  2. Replace \pending{...} markers with real content as results arrive.
+%     Never delete a \pending marker without filling in the content.
+%  3. New references go in references.bib, cited with \cite{key}.
+%  4. Keep the section order fixed (1--10) as agreed with the supervisor.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+% ---------- packages ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{parskip}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{hyperref}
+
+% ---------- colours ----------
+\definecolor{secblue}{HTML}{1A5276}
+\definecolor{linkblue}{HTML}{2471A3}
+\definecolor{pendingcol}{HTML}{B03A2E}
+\definecolor{donecol}{HTML}{1E8449}
+\definecolor{notecol}{HTML}{6B6A63}
+\definecolor{boxbg}{HTML}{F4F8FB}
+
+\hypersetup{colorlinks=true, linkcolor=linkblue, citecolor=linkblue,
+            urlcolor=linkblue,
+            pdftitle={Concept Shift, Not Covariate Shift: Training-Free
+                      Domain-Adaptive Video Anomaly Detection}}
+
+% ---------- section styling ----------
+\titleformat{\section}{\large\bfseries\color{secblue}}{\thesection.}{0.6em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries\color{secblue}}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection}{0.6em}{}
+
+% ---------- header / footer ----------
+\pagestyle{fancy}\fancyhf{}
+\lhead{\small\textcolor{notecol}{DA-ZVAD --- Living Research Document}}
+\rhead{\small\textcolor{notecol}{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---------- status macros ----------
+% \pending{what is still required} -- visible marker for unfinished content
+\newcommand{\pending}[1]{{\color{pendingcol}\sffamily\small[\,PENDING: #1\,]}}
+\newcommand{\done}{{\color{donecol}\sffamily\bfseries\small DONE}}
+\newcommand{\inprog}{{\color{pendingcol}\sffamily\bfseries\small IN PROGRESS}}
+\newcommand{\notstarted}{{\color{notecol}\sffamily\bfseries\small NOT STARTED}}
+% \note{...} -- internal note to supervisor / self
+\newcommand{\note}[1]{{\color{notecol}\itshape #1}}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% =====================================================================
+\begin{document}
+
+% ---------------- title block ----------------
+\begin{center}
+{\LARGE\bfseries Concept Shift, Not Covariate Shift:}\\[4pt]
+{\LARGE\bfseries Training-Free Domain-Adaptive Video Anomaly Detection}\\[4pt]
+{\large with Vision-Language Models}\\[14pt]
+{\large Prakash Kumar Sarangi}\\[3pt]
+{\normalsize M.Tech, Computer Science and Engineering}\\
+{\normalsize National Institute of Technology Calicut}\\[6pt]
+{\normalsize Supervisor: \underline{\hspace{4.5cm}}}\\[10pt]
+{\small\textcolor{notecol}{Living document --- last updated \today}}
+\end{center}
+
+\vspace{0.6em}
+\hrule
+\vspace{1.2em}
+
+% =====================================================================
+\section*{Document Status}
+\addcontentsline{toc}{section}{Document Status}
+% ---------------------------------------------------------------------
+\note{This document is maintained continuously. The table below records what is
+complete, what is in progress, and what is not yet started, so that progress can
+be reviewed at any time. Content that has not yet been produced is marked inline
+with a \pending{} marker rather than left blank or written speculatively.}
+
+\vspace{0.5em}
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}clX@{}}
+\toprule
+\textbf{\S} & \textbf{Section} & \textbf{Status} \\
+\midrule
+1  & Draft title                          & \done{} --- may be refined \\
+2  & Draft abstract                       & \inprog{} --- results sentences pending experiments \\
+3  & Introduction and literature          & \done{} --- 6 DA surveys + 12 VAD/VLM papers reviewed \\
+4  & Observations and research gap        & \done{} --- gap identified and grounded in surveys \\
+5  & Contribution points                  & \done{} --- 5 contributions stated \\
+6  & Problem formulation and objectives   & \done{} \\
+7  & Proposed methodology                 & \done{} --- framework implemented and verified \\
+8  & Results and analysis                 & \inprog{} --- image-domain baseline complete; video experiments pending GPU runs \\
+9  & Conclusion and discussion            & \notstarted{} --- awaits results \\
+10 & References                           & \inprog{} --- grows with the document \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{Revision history}
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Date} & \textbf{Update} \\
+\midrule
+\today & Document created. Sections 1--7 drafted from the literature study;
+         Section 8 contains the completed image-domain baseline; video
+         experiments pending. \\
+% ---- ADD NEW ROWS HERE (newest at the bottom) ----
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\vspace{0.4em}
+\noindent\fcolorbox{secblue}{boxbg}{%
+\begin{minipage}{0.97\textwidth}
+\textbf{Current honest status of results.} The MVTec~AD image-domain baseline
+(Sec.~\ref{sec:results}) is a completed measurement on real data. All video-domain
+results are \emph{pending}: the framework has been implemented and verified
+end-to-end on synthetic data, but the video experiments require GPU execution,
+which has recently become available. No video number is reported in this document
+until it has been measured.
+\end{minipage}}
+
+\clearpage
+
+% =====================================================================
+\section{Draft Title}
+% =====================================================================
+\textbf{Primary:}
+\begin{quote}
+\emph{Concept Shift, Not Covariate Shift: Training-Free Domain-Adaptive Video
+Anomaly Detection with Vision-Language Models}
+\end{quote}
+
+\noindent\textbf{Alternatives under consideration:}
+\begin{enumerate}[leftmargin=1.6em, itemsep=1pt]
+  \item Characterising Domain Shift in Video Anomaly Detection: A Training-Free
+        Vision-Language Study
+  \item Language as the Adaptation Mechanism: Test-Time Domain Adaptation for
+        Zero-Shot Video Anomaly Detection
+\end{enumerate}
+
+\note{The primary title states a falsifiable claim rather than describing a system,
+and names the specific technical contribution (the shift-type characterisation).}
+
+% =====================================================================
+\section{Draft Abstract}
+% =====================================================================
+
+Video anomaly detection (VAD) models degrade when deployed in an environment
+different from the one they were developed on. The established remedy is domain
+adaptation (DA), and the overwhelming majority of DA research---as its own
+surveys state explicitly---targets \emph{covariate shift}, the change in the input
+distribution $p(x)$, while treating \emph{concept shift}, the change in the
+conditional $p(y \mid x)$, as uncommon enough to set aside. We observe that this
+assumption, reasonable for object classification, is invalid for anomaly
+detection: normality in VAD is defined by deployment context rather than by object
+identity, so the same visual input legitimately carries opposite labels in
+different domains---a vehicle is normal on a road and anomalous on a pedestrian
+walkway. Concept shift is therefore not a rare corner case in VAD but its dominant
+form of domain shift. We further note that vision-language foundation models such
+as CLIP already absorb much of the covariate shift that classical DA was built to
+correct, leaving concept shift as the operative problem. We propose
+\textbf{DA-ZVAD}, a fully training-free VAD pipeline in which every model remains
+frozen and domain adaptation is performed exclusively through a natural-language
+description of the deployment scene, injected at test time. Because no parameters
+are updated anywhere in the pipeline, any change in performance is attributable to
+the text alone, which makes the adaptation claim directly measurable. We introduce
+an evaluation protocol that varies only this description across four
+conditions---absent, generic, matched, and deliberately mismatched---where the
+mismatched condition serves as a falsifying control. We evaluate across industrial
+and surveillance domains.
+\pending{one or two sentences reporting headline quantitative results, once the
+video experiments have been run}
+\pending{one closing sentence stating the principal empirical finding}
+
+\vspace{0.6em}
+\noindent\textbf{Keywords:} video anomaly detection; domain adaptation; concept
+shift; vision-language models; training-free adaptation; explainability.
+
+% =====================================================================
+\section{Introduction and Literature}
+% =====================================================================
+
+\subsection{Motivation}
+Anomaly detection identifies rare, unexpected events in images or video, with
+applications in industrial quality inspection and surveillance. The dominant
+formulation is one-class learning: a model of ``normal'' is estimated from a large
+corpus of normal samples, and deviations are flagged. This formulation carries
+three practical costs. First, it requires substantial domain-specific training
+data. Second, and more importantly for this work, the learned notion of normality
+is tied to the environment it was estimated in, so a change of camera, site, or
+application requires fresh data collection and retraining. Third, such models emit
+a score without an explanation, limiting their usefulness to an operator who must
+act on the alert.
+
+\subsection{Zero-shot and training-free anomaly detection}
+Vision-language models (VLMs) trained on web-scale image--text corpora, notably
+CLIP~\citep{radford2021clip}, permit classification of concepts specified purely in
+natural language. WinCLIP~\citep{jeong2023winclip} applied this to industrial
+anomaly detection by scoring images against ensembles of ``normal'' and
+``abnormal'' text prompts, requiring no task-specific training;
+AnomalyCLIP~\citep{zhou2024anomalyclip} learns object-agnostic prompts to improve
+generalisation across categories. These are evaluated primarily on
+MVTec~AD~\citep{bergmann2019mvtec}, against trained baselines such as
+PatchCore~\citep{roth2022patchcore}.
+
+In video, LAVAD~\citep{zanella2024lavad} demonstrated fully training-free VAD by
+captioning frames with a VLM, scoring caption sequences with a large language
+model, and refining the result via cross-modal similarity.
+VERA~\citep{ye2025vera} keeps the VLM frozen and instead learns a set of verbal
+\emph{guiding questions}, yielding explainable detection;
+notably, these questions are optimised offline on source data, so the adaptation
+is not performed at test time. AnyAnomaly~\citep{anyanomaly2025} lets a user define
+the anomaly of interest in text at inference time, and
+OVVAD~\citep{wu2024ovvad} addresses the open-vocabulary setting using a frozen CLIP
+encoder with a lightweight trained temporal adapter.
+
+\subsection{Domain adaptation: the classical view}
+Domain adaptation is the subfield of transfer learning in which the task is fixed
+and the data distribution changes. The literature is mature and well surveyed.
+Patel et al.~\citep{patel2015visual} review the shallow era---subspace alignment,
+geodesic-flow interpolation between source and target subspaces, dictionary
+learning, and projection of heterogeneous features into a shared latent space.
+Wang and Deng~\citep{wang2018deep} provide the canonical deep taxonomy, dividing
+one-step DA into \emph{discrepancy-based} methods (minimising a measured domain
+gap), \emph{adversarial-based} methods (a domain discriminator is defeated by a
+feature extractor, yielding domain-confused features), and
+\emph{reconstruction-based} methods (reconstruction as an auxiliary invariance
+task), with multi-step DA constructing intermediate domains when source and target
+are too distant to bridge directly.
+
+Wilson and Cook~\citep{wilson2020survey} organise unsupervised DA by mechanism
+---domain-invariant feature learning, domain mapping, normalisation statistics,
+ensembles, target-discriminative methods---and decompose methods into
+interchangeable components, alongside the generalisation bound that motivates
+divergence minimisation. Liu et al.~\citep{liu2022deep} survey modern UDA
+(statistic alignment, adversarial learning, generative mapping, self-training,
+self-supervision) with applications spanning natural images, medical imaging,
+video, language, and time series, and enumerate open directions including
+source-free adaptation, continuous and test-time adaptation, and adaptation in the
+foundation-model era. Singhal et al.~\citep{singhal2023domain} consolidate the
+field, stating the theoretical conditions under which DA is justified and
+categorising settings by label-set relationship (closed-set, partial, open-set,
+universal).
+
+\subsection{Domain adaptation beyond vision}
+The mechanism of adaptation changes substantially in the language-model era.
+Fan et al.~\citep{fan2025llm}, reviewing LLM adaptation for geotechnical
+engineering, describe four strategies forming ``a continuum balancing cost,
+complexity, and performance'': \emph{prompt engineering} (lowest cost, immediate
+and flexible, but ``often lacks depth and robustness''), \emph{retrieval-augmented
+generation}, \emph{domain-adaptive pretraining}, and \emph{fine-tuning} (highest
+task precision, highest cost in compute and labels). The relevant structural
+observation is that in this paradigm the model may remain unchanged while the
+\emph{input context} carries the adaptation---a category absent from the visual DA
+taxonomies above, which predate foundation models.
+
+% =====================================================================
+\section{Observations from Literature and Research Gap}
+\label{sec:gap}
+% =====================================================================
+
+\subsection{Observation 1: the field targets covariate shift by design}
+A domain is a joint distribution $P(x,y) = P(y\mid x)\,P(x)$, and shift may occur
+in any factor. Following the taxonomy of Kouw and
+Loog~\citep{kouw2018introduction} as presented by Liu et al.~\citep{liu2022deep},
+four types are distinguished, summarised in Table~\ref{tab:shifts}.
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}lL{3.4cm}X@{}}
+\toprule
+\textbf{Shift type} & \textbf{Factor that changes} & \textbf{Standard example} \\
+\midrule
+Covariate shift        & $p(x)$      & Same objects under a different camera, lighting, or weather \\
+Conditional shift      & $p(x\mid y)$ & A class appears differently across domains \\
+Label / target shift   & $p(y)$      & Class proportions differ between domains \\
+\textbf{Concept shift} & $p(y\mid x)$ & \textbf{The same input carries a different label} (a tomato classified as a vegetable in one country and a fruit in another) \\
+\bottomrule
+\end{tabularx}
+\caption{The four types of domain shift.}
+\label{tab:shifts}
+\end{table}
+
+Liu et al.~\citep{liu2022deep} state their scope explicitly: concept shift
+``is, however, usually not a common problem in popular object classification or
+semantic segmentation tasks. As such, this review mainly focuses on the covariate
+shift alignment in UDA, as is most commonly studied,'' listing the remaining shifts
+as directions for future research. Consistently, Singhal
+et al.~\citep{singhal2023domain} give covariate shift---$P(Y_s\mid X_s) =
+Q(Y_t\mid X_t)$---as the first theoretical condition under which DA is justified,
+which is to say that classical DA theory \emph{assumes concept shift away}.
+
+\subsection{Observation 2: anomaly detection is concept-shift dominated}
+In anomaly detection, normality is a property of the deployment context rather
+than of the object. Table~\ref{tab:conceptshift} gives three cases in which the
+visual content is unchanged while the correct label inverts with the domain.
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}XllX@{}}
+\toprule
+\textbf{Input $x$} & \textbf{Domain A} & \textbf{Domain B} & \textbf{Shift} \\
+\midrule
+A person running          & park: \emph{normal}   & bank vault: \emph{anomalous}      & $p(y\mid x)$ \\
+A person lying down       & beach: \emph{normal}  & factory aisle: \emph{anomalous}   & $p(y\mid x)$ \\
+A vehicle                 & road: \emph{normal}   & pedestrian walkway: \emph{anomalous} & $p(y\mid x)$ \\
+\bottomrule
+\end{tabularx}
+\caption{Concept shift in video anomaly detection. The third case is an actual
+anomaly class in the ShanghaiTech benchmark~\citep{liu2018shanghaitech}.}
+\label{tab:conceptshift}
+\end{table}
+
+These are concept shift by definition. Crucially, methods that align $p(x)$
+---the dominant family across~\citep{wang2018deep, wilson2020survey, liu2022deep}
+---cannot address them, because $p(x)$ may be identical across the two domains
+while only the labelling function differs.
+
+\subsection{Observation 3: foundation models relocate the problem}
+Liu et al.~\citep{liu2022deep} pose the foundation-model question directly and
+answer it in part: such models ``are robust to the covariate shift in many
+cases,'' but ``it is challenging to alleviate the label shift, without access to
+target domain data. In addition, the concept shift can also cause a problem, even
+though there are sufficient training data.'' A frozen CLIP encoder has been
+exposed to an enormous diversity of cameras, lighting conditions, and viewpoints,
+so much of the covariate shift that classical DA was constructed to correct is
+already absorbed. What remains is precisely the shift the literature set aside.
+
+\subsection{Statement of the research gap}
+\begin{enumerate}[label=\textbf{G\arabic*.}, leftmargin=2.2em, itemsep=3pt]
+  \item \textbf{Concept shift dominates VAD but is unstudied as such.} The DA
+        literature scopes it out as uncommon; in VAD it is the primary shift. No
+        existing work characterises VAD domain shift in these terms.
+  \item \textbf{No protocol measures language-mediated adaptation.} The standard
+        DA protocol compares source-trained against target-adapted accuracy, which
+        presupposes a training step. There is no established way to test whether a
+        \emph{description} adapted anything.
+  \item \textbf{Foundation-model-era DA is empirically under-characterised.}
+        Identified as an open direction in~\citep{liu2022deep}, with little
+        empirical evidence on which shifts a frozen VLM absorbs unaided.
+  \item \textbf{Explanation quality under domain shift is unexamined.} None of the
+        six DA surveys addresses it; explainable VAD~\citep{ye2025vera} is
+        evaluated in-domain only.
+\end{enumerate}
+
+\note{Scope discipline: this work targets G1 and G2 as primary contributions, with
+G3 and G4 as supporting evidence. It does not claim to solve concept shift, nor to
+exceed the state of the art in detection accuracy.}
+
+% =====================================================================
+\section{Contribution Points}
+% =====================================================================
+
+\begin{enumerate}[label=\textbf{C\arabic*.}, leftmargin=2.4em, itemsep=5pt]
+  \item \textbf{Characterisation.} We identify concept shift, rather than covariate
+        shift, as the dominant form of domain shift in video anomaly detection, and
+        show that this follows from the definition of normality in the task. This
+        reframes VAD domain adaptation in the formal vocabulary of the DA
+        literature and explains why $p(x)$-alignment methods are structurally
+        unsuited to it.
+
+  \item \textbf{Mechanism.} We present DA-ZVAD, a fully training-free VAD pipeline
+        in which every model is frozen and domain adaptation is performed solely by
+        a natural-language description of the deployment scene supplied at test
+        time. This transplants the lowest-cost strategy of the LLM adaptation
+        continuum~\citep{fan2025llm} into a vision task, and requires neither
+        target-domain data nor gradient updates.
+
+  \item \textbf{Evaluation protocol.} We introduce a four-condition context sweep
+        (absent / generic / matched / mismatched) that isolates the contribution of
+        the verbalised description while holding all else fixed. The
+        \emph{mismatched} condition is a falsifying control: if supplying a
+        wrong-domain description does not degrade performance, the adaptation claim
+        is refuted.
+
+  \item \textbf{Cross-domain empirical study.} We evaluate a single frozen pipeline
+        across industrial and surveillance domains, providing evidence on which
+        shifts a vision-language foundation model absorbs unaided and which it does
+        not.
+
+  \item \textbf{Explanation under shift.} We report the first examination of how
+        generated natural-language explanations behave when the supplied domain
+        context is incorrect.
+\end{enumerate}
+
+% =====================================================================
+\section{Problem Formulation and Objectives}
+% =====================================================================
+
+\subsection{Formulation}
+Let a domain $\mathcal{D}$ be a joint distribution $P(x,y)$ over inputs
+$x \in \mathcal{X}$ (video frames or images) and labels $y \in \{0,1\}$, where
+$y=1$ denotes anomalous. Let $\mathcal{D}_A$ and $\mathcal{D}_B$ be two deployment
+domains. The concept-shift setting is characterised by
+\begin{equation}
+p_A(x) \approx p_B(x)
+\qquad\text{while}\qquad
+p_A(y \mid x) \neq p_B(y \mid x),
+\label{eq:conceptshift}
+\end{equation}
+that is, visually comparable inputs receive different labels because the definition
+of normality differs between the domains.
+
+Classical unsupervised DA seeks a feature map $\phi$ minimising a divergence
+$d\!\left(p_A(\phi(x)),\, p_B(\phi(x))\right)$. Under
+Eq.~\eqref{eq:conceptshift} this objective is uninformative, since the marginals
+are already aligned; the quantity that differs is the labelling function itself.
+
+We therefore introduce an explicit domain descriptor $c \in \mathcal{C}$, a short
+natural-language statement of what the deployment scene contains and what
+constitutes normal behaviour within it. The anomaly score becomes
+\begin{equation}
+s(x \mid c) \;=\; f_\theta(x,\, c), \qquad \theta \ \text{fixed},
+\label{eq:score}
+\end{equation}
+where $f_\theta$ is composed entirely of pre-trained, frozen models. Adaptation
+from $\mathcal{D}_A$ to $\mathcal{D}_B$ consists of replacing $c_A$ with $c_B$;
+no element of $\theta$ is updated, and no target-domain data is required.
+
+Because $\theta$ is fixed by construction, any measured difference between
+$s(x\mid c_A)$ and $s(x\mid c_B)$ is attributable to the descriptor alone. This
+identifiability property is what makes the adaptation claim testable, and it is
+not available to methods that update parameters.
+
+\subsection{Setting}
+In the vocabulary of the DA literature, the setting is: \emph{source-free} (no
+source-domain data at adaptation time), \emph{test-time} (adaptation occurs at
+inference), \emph{training-free} (no gradient updates anywhere),
+\emph{concept-shift-oriented} (the targeted shift is in $p(y\mid x)$), and
+\emph{language-mediated} (adaptation is carried by text).
+
+\subsection{Objectives}
+\begin{enumerate}[label=\textbf{O\arabic*.}, leftmargin=2.4em, itemsep=3pt]
+  \item Formalise domain shift in VAD and establish concept shift as its dominant
+        form.
+  \item Design and implement a fully training-free detection pipeline in which
+        domain context enters only as language.
+  \item Devise and apply a protocol that isolates and measures the effect of the
+        verbalised domain descriptor, including a falsifying control.
+  \item Evaluate across industrial and surveillance domains, quantifying which
+        shifts the frozen vision-language backbone absorbs unaided.
+  \item Generate natural-language explanations for detected events and examine
+        their behaviour under correct and incorrect domain context.
+\end{enumerate}
+
+% =====================================================================
+\section{Proposed Methodology}
+% =====================================================================
+
+\subsection{Framework overview}
+DA-ZVAD comprises four modules, all frozen at inference. Figure~\ref{fig:arch}
+shows the architecture.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=\textwidth]{dazvad_architecture.png}
+\caption{The DA-ZVAD framework. Every model is frozen; the verbalised scene
+context (M3) is the sole adaptation mechanism, grounding both the prompt ensembles
+used for scoring and the generated explanations.}
+\label{fig:arch}
+\end{figure}
+
+\begin{description}[leftmargin=2.2em, style=nextline, itemsep=4pt]
+  \item[M1 --- Visual encoder.] A frozen CLIP ViT-L/14 encoder embeds each frame.
+  An anomaly score is obtained as the softmax probability of the frame matching an
+  ensemble of ``abnormal'' text prompts rather than an ensemble of ``normal''
+  prompts, in CLIP's joint image--text space. No training data is used; the
+  language prior serves as the classifier.
+  \item[M2 --- Temporal aggregation.] Per-frame scores are smoothed with a centred
+  moving average over a window of $w$ frames. This suppresses isolated
+  single-frame fluctuations while preserving multi-frame events, and introduces no
+  learnable parameters.
+  \item[M3 --- Verbalised domain context.] A short natural-language description of
+  the deployment scene is injected into both prompt ensembles, grounding the
+  notion of normality in the specific environment. This module is the adaptation
+  mechanism of the framework.
+  \item[M4 --- Reasoning and explanation.] For each detected event, a frozen
+  multimodal LLM (LLaVA-1.5-7B, 4-bit quantised) receives the peak-scoring frame
+  together with the domain descriptor and produces a natural-language explanation.
+  The prompt explicitly permits the model to report that nothing appears wrong,
+  which limits ungrounded assertions.
+\end{description}
+
+The complete pipeline is designed to fit a single consumer GPU (approximately
+7\,GB of VRAM), in deliberate contrast to multi-model training-free pipelines
+such as~\citep{zanella2024lavad}.
+
+\subsection{Inference algorithm}
+\begin{algorithm}[h!]
+\caption{DA-ZVAD inference for one sequence}
+\label{alg:infer}
+\begin{algorithmic}[1]
+\Require frames $X = \{x_1,\dots,x_T\}$; domain descriptor $c$; window $w$;
+         threshold $\tau$; frozen encoder $E$, frozen MLLM $G$
+\Ensure per-frame scores $\tilde{s}$; event explanations $\mathcal{E}$
+\State $(P^{+}, P^{-}) \gets \textproc{GroundPrompts}(c)$
+       \Comment{M3: inject $c$ into normal/abnormal ensembles}
+\State $e^{+} \gets \textproc{MeanPool}(E_{\text{text}}(P^{+})),\quad
+       e^{-} \gets \textproc{MeanPool}(E_{\text{text}}(P^{-}))$
+\For{$t = 1$ \textbf{to} $T$}
+    \State $v_t \gets E_{\text{img}}(x_t)$ \Comment{M1: frozen visual embedding}
+    \State $s_t \gets \textproc{Softmax}\!\left(\left[\langle v_t, e^{+}\rangle,\;
+           \langle v_t, e^{-}\rangle\right]\cdot\lambda\right)_{2}$
+           \Comment{$\lambda$: CLIP logit scale}
+\EndFor
+\State $\tilde{s} \gets \textproc{MovingAverage}(s, w)$ \Comment{M2}
+\State $\mathcal{P} \gets \{t : \tilde{s}_t \ge \tau\}$
+\State $\mathcal{V} \gets \textproc{PeakOfEachContiguousRun}(\mathcal{P}, \tilde{s})$
+       \Comment{one explanation per event}
+\ForAll{$t \in \mathcal{V}$}
+    \State $\mathcal{E}[t] \gets G(x_t,\, c,\, \tilde{s}_t)$ \Comment{M4}
+\EndFor
+\State \Return $\tilde{s}, \mathcal{E}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{The context sweep protocol}
+To isolate the contribution of the domain descriptor, the pipeline is executed
+repeatedly on identical data with every component fixed, varying only $c$ across
+the four conditions of Table~\ref{tab:variants}.
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}lXX@{}}
+\toprule
+\textbf{Condition} & \textbf{Descriptor supplied} & \textbf{Purpose} \\
+\midrule
+\texttt{none}       & M3 disabled; prompt ensembles only & Lower reference \\
+\texttt{generic}    & ``a generic scene''                & Controls for the mere presence of context \\
+\texttt{matched}    & Correct description of the scene   & The proposed operating condition \\
+\texttt{mismatched} & Description of the \emph{wrong} domain family (industrial text on surveillance data, and conversely) & \textbf{Falsifying control} \\
+\bottomrule
+\end{tabularx}
+\caption{The four conditions of the context sweep. All models, frames, thresholds
+and windows are held fixed; only the text differs.}
+\label{tab:variants}
+\end{table}
+
+The predicted signature, if the adaptation claim holds, is
+$\textsc{matched} \gtrsim \textsc{generic} \gtrsim \textsc{none}$ with
+\textsc{mismatched} performing measurably \emph{worse}. The \texttt{mismatched}
+condition is essential: a method that ignores its context entirely would show no
+difference across conditions, and a result of that form would refute the claim
+rather than support it.
+
+\subsection{Implementation}
+The framework is implemented as a configuration-driven Python package in which each
+module is independently switchable, so that the full ablation is produced by
+configuration rather than by code modification. Experiments are cached and
+resumable. The implementation has been verified end-to-end on synthetic data; the
+measured results reported below are those obtained on real data.
+
+% =====================================================================
+\section{Results and Analysis}
+\label{sec:results}
+% =====================================================================
+
+\subsection{Datasets}
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}llXl@{}}
+\toprule
+\textbf{Dataset} & \textbf{Domain} & \textbf{Content} & \textbf{Status} \\
+\midrule
+MVTec AD~\citep{bergmann2019mvtec} & Industrial & 15 product categories, 1{,}725 test images, pixel-level masks & \done \\
+ShanghaiTech~\citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes, frame-level ground truth & \inprog \\
+CUHK Avenue~\citep{lu2013avenue} & Surveillance & Subway entrance, 21 test videos & \notstarted \\
+\bottomrule
+\end{tabularx}
+\caption{Datasets. The industrial/surveillance pairing provides the concept-shift
+contrast: what constitutes normality differs maximally between them.}
+\end{table}
+
+\subsection{Evaluation metrics}
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item \textbf{AUROC} (primary). Threshold-free; equals the probability that a
+        randomly chosen anomalous sample is scored above a randomly chosen normal
+        one. Reported at image level for MVTec and frame level for video.
+  \item \textbf{Micro- and macro-averaged AUROC.} Micro concatenates all frames
+        across clips (weighting long clips more; the field convention); macro
+        averages per-clip AUROC (weighting clips equally). Divergence between them
+        is itself diagnostic.
+  \item \textbf{Pixel-level AUROC} for localisation, where masks are available.
+  \item \textbf{Average precision} and best $F_1$ as secondary measures under class
+        imbalance.
+  \item \textbf{Explanation assessment} (qualitative at this stage): correctness,
+        specificity, and consistency with the supplied domain context.
+\end{itemize}
+
+\subsection{Result 1 --- Industrial baseline (completed)}
+The frozen visual scoring stage (M1) was evaluated on the complete MVTec~AD
+benchmark with no training data of any kind. A One-Class SVM fitted on CLIP
+features of the normal training split provides a \emph{trained} reference on
+identical features, so that the comparison isolates the value of training.
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Method} & \textbf{Training data} & \textbf{Image AUROC} & \textbf{Pixel AUROC} \\
+\midrule
+One-Class SVM (CLIP features) & Normal images only & 92.4\% & --- \\
+\textbf{DA-ZVAD M1 (zero-shot)} & \textbf{None} & \textbf{88.5\%} & \textbf{71.0\%} \\
+\bottomrule
+\end{tabular}
+\caption{MVTec AD, 15 categories, 1{,}725 test images. CLIP ViT-L/14.
+Best $F_1 = 90.7\%$.}
+\label{tab:mvtec}
+\end{table}
+
+\noindent\textbf{Analysis.} A detector using no training data lands within roughly
+four points of a trained baseline built on identical features. The per-category
+breakdown is more informative than the mean: performance separates sharply into
+texture categories (carpet, grid, leather, tile, wood; mean $\approx 99.5\%$) and
+object categories (bottle, cable, capsule, transistor, and others; mean
+$\approx 83.1\%$). Zero-shot scoring \emph{exceeds} the trained baseline on every
+texture category and on \texttt{screw} (84.3\% against 67.3\%), while the trained
+baseline retains an advantage on structured objects with small, spatially
+localised defects (transistor: 72.7\%).
+
+The interpretation is that whole-image embeddings capture global appearance
+changes, which the language prior describes well, but cannot resolve defects
+occupying a small fraction of the pixels. A prompt-design ablation
+(generic single prompt 89.1\%; category-specific single prompt 88.6\%;
+category-specific ensemble 88.5\%) shows that prompt engineering yields no
+improvement at image level, indicating that the binding constraint is spatial
+resolution rather than linguistic specification. This finding motivates the
+windowed scoring used for localisation and, more broadly, supports the position
+that the residual difficulty for a foundation model in this task is not covariate
+in nature.
+
+\subsection{Result 2 --- Video-domain detection}
+\pending{frame-level AUROC (micro and macro) on ShanghaiTech and CUHK Avenue,
+across smoothing windows $w \in \{1,5,9,15\}$; table structure below}
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Dataset} & \textbf{Context} & $w{=}1$ & $w{=}5$ & $w{=}9$ & $w{=}15$ \\
+\midrule
+ShanghaiTech & off & --- & --- & --- & --- \\
+ShanghaiTech & on  & --- & --- & --- & --- \\
+CUHK Avenue  & off & --- & --- & --- & --- \\
+CUHK Avenue  & on  & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\caption{Frame-level AUROC by temporal window. Values to be filled once measured.}
+\end{table}
+
+\subsection{Result 3 --- Context sweep (the central experiment)}
+\pending{AUROC under the four context conditions of Table~\ref{tab:variants},
+per dataset; this is the primary evidence for or against the adaptation claim}
+
+\begin{table}[h!]
+\centering\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Dataset} & \texttt{none} & \texttt{generic} & \texttt{matched} & \texttt{mismatched} \\
+\midrule
+ShanghaiTech & --- & --- & --- & --- \\
+CUHK Avenue  & --- & --- & --- & --- \\
+MVTec AD     & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\caption{Context sweep: frame-level AUROC with all components fixed and only the
+domain descriptor varied. Values to be filled once measured.}
+\end{table}
+
+\note{Interpretation is prepared in advance to avoid post-hoc reasoning.
+If \textsc{matched} exceeds \textsc{none} and \textsc{mismatched} falls below it,
+the descriptor is causally involved in the decision. If all four conditions
+coincide, the descriptor is inert at this scale---an informative negative result
+that would redirect the adaptation mechanism rather than invalidate the
+characterisation in Sec.~\ref{sec:gap}.}
+
+\subsection{Result 4 --- Cross-domain transfer}
+\pending{performance of a single frozen configuration evaluated across industrial
+and surveillance domains, isolating which shifts are absorbed by the backbone}
+
+\subsection{Result 5 --- Explanations under domain shift}
+\pending{qualitative gallery contrasting explanations generated under matched and
+mismatched domain descriptors for identical flagged events}
+
+% =====================================================================
+\section{Conclusion and Discussion}
+% =====================================================================
+
+\pending{to be written once Results 2--5 are complete. The following points are
+established and will be retained:}
+
+\begin{itemize}[leftmargin=1.6em, itemsep=3pt]
+  \item The domain-adaptation literature targets covariate shift by explicit
+        scoping decision, and its theoretical conditions assume the conditional
+        $p(y\mid x)$ to be stable.
+  \item Anomaly detection violates that assumption structurally, because normality
+        is defined by deployment context; concept shift is therefore its dominant
+        form of domain shift.
+  \item Vision-language foundation models absorb much of the covariate shift that
+        motivated the classical toolkit, relocating the operative difficulty to
+        the shift type the literature set aside.
+  \item A fully frozen pipeline makes the adaptation claim identifiable: with no
+        parameters updated, an effect can be attributed to the supplied text.
+\end{itemize}
+
+\subsection*{Limitations (to be maintained honestly)}
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item The approach is not expected to exceed trained state-of-the-art detectors
+        on absolute AUROC, and no such claim is made.
+  \item The contribution is a characterisation, a mechanism, and a measurement
+        protocol; it is not a new adaptation algorithm.
+  \item Prompt-based adaptation occupies the lowest-cost, lowest-robustness point
+        of the adaptation continuum~\citep{fan2025llm}, and is evaluated as such.
+  \item Explanation assessment is qualitative at the present scale.
+  \item \pending{additional limitations identified during experimentation}
+\end{itemize}
+
+\subsection*{Future work}
+\begin{itemize}[leftmargin=1.6em, itemsep=2pt]
+  \item A lightweight learned temporal adapter over the frozen backbone, as an
+        upgrade path retaining the frozen encoder.
+  \item Automatic generation of the domain descriptor from the first frames of a
+        deployment, removing the manual step.
+  \item Quantitative evaluation of explanation quality against human judgement.
+\end{itemize}
+
+% =====================================================================
+% unsrtnat: numeric citations, ordered by first appearance. Ships with natbib,
+% so it compiles anywhere. Swap for IEEEtranN if an IEEE style is required.
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+% =====================================================================
+
+\end{document}
