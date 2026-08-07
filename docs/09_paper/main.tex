@@ -30,8 +30,15 @@
 \usepackage{parskip}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{etoolbox}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{hyperref}
+
+% parskip inserts vertical space at the start of every paragraph, and each cell
+% of a p/X column begins a paragraph -- which pushes cell text down and breaks
+% row alignment. Suppress it inside tables only.
+\AtBeginEnvironment{tabularx}{\setlength{\parskip}{0pt}}
+\AtBeginEnvironment{tabular}{\setlength{\parskip}{0pt}}
 
 % ---------- colours ----------
 \definecolor{secblue}{HTML}{1A5276}
@@ -43,8 +50,8 @@
 
 \hypersetup{colorlinks=true, linkcolor=linkblue, citecolor=linkblue,
             urlcolor=linkblue,
-            pdftitle={Concept Shift, Not Covariate Shift: Training-Free
-                      Domain-Adaptive Video Anomaly Detection}}
+            pdftitle={Zero-Shot Multimodal Anomaly Detection Using
+                      Vision-Language Models}}
 
 % ---------- section styling ----------
 \titleformat{\section}{\large\bfseries\color{secblue}}{\thesection.}{0.6em}{}[\titlerule]
@@ -73,13 +80,12 @@
 
 % ---------------- title block ----------------
 \begin{center}
-{\LARGE\bfseries Concept Shift, Not Covariate Shift:}\\[4pt]
-{\LARGE\bfseries Training-Free Domain-Adaptive Video Anomaly Detection}\\[4pt]
-{\large with Vision-Language Models}\\[14pt]
+{\LARGE\bfseries Zero-Shot Multimodal Anomaly Detection\\[2pt]
+Using Vision-Language Models}\\[14pt]
 {\large Prakash Kumar Sarangi}\\[3pt]
 {\normalsize M.Tech, Computer Science and Engineering}\\
 {\normalsize National Institute of Technology Calicut}\\[6pt]
-{\normalsize Supervisor: \underline{\hspace{4.5cm}}}\\[10pt]
+{\normalsize Supervisors: Dr.~Pranesh Das, Dr.~Raju Hazari}\\[10pt]
 {\small\textcolor{notecol}{Living document --- last updated \today}}
 \end{center}
 
