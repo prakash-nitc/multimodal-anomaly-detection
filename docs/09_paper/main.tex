@@ -155,13 +155,14 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
 \midrule
 --- & Title (front matter)             & \done       & May be refined \\
 --- & Abstract (front matter)          & \inprog     & Results sentences await experiments \\
-1   & Introduction and literature      & \done       & 6 DA surveys, 12 VAD/VLM papers reviewed \\
-2   & Observations and research gap    & \done       & Gap identified and grounded in the surveys \\
-3   & Contribution points              & \done       & 5 contributions stated \\
-4   & Problem formulation, objectives  & \done       & --- \\
-5   & Proposed methodology             & \done       & Framework implemented and verified \\
-6   & Results and analysis             & \inprog     & Image-domain baseline complete; video experiments await GPU runs \\
-7   & Conclusion and discussion        & \notstarted & Awaits results \\
+1   & Introduction                     & \done       & Motivation integrated; roadmap added \\
+2   & Literature review                & \done       & 6 DA surveys, 12 VAD/VLM papers reviewed \\
+3   & Observations and research gap    & \done       & Gap identified and grounded in the surveys \\
+4   & Contribution points              & \done       & 5 contributions stated \\
+5   & Problem formulation, objectives  & \done       & --- \\
+6   & Proposed methodology             & \done       & Framework detailed; algorithms cited \\
+7   & Results and analysis             & \inprog     & Image-domain baseline complete; video experiments await GPU runs \\
+8   & Conclusion and discussion        & \notstarted & Awaits results \\
 --- & References                       & \inprog     & Grows with the document \\
 \bottomrule
 \end{tabularx}
@@ -176,6 +177,12 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
 \today & Converted to Elsevier CAS single-column format. Sections drafted from
          the literature study; image-domain baseline reported; video
          experiments pending. \\
+\today & Supervisor revisions: Introduction and Literature Review separated
+         into distinct sections, with motivation integrated into the
+         Introduction; framework overview expanded with end-to-end data flow,
+         scoring and smoothing equations, and design rationale; algorithms
+         (ViT, CLIP, LLaVA, 4-bit quantisation, One-Class SVM) and evaluation
+         metrics (AUROC, PR) now cited. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -193,20 +200,70 @@ measured.}
 % =====================================================================
 
 % =====================================================================
-\section{Introduction and Literature}
+\section{Introduction}
 % =====================================================================
 
-\subsection{Motivation}
-Anomaly detection identifies rare, unexpected events in images or video, with
-applications in industrial quality inspection and surveillance. The dominant
-formulation is one-class learning: a model of ``normal'' is estimated from a
-large corpus of normal samples, and deviations are flagged. This formulation
-carries three practical costs. First, it requires substantial domain-specific
-training data. Second, and more importantly for this work, the learned notion of
-normality is tied to the environment it was estimated in, so a change of camera,
-site, or application requires fresh data collection and retraining. Third, such
-models emit a score without an explanation, limiting their usefulness to an
-operator who must act on the alert.
+Anomaly detection identifies rare, unexpected events in images or video, and
+underpins applications from industrial quality inspection to public-space
+surveillance. The dominant formulation is one-class learning: a model of
+``normal'' is estimated from a large corpus of normal samples, and deviations
+from that model are flagged. Anomalies are by nature rare, diverse and difficult
+to enumerate in advance, so learning what is \emph{normal} and treating
+everything else as suspect is a natural and widely adopted design.
+
+This formulation carries three practical costs. First, it requires a substantial
+corpus of domain-specific normal data before the system can be used at all.
+Second---and this is the concern that motivates the present work---the learned
+notion of normality is bound to the environment in which it was estimated. A
+change of camera, viewpoint, site or application invalidates the model, and
+recovering performance requires fresh data collection and retraining. Third,
+such systems emit a score without a justification, which limits their
+usefulness to an operator who must decide what to do about an alert.
+
+The second cost is conventionally addressed by \emph{domain adaptation} (DA), a
+mature field with a large body of methods for transferring a model from a source
+domain to a target domain. We observe, however, that the DA literature and the
+anomaly detection setting are misaligned in a specific and consequential way.
+Domain shift decomposes into several distinct types, and the DA literature
+concentrates---by explicit and reasonable scoping decision---on
+\emph{covariate shift}, the change in the input distribution. In anomaly
+detection, normality is defined by the deployment context rather than by object
+identity, so the same visual content can be normal in one environment and
+anomalous in another. That is \emph{concept shift}, the shift type the
+literature sets aside. Section~\ref{sec:gap} develops this argument in full.
+
+A second development compounds the mismatch. Vision-language models trained at
+web scale, such as CLIP \citep{radford2021clip}, permit recognition of concepts
+specified purely in natural language and are, as a consequence of their training
+breadth, substantially robust to the appearance variation that covariate-shift
+methods were built to correct. If a foundation model already absorbs much of the
+covariate shift, then what remains is precisely the shift the field excluded.
+
+We therefore propose DA-ZVAD, a video anomaly detection pipeline in which every
+model is frozen and adaptation to a new environment is performed solely by
+supplying a natural-language description of the deployment scene at inference
+time. Because no parameter is updated anywhere in the pipeline, any measured
+change in behaviour is attributable to that description alone, which converts
+the adaptation claim from an assertion into something directly measurable. We
+accompany the method with an evaluation protocol that varies only the
+description, including a deliberately incorrect description that acts as a
+falsifying control.
+
+The remainder of this document is organised as follows.
+Section~\ref{sec:lit} reviews zero-shot anomaly detection, the classical domain
+adaptation literature, adaptation in the language-model era, and prior domain
+adaptation work specific to video anomaly detection.
+Section~\ref{sec:gap} states the observations drawn from that literature and the
+resulting research gap. Section~\ref{sec:contrib} lists the contributions,
+Section~\ref{sec:problem} formalises the problem, and
+Section~\ref{sec:method} describes the proposed framework.
+Section~\ref{sec:results} reports results and analysis, and
+Section~\ref{sec:conclusion} concludes.
+
+% =====================================================================
+\section{Literature Review}
+\label{sec:lit}
+% =====================================================================
 
 \subsection{Zero-shot and training-free anomaly detection}
 Vision-language models (VLMs) trained on web-scale image--text corpora, notably
@@ -381,6 +438,7 @@ nor to exceed the state of the art in detection accuracy.}
 
 % =====================================================================
 \section{Contribution Points}
+\label{sec:contrib}
 % =====================================================================
 
 \begin{enumerate}[C1.]
@@ -417,6 +475,7 @@ nor to exceed the state of the art in detection accuracy.}
 
 % =====================================================================
 \section{Problem Formulation and Objectives}
+\label{sec:problem}
 % =====================================================================
 
 \subsection{Formulation}
@@ -478,11 +537,101 @@ inference), \emph{training-free} (no gradient updates anywhere),
 
 % =====================================================================
 \section{Proposed Methodology}
+\label{sec:method}
 % =====================================================================
 
 \subsection{Framework overview}
-DA-ZVAD comprises four modules, all frozen at inference. Figure~\ref{fig:arch}
-shows the architecture.
+DA-ZVAD is a four-stage inference pipeline in which every learned component is a
+pre-trained model used with its weights frozen. Figure~\ref{fig:arch} shows the
+architecture. This subsection describes the end-to-end data flow and the design
+rationale; the individual modules are specified in Section~\ref{sec:modules} and
+the complete procedure is given as Algorithm~\ref{alg:infer}.
+
+\subsubsection{End-to-end data flow}
+The system consumes a sequence of frames $X = \{x_1,\dots,x_T\}$ together with a
+single natural-language domain descriptor $c$, and returns a per-frame anomaly
+score together with a natural-language explanation for each detected event. Five
+stages are executed in order.
+
+\begin{enumerate}[Stage 1.]
+  \item \textbf{Prompt construction.} Two prompt ensembles are instantiated from
+        templates: a \emph{normal} ensemble $P^{+}$ and an \emph{abnormal}
+        ensemble $P^{-}$. If the verbalised context module is active, the domain
+        descriptor $c$ is injected into both ensembles, so that the textual
+        definition of normality is specific to the deployment scene rather than
+        generic. Ensembling several phrasings rather than using a single prompt
+        follows the practice established for zero-shot anomaly detection by
+        \citet{jeong2023winclip}.
+
+  \item \textbf{Text encoding.} Each ensemble is encoded by the frozen text
+        encoder and mean-pooled into a single unit-norm prototype vector,
+        yielding $e^{+}$ and $e^{-}$. Because the descriptor enters only here,
+        the entire influence of the domain context on detection is mediated by
+        these two vectors.
+
+  \item \textbf{Frame scoring.} Each frame is embedded by the frozen image
+        encoder to give $v_t$. The anomaly score is the softmax probability that
+        the frame matches the abnormal prototype rather than the normal one,
+        computed over the two cosine similarities and scaled by the temperature
+        $\lambda$ learned during the backbone's own pre-training
+        \citep{radford2021clip}:
+        \begin{equation}
+        s_t \;=\; \frac{\exp\!\left(\lambda \langle v_t, e^{-}\rangle\right)}
+                       {\exp\!\left(\lambda \langle v_t, e^{+}\rangle\right)
+                       +\exp\!\left(\lambda \langle v_t, e^{-}\rangle\right)}.
+        \label{eq:framescore}
+        \end{equation}
+        No classifier is trained: the separation between the two text
+        prototypes is what performs the classification.
+
+  \item \textbf{Temporal aggregation.} The raw score sequence
+        $s = (s_1,\dots,s_T)$ is smoothed by a centred moving average of width
+        $w$,
+        \begin{equation}
+        \tilde{s}_t \;=\; \frac{1}{|\mathcal{W}_t|}
+                          \sum_{k \in \mathcal{W}_t} s_k ,
+        \qquad
+        \mathcal{W}_t = \left[t - \lfloor w/2 \rfloor,\;
+                              t + \lfloor w/2 \rfloor\right] \cap [1,T],
+        \label{eq:smooth}
+        \end{equation}
+        which suppresses isolated single-frame excursions while preserving
+        events that persist across several frames. The operator has no learnable
+        parameters, so the temporal stage adds no training requirement.
+
+  \item \textbf{Detection and explanation.} Frames with
+        $\tilde{s}_t \ge \tau$ are flagged. Contiguous runs of flagged frames are
+        grouped into events, and the single highest-scoring frame of each run is
+        selected as that event's representative. Only these representative frames
+        are passed to the multimodal language model, together with the same
+        descriptor $c$, which produces the explanation. Explaining one frame per
+        event rather than every flagged frame keeps the cost of the most
+        expensive stage proportional to the number of events rather than to video
+        length.
+\end{enumerate}
+
+\subsubsection{Design rationale}
+Three properties of this arrangement are deliberate and worth stating explicitly.
+
+\emph{Everything is frozen.} No gradient is computed anywhere in the pipeline.
+This is not merely an efficiency choice: it is what makes the central claim
+measurable. Since the parameters cannot change, a difference in output between
+two runs that differ only in $c$ must be caused by $c$. Methods that update
+weights cannot isolate the effect of a contextual input in this way.
+
+\emph{The domain enters at exactly one point.} The descriptor is consumed in
+Stage~1 (and again in Stage~5 for explanation), and nowhere else. Detection
+therefore has a single, well-defined channel through which environment-specific
+knowledge is supplied, which is what allows the context sweep of
+Section~\ref{sec:sweep} to isolate its contribution.
+
+\emph{The expensive stage is gated.} The visual encoder runs once per frame,
+which is cheap and batchable; the language model runs once per detected event.
+The pipeline therefore fits within roughly 7\,GB of accelerator memory, and its
+cost does not scale with the length of quiet video.
+
+\subsection{Module specifications}
+\label{sec:modules}
 
 % figure (not figure*): cas-sc is a single-column class, so a starred
 % float would have nothing extra to span.
@@ -496,32 +645,44 @@ ensembles used for scoring and the generated explanations.}
 \end{figure}
 
 \begin{description}
-  \item[M1 --- Visual encoder.] A frozen CLIP ViT-L/14 encoder embeds each frame.
-  An anomaly score is obtained as the softmax probability of the frame matching
-  an ensemble of ``abnormal'' text prompts rather than an ensemble of ``normal''
-  prompts, in CLIP's joint image--text space. No training data is used; the
+  \item[M1 --- Visual encoder.] A frozen CLIP ViT-L/14 encoder
+  \citep{radford2021clip} embeds each frame. The backbone is a Vision
+  Transformer \citep{dosovitskiy2021vit}, itself built on the transformer
+  architecture of \citet{vaswani2017attention}, which partitions the frame into
+  $14 \times 14$ patches and produces a single unit-norm embedding in the joint
+  image--text space that CLIP learns by contrastive pre-training. Scoring
+  follows Equation~\eqref{eq:framescore}. No training data is used; the
   language prior serves as the classifier.
 
-  \item[M2 --- Temporal aggregation.] Per-frame scores are smoothed with a
-  centred moving average over a window of $w$ frames. This suppresses isolated
-  single-frame fluctuations while preserving multi-frame events, and introduces
-  no learnable parameters.
+  \item[M2 --- Temporal aggregation.] Per-frame scores are smoothed by the
+  centred moving average of Equation~\eqref{eq:smooth} over a window of $w$
+  frames. This suppresses isolated single-frame fluctuations while preserving
+  multi-frame events, and introduces no learnable parameters. The window width
+  $w$ is the only hyperparameter of this stage and is swept in
+  Section~\ref{sec:results}.
 
   \item[M3 --- Verbalised domain context.] A short natural-language description
   of the deployment scene is injected into both prompt ensembles, grounding the
   notion of normality in the specific environment. This module is the adaptation
-  mechanism of the framework.
+  mechanism of the framework. It is the vision-side counterpart of prompt-based
+  adaptation as catalogued for language models by \citet{fan2026llm}, and
+  differs from the verbalised learning of \citet{ye2025vera} in that the text is
+  supplied at inference rather than optimised on source data beforehand.
 
   \item[M4 --- Reasoning and explanation.] For each detected event, a frozen
-  multimodal large language model (LLaVA-1.5-7B \citep{liu2023llava}, 4-bit
-  quantised) receives the peak-scoring frame together with the domain descriptor
-  and produces a natural-language explanation. The prompt explicitly permits the
-  model to report that nothing appears wrong, which limits ungrounded assertions.
+  multimodal large language model (LLaVA-1.5-7B \citep{liu2023llava}) receives
+  the peak-scoring frame together with the domain descriptor and produces a
+  natural-language explanation. The model is loaded under 4-bit
+  \textsc{NormalFloat} quantisation \citep{dettmers2023qlora}, which reduces its
+  memory footprint to roughly 5.5\,GB with negligible loss of generation
+  quality. The prompt explicitly permits the model to report that nothing
+  appears wrong, which limits ungrounded assertions.
 \end{description}
 
 The complete pipeline is designed to fit a single consumer GPU (approximately
 7\,GB of VRAM), in deliberate contrast to multi-model training-free pipelines
-such as that of \citet{zanella2024lavad}.
+such as that of \citet{zanella2024lavad}, which chains a captioner, a large
+language model and a cross-modal refiner.
 
 \subsection{Inference algorithm}
 \begin{algorithm}[h]
@@ -553,6 +714,7 @@ such as that of \citet{zanella2024lavad}.
 \end{algorithm}
 
 \subsection{The context sweep protocol}
+\label{sec:sweep}
 To isolate the contribution of the domain descriptor, the pipeline is executed
 repeatedly on identical data with every component fixed, varying only $c$ across
 the four conditions of Table~\ref{tbl:variants}.
@@ -608,26 +770,55 @@ CUHK Avenue \citep{lu2013avenue} & Surveillance & Subway entrance, 21 test video
 \end{table}
 
 \subsection{Evaluation metrics}
+Anomaly detection is a strongly class-imbalanced problem, in which accuracy is
+uninformative: a detector that labels every frame normal attains high accuracy
+while detecting nothing. We therefore adopt threshold-free and
+imbalance-aware measures.
+
 \begin{itemize}
-  \item \textbf{AUROC} (primary). Threshold-free; equals the probability that a
-        randomly chosen anomalous sample is scored above a randomly chosen normal
-        one. Reported at image level for MVTec and frame level for video.
-  \item \textbf{Micro- and macro-averaged AUROC.} Micro concatenates all frames
-        across clips (weighting long clips more; the field convention); macro
-        averages per-clip AUROC (weighting clips equally). Divergence between
-        them is itself diagnostic.
-  \item \textbf{Pixel-level AUROC} for localisation, where masks are available.
-  \item \textbf{Average precision} and best $F_1$ as secondary measures under
-        class imbalance.
+  \item \textbf{AUROC} (primary). The area under the receiver operating
+        characteristic curve \citep{fawcett2006roc, bradley1997auc}. It is
+        threshold-free, and admits the equivalent probabilistic reading that it
+        equals the probability that a randomly chosen anomalous sample receives
+        a higher score than a randomly chosen normal one. It therefore measures
+        the quality of the score \emph{ranking} rather than of any particular
+        operating point, which is what makes results comparable across methods
+        that calibrate their scores differently. Reported at image level for
+        MVTec~AD and at frame level for video, following the convention of the
+        respective benchmarks \citep{bergmann2019mvtec, liu2018shanghaitech}.
+
+  \item \textbf{Micro- and macro-averaged AUROC.} Micro-averaging concatenates
+        all frames across clips before computing a single curve, which weights
+        long clips more heavily and is the usual convention on video benchmarks;
+        macro-averaging computes AUROC per clip and averages, weighting clips
+        equally. Divergence between the two is itself diagnostic, indicating
+        that performance is carried by a subset of clips.
+
+  \item \textbf{Pixel-level AUROC} for localisation, computed against the
+        ground-truth defect masks where these are available
+        \citep{bergmann2019mvtec}.
+
+  \item \textbf{Average precision} and best $F_1$ as secondary measures. Under
+        strong imbalance the precision--recall curve is more sensitive to
+        performance on the minority class than the ROC curve is
+        \citep{davis2006pr}, so we report both rather than relying on AUROC
+        alone.
+
   \item \textbf{Explanation assessment} (qualitative at this stage): correctness,
         specificity, and consistency with the supplied domain context.
 \end{itemize}
 
 \subsection{Result 1: industrial baseline (completed)}
 The frozen visual scoring stage (M1) was evaluated on the complete MVTec~AD
-benchmark with no training data of any kind. A One-Class SVM fitted on CLIP
-features of the normal training split provides a \emph{trained} reference on
-identical features, so that the comparison isolates the value of training.
+benchmark \citep{bergmann2019mvtec} with no training data of any kind. As a
+\emph{trained} reference we fit a One-Class Support Vector Machine
+\citep{scholkopf2001oneclass}---which estimates the support of the normal-class
+distribution and flags points falling outside it---on CLIP features of the
+normal training split, using an RBF kernel after per-dimension standardisation.
+Because the baseline consumes identical features and is evaluated on the
+identical test split, the only difference between the two rows of
+Table~\ref{tbl:mvtec} is whether training on normal data took place; the
+comparison therefore isolates the value of that training.
 
 \begin{table}[width=\linewidth,cols=4,pos=h]
 \caption{MVTec AD, 15 categories, 1{,}725 test images. CLIP ViT-L/14. Best
@@ -716,6 +907,7 @@ mismatched domain descriptors for identical flagged events}
 
 % =====================================================================
 \section{Conclusion and Discussion}
+\label{sec:conclusion}
 % =====================================================================
 
 \pending{to be written once Results 2--5 are complete. The following points are
