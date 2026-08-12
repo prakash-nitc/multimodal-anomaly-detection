@@ -10,7 +10,7 @@
 %  2. Replace \pending{...} markers with real content as results arrive.
 %     Never delete a \pending marker without filling in the content.
 %  3. New references go in references.bib; cite with \citep{} or \citet{}
-%     (author-year style is active -- NOT \cite{}).
+%     (numbered style is active; both of those commands work).
 %  4. Section order is fixed as agreed with the supervisor. Note that in
 %     journal format the draft title and draft abstract live in the front
 %     matter rather than as numbered sections.
@@ -23,8 +23,12 @@
 
 \documentclass[a4paper,fleqn]{cas-sc}
 
-% Author-year citation style (use \citep and \citet, not \cite)
-\usepackage[authoryear,longnamesfirst]{natbib}
+% Numbered citation style, matching model1-num-names.bst shipped with the CAS
+% bundle (and the convention of Pattern Recognition Letters / Neurocomputing).
+% \citep gives [12]; \citet gives "Liu et al. [12]" -- both still work.
+% To switch to author-year instead: use [authoryear,longnamesfirst] here and
+% \bibliographystyle{cas-model2-names} at the end (that .bst must be present).
+\usepackage[numbers,sort&compress]{natbib}
 
 % cas-sc already provides: geometry, graphicx, hyperref, xcolor, natbib
 % hooks, and enhanced enumerate/itemize. Do NOT load those again.
@@ -756,9 +760,10 @@ established and will be retained:}
 \printcredits
 
 % ---------- bibliography ----------
-% cas-model2-names is the Elsevier author-year style, matching the
-% authoryear option passed to natbib above.
-\bibliographystyle{cas-model2-names}
+% model1-num-names.bst is the Elsevier numbered style, and is the .bst that
+% ships in the CAS bundle alongside cas-sc.cls. It matches the natbib
+% "numbers" option set in the preamble.
+\bibliographystyle{model1-num-names}
 \bibliography{references}
 
 \end{document}
