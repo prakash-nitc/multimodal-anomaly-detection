@@ -120,10 +120,19 @@ performance is attributable to the text alone, which makes the adaptation claim
 directly measurable. We introduce an evaluation protocol that varies only this
 description across four conditions---absent, generic, matched, and deliberately
 mismatched---where the mismatched condition serves as a falsifying control. We
-evaluate across industrial and surveillance domains.
-\pending{one or two sentences reporting headline quantitative results, once the
-video experiments have been run}
-\pending{one closing sentence stating the principal empirical finding}
+evaluate across industrial and surveillance domains. On MVTec~AD the frozen
+scorer attains $88.5\%$ image-level AUROC with no training data, within four
+points of a one-class baseline fitted on identical features; on the full
+ShanghaiTech test set it attains $0.706$ frame-level AUROC, with semantic and
+kinematic signals contributing complementarily. The sweep yields the predicted
+signature---a matched descriptor at $0.692$ against a mismatched one at
+$0.592$---but only once the descriptor is injected into the normal ensemble
+alone: appending it to both ensembles draws the two prototypes together and
+reverses the effect, making an accurate description the most damaging condition.
+The principal empirical finding is that verbalized context is load-bearing but
+not robust---its measured contribution is governed by the point of injection
+rather than by the wording, and a fusion rule adopted without testing this can
+invert the conclusion drawn from it.
 \end{abstract}
 
 % ---------- keywords ----------
@@ -183,17 +192,25 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          scoring and smoothing equations, and design rationale; algorithms
          (ViT, CLIP, LLaVA, 4-bit quantisation, One-Class SVM) and evaluation
          metrics (AUROC, PR) now cited. \\
+14 Aug 2026 & ShanghaiTech evaluated in full on GPU (107 clips, 20{,}449
+         frames). Results~2--4 reported: temporal ablation, context sweep under
+         two fusion rules, and component ablation with clip-level held-out
+         partitions. Per-clip score normalisation added to the metrics protocol.
+         Conclusion and limitations rewritten against measured outcomes.
+         Results~5 (cross-domain) and~6 (explanations) remain outstanding. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \wnote{\textbf{Current status of results.} The MVTec~AD image-domain baseline
-(Section~\ref{sec:results}) is a completed measurement on real data. All
-video-domain results are pending: the framework has been implemented and
-verified end-to-end on synthetic data, but the video experiments require GPU
-execution. No video number is reported in this document until it has been
-measured.}
+and the ShanghaiTech video-domain results (Results~1--4,
+Section~\ref{sec:results}) are completed measurements on real data, obtained on
+an NVIDIA A40; each carries a run manifest recording the code commit, hardware,
+library versions and dataset counts that produced it. Results~5 (cross-domain
+transfer) and~6 (explanations under domain shift) are outstanding and are marked
+as such; the claims depending on them are not made. No number appears in this
+document that has not been measured.}
 
 % =====================================================================
 % END OF DOCUMENT STATUS SECTION
@@ -748,6 +765,16 @@ configuration rather than by code modification. Experiments are cached and
 resumable. The implementation has been verified end-to-end on synthetic data; the
 measured results reported below are those obtained on real data.
 
+Video experiments were run on a single NVIDIA A40 under PyTorch 2.3.1 with CUDA
+12.1, using CLIP ViT-L/14 pretrained on LAION-2B. Each run records a manifest
+capturing the commit identifier of the code, the hardware, the library versions,
+the full configuration, and the per-dataset sequence, frame and positive-label
+counts, so that every reported figure is traceable to the state that produced
+it. Image embeddings are cached separately from scores: the visual encoder is
+the only expensive stage and is independent of the prompts, the scoring rule and
+the temporal window, so a single encoding pass supports the comparison of many
+scoring hypotheses without re-encoding.
+
 % =====================================================================
 \section{Results and Analysis}
 \label{sec:results}
@@ -763,7 +790,7 @@ them.}\label{tbl:datasets}
 \textbf{Dataset} & \textbf{Domain} & \textbf{Content} & \textbf{Status} \\
 \midrule
 MVTec AD \citep{bergmann2019mvtec} & Industrial & 15 product categories, 1{,}725 test images, pixel-level masks & \done \\
-ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes, frame-level ground truth & \inprog \\
+ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes, 107 test clips, 40{,}791 frames, frame-level ground truth & \done \\
 CUHK Avenue \citep{lu2013avenue} & Surveillance & Subway entrance, 21 test videos & \notstarted \\
 \bottomrule
 \end{tabularx}
@@ -793,6 +820,17 @@ imbalance-aware measures.
         macro-averaging computes AUROC per clip and averages, weighting clips
         equally. Divergence between the two is itself diagnostic, indicating
         that performance is carried by a subset of clips.
+
+  \item \textbf{Per-clip score normalisation.} Micro-averaged figures on video
+        benchmarks are computed after min--max normalising each clip's scores,
+        following the protocol established with the benchmark
+        \citep{liu2018shanghaitech}. The step is necessary rather than
+        conventional: ShanghaiTech comprises thirteen camera views, and a frozen
+        scorer occupies a different similarity baseline under each, so pooling
+        raw scores compares frames drawn from incomparable scales. The
+        transformation uses no labels and therefore leaks no test information.
+        Raw and normalised figures are reported alongside each other throughout,
+        so that the contribution of the protocol is visible rather than assumed.
 
   \item \textbf{Pixel-level AUROC} for localisation, computed against the
         ground-truth defect masks where these are available
@@ -854,64 +892,200 @@ localisation and, more broadly, supports the position that the residual
 difficulty for a foundation model in this task is not covariate in nature.
 
 \subsection{Result 2: video-domain detection}
-\pending{frame-level AUROC (micro and macro) on ShanghaiTech and CUHK Avenue,
-across smoothing windows $w \in \{1,5,9,15\}$}
-
-\begin{table}[width=\linewidth,cols=6,pos=h]
-\caption{Frame-level AUROC by temporal window. Values to be filled once
-measured.}\label{tbl:video}
-\begin{tabularx}{\linewidth}{@{}Z l l l l l@{}}
-\toprule
-\textbf{Dataset} & \textbf{Context} & $w{=}1$ & $w{=}5$ & $w{=}9$ & $w{=}15$ \\
-\midrule
-ShanghaiTech & off & --- & --- & --- & --- \\
-ShanghaiTech & on  & --- & --- & --- & --- \\
-CUHK Avenue  & off & --- & --- & --- & --- \\
-CUHK Avenue  & on  & --- & --- & --- & --- \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\subsection{Result 3: context sweep (the central experiment)}
-\pending{AUROC under the four context conditions of Table~\ref{tbl:variants}, per
-dataset; this is the primary evidence for or against the adaptation claim}
+ShanghaiTech was evaluated in full: all 107 test clips, 20{,}449 frames after
+subsampling at $\mathrm{step}=2$, of which 8{,}671 ($42.4\%$) are anomalous.
+Table~\ref{tbl:video} reports the M1$+$M2 configuration---frozen CLIP scoring
+with moving-average aggregation, no domain descriptor---under all three pooling
+conventions.
 
 \begin{table}[width=\linewidth,cols=5,pos=h]
-\caption{Context sweep: frame-level AUROC with all components fixed and only the
-domain descriptor varied. Values to be filled once measured.}\label{tbl:sweep}
+\caption{ShanghaiTech, 107 clips / 20{,}449 frames. Frame-level AUROC by
+temporal window $w$, under three pooling conventions. Rows differ only in how
+per-clip scores are aggregated into a single figure; the underlying scores are
+identical.}\label{tbl:video}
 \begin{tabularx}{\linewidth}{@{}Z l l l l@{}}
 \toprule
-\textbf{Dataset} & \textbf{none} & \textbf{generic} & \textbf{matched} & \textbf{mismatched} \\
+\textbf{Pooling convention} & $w{=}1$ & $w{=}5$ & $w{=}9$ & $w{=}15$ \\
 \midrule
-ShanghaiTech & --- & --- & --- & --- \\
-CUHK Avenue  & --- & --- & --- & --- \\
-MVTec AD     & --- & --- & --- & --- \\
+Micro, raw scores            & 0.493 & 0.502 & 0.508 & 0.513 \\
+Macro (per-clip mean)        & 0.614 & 0.628 & 0.637 & 0.648 \\
+\textbf{Micro, per-clip normalised} & \textbf{0.667} & \textbf{0.685} & \textbf{0.691} & \textbf{0.702} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\wnote{Interpretation is prepared in advance to avoid post-hoc reasoning. If
-matched exceeds none and mismatched falls below it, the descriptor is causally
-involved in the decision. If all four conditions coincide, the descriptor is
-inert at this scale---an informative negative result that would redirect the
-adaptation mechanism rather than invalidate the characterisation in
-Section~\ref{sec:gap}.}
+Two findings follow. First, temporal aggregation contributes a consistent,
+monotone gain of roughly three AUROC points from $w{=}1$ to $w{=}15$, present in
+every row and in every context condition measured subsequently. M2 requires no
+training and no parameters, so this gain is obtained at zero cost.
 
-\subsection{Result 4: cross-domain transfer}
+Second, and more consequential for evaluation practice, the raw micro figure is
+indistinguishable from chance while the same scores yield $0.702$ once
+normalised per clip. The gap is diagnostic rather than cosmetic. ShanghaiTech
+spans thirteen camera views, and a frozen scorer sits at a different similarity
+baseline under each; concatenating raw scores therefore ranks frames drawn from
+incomparable scales against one another, destroying an ordering that is present
+within each clip. That the macro figure---which is by construction immune to
+cross-clip offsets---sits at $0.648$ while raw micro sits at $0.513$ confirms
+the cause. Only $31$ of $105$ scorable clips fall below chance individually.
+
+This is a concrete instance of the paper's general position appearing inside the
+measurement itself: what counts as an anomalous \emph{score} is scene-relative,
+exactly as what counts as an anomalous \emph{event} is.
+
+\subsection{Result 3: context sweep (the central experiment)}
+\label{sec:res-sweep}
+The sweep of Section~\ref{sec:sweep} was run twice, differing only in how the
+domain descriptor is fused into the prompt ensembles. In the \emph{both}
+condition the descriptor is appended to the normal and the abnormal ensemble
+alike; in the \emph{normal} condition it is appended only to the normal
+ensemble. Every other quantity---weights, prompts, data, protocol---is
+identical, and in Table~\ref{tbl:sweep} the \texttt{none} column is common to
+both rows by construction, which serves as an internal control.
+
+\begin{table}[width=\linewidth,cols=5,pos=h]
+\caption{Context sweep on ShanghaiTech, $w{=}5$, per-clip normalised frame-level
+AUROC. All models frozen; only the domain descriptor and its point of injection
+vary. The \texttt{none} column is necessarily identical across rows and confirms
+that no other quantity changed.}\label{tbl:sweep}
+\begin{tabularx}{\linewidth}{@{}Z l l l l@{}}
+\toprule
+\textbf{Fusion} & \textbf{none} & \textbf{generic} & \textbf{matched} & \textbf{mismatched} \\
+\midrule
+Both ensembles          & 0.685 & 0.656 & 0.637 & 0.678 \\
+\textbf{Normal ensemble only} & \textbf{0.685} & \textbf{0.677} & \textbf{0.692} & \textbf{0.592} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\wnote{Interpretation was fixed before measurement to avoid post-hoc reasoning:
+if matched exceeds none and mismatched falls below it, the descriptor is
+causally involved; if all four conditions coincide, the descriptor is inert. The
+first configuration run produced neither outcome but their inverse, and the
+account below was arrived at by diagnosing that inversion.}
+
+Under \emph{both}, the predicted ordering is not merely absent but reversed: the
+matched descriptor is the \emph{worst} condition ($0.637$) and the deliberately
+mismatched one among the best ($0.678$). The mechanism is prototype dilution.
+Each ensemble is mean-pooled into a single embedding, so text appended to both
+ensembles enters both prototypes as a common component, drawing them together
+and contracting the margin that carries the decision. The more faithfully the
+descriptor describes the imagery, the more strongly it aligns with every frame,
+and the more of the normal/abnormal contrast it absorbs---which is precisely why
+an \emph{accurate} description was the most damaging one, and why a description
+of an unrelated domain, aligning with nothing in the scene, left the original
+prompts largely intact.
+
+Under \emph{normal}, where the descriptor no longer enters both prototypes, the
+predicted signature appears: matched $(0.692) \geq$ none $(0.685) \gg$
+mismatched $(0.592)$. The matched-minus-mismatched contrast moves from $-0.041$
+to $+0.100$; fixing the fusion rule inverts the sign of the effect.
+
+The claim this supports should be stated precisely. The matched-over-none margin
+is $+0.007$ and is not evidence that a correct descriptor improves detection.
+The mismatched deficit is $-0.100$ and is unambiguous. What the experiment
+establishes is that the descriptor is \emph{load-bearing}: corrupting it
+degrades detection substantially. Because no parameter is updated anywhere in
+the pipeline, that deficit is attributable to the text alone---no other quantity
+was free to vary. This is the identifiability property of
+Section~\ref{sec:contrib} realised as a measurement.
+
+A secondary consequence is methodological. Verbalized context is frequently
+treated as a matter of wording; here the point of injection dominated the
+wording entirely, to the extent of reversing the direction of the effect. A
+negative result reported without varying the fusion rule would have been an
+artefact of an implementation detail.
+
+\subsection{Result 4: component ablation}
+\label{sec:res-components}
+To establish what each signal contributes, image embeddings were cached once and
+five scoring rules compared against them. Two are semantic (a text margin
+against the prompt ensembles); one is kinematic (embedding drift between
+neighbouring frames of a clip, requiring no additional model); one estimates
+normality from the clip's own unlabelled frames; and two combine them by
+per-clip standardisation.
+
+Because cached embeddings make evaluation nearly free, the risk of selecting a
+configuration that succeeds by chance is real. Clips were therefore partitioned
+into development and held-out halves before measurement, at the clip level
+rather than the frame level---frames within a clip are strongly correlated, so a
+frame-level partition would leak across the boundary. Five independent
+partitions were drawn; ranking used the development halves only.
+Table~\ref{tbl:components} reports the outcome.
+
+\begin{table}[width=\linewidth,cols=4,pos=h]
+\caption{Component ablation on ShanghaiTech. Held-out AUROC is the mean over
+five clip-level partitions, with the standard deviation across
+partitions; the final column scores every clip, for comparability with published
+results that use the full test set.}\label{tbl:components}
+\begin{tabularx}{\linewidth}{@{}Z l l l@{}}
+\toprule
+\textbf{Scoring signal} & $w$ & \textbf{Held-out} & \textbf{Full set} \\
+\midrule
+Scene-centre normality only    & 31 & $0.585 \pm 0.025$ & 0.585 \\
+Semantic (text margin) only    & 15 & $0.663 \pm 0.021$ & 0.673 \\
+Kinematic (embedding drift) only & 31 & $0.676 \pm 0.012$ & 0.684 \\
+Semantic $+$ scene-centre      & 15 & $0.649 \pm 0.022$ & 0.657 \\
+\textbf{Semantic $+$ kinematic} & 31 & $\mathbf{0.699 \pm 0.017}$ & \textbf{0.706} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The two signals are complementary: their combination exceeds the semantic
+signal by $0.033$ and the kinematic signal by $0.023$ on the full test set, with
+the same ordering on development and held-out partitions. Against a
+partition-to-partition spread of $\pm0.017$ the margin is suggestive rather than
+decisive, and is reported as complementarity rather than as a large effect.
+
+The complementarity has a straightforward reading. The semantic signal responds
+to what occupies the frame; the kinematic signal responds to whether it is
+moving unlike its neighbours. ShanghaiTech's anomaly classes require both
+conditions jointly---a stationary bicycle is not anomalous, nor is a pedestrian
+walking briskly; a bicycle \emph{travelling at cycling speed} on a walkway is.
+
+Two negative results are recorded here rather than omitted. Scene-centre
+normality, in which the mean embedding of a clip's own frames defines normality
+and departure from it defines anomaly, reaches only $0.585$ and \emph{degrades}
+the semantic signal when combined with it. Separately, quadrant-level scoring
+with maximum aggregation---intended to recover anomalies too small to survive
+the $224\times224$ resize---did not improve on whole-frame scoring in any
+configuration; mean aggregation over quadrants was uniformly superior, which is
+consistent with mild ensembling rather than with recovery of spatial detail.
+Region-level scoring at finer granularity than quadrants remains untested and is
+identified in Section~\ref{sec:conclusion} as the most promising route to a
+materially higher figure.
+
+Prompt design interacts with these components in a way worth recording. A
+domain-specific ensemble naming ShanghaiTech's documented anomaly classes
+performed \emph{worse in isolation} than a minimal pair of prompts sharing no
+vocabulary ($0.486$ against $0.685$ at $w{=}5$), yet was the ensemble selected
+when combined with the kinematic signal. Both observations follow from the
+dilution mechanism of Section~\ref{sec:res-sweep}: the domain-specific normal
+and abnormal prompts share heavy scene vocabulary (``walkway'', ``pedestrians''),
+which contracts the margin between prototypes in exactly the manner the fusion
+experiment isolated, while their added specificity becomes useful once a
+separate signal establishes that the named object is in anomalous motion.
+
+\subsection{Result 5: cross-domain transfer}
 \pending{performance of a single frozen configuration evaluated across industrial
-and surveillance domains, isolating which shifts are absorbed by the backbone}
+and surveillance domains, isolating which shifts are absorbed by the backbone.
+Requires CUHK Avenue, which is not yet evaluated. This is the experiment that
+tests the transfer claim directly, and no cross-domain conclusion is drawn until
+it is complete.}
 
-\subsection{Result 5: explanations under domain shift}
+\subsection{Result 6: explanations under domain shift}
 \pending{qualitative gallery contrasting explanations generated under matched and
-mismatched domain descriptors for identical flagged events}
+mismatched domain descriptors for identical flagged events. M4 has not yet been
+executed on video data.}
 
 % =====================================================================
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
 % =====================================================================
 
-\pending{to be written once Results 2--5 are complete. The following points are
-established and will be retained:}
+The analytical position of this work rests on four points, each established in
+Sections~\ref{sec:lit}--\ref{sec:contrib} and unaffected by the experiments that
+follow them.
 
 \begin{itemize}
   \item The domain-adaptation literature targets covariate shift by explicit
@@ -927,6 +1101,42 @@ established and will be retained:}
         parameters updated, an effect can be attributed to the supplied text.
 \end{itemize}
 
+Three empirical findings follow from the experiments completed to date.
+
+\emph{Verbalized context is load-bearing, and the evidence is the falsifying
+control rather than the positive one.} Supplying a descriptor of the wrong
+domain costs $0.100$ AUROC, while supplying the correct one improves on
+supplying none by $0.007$. The asymmetry matters for how the mechanism should be
+understood: the descriptor is not adding information that lifts detection so
+much as constraining a decision boundary that degrades measurably when
+misdirected. Since no parameter is free to vary, the deficit is attributable to
+the text alone.
+
+\emph{The point of injection dominates the wording.} Appending the descriptor to
+both prompt ensembles rather than to the normal ensemble alone reverses the
+direction of the effect, because mean-pooled ensembles sharing a common textual
+component yield prototypes drawn toward one another. The same mechanism accounts
+for a domain-specific prompt ensemble underperforming a minimal pair of prompts
+sharing no vocabulary. Verbalized adaptation is consequently more fragile than
+its framing in the literature suggests: a study reporting that scene
+descriptions do not help, without varying the fusion rule, would have reported
+an artefact of an implementation detail.
+
+\emph{Semantic and kinematic evidence are complementary.} Text-based scoring and
+embedding drift between neighbouring frames reach $0.673$ and $0.684$
+respectively on ShanghaiTech, and $0.706$ in combination. That the kinematic
+signal---which consults no language at all---is competitive with the semantic
+one is a caution against reading frame-level vision-language scores on this
+benchmark as evidence of semantic understanding, and indicates that a
+substantial part of what such scores capture on kinematically defined anomalies
+is temporal change.
+
+Results~5 and~6 remain outstanding, and the corresponding claims are not made.
+In particular, the transfer claim central to the framework requires a second
+video domain and is therefore not yet tested: the present evidence for
+context-dependence comes from varying the descriptor within one domain, which is
+a necessary but not a sufficient condition for adaptation across domains.
+
 \subsection{Limitations}
 \begin{itemize}
   \item The approach is not expected to exceed trained state-of-the-art detectors
@@ -936,11 +1146,46 @@ established and will be retained:}
   \item Prompt-based adaptation occupies the lowest-cost, lowest-robustness point
         of the adaptation continuum \citep{fan2026llm}, and is evaluated as such.
   \item Explanation assessment is qualitative at the present scale.
-  \item \pending{additional limitations identified during experimentation}
+  \item Absolute performance on ShanghaiTech ($0.706$) is well below
+        training-free methods that invoke a captioning language model over every
+        frame \citep{zanella2024lavad}. The gap is consistent with the
+        resolution limitation identified on MVTec~AD: whole-frame embeddings at
+        $224\times224$ cannot resolve objects occupying a small fraction of a
+        surveillance frame. Quadrant-level scoring did not close it; region- or
+        patch-level scoring in the manner of \citet{jeong2023winclip} remains
+        untested and is the most likely route to a materially higher figure.
+  \item The kinematic component is a proxy. Embedding drift between neighbouring
+        frames responds to motion but also to illumination change, compression
+        artefacts and camera noise, and it has not been isolated from these.
+  \item Scoring is transductive in one respect: per-clip score normalisation
+        reads the whole clip before ranking any of its frames. It consumes no
+        labels, and it is the protocol established with the benchmark, but it
+        is not available to a strictly online detector.
+  \item Configuration selection used development partitions of the same test
+        set, there being no separate validation split defined for these
+        benchmarks. Held-out figures are reported as means over five clip-level
+        partitions with their spread, and the spread is comparable to the
+        margins separating the leading configurations---which are consequently
+        reported as tied rather than ranked.
+  \item Evidence for the adaptation mechanism is drawn from a single video
+        domain. Transfer across domains is asserted by the framework but not yet
+        measured.
 \end{itemize}
 
 \subsection{Future work}
 \begin{itemize}
+  \item Evaluation on a second video domain, completing Result~5. This is the
+        experiment that tests the transfer claim directly and takes precedence
+        over further optimisation within one domain.
+  \item Patch-level scoring against the encoder's spatial tokens rather than the
+        pooled embedding \citep{jeong2023winclip, zhou2024anomalyclip}. The
+        present results use only the pooled representation, discarding the
+        spatial tokens that carry sub-frame detail; the resolution limitation
+        observed on both benchmarks makes this the most promising direction for
+        absolute performance.
+  \item A fusion rule for M3 that conditions the normal and abnormal ensembles
+        differentially by construction, rather than by the asymmetric injection
+        established empirically here.
   \item A lightweight learned temporal adapter over the frozen backbone, as an
         upgrade path retaining the frozen encoder.
   \item Automatic generation of the domain descriptor from the first frames of a
