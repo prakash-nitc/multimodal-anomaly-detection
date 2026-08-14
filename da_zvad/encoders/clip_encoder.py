@@ -77,5 +77,78 @@ class CLIPEncoder:
         abnormal_embed = self.encode_text_ensemble(abnormal_prompts)
         return np.array([self.score_frame(im, normal_embed, abnormal_embed) for im in images])
 
+    # ------------------------------------------------------------------
+    # Embedding access (batched)
+    #
+    # ``score_frames`` couples encoding to one particular scoring rule and one
+    # particular prompt pair, so every new idea costs a full re-encode of the
+    # dataset. Exposing the embeddings separates the expensive, prompt-agnostic
+    # step from the cheap one: encode once, then evaluate any number of prompt
+    # sets, scoring rules and normality models against the cache.
+    # ------------------------------------------------------------------
+    def encode_texts(self, prompts: Sequence[str]):
+        """-> unit-normalised text features, one row per prompt (NOT pooled).
+
+        Pooling is left to the caller: mean-pooling an ensemble is only one
+        option, and it is the one that caused prototype dilution.
+        """
+        import torch
+        import torch.nn.functional as F
+
+        self._ensure_loaded()
+        with torch.no_grad():
+            tokens = self._tokenizer(list(prompts)).to(self.device)
+            return F.normalize(self._model.encode_text(tokens), dim=-1).cpu().numpy()
+
+    def encode_images(self, paths: Sequence[str], batch_size: int = 64,
+                      num_workers: int = 6, crops: int = 1, progress=None):
+        """-> unit-normalised image features, shape (N, crops, D).
+
+        ``crops=5`` additionally encodes the four quadrants of each frame. Whole
+        -frame CLIP resizes an 856x480 frame to 224x224, at which point a
+        cyclist covering a few percent of the image is a handful of pixels;
+        scoring quadrants and taking the max recovers that detail, which is the
+        same motivation as WinCLIP's windowed scoring.
+        """
+        import numpy as np
+        import torch
+        import torch.nn.functional as F
+        from PIL import Image
+        from torch.utils.data import DataLoader, Dataset
+
+        self._ensure_loaded()
+        preprocess, ncrop = self._preprocess, crops
+
+        class _DS(Dataset):
+            def __len__(self):
+                return len(paths)
+
+            def __getitem__(self, i):
+                im = paths[i]
+                if isinstance(im, str):
+                    im = Image.open(im).convert("RGB")
+                views = [im]
+                if ncrop == 5:
+                    w, h = im.size
+                    views += [im.crop(b) for b in
+                              ((0, 0, w // 2, h // 2), (w // 2, 0, w, h // 2),
+                               (0, h // 2, w // 2, h), (w // 2, h // 2, w, h))]
+                return torch.stack([preprocess(v) for v in views])
+
+        loader = DataLoader(_DS(), batch_size=batch_size, num_workers=num_workers,
+                            shuffle=False, pin_memory=True)
+        out = []
+        done = 0
+        with torch.no_grad():
+            for batch in loader:                       # (B, crops, 3, H, W)
+                b, c = batch.shape[0], batch.shape[1]
+                x = batch.view(b * c, *batch.shape[2:]).to(self.device, non_blocking=True)
+                f = F.normalize(self._model.encode_image(x), dim=-1)
+                out.append(f.view(b, c, -1).cpu().numpy().astype(np.float32))
+                done += b
+                if progress is not None:
+                    progress(done, len(paths))
+        return np.concatenate(out, axis=0)
+
     def __repr__(self) -> str:
         return f"CLIPEncoder({self.model_name}, {self.pretrained})"

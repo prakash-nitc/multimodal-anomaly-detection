@@ -1,0 +1,215 @@
+# -*- coding: utf-8 -*-
+"""Evaluate many scoring hypotheses against cached embeddings, honestly.
+
+Once ``cache_embeddings.py`` has run, every question that does not change the
+image encoder -- prompt wording, pooling rule, crop aggregation, temporal
+window, how normality is defined -- can be answered in seconds instead of the
+50 minutes a re-encode costs.
+
+That speed creates its own hazard. Evaluate enough variants against a test set
+and one of them scores well by chance; report only that one and the number is
+fiction. So the clips are split into a DEVELOPMENT half and a HELD-OUT half
+before anything is measured. All exploration and all ranking happen on dev. The
+held-out column exists to be read once, at the end, for the configuration dev
+selected -- it is the number that goes in the paper.
+
+The split is by CLIP, not by frame: frames within a clip are highly correlated,
+so a frame-level split would leak almost everything across the boundary.
+
+Scoring strategies
+------------------
+margin_pooled
+    Mean-pool each prompt ensemble into one prototype, score by the difference
+    of cosine similarities. This is the original DA-ZVAD rule (its softmax is a
+    monotone function of this margin, so AUROC is identical). Mean-pooling is
+    also what produced the prototype-dilution failure.
+
+margin_maxmax
+    Score against each prompt individually: max similarity over the abnormal
+    ensemble minus max over the normal ensemble. Never averages prompts, so a
+    specific anomaly phrase that fires on a few frames is not washed out by the
+    other phrases in its ensemble.
+
+center
+    Ignore the abnormal text entirely. Estimate what normal looks like IN THIS
+    CLIP as the mean embedding of its own frames, and score by distance from
+    it. Uses no labels and no training. Anomalies are the minority and are
+    mutually dissimilar, so the mean is dominated by normal content.
+
+    This is transductive -- it reads the unlabelled test clip before scoring --
+    which must be stated plainly in the paper. It is standard in the VAD
+    literature, and it is the most direct expression of the concept-shift
+    claim: the decision boundary is re-estimated per scene, with no gradients.
+
+*_plus_center
+    Per-clip z-score of the text margin plus the centre distance. Combines a
+    semantic prior with a scene-specific empirical one.
+
+Usage:
+    python notebooks/scoring_lab.py --cache ~/dazvad/work/embeddings/<file>.npz
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+
+import numpy as np
+
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO)
+
+from da_zvad import evaluation                    # noqa: E402
+from da_zvad.prompts import get_prompts           # noqa: E402
+from da_zvad.temporal import moving_average       # noqa: E402
+
+
+# --- extra prompt ensembles to compare against the packaged ones ------------
+EXTRA_PROMPTS = {
+    # Union of the crime vocabulary and the campus vocabulary: tests whether
+    # the two are complementary or whether one simply drowns the other.
+    "union": (
+        list(get_prompts("surveillance")[0]) + list(get_prompts("campus")[0]),
+        list(get_prompts("surveillance")[1]) + list(get_prompts("campus")[1]),
+    ),
+    # Deliberately minimal and scene-free: the two ensembles share no
+    # vocabulary at all, which is the condition prototype dilution violates.
+    "disjoint": (
+        ["a photo of an ordinary calm moment"],
+        ["a photo of an unusual and alarming moment"],
+    ),
+}
+
+
+def prompt_sets():
+    out = {name: get_prompts(name) for name in ("generic", "surveillance", "campus")}
+    out.update(EXTRA_PROMPTS)
+    return out
+
+
+def zscore_per_clip(x: np.ndarray, clip_ids: np.ndarray) -> np.ndarray:
+    z = np.empty_like(x, dtype=float)
+    for c in np.unique(clip_ids):
+        m = clip_ids == c
+        v = x[m]
+        sd = v.std()
+        z[m] = (v - v.mean()) / sd if sd > 1e-8 else 0.0
+    return z
+
+
+def build_scores(feats, clip_ids, texts, crop_agg: str):
+    """feats (N, C, D); texts dict name -> (normal (P,D), abnormal (Q,D))."""
+    agg = (lambda a: a.max(axis=1)) if crop_agg == "max" else (lambda a: a.mean(axis=1))
+    out = {}
+
+    for pname, (tn, ta) in texts.items():
+        pn = tn.mean(0); pn /= np.linalg.norm(pn)
+        pa = ta.mean(0); pa /= np.linalg.norm(pa)
+        out[f"margin_pooled|{pname}"] = agg(feats @ pa) - agg(feats @ pn)
+        out[f"margin_maxmax|{pname}"] = (agg((feats @ ta.T).max(axis=-1))
+                                         - agg((feats @ tn.T).max(axis=-1)))
+
+    # Scene-conditional normality, from the clip's own (unlabelled) frames.
+    whole = feats[:, 0, :]
+    center = np.empty(len(whole), dtype=float)
+    for c in np.unique(clip_ids):
+        m = clip_ids == c
+        mu = whole[m].mean(0)
+        n = np.linalg.norm(mu)
+        center[m] = 1.0 - whole[m] @ (mu / n if n > 1e-8 else mu)
+    out["center|-"] = center
+
+    for key in [k for k in list(out) if k.startswith("margin_")]:
+        strat, pname = key.split("|")
+        out[f"{strat}_plus_center|{pname}"] = (zscore_per_clip(out[key], clip_ids)
+                                               + zscore_per_clip(center, clip_ids))
+    return out
+
+
+def evaluate(scores, labels, clip_ids, keep, window: int) -> float:
+    seqs, labs = [], []
+    for c in np.unique(clip_ids):
+        if c not in keep:
+            continue
+        m = clip_ids == c
+        if len(np.unique(labels[m])) < 2 and labels[m].sum() == 0:
+            pass  # all-normal clips still contribute negatives to the pool
+        seqs.append(moving_average(scores[m], window))
+        labs.append(labels[m])
+    return evaluation.pooled_auroc(seqs, labs, normalize=True)
+
+
+def main() -> int:
+    p = argparse.ArgumentParser()
+    p.add_argument("--cache", required=True)
+    p.add_argument("--windows", type=int, nargs="+", default=[1, 5, 15, 31])
+    p.add_argument("--crop-agg", nargs="+", default=["max", "mean"])
+    p.add_argument("--dev-frac", type=float, default=0.5)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--top", type=int, default=20)
+    p.add_argument("--out", default=None)
+    args = p.parse_args()
+
+    z = np.load(os.path.expanduser(args.cache), allow_pickle=True)
+    feats, labels, clip_ids = z["feats"], z["labels"].astype(int), z["clip_ids"]
+    n_crops = feats.shape[1]
+    print(f"cache: {feats.shape[0]} frames, {n_crops} crop(s), dim {feats.shape[2]}, "
+          f"{len(np.unique(clip_ids))} clips, {labels.sum()} anomalous "
+          f"({100 * labels.mean():.1f}%)")
+
+    clips = np.unique(clip_ids)
+    rng = np.random.default_rng(args.seed)
+    perm = rng.permutation(clips)
+    n_dev = int(round(args.dev_frac * len(clips)))
+    dev, held = set(perm[:n_dev].tolist()), set(perm[n_dev:].tolist())
+    print(f"split: {len(dev)} dev clips / {len(held)} held-out clips (seed {args.seed})\n")
+
+    from da_zvad.encoders import CLIPEncoder
+    enc = CLIPEncoder(str(z["clip_model"]), str(z["clip_pretrained"]), "cpu")
+    texts = {name: (enc.encode_texts(n), enc.encode_texts(a))
+             for name, (n, a) in prompt_sets().items()}
+
+    rows = []
+    for crop_agg in (args.crop_agg if n_crops > 1 else ["max"]):
+        variants = build_scores(feats, clip_ids, texts, crop_agg)
+        for key, s in variants.items():
+            strat, pname = key.split("|")
+            for w in args.windows:
+                rows.append({
+                    "strategy": strat, "prompts": pname,
+                    "crops": crop_agg if n_crops > 1 else "n/a", "window": w,
+                    "dev_auroc": round(evaluate(s, labels, clip_ids, dev, w), 4),
+                    "heldout_auroc": round(evaluate(s, labels, clip_ids, held, w), 4),
+                })
+
+    rows.sort(key=lambda r: -r["dev_auroc"])
+    print(f"{'strategy':<28}{'prompts':<14}{'crops':<7}{'win':>4}"
+          f"{'DEV':>9}{'held-out':>10}")
+    print("-" * 74)
+    for r in rows[:args.top]:
+        print(f"{r['strategy']:<28}{r['prompts']:<14}{r['crops']:<7}{r['window']:>4}"
+              f"{r['dev_auroc']:>9.4f}{r['heldout_auroc']:>10.4f}")
+
+    best = rows[0]
+    print("\n" + "=" * 74)
+    print("SELECTED ON DEV -- report the held-out number:")
+    print(f"  {best['strategy']} / prompts={best['prompts']} / "
+          f"crops={best['crops']} / window={best['window']}")
+    print(f"  dev {best['dev_auroc']:.4f}   HELD-OUT {best['heldout_auroc']:.4f}")
+    print("=" * 74)
+    print("\nDev picks the configuration; held-out is the number to publish.")
+    print("A large dev-to-held-out drop means the ranking fitted noise --")
+    print("report it rather than reseeding until the gap closes.")
+
+    if args.out:
+        import csv
+        os.makedirs(os.path.dirname(os.path.abspath(args.out)) or ".", exist_ok=True)
+        with open(args.out, "w", newline="") as fh:
+            wr = csv.DictWriter(fh, fieldnames=list(rows[0].keys()))
+            wr.writeheader(); wr.writerows(rows)
+        print(f"\n-> {args.out}  ({len(rows)} rows)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
