@@ -119,24 +119,62 @@ def build_scores(feats, clip_ids, texts, crop_agg: str):
         center[m] = 1.0 - whole[m] @ (mu / n if n > 1e-8 else mu)
     out["center|-"] = center
 
-    for key in [k for k in list(out) if k.startswith("margin_")]:
+    # Motion. ShanghaiTech's anomaly classes are overwhelmingly kinematic --
+    # cyclists, runners, vehicles, chasing. A single frame of a cyclist is an
+    # unremarkable photo of a person on a path, so a frame-level scorer is
+    # being asked to judge appearance for what is really an event in time.
+    # Embedding drift between neighbouring frames measures that directly, and
+    # needs no extra model: fast-moving content changes the frame embedding
+    # quickly, ordinary walking does not.
+    for lag in (1, 5):
+        d = np.zeros(len(whole), dtype=float)
+        for c in np.unique(clip_ids):
+            idx = np.where(clip_ids == c)[0]
+            f = whole[idx]
+            if len(f) <= lag:
+                continue
+            sim = np.einsum("ij,ij->i", f[lag:], f[:-lag])
+            d[idx[lag:]] = 1.0 - sim
+            d[idx[:lag]] = d[idx[lag]]          # pad the head with the first value
+        out[f"motion{lag}|-"] = d
+
+    base = [k for k in list(out) if k.startswith("margin_")]
+    for key in base:
         strat, pname = key.split("|")
-        out[f"{strat}_plus_center|{pname}"] = (zscore_per_clip(out[key], clip_ids)
-                                               + zscore_per_clip(center, clip_ids))
+        zk = zscore_per_clip(out[key], clip_ids)
+        out[f"{strat}_plus_center|{pname}"] = zk + zscore_per_clip(center, clip_ids)
+        for lag in (1, 5):
+            out[f"{strat}_plus_motion{lag}|{pname}"] = (
+                zk + zscore_per_clip(out[f"motion{lag}|-"], clip_ids))
     return out
 
 
-def evaluate(scores, labels, clip_ids, keep, window: int) -> float:
-    seqs, labs = [], []
-    for c in np.unique(clip_ids):
-        if c not in keep:
-            continue
-        m = clip_ids == c
-        if len(np.unique(labels[m])) < 2 and labels[m].sum() == 0:
-            pass  # all-normal clips still contribute negatives to the pool
-        seqs.append(moving_average(scores[m], window))
-        labs.append(labels[m])
-    return evaluation.pooled_auroc(seqs, labs, normalize=True)
+def per_clip_smoothed(scores, labels, clip_ids, window: int):
+    """Smooth once per clip; every split then reuses the result."""
+    return {int(c): (moving_average(scores[clip_ids == c], window),
+                     labels[clip_ids == c])
+            for c in np.unique(clip_ids)}
+
+
+def auroc_subset(pc, keep) -> float:
+    return evaluation.pooled_auroc([pc[c][0] for c in keep],
+                                   [pc[c][1] for c in keep], normalize=True)
+
+
+def make_splits(clips, dev_frac: float, seeds):
+    """Several independent clip-level dev/held-out partitions.
+
+    One partition of 107 clips is noisy: differences of 0.002 between the top
+    configurations are indistinguishable from which clips happened to land
+    where. Averaging over partitions, and reporting the spread, says whether a
+    ranking is real or an artefact of one draw.
+    """
+    out = []
+    for s in seeds:
+        perm = np.random.default_rng(s).permutation(clips)
+        n = int(round(dev_frac * len(clips)))
+        out.append((set(perm[:n].tolist()), set(perm[n:].tolist())))
+    return out
 
 
 def main() -> int:
@@ -145,7 +183,7 @@ def main() -> int:
     p.add_argument("--windows", type=int, nargs="+", default=[1, 5, 15, 31])
     p.add_argument("--crop-agg", nargs="+", default=["max", "mean"])
     p.add_argument("--dev-frac", type=float, default=0.5)
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     p.add_argument("--top", type=int, default=20)
     p.add_argument("--out", default=None)
     args = p.parse_args()
@@ -158,11 +196,9 @@ def main() -> int:
           f"({100 * labels.mean():.1f}%)")
 
     clips = np.unique(clip_ids)
-    rng = np.random.default_rng(args.seed)
-    perm = rng.permutation(clips)
-    n_dev = int(round(args.dev_frac * len(clips)))
-    dev, held = set(perm[:n_dev].tolist()), set(perm[n_dev:].tolist())
-    print(f"split: {len(dev)} dev clips / {len(held)} held-out clips (seed {args.seed})\n")
+    splits = make_splits(clips, args.dev_frac, args.seeds)
+    print(f"splits: {len(splits)} x ({len(splits[0][0])} dev / "
+          f"{len(splits[0][1])} held-out) clips, seeds {args.seeds}\n")
 
     from da_zvad.encoders import CLIPEncoder
     enc = CLIPEncoder(str(z["clip_model"]), str(z["clip_pretrained"]), "cpu")
@@ -175,31 +211,46 @@ def main() -> int:
         for key, s in variants.items():
             strat, pname = key.split("|")
             for w in args.windows:
+                pc = per_clip_smoothed(s, labels, clip_ids, w)
+                dev_a = [auroc_subset(pc, d) for d, _ in splits]
+                held_a = [auroc_subset(pc, h) for _, h in splits]
+                full = auroc_subset(pc, [int(c) for c in clips])
                 rows.append({
                     "strategy": strat, "prompts": pname,
                     "crops": crop_agg if n_crops > 1 else "n/a", "window": w,
-                    "dev_auroc": round(evaluate(s, labels, clip_ids, dev, w), 4),
-                    "heldout_auroc": round(evaluate(s, labels, clip_ids, held, w), 4),
+                    "dev_mean": round(float(np.mean(dev_a)), 4),
+                    "heldout_mean": round(float(np.mean(held_a)), 4),
+                    "heldout_std": round(float(np.std(held_a)), 4),
+                    "all_clips": round(float(full), 4),
                 })
 
-    rows.sort(key=lambda r: -r["dev_auroc"])
-    print(f"{'strategy':<28}{'prompts':<14}{'crops':<7}{'win':>4}"
-          f"{'DEV':>9}{'held-out':>10}")
-    print("-" * 74)
+    rows.sort(key=lambda r: -r["dev_mean"])
+    print(f"{'strategy':<30}{'prompts':<12}{'crops':<7}{'win':>4}"
+          f"{'DEV':>9}{'held-out':>11}{'all':>9}")
+    print("-" * 82)
     for r in rows[:args.top]:
-        print(f"{r['strategy']:<28}{r['prompts']:<14}{r['crops']:<7}{r['window']:>4}"
-              f"{r['dev_auroc']:>9.4f}{r['heldout_auroc']:>10.4f}")
+        print(f"{r['strategy']:<30}{r['prompts']:<12}{r['crops']:<7}{r['window']:>4}"
+              f"{r['dev_mean']:>9.4f}"
+              f"{r['heldout_mean']:>8.4f}+-{r['heldout_std']:<4.3f}"
+              f"{r['all_clips']:>9.4f}")
 
     best = rows[0]
-    print("\n" + "=" * 74)
-    print("SELECTED ON DEV -- report the held-out number:")
+    spread = max(r["dev_mean"] for r in rows[:5]) - min(r["dev_mean"] for r in rows[:5])
+    print("\n" + "=" * 82)
+    print("SELECTED ON DEV (mean over splits) -- report the held-out number:")
     print(f"  {best['strategy']} / prompts={best['prompts']} / "
           f"crops={best['crops']} / window={best['window']}")
-    print(f"  dev {best['dev_auroc']:.4f}   HELD-OUT {best['heldout_auroc']:.4f}")
-    print("=" * 74)
-    print("\nDev picks the configuration; held-out is the number to publish.")
-    print("A large dev-to-held-out drop means the ranking fitted noise --")
-    print("report it rather than reseeding until the gap closes.")
+    print(f"  dev {best['dev_mean']:.4f}   HELD-OUT {best['heldout_mean']:.4f} "
+          f"+- {best['heldout_std']:.4f}   all-clips {best['all_clips']:.4f}")
+    print("=" * 82)
+    if spread < 2 * max(r["heldout_std"] for r in rows[:5]):
+        print(f"\nCAUTION: the top 5 configurations span only {spread:.4f} on dev,")
+        print("which is inside the split-to-split noise. Treat them as tied --")
+        print("the winner is not meaningfully better than its neighbours.")
+    print("\nheld-out +- is the standard deviation across splits, i.e. how much")
+    print("the number moves purely from which clips landed in which half.")
+    print("'all' scores every clip, for comparison with published numbers that")
+    print("use the full test set.")
 
     if args.out:
         import csv
