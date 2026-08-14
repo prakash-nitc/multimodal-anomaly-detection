@@ -26,8 +26,9 @@ class DAZVADConfig:
     device: str = "cuda"                    # falls back to cpu automatically
 
     # --- domain / prompts ---
-    domain: str = "generic"                 # generic | industrial | surveillance
+    domain: str = "generic"                 # generic | industrial | surveillance | campus
     domain_description: str = "a generic scene"   # M3 verbalized context
+    context_mode: str = "normal"            # normal | both (see context.verbalized)
 
     # --- module toggles (ablation switches) ---
     use_temporal: bool = True               # M2 temporal aggregation

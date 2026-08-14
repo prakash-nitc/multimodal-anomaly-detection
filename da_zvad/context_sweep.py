@@ -30,6 +30,7 @@ from . import evaluation
 # Deliberately-wrong descriptions per domain family
 MISMATCHED = {
     "surveillance": "an industrial quality-inspection image of a manufactured product on a factory line",
+    "campus": "an industrial quality-inspection image of a manufactured product on a factory line",
     "industrial": "a university campus walkway with pedestrians under CCTV surveillance",
     "generic": "a generic scene",
 }
@@ -66,7 +67,10 @@ def run_context_sweep(specs: List[DatasetSpec],
             labels_cat = np.concatenate(data["labels"])
             for w in windows:
                 smoothed = [_smooth(s, w) for s in data["scores"]]
-                micro = evaluation.frame_auroc(np.concatenate(smoothed), labels_cat)
+                micro = evaluation.pooled_auroc(smoothed, data["labels"],
+                                                normalize=False)
+                micro_norm = evaluation.pooled_auroc(smoothed, data["labels"],
+                                                     normalize=True)
                 per_seq = [evaluation.frame_auroc(s, l)
                            for s, l in zip(smoothed, data["labels"])
                            if len(np.unique(l)) == 2]
@@ -75,6 +79,7 @@ def run_context_sweep(specs: List[DatasetSpec],
                     "dataset": spec.label(), "context_variant": var["name"],
                     "description": var["description"] or "-", "window": w,
                     "auroc_micro": round(float(micro), 4),
+                    "auroc_micro_norm": round(float(micro_norm), 4),
                     "auroc_macro": round(macro, 4),
                     "n_frames": int(labels_cat.size),
                 })
@@ -87,14 +92,18 @@ def run_context_sweep(specs: List[DatasetSpec],
 
     if verbose:
         print(f"\n[ctx-sweep] {len(rows)} rows -> {path}")
-        print("\n=== context sweep: auroc_micro (per window) ===")
         variant_order = ["none", "generic", "matched", "mismatched"]
-        for w_ in sorted({r["window"] for r in rows}):
-            print(f"-- window={w_} --")
-            print(f"{'dataset':<22}" + "".join(f"{v:>12}" for v in variant_order))
-            for ds in dict.fromkeys(r["dataset"] for r in rows):
-                by_var = {r["context_variant"]: r["auroc_micro"] for r in rows
-                          if r["dataset"] == ds and r["window"] == w_}
-                print(f"{ds:<22}" + "".join(
-                    f"{by_var.get(v, float('nan')):>12.3f}" for v in variant_order))
+        # Report the per-clip-normalised pooled AUROC: raw pooling mixes 13
+        # camera views on incomparable score scales, so it measures the
+        # benchmark's heterogeneity as much as the method's ability.
+        for metric in ("auroc_micro_norm", "auroc_micro"):
+            print(f"\n=== context sweep: {metric} (per window) ===")
+            for w_ in sorted({r["window"] for r in rows}):
+                print(f"-- window={w_} --")
+                print(f"{'dataset':<22}" + "".join(f"{v:>12}" for v in variant_order))
+                for ds in dict.fromkeys(r["dataset"] for r in rows):
+                    by_var = {r["context_variant"]: r[metric] for r in rows
+                              if r["dataset"] == ds and r["window"] == w_}
+                    print(f"{ds:<22}" + "".join(
+                        f"{by_var.get(v, float('nan')):>12.3f}" for v in variant_order))
     return rows

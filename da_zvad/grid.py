@@ -41,8 +41,17 @@ class DatasetSpec:
 
 
 def _cache_key(spec: DatasetSpec, ctx_name: str, cfg: DAZVADConfig) -> str:
-    parts = [spec.dataset, spec.category or "", ctx_name,
-             cfg.clip_model.replace("/", "-"), f"step{cfg.frame_step}"]
+    """Identify a cached score set by everything that can change the scores.
+
+    ``spec.domain`` and ``cfg.context_mode`` are part of the key because both
+    change the text prompts and therefore the scores. Leaving them out was a
+    correctness bug: rerunning the same dataset under a different prompt
+    ensemble would load the previous run's scores from cache and silently
+    report them as the new configuration's result.
+    """
+    parts = [spec.dataset, spec.category or "", spec.domain, ctx_name,
+             cfg.context_mode, cfg.clip_model.replace("/", "-"),
+             f"step{cfg.frame_step}"]
     return "_".join(p for p in parts if p)
 
 
@@ -114,14 +123,19 @@ def run_grid(specs: List[DatasetSpec],
             labels_cat = np.concatenate(data["labels"])
             for w in windows:
                 smoothed = [_smooth(s, w) for s in data["scores"]]
-                micro = evaluation.frame_auroc(np.concatenate(smoothed), labels_cat)
+                micro = evaluation.pooled_auroc(smoothed, data["labels"],
+                                                normalize=False)
+                micro_norm = evaluation.pooled_auroc(smoothed, data["labels"],
+                                                     normalize=True)
                 per_seq = [evaluation.frame_auroc(s, l)
                            for s, l in zip(smoothed, data["labels"])
                            if len(np.unique(l)) == 2]
                 macro = float(np.mean(per_seq)) if per_seq else float("nan")
                 rows.append({
-                    "dataset": spec.label(), "context": use_ctx, "window": w,
+                    "dataset": spec.label(), "domain": spec.domain,
+                    "context": use_ctx, "window": w,
                     "auroc_micro": round(float(micro), 4),
+                    "auroc_micro_norm": round(float(micro_norm), 4),
                     "auroc_macro": round(macro, 4),
                     "n_seqs": len(data["scores"]),
                     "n_frames": int(labels_cat.size),

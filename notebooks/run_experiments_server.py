@@ -91,6 +91,8 @@ def build_manifest(args, specs, gpu_info: dict) -> str:
         "",
         "-- configuration " + "-" * 43,
         f"clip model      : {args.clip_model} / {args.clip_pretrained}",
+        f"prompt domain   : {args.domain}",
+        f"context mode    : {args.context_mode}",
         f"frame_step      : {args.frame_step}  (score every Nth frame)",
         f"grid windows    : {args.windows}",
         f"sweep windows   : {args.sweep_windows}",
@@ -148,6 +150,14 @@ def main() -> int:
     p.add_argument("--sweep-windows", type=int, nargs="+", default=[1, 5])
     p.add_argument("--clip-model", default="ViT-L-14")
     p.add_argument("--clip-pretrained", default="laion2b_s32b_b82k")
+    p.add_argument("--domain", default="campus",
+                   choices=["campus", "surveillance", "generic"],
+                   help="prompt ensemble for the video datasets. 'surveillance' "
+                        "encodes a crime notion of anomaly (UCF-Crime style); "
+                        "'campus' encodes ShanghaiTech's documented classes")
+    p.add_argument("--context-mode", default="normal", choices=["normal", "both"],
+                   help="'both' appends the description to both ensembles and "
+                        "dilutes them; 'normal' grounds only the normal side")
     p.add_argument("--gpu-frac", type=float, default=0.40,
                    help="max fraction of GPU memory this process may hold")
     p.add_argument("--tag", default="grid", help="short label for the run folder")
@@ -181,11 +191,11 @@ def main() -> int:
     if args.shanghaitech:
         specs.append(DatasetSpec(
             "shanghaitech", os.path.expanduser(args.shanghaitech),
-            domain="surveillance",
+            domain=args.domain,
             description="a university campus walkway with pedestrians"))
     if args.avenue:
         specs.append(DatasetSpec(
-            "avenue", os.path.expanduser(args.avenue), domain="surveillance",
+            "avenue", os.path.expanduser(args.avenue), domain=args.domain,
             description="a subway station entrance with commuters"))
     if args.mvtec:
         for cat in args.mvtec_categories:
@@ -226,7 +236,8 @@ def main() -> int:
 
     base = DAZVADConfig(clip_model=args.clip_model,
                         clip_pretrained=args.clip_pretrained,
-                        frame_step=args.frame_step)
+                        frame_step=args.frame_step,
+                        context_mode=args.context_mode)
     t0 = time.time()
 
     print("\n" + "=" * 70)

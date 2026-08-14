@@ -58,7 +58,9 @@ class DAZVADPipeline:
     def __init__(self, config: DAZVADConfig):
         self.config = config
         # M3 verbalized context (optional)
-        self.context = VerbalizedContext(config.domain_description) if config.use_context else None
+        self.context = (VerbalizedContext(config.domain_description,
+                                          mode=config.context_mode)
+                        if config.use_context else None)
         # M2 temporal (optional)
         self.temporal = TemporalAggregator(config.temporal_window) if config.use_temporal else None
         # M4 reasoning (optional; stub or LLaVA per config)
