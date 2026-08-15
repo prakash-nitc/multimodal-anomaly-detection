@@ -198,13 +198,12 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          partitions. Per-clip score normalisation added to the metrics protocol.
          Conclusion and limitations rewritten against measured outcomes.
          Results~5 (cross-domain) and~6 (explanations) remain outstanding. \\
-14 Aug 2026 & Positioned against concurrent work. \citet{wilkinghoff2026context}
-         argue independently that normality is context-dependent and that
-         abnormality should be assessed conditionally. Observation~2 and
-         Contribution~C1 revised to cite it and to state precisely what this work
-         adds: the domain-adaptation vocabulary that locates the mismatch,
-         language rather than additional sensing as the context channel, and a
-         protocol that tests whether supplied context does any work. \\
+14 Aug 2026 & Added a citation to \citet{wilkinghoff2026context}, who reach the
+         same conclusion independently: what counts as normal depends on the
+         setting. Observation~2 and Contribution~C1 now cite that paper and say
+         what this work adds instead. We state the problem in domain-adaptation
+         terms, we supply the context as a sentence rather than as extra sensor
+         data, and we test whether the context changes anything. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -429,23 +428,23 @@ dominant family across \citet{wang2018deep}, \citet{wilson2020survey} and
 \citet{liu2022deep}---cannot address them, because $p(x)$ may be identical across
 the two domains while only the labelling function differs.
 
-The context-dependence of normality has been argued independently and
-concurrently by \citet{wilkinghoff2026context}, who observe that ``a specific
-observation may be normal under one operating condition, yet anomalous under
-another'', that modelling normality against a single unconditional reference
-therefore introduces ``structural ambiguity'', and that abnormality should be
-defined conditionally rather than relative to a global reference. We take that
-convergence as support for the premise rather than as competition for it, and
-our position differs from theirs in three respects. First, we state the problem
-in the formal vocabulary of the domain-adaptation literature, which allows the
-mismatch of Observation~1 to be identified precisely: the shift anomaly
-detection exhibits is the one that literature scopes out. Second, their context
-is carried by additional sensing modalities, whereas ours is carried by
-natural language supplied by an operator, which requires no additional
-instrumentation. Third, and most consequentially, their contribution is a
-position: they argue for context-conditional assessment and enumerate open
-challenges. The present work supplies a mechanism and, more importantly, a
-protocol that can determine whether the supplied context does any work at all.
+\citet{wilkinghoff2026context} reach the same conclusion independently. They
+observe that ``a specific observation may be normal under one operating
+condition, yet anomalous under another'', and argue that judging such an
+observation against a single fixed notion of normality creates what they term
+``structural ambiguity''. Abnormality, they conclude, should be assessed
+conditionally.
+
+We read that agreement as support for the premise rather than as competition
+for it. Three things separate the two accounts. First, we state the problem in
+the vocabulary of the domain-adaptation literature, which is what makes the
+mismatch in Observation~1 visible: the shift anomaly detection exhibits is the
+one that literature sets aside. Second, their context arrives through additional
+sensing modalities, whereas ours arrives as a sentence written by an operator
+and needs no extra instrumentation. Third, their paper is a position: it argues
+for conditional assessment and lists open problems. This work supplies a
+mechanism, and a protocol that can establish whether the supplied context does
+anything at all.
 
 \subsection{Observation 3: foundation models relocate the problem}
 \citet{liu2022deep} pose the foundation-model question directly and answer it in
