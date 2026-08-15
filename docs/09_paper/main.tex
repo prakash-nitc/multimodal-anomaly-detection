@@ -183,10 +183,10 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
 \toprule
 \textbf{Date} & \textbf{Update} \\
 \midrule
-\today & Converted to Elsevier CAS single-column format. Sections drafted from
+07 August 2026 & Converted to Elsevier CAS single-column format. Sections drafted from
          the literature study; image-domain baseline reported; video
          experiments pending. \\
-\today & Supervisor revisions: Introduction and Literature Review separated
+10 August 2026 & Supervisor revisions: Introduction and Literature Review separated
          into distinct sections, with motivation integrated into the
          Introduction; framework overview expanded with end-to-end data flow,
          scoring and smoothing equations, and design rationale; algorithms
@@ -198,6 +198,13 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          partitions. Per-clip score normalisation added to the metrics protocol.
          Conclusion and limitations rewritten against measured outcomes.
          Results~5 (cross-domain) and~6 (explanations) remain outstanding. \\
+14 Aug 2026 & Positioned against concurrent work. \citet{wilkinghoff2026context}
+         argue independently that normality is context-dependent and that
+         abnormality should be assessed conditionally. Observation~2 and
+         Contribution~C1 revised to cite it and to state precisely what this work
+         adds: the domain-adaptation vocabulary that locates the mismatch,
+         language rather than additional sensing as the context channel, and a
+         protocol that tests whether supplied context does any work. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -422,6 +429,24 @@ dominant family across \citet{wang2018deep}, \citet{wilson2020survey} and
 \citet{liu2022deep}---cannot address them, because $p(x)$ may be identical across
 the two domains while only the labelling function differs.
 
+The context-dependence of normality has been argued independently and
+concurrently by \citet{wilkinghoff2026context}, who observe that ``a specific
+observation may be normal under one operating condition, yet anomalous under
+another'', that modelling normality against a single unconditional reference
+therefore introduces ``structural ambiguity'', and that abnormality should be
+defined conditionally rather than relative to a global reference. We take that
+convergence as support for the premise rather than as competition for it, and
+our position differs from theirs in three respects. First, we state the problem
+in the formal vocabulary of the domain-adaptation literature, which allows the
+mismatch of Observation~1 to be identified precisely: the shift anomaly
+detection exhibits is the one that literature scopes out. Second, their context
+is carried by additional sensing modalities, whereas ours is carried by
+natural language supplied by an operator, which requires no additional
+instrumentation. Third, and most consequentially, their contribution is a
+position: they argue for context-conditional assessment and enumerate open
+challenges. The present work supplies a mechanism and, more importantly, a
+protocol that can determine whether the supplied context does any work at all.
+
 \subsection{Observation 3: foundation models relocate the problem}
 \citet{liu2022deep} pose the foundation-model question directly and answer it in
 part: such models ``are robust to the covariate shift in many cases,'' but ``it
@@ -435,8 +460,11 @@ absorbed. What remains is precisely the shift the literature set aside.
 \subsection{Statement of the research gap}
 \begin{enumerate}[G1.]
   \item \textbf{Concept shift dominates VAD but is unstudied as such.} The DA
-        literature scopes it out as uncommon; in VAD it is the primary shift. No
-        existing work characterises VAD domain shift in these terms.
+        literature scopes it out as uncommon; in VAD it is the primary shift.
+        That normality is context-dependent has recently been argued
+        \citep{wilkinghoff2026context}, but not in the vocabulary that locates
+        the mismatch: no existing work states VAD domain shift in the DA
+        literature's own taxonomy, where the exclusion becomes visible.
   \item \textbf{No protocol measures language-mediated adaptation.} The standard
         DA protocol compares source-trained against target-adapted accuracy,
         which presupposes a training step. There is no established way to test
@@ -459,12 +487,16 @@ nor to exceed the state of the art in detection accuracy.}
 % =====================================================================
 
 \begin{enumerate}[C1.]
-  \item \textbf{Characterisation.} We identify concept shift, rather than
+  \item \textbf{Characterisation.} We formalise concept shift, rather than
         covariate shift, as the dominant form of domain shift in video anomaly
         detection, and show that this follows from the definition of normality in
-        the task. This reframes VAD domain adaptation in the formal vocabulary of
-        the DA literature and explains why $p(x)$-alignment methods are
-        structurally unsuited to it.
+        the task. That normality is context-dependent has been argued
+        concurrently and independently \citep{wilkinghoff2026context}; what we
+        add is its statement in the formal vocabulary of the domain-adaptation
+        literature, which locates the mismatch precisely---the shift anomaly
+        detection exhibits is the one that literature excludes by explicit
+        scoping decision---and explains why $p(x)$-alignment methods are
+        structurally unsuited to the task.
 
   \item \textbf{Mechanism.} We present DA-ZVAD, a fully training-free VAD
         pipeline in which every model is frozen and domain adaptation is
