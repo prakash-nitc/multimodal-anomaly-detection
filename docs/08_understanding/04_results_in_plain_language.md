@@ -1,7 +1,9 @@
 # What We Did, In Plain Language
 
-*Written 14 August 2026, after the first full GPU run. Read this before your
-Phase 2 presentation. No prior technical reading needed.*
+*Written 14 August 2026. **Substantially revised 19 August 2026** after a second
+round of experiments corrected several results — including one finding that
+turned out to be wrong. Read this before your Phase 2 presentation. No prior
+technical reading needed.*
 
 ---
 
@@ -13,9 +15,8 @@ from *that specific camera* until it learns what "ordinary" looks like there.
 Our system skips that entirely. Instead, you **write a sentence in English**
 describing the place — "a university campus walkway with pedestrians" — and the
 system uses that sentence to decide what counts as unusual. Nothing is trained.
-Today we tested it properly for the first time, on a standard benchmark, and we
-found out both how well it works and, more interestingly, *why* it works the way
-it does.
+We tested it on two standard benchmarks, found that it works on one and not the
+other, and then worked out why.
 
 ---
 
@@ -23,8 +24,8 @@ it does.
 
 ### An anomaly detector is tied to the place it learned
 
-Suppose a company sells an anomaly-detection system to a shopping mall. It
-learns, over weeks of footage, that people walking slowly is normal, that the
+Suppose a company sells an anomaly-detection system to a shopping mall. Over
+weeks of footage it learns that people walking slowly is normal, that the
 shutters close at 9pm, that nobody is around at 3am.
 
 Now sell the same system to a factory. It fails completely. Everything is
@@ -62,10 +63,12 @@ problems — in object recognition, a cat is a cat everywhere.
 where you are. That is the definition of the task. So the field's main toolkit
 is aimed somewhere other than our actual problem.
 
-**That gap is your research contribution.** You are not claiming to have
-invented a better detector. You are pointing out that everyone has been
-solving the adjacent problem, and showing what it looks like to attack the
-real one.
+> **One honest note.** A paper published this April (Wilkinghoff et al.) argues
+> the same premise independently — that normality is context-dependent and
+> should be judged conditionally. We cite it. That is *good* for you: it means
+> the problem is real and recognised, not invented to be solved. What they leave
+> open is whether supplied context actually does anything, which is what we
+> measure.
 
 ---
 
@@ -76,13 +79,10 @@ the kind of thing you can state in words — then let the operator state them.
 
 So: **freeze everything, and adapt by changing a sentence.**
 
-No retraining. No new footage. Deploy to a new site by editing one line of
-text.
-
 ### Why "freeze everything" is a clever move, not a lazy one
 
-This is worth understanding properly, because it is the strongest thing in your
-whole design and a panel member may well probe it.
+This is the strongest thing in your whole design and a panel member may well
+probe it.
 
 If we let the system learn even a little from the new place, and performance
 improves, we cannot tell *why*. Did the sentence help? Or did the learning help?
@@ -90,455 +90,379 @@ The two are tangled.
 
 Because we freeze every single parameter, only one thing in the entire system
 can vary: **the sentence**. So if performance changes, the sentence caused it.
-There is no other candidate.
 
-This is what scientists call an **identifiable** claim — you can point at the
-cause. Most adaptation methods cannot do this, because they change weights and
-text together.
-
-> **Say this in your presentation.** It is a genuine methodological strength and
-> it shows you understand why the design is the way it is.
+**And this is not available to the competing systems.** You could not run our
+central experiment on them — VERA optimises its text on source data, LAVAD's
+notion of anomaly is buried in a language model's prior, OVVAD trains an
+adapter. In each, something else is free to move.
 
 ---
 
 ## 4. What the system actually does
 
-Four parts. Think of them as four workers on an assembly line.
+Four parts.
 
 **M1 — The looker (CLIP)**
-A pre-trained model called CLIP can compare a picture to a sentence and say how
-well they match. We hand it two sets of sentences — describing normal, and
-describing abnormal — and for each video frame it reports which side matches
-better. That number is the anomaly score. **No training happens.** The language
-itself is doing the classifying.
+A pre-trained model that compares a picture to a sentence and says how well they
+match. We hand it two sets of sentences — describing normal, and describing
+abnormal — and for each frame it reports which side matches better. **No
+training happens.** The language itself does the classifying.
 
 **M2 — The smoother**
-Single frames are noisy; a person momentarily blocking the camera should not
-count as an event. So we average each frame's score with its neighbours. Real
+Single frames are noisy. We average each frame's score with its neighbours. Real
 events last several seconds; noise does not.
 
 **M3 — The scene description** ← *this is the research*
-This is where your sentence about the deployment site gets mixed into M1's
-sentences, so that "normal" means normal *here*.
+Where your sentence about the deployment site gets mixed into M1's sentences.
 
 **M4 — The explainer (LLaVA)**
-For each flagged event, a second model writes a sentence saying what it thinks
-is wrong. **We have not run this yet.**
+For each flagged event, a second model writes a sentence saying what is wrong.
+**Still not run.**
 
 ---
 
-## 5. What happened today, as a story
+## 5. What happened, as a story
 
-This section matters more than the numbers. It is what you should actually
-present.
+This matters more than the numbers. It is what you should actually present.
 
-### Step 1: We got it running (and it failed completely)
+### Day one: it failed completely
 
-We connected to the college's A40 GPU, downloaded the standard benchmark
-(**ShanghaiTech** — campus CCTV, 107 video clips, 40,791 frames, with a human
-label on every single frame saying anomalous or not), and ran the full
-experiment. Fifty minutes.
+We ran the full experiment on **ShanghaiTech** (campus CCTV, 107 clips, 40,791
+frames, every frame human-labelled). Fifty minutes.
 
 **Result: 0.49.** Explained below, but for now: **0.50 means random guessing.**
-The system was performing exactly as well as a coin.
 
-Worse, the central experiment came out *backwards*. We had predicted that giving
-the system the **correct** description of the scene would help and a **wrong**
-description would hurt. We got the opposite. The correct description was the
-worst condition and the deliberately wrong one was among the best.
+Worse, the central experiment came out *backwards*. We predicted that the
+**correct** description of the scene would help and a **wrong** one would hurt.
+We got the opposite.
 
-That is the kind of result that makes you think the whole idea is broken.
+### Problem 1 — we were measuring it wrong
 
-### Step 2: We investigated instead of guessing
+ShanghaiTech has 13 different cameras. CLIP gives slightly different baseline
+scores under each — different lighting, different angle.
 
-Three separate problems, found one at a time.
+We were dumping every frame from all 13 cameras into one list and ranking them
+together. That is like ranking students from different schools by raw marks when
+the schools grade differently.
 
-**Problem 1 — we were measuring it wrong.**
+The standard fix, used by every published paper on this benchmark, is to put
+each clip's scores on a common scale before combining. **That alone took the
+score from 0.49 to 0.71**, with no change to the system.
 
-ShanghaiTech has 13 different cameras. Each shows a different part of campus.
-CLIP happens to give slightly different baseline scores under each camera — one
-camera might sit around 0.3, another around 0.6, just because of lighting and
-angle.
+> Not cheating: it uses **no labels**, it is the benchmark's own published
+> protocol, and we report **both** numbers in the paper.
 
-We were dumping every frame from all 13 cameras into one big list and ranking
-them together. That is like ranking students from different schools by raw
-marks when the schools grade differently — a 70 from a strict school and a 70
-from a lenient one are not the same thing, and comparing them destroys the
-ranking.
+### Problem 2 — the description was cancelling itself out
 
-The standard fix, used by every published paper on this benchmark, is to
-normalise each clip's scores to a common range before combining them. We were
-not doing it.
-
-**Applying it took the score from 0.49 to 0.70, with no change to the system at
-all.** Same scores, correct arithmetic.
-
-> This is not cheating, and you should be ready to say so. It uses no labels —
-> it is just putting things on the same scale before comparing them. It is the
-> protocol from the paper that created the benchmark. And we report **both**
-> numbers in our paper, so nobody has to take our word for it.
-
-**Problem 2 — the scene description was cancelling itself out.**
-
-This is the interesting one, and it became a genuine finding.
-
-We were adding your scene sentence to *both* the "normal" sentences and the
-"abnormal" sentences. Like this:
+We were adding your scene sentence to *both* the normal and the abnormal
+sentences:
 
 - normal: *"a campus walkway with pedestrians, everything is normal"*
 - abnormal: *"a campus walkway with pedestrians, but something is wrong"*
 
-Notice both now start with the same words. The system averages each group into a
-single summary. When both summaries contain the same phrase, they become **more
-similar to each other** — and the whole method depends on them being *different*.
-We were blurring the distinction we needed.
+Both now start with the same words. The system averages each group into a single
+summary. When both summaries share a phrase, they become **more similar to each
+other** — and the method depends on them being *different*.
 
-And now the backwards result makes perfect sense: **the more accurate your
-description, the worse the damage.** An accurate description matches every frame
-strongly, so it dominates both sides and wipes out the contrast. A description
-of a factory, fed to campus footage, matches nothing — so it does no harm.
+And now the backwards result makes sense: **the more accurate your description,
+the worse the damage.** An accurate description matches every frame strongly, so
+it dominates both sides. A description of a factory matches nothing, so it does
+no harm.
 
-The fix: put the description **only on the normal side**. That fits the idea
-anyway — the scene tells you what normal looks like here; an anomaly is
-whatever departs from it.
+The fix: put the description **only on the normal side**. After that, the
+experiment behaved exactly as predicted.
 
-**After the fix, the experiment behaved exactly as predicted.** More on this
-below, because it is your headline result.
+### Day two: a second dataset, and a bug of our own
 
-**Problem 3 — a hypothesis of mine that turned out wrong.**
+We then ran **CUHK Avenue**, a second surveillance benchmark, to check the
+finding holds elsewhere. It did not — more on that below.
 
-I thought the abnormal sentences were badly chosen. They talked about *"a fight,
-robbery or accident"* — crime-scene language. But ShanghaiTech's anomalies are
-mostly cyclists and skateboarders on footpaths. So I predicted that rewriting
-them to mention bicycles and vehicles would help a lot.
+While investigating, we found **an error in our own analysis code**. A script
+we had been using to explore ideas was scoring the numbers slightly differently
+from the real system. The two ranked frames identically — we checked, and the
+correlation was exactly 1.0 — but the benchmark's scoring recipe involves
+rescaling each clip, and that step is affected by the difference.
 
-**It made things much worse** (0.69 → 0.49). My prediction was wrong.
+Roughly four hours of conclusions drawn from that script were void. We corrected
+every affected number.
 
-The reason, we think, is the same dilution problem in a new place: my new
-sentences all contained "walkway" and "pedestrians" on *both* sides, so the two
-groups shared vocabulary again.
+> **This is worth presenting.** It produced a genuine methodological finding:
+> the metric this whole field uses is sensitive to the *scale* of your score,
+> not just its ordering. That is now a limitation in your paper, and it applies
+> to everyone using the protocol, not just us.
 
-> **Keep this in your presentation.** A prediction that failed, with an
-> explanation of why, is more convincing evidence that you did real work than a
-> table of good numbers.
+### What the correction changed
 
-### Step 3: We made the system faster, then tested one more idea
+| | before | after |
+|---|---|---|
+| Headline | 0.706 | **0.734** |
+| Best temporal window | 15 | **31** |
+| Best components | language **+ motion** | **language alone** |
 
-Each experiment took 50 minutes, because we re-analysed all 40,000 frames every
-time we changed a word. We restructured it: **look at all the frames once, save
-the results, then test ideas against the saved version.** One 21-minute pass,
-after which each new idea takes seconds instead of an hour.
-
-That let us test several ideas quickly. Most failed. One worked:
-
-**Motion.** ShanghaiTech's anomalies are mostly about *speed*. A photo of a
-cyclist is just a photo of a person on a path — nothing looks wrong. What makes
-it an anomaly is that the person is moving at bicycle speed. A single still
-frame cannot show that.
-
-So we measured how much each frame differs from the one before it. Fast-moving
-things change a lot; walking changes little.
-
-Combining "what is in the frame" with "how fast it is changing" gave our best
-result.
+**A finding we had to retract:** we previously believed a motion signal combined
+usefully with the language signal. Measured correctly, motion adds nothing. If
+you saw an earlier version saying otherwise, this is the correction.
 
 ---
 
 ## 6. The results, and what the numbers mean
 
-### First: what does 0.70 actually mean?
+### First: what does 0.734 mean?
 
-The measure is called **AUROC**. Here is the only definition you need:
+**AUROC.** The only definition you need:
 
-> **Pick one anomalous frame and one normal frame at random. AUROC is how often
+> Pick one anomalous frame and one normal frame at random. AUROC is **how often
 > the system gives the anomalous one a higher suspicion score.**
 
-- **0.50** = coin flip. Useless.
-- **0.70** = correct 70% of the time.
-- **1.00** = perfect, always.
-
-So our 0.706 means: shown an anomalous frame and a normal frame, our system
-picks correctly about **7 times out of 10**.
+- **0.50** = coin flip
+- **0.734** = correct about 73 times out of 100
+- **1.00** = perfect
 
 ### Result A — the detector works
 
-| What is being measured | Score |
+| what is measured | full test set |
 |---|---|
-| Language only (CLIP + descriptions) | 0.673 |
-| Motion only (no language at all) | 0.684 |
-| **Both together** | **0.706** |
+| **Language only** | **0.707** |
+| Motion only (no language) | 0.686 |
+| Language + motion | 0.706 |
+| Clip's own average as reference | 0.585 |
 
-Two things to notice.
+**Language alone is best.** Adding motion changes nothing. That surprised us —
+ShanghaiTech's anomalies look kinematic, so the two *should* combine. They
+don't, which suggests the frozen encoder already registers enough of the motion.
 
-**The pieces combine well.** Neither alone reaches 0.706. They notice different
-things — language notices *a bicycle is present*, motion notices *something is
-moving oddly* — and a ShanghaiTech anomaly needs both. A parked bicycle is not
-an anomaly. A person walking briskly is not an anomaly. A bicycle *travelling at
-cycling speed on a footpath* is.
+With the correct scene description and the best temporal window, the full system
+reaches **0.734**.
 
-**Motion alone almost matches language alone.** That is a slightly awkward
-finding and we report it honestly: on this benchmark, a large part of what the
-fancy language model contributes could be obtained from a simple measure of
-change. It is a caution about over-claiming, and stating it yourself is far
-better than a panel member noticing it.
+### Result B — the central experiment
 
-### Result B — the central experiment (your headline)
+Four runs, changing **only the sentence**, every model frozen:
 
-This is the one that matters. We ran the system four times, changing **only the
-sentence**, with every model frozen:
-
-| Sentence given | Score |
+| sentence given | score |
 |---|---|
-| No sentence at all | 0.685 |
-| A vague one ("a generic scene") | 0.677 |
-| **The correct one** (campus walkway) | **0.692** |
-| **A deliberately wrong one** (factory inspection) | **0.592** |
+| No sentence | 0.707 |
+| Vague ("a generic scene") | 0.691 |
+| **The correct one** | **0.734** |
+| **A deliberately wrong one** | **0.628** |
 
-**Read the last row.** Giving the system a description of the wrong kind of
-place costs it **10 points**. That is a big drop.
+**A wrong description costs 10 points.** Nothing else could have caused it —
+same model, same weights, same video.
 
-And here is why that is proof rather than coincidence: **nothing else could have
-caused it.** Same model, same weights, same video, same everything. One sentence
-changed. So the sentence is doing real work.
+> **Be precise.** The correct description beats none by +0.027. That is positive
+> at every temporal window and grows with the window, so the direction is real —
+> but it sits inside the ±0.036 variation between data splits, so we report the
+> direction and don't claim the size. **The claim rests on the wrong description
+> failing, not on the right one succeeding.**
 
-**Be precise about the claim, because this is where a sharp examiner will push.**
-The correct sentence beat no sentence by only 0.007 — that is nothing, and you
-should not claim it as an improvement. The *evidence* is the wrong sentence
-failing badly, not the right sentence succeeding.
+### Result C — it did not replicate on the second benchmark
 
-Put in one line:
+| | ShanghaiTech | Avenue |
+|---|---|---|
+| No sentence | 0.707 | 0.706 |
+| Correct sentence | **0.734** | 0.677 |
+| Wrong sentence | 0.628 | 0.657 |
+| **Gap** | **+0.105** | **+0.020** |
 
-> **"We proved the description matters by breaking it. Corrupting it costs 10
-> points. That could only have come from the text, because nothing else in the
-> system was allowed to change."**
+**Detection transfers perfectly** — 0.706 versus 0.707. The detector works
+equally well on both.
 
-### Result C — the honest failures
+**The adaptation does not.** The gap is five times smaller, and on Avenue the
+*correct* description scores below no description at all. A vague placeholder
+beats an accurate one.
 
-We tested four ideas that did not work, and all four are written into the paper:
+That was the falsifying control doing exactly what it was built to do.
 
-1. Chopping frames into quadrants to spot small objects — no help
-2. Judging normality from the clip's own average appearance — 0.585, poor, and
-   it *hurt* when combined with language
-3. Rewriting the prompts to name bicycles and cars — much worse alone
-4. A different way of combining prompt sentences — no difference
+### Result D — and then we worked out why
 
-> **This is a strength, not an admission.** Anyone can report the runs that
-> worked. Reporting the ones that did not is what separates a study from a demo,
-> and a panel that suspects AI-generated work will find this far more convincing
-> than a clean table.
+ShanghaiTech has **13 camera views**. Avenue has **one**.
+
+Our idea: a scene description only has work to do when there are several places
+to tell apart. On Avenue every clip shows the same view, so there is nothing to
+resolve.
+
+That is testable *without a third dataset*, because ShanghaiTech is really 13
+single-view datasets stacked together. So we ran the same experiment **inside
+each camera view separately**:
+
+| evaluation | gap |
+|---|---|
+| Pooled across 13 views | **+0.105** |
+| Within a single view (average) | **+0.034** |
+| Avenue (single view) | +0.020 |
+
+**The prediction held.** Confine it to one scene and the effect collapses to
+near Avenue's level.
+
+> **So what the sentence mainly does is tell the system *which* place it is
+> looking at — not what counts as normal within that place.**
+
+That is narrower than we originally claimed, and it is *measured* rather than
+argued. It also predicts where the method should be useful: installations
+covering several environments, not a single fixed camera.
+
+### Result E — six things that did not work
+
+Quadrant scoring, motion, the clip's own average, local temporal deviation,
+per-prompt max pooling, and prompts naming bicycles and vehicles. All neutral or
+harmful.
+
+> **This is a strength.** Your claim is that the *simplest* configuration is the
+> right one. That is only believable next to the alternatives you tried.
 
 ---
 
-## 7. Are these results promising? An honest answer
+## 7. Are these results promising?
 
-### As a detector: modest
+### As a detector: modest, with one comparison worth making
 
-The best training-free published method (LAVAD, CVPR 2024) reaches about 0.85 on
-this benchmark. We are at 0.71.
+LAVAD (CVPR 2024) reaches ~0.85 — but runs three large models on every frame.
+You run one frozen model and a sentence, in about 7 GB.
 
-**But the comparison is not like-for-like.** LAVAD runs a captioning model over
-every frame, feeds the captions to a large language model, then refines with a
-third model. Three heavy models per frame. Ours is one frozen encoder and a
-sentence, running in about 7 GB of memory.
+**The fair comparison is this one:**
 
-You are not competing on accuracy, and your paper says so explicitly.
+> Liu et al. (2018), the paper that created ShanghaiTech, reach ~0.728 by
+> training on ShanghaiTech's own training data. **You reach 0.734 having never
+> seen a frame of it.**
 
-### As research: yes, genuinely promising
-
-Here is the honest case, and it is a real one.
-
-**You have the shape of a proper scientific study:**
+### As research: yes, genuinely
 
 - A claim that could have been proven wrong
-- A test designed to prove it wrong (the deliberately wrong description)
-- The test was run, and the claim survived
-- Findings you did not expect, with explanations
-- Failures reported alongside successes
-- Every number traceable to the exact code and hardware that produced it
+- A test designed to prove it wrong — which it partly did
+- An explanation for the failure, then a control that confirmed the explanation
+- Six failures reported alongside the successes
+- Two of your own errors caught and corrected
+- Every number traceable to the code and machine that produced it
 
-**And you found something genuinely new.** The finding that *where* you inject
-the description matters more than *what it says* — to the point of reversing the
-result — is not in the literature. Papers treat verbalised context as a matter
-of wording. We showed that a study reporting "scene descriptions do not help"
-might simply have injected them in the wrong place.
+### Will it get much better?
 
-That is a small but real contribution, and it is publishable.
+Probably not dramatically, and it is worth knowing why. Your decision rule is
+one vector compared against two sentences — it cannot *reason*. LAVAD captions
+each frame and has a language model think about the caption, which can hold
+"bicycle" and "footpath" as separate facts and combine them.
 
-### What is missing, and you should say so
+Patch-level scoring (looking at parts of the frame instead of the whole) is the
+best remaining idea and might reach 0.78–0.82. Getting to 0.85 would mean adding
+a captioner and a language model — **which would destroy the thing that makes
+your claim measurable.**
 
-**Your project is about adapting between domains, and so far you have tested one
-domain.** Everything today came from ShanghaiTech. The description experiment is
-good evidence that context matters *within* a domain, but the actual claim —
-deploy somewhere new, change only the sentence, keep working — needs a **second
-dataset**.
+That is a real trade-off, and it belongs in your answer rather than in your
+apology:
 
-That is the next experiment, and it is roughly half a session now that
-everything is built.
-
-> **Say this yourself in the presentation before anyone asks.** Naming the gap
-> in your own work reads as confidence. Being caught not having noticed reads as
-> the opposite.
+> "The architecture is capped by the same property that makes its central claim
+> testable."
 
 ---
 
 ## 8. Your Phase 2 presentation
 
-### Where you are in the four phases
-
-| Phase | What it needs | Status |
+| Phase | Needs | Status |
 |---|---|---|
-| **Phase 2** (now) | Show what you did over the break | **Comfortably covered** |
-| Phase 3 | Full implementation | Needs 2nd dataset + explanations |
-| Phase 4 | Paper publication | Needs Phase 3 done |
+| **Phase 2** (now) | Show the summer's work | **Comfortably covered** |
+| Phase 3 | Full implementation | Six items queued |
+| Phase 4 | Publication | Needs Phase 3 |
 
-For Phase 2 you have considerably more than "here is my plan" — you have a
-working system, a benchmark result, a controlled experiment, and a finding.
+Your deck is **21 slides** with speaker notes:
+`docs/06_presentations/DA-ZVAD_Phase2_Review.pptx`
 
-### A suggested structure
+**The two that matter most:**
+- **Slide 11** — the dilution explanation. Put the two prompts on screen and let
+  people see the shared words.
+- **Slide 15** — the within-view control. This shows a complete cycle: odd
+  result → explanation → test that could have killed it → it held.
 
-**Slide 1 — The problem.**
-Anomaly detectors are tied to the place they learned. Every new site means new
-footage and retraining. *Use the mall-versus-factory example — everyone gets it
-instantly.*
-
-**Slide 2 — Why the existing literature does not solve it.**
-Covariate shift versus concept shift. The surveys focus on the first and say so.
-Anomaly detection is built on the second. *This is your strongest slide — it is
-the one that shows you read the six surveys and understood them.*
-
-**Slide 3 — Our approach.**
-Freeze everything, adapt by writing a sentence. Show the architecture diagram.
-Emphasise: because nothing can change except the text, any effect is provably
-caused by the text.
-
-**Slide 4 — What we ran.**
-ShanghaiTech, 107 clips, 40,791 frames, on the college A40. Show a manifest —
-it proves the run is real and repeatable.
-
-**Slide 5 — The first result was a failure.**
-0.49, chance. And the key experiment came out backwards. *Do not hide this.
-Presenting a failure you then explained is the most credible thing you can do.*
-
-**Slide 6 — What was wrong, and the fix.**
-The measurement error, and the dilution problem. Explain dilution with the two
-sentences on screen — it is visual and people understand it immediately.
-
-**Slide 7 — Results after the fix.**
-The context table. Point at the 0.592 and say: *"that is a wrong description
-costing us 10 points, and nothing else in the system was allowed to change."*
-
-**Slide 8 — Component ablation.**
-Language 0.673, motion 0.684, together 0.706. Note the honest observation about
-motion.
-
-**Slide 9 — What did not work.**
-Four failed hypotheses. Shows the work was exploratory and real.
-
-**Slide 10 — Next.**
-Second dataset (the actual transfer test), explanation module, patch-level
-scoring. Be clear that the transfer claim is not yet tested.
+Rehearse both **out loud**. They land when spoken and die when read.
 
 ---
 
 ## 9. Questions they will ask
 
-**"0.71 is not very good. LAVAD gets 0.85."**
-> Correct, and we say so in the paper. LAVAD runs three large models per frame —
-> a captioner, a language model, and a refiner. We run one frozen encoder and a
-> sentence, in about 7 GB. We are not competing on accuracy; we are testing
-> whether language alone can carry adaptation, which needs the system to stay
-> frozen.
+**"0.734 isn't very good. LAVAD gets 0.85."**
+> Correct. LAVAD runs a captioner, a language model and a refiner on every
+> frame. We run one frozen encoder and a sentence, in about 7 GB. The fair
+> comparison is the benchmark's own trained baseline at 0.728 — we match it
+> using none of its training data.
 
-**"Did you tune this on the test set?"**
-> Partly, and we control for it. There is no validation split defined for this
-> benchmark, so we split the clips into two halves, chose configurations using
-> one half, and report the number from the half we never looked at — averaged
-> over five different splits, with the spread reported. Where configurations sit
-> inside that spread we report them as tied rather than picking a winner.
+**"Did you tune on the test set?"**
+> Partly, and we control for it. No validation split is defined for these
+> benchmarks, so we split the clips in half, chose settings on one half, and
+> report the half we never looked at — averaged over five different splits, with
+> the spread reported.
 
-**"Isn't the normalisation just making the number look better?"**
-> It uses no labels — it only puts the 13 cameras on a common scale before
-> comparing them. It is the protocol from the paper that introduced the
-> benchmark, and every published result on it does the same. We report the
-> un-normalised number in the same table so it can be checked.
+**"Isn't the normalisation just flattering the number?"**
+> It uses no labels — it puts 13 camera views on a common scale before
+> comparing. It is the benchmark's own protocol, and we report the
+> un-normalised figure in the same table.
 
-**"The correct description barely beats no description. So does it help?"**
-> That is the right question, and our claim is narrower than you might expect.
-> The correct description gains 0.007, which we explicitly do not claim as an
-> improvement. The evidence that the text matters is that a *wrong* description
-> costs 0.100. The description constrains the decision rather than adding
-> information — it degrades sharply when misdirected.
+**"The correct description barely beats no description."**
+> +0.027, positive at every window and growing with it — so the direction is
+> consistent. But it is inside the ±0.036 split spread, so I report the
+> direction, not the size. The claim rests on the *wrong* description costing
+> 0.105.
 
-**"Motion alone gets 0.684 without any language. So what is the language for?"**
-> A fair challenge, and we raise it ourselves in the paper. On this benchmark
-> the anomalies are largely kinematic, so a change signal captures much of them.
-> The two are complementary — together they reach 0.706, above either alone —
-> but we are careful not to present a frame-level vision-language score on this
-> benchmark as evidence of semantic understanding.
+**"Your finding doesn't replicate on Avenue."** ← *the hard one*
+> It bounds it rather than refuting it. Detection transfers exactly — 0.706
+> against 0.707. What doesn't transfer is the context effect. And we tested why:
+> confining ShanghaiTech to a single camera view reproduces Avenue's flat
+> result. The sentence mainly tells the system which environment it is in, and
+> Avenue has only one. **I can't explain away that a placeholder beats an
+> accurate description there** — but the mechanism is now measured, not guessed.
 
-**"Have you shown it adapts across domains?"**
-> Not yet, and that is the next experiment. What we have shown is that within a
-> domain, the description is load-bearing. Cross-domain transfer needs a second
-> dataset and is our immediate next step.
+**"Why did your numbers change from an earlier version?"**
+> An analysis script scored slightly differently from the real pipeline. The two
+> ranked frames identically, but the benchmark's per-clip rescaling is affected
+> by the difference. We caught it by requiring the analysis tool to reproduce a
+> pipeline result, corrected every affected figure, and the metric's sensitivity
+> is now a stated limitation.
 
-**"How do I know you actually ran this?"**
-> Every run writes a manifest recording the code commit, the GPU, the library
-> versions, the configuration, and the frame counts. They are committed to the
-> repository with the results. *(Have one open. This question is really about
-> credibility, and a manifest answers it in five seconds.)*
+**"How do I know you ran this?"**
+> Every run writes a manifest — code commit, GPU, library versions, config,
+> frame counts. Five of them, committed with the results.
+> *(Have one open on screen.)*
 
 ---
 
 ## 10. Glossary
 
-**AUROC** — Show the system one anomalous and one normal frame; how often does
-it rank the anomalous one higher? 0.5 = guessing, 1.0 = perfect.
+**AUROC** — Show one anomalous and one normal frame; how often is the anomalous
+one ranked higher? 0.5 = guessing, 1.0 = perfect.
 
-**Zero-shot / training-free** — The system was never shown examples from this
-task or this place. It works straight out of the box.
+**Zero-shot / training-free** — Never shown examples from this task or place.
 
-**Frozen** — No part of the model changes. No training, no learning, no updates.
+**Frozen** — No part of the model changes. No training, no updates.
 
-**CLIP** — A pre-trained model that scores how well a picture matches a
-sentence. Ours is used entirely as-is.
+**CLIP** — A pre-trained model scoring how well a picture matches a sentence.
 
-**Prompt** — A sentence given to the model. A **prompt ensemble** is several
-phrasings of the same idea, used together.
+**Prompt ensemble** — Several phrasings of the same idea, used together.
 
 **Covariate shift** — Same things, different appearance (fog versus sun).
 
-**Concept shift** — Same appearance, different correct answer (a bicycle on a
-road versus on a footpath). **This is our problem.**
+**Concept shift** — Same appearance, different correct answer. **Our problem.**
 
 **Ablation** — Turning parts off one at a time to see what each contributes.
 
-**Held-out split** — Keeping some data hidden while choosing settings, then
-reporting the score on the hidden part, so you cannot fool yourself.
+**Held-out split** — Keeping data hidden while choosing settings, then reporting
+on the hidden part.
 
-**Micro / macro averaging** — Micro pools all frames together; macro scores each
-clip and averages. When they disagree, something is off with how clips compare.
-
-**Manifest** — The record each run writes about itself: which code, which
-machine, which settings.
+**Manifest** — The record each run writes about itself.
 
 ---
 
 ## 11. If you remember only five things
 
-1. **The problem:** anomaly detectors are tied to where they learned. We adapt
+1. **The problem.** Anomaly detectors are tied to where they learned. We adapt
    them by writing a sentence instead of retraining.
 
-2. **The research gap:** the domain-adaptation literature explicitly focuses on
-   "things look different". Anomaly detection's real problem is "the same thing
-   means something different". Nobody has attacked that directly.
+2. **The gap.** The domain-adaptation literature explicitly focuses on "things
+   look different". Anomaly detection's real problem is "the same thing means
+   something different".
 
-3. **The headline result:** 0.706 on the standard benchmark with no training at
-   all — and giving it a *wrong* scene description costs 10 points, which proves
-   the sentence is doing real work, because nothing else could change.
+3. **The result.** 0.734 on ShanghaiTech with no training — matching the
+   benchmark's own trained baseline. A *wrong* sentence costs 10 points, which
+   proves the text is doing real work.
 
-4. **The surprise:** *where* you insert the description matters more than what it
-   says. Putting it in the wrong place reversed the entire result. That is new,
-   and it is our contribution.
+4. **The surprise.** *Where* you insert the description matters more than what
+   it says. Inserting it wrongly reversed the entire result.
 
-5. **What is missing:** we have tested one domain. The cross-domain claim needs a
-   second dataset. Say this before anyone asks.
+5. **The boundary.** It doesn't work on a single-scene benchmark, and we
+   measured why: the sentence mainly tells the system *which* scene it is
+   looking at. The claim is scoped, and the scoping is evidence, not excuse.
