@@ -196,7 +196,7 @@ def main() -> int:
     if args.avenue:
         specs.append(DatasetSpec(
             "avenue", os.path.expanduser(args.avenue), domain=args.domain,
-            description="a subway station entrance with commuters"))
+            description="an outdoor campus walkway in front of a building entrance"))
     if args.mvtec:
         for cat in args.mvtec_categories:
             specs.append(DatasetSpec(

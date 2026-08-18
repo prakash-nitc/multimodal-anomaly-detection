@@ -17,6 +17,7 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from typing import List, Optional, Dict
 import csv
+import hashlib
 import os
 
 import numpy as np
@@ -40,18 +41,25 @@ class DatasetSpec:
         return f"{self.dataset}/{self.category}" if self.category else self.dataset
 
 
-def _cache_key(spec: DatasetSpec, ctx_name: str, cfg: DAZVADConfig) -> str:
+def _cache_key(spec: DatasetSpec, ctx_name: str, cfg: DAZVADConfig,
+               description: str = None) -> str:
     """Identify a cached score set by everything that can change the scores.
 
-    ``spec.domain`` and ``cfg.context_mode`` are part of the key because both
-    change the text prompts and therefore the scores. Leaving them out was a
-    correctness bug: rerunning the same dataset under a different prompt
-    ensemble would load the previous run's scores from cache and silently
-    report them as the new configuration's result.
+    ``spec.domain``, ``cfg.context_mode`` and the descriptor text are all part
+    of the key because each changes the text prompts and therefore the scores.
+    Leaving any of them out is a correctness bug: rerunning the same dataset
+    under a different prompt ensemble or a corrected scene description would
+    load the previous run's scores from cache and silently report them as the
+    new configuration's result.
+
+    The descriptor is hashed rather than embedded so that the key stays a
+    usable filename regardless of what the operator wrote.
     """
+    desc = description if description is not None else spec.description
+    digest = hashlib.sha1((desc or "").encode("utf-8")).hexdigest()[:8]
     parts = [spec.dataset, spec.category or "", spec.domain, ctx_name,
              cfg.context_mode, cfg.clip_model.replace("/", "-"),
-             f"step{cfg.frame_step}"]
+             f"step{cfg.frame_step}", f"d{digest}"]
     return "_".join(p for p in parts if p)
 
 
@@ -64,7 +72,7 @@ def _score_or_load(spec: DatasetSpec, ctx_name: str, use_context: bool,
     the context sweep inject a deliberately WRONG domain description while
     everything else stays identical.
     """
-    key = _cache_key(spec, ctx_name, base)
+    key = _cache_key(spec, ctx_name, base, description)
     path = os.path.join(raw_dir, key + ".npz")
     if os.path.isfile(path):
         z = np.load(path, allow_pickle=True)
