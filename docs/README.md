@@ -10,10 +10,10 @@ what you're doing right now:**
 | Prepare for a proposal/topic meeting | **[`02_proposal/`](02_proposal/) |
 | Write/track a progress report | **[`03_progress_reports/`](03_progress_reports/) |
 | Work on the actual thesis document | **[`04_thesis/`](04_thesis/) |
-| Prepare for the viva | **[`05_viva/`](05_viva/) |
+| Prepare for the viva / a presentation | **[`08_understanding/00_HANDBOOK.md`](08_understanding/00_HANDBOOK.md)** |
 | Find a slide deck / presentation script | **[`06_presentations/`](06_presentations/) |
 | Read a reference paper (PDF) | **[`07_reference_papers/`](07_reference_papers/) |
-| **Understand what we built & why (plain language)** | **[`08_understanding/`](08_understanding/) |
+| **Understand what we built & why (plain language)** | **[`08_understanding/00_HANDBOOK.md`](08_understanding/00_HANDBOOK.md)** |
 | **Update the paper for my guide (living document)** | **[`09_paper/`](09_paper/) |
 
 ---
@@ -34,9 +34,11 @@ the video-AD future-scope note. *Frozen Sem-2 deliverables* — historical, rare
 **`04_thesis/`** — the growing final thesis, in parts (`part1`–`part4`). This is where new
 results get written up.
 
-**`05_viva/`** — **`viva_questions_final.md` is the START-HERE master.** The deeper/older
-question banks (`viva_questions_55.tex`, `viva_preparation_bible.tex`) are kept in `_archive/`
-if you want extra practice questions.
+**`08_understanding/`** — **`00_HANDBOOK.md` is the START-HERE document**: the project's
+problem, method, every result, honest assessment, prepared answers to hard questions, and
+what remains. `03_domain_adaptation_deep_dive.md` is the full study of the six supervisor-
+assigned surveys. Viva question banks and earlier plain-language notes were folded into the
+Handbook on 19 Aug 2026 and moved to `_archive/superseded_2026-08-19/`.
 
 **`06_presentations/`** — slide decks (`.pptx`/`.pdf`), the presentation scripts, and the
 compiled report PDF. Latest deck = the one to reuse.
