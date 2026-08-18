@@ -184,6 +184,7 @@ def bignum(slide_, x, y, value, label, color=ACCENT, vsize=72, w=3.2):
     box(slide_, x, y + 1.08, w, 0.5, label, 13, color=MUTED)
 
 
+
 # ================================================================ TITLE
 s = prs.slides.add_slide(BLANK)
 rect(s, 0, 0, W, H, WHITE)
@@ -205,7 +206,7 @@ box(s, 1.5, 5.92, 7.0, 0.6,
     spacing=1.35)
 box(s, 1.5, 6.75, 7.0, 0.3, "National Institute of Technology Calicut", 12.5,
     bold=True, color=ACCENT)
-box(s, W - R - 2.2, 6.75, 2.2, 0.3, "14 August 2026", 12.5, color=MUTED,
+box(s, W - R - 2.2, 6.75, 2.2, 0.3, "18 August 2026", 12.5, color=MUTED,
     align=PP_ALIGN.RIGHT)
 
 # ================================================================ 1 PROBLEM
@@ -213,7 +214,7 @@ s = slide("A detector is tied to the place it learned", "The problem")
 bullets(s, [
     ("Standard approach.", "Show the system weeks of ordinary footage from one "
      "camera until it learns what normal looks like there."),
-    ("The cost.", "Move it anywhere else and it fails — new site means new "
+    ("The cost.", "Move it anywhere else and it fails — a new site means new "
      "footage collection and a full retraining cycle."),
 ], 1.95, width=CW, size=16.5)
 
@@ -274,14 +275,19 @@ table(s, [
 callout(s, L, 5.0, CW, 1.35, "The gap we target",
         "Methods that align appearance cannot help here — the appearance is "
         "already identical. Two domains can share p(x) exactly while the "
-        "labelling function differs. No existing work characterises video "
-        "anomaly detection in these terms.", size=15)
+        "labelling function differs. A 2026 position paper argues the same "
+        "premise independently; what is missing is a test of whether supplied "
+        "context does any work.", size=14.5)
 
 # ================================================================ 4 APPROACH
 s = slide("DA-ZVAD: adapt by writing a sentence", "Proposed framework")
-img = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                   "dazvad_architecture.png")
-if os.path.isfile(img):
+_here = os.path.dirname(os.path.abspath(__file__))
+img = next((c for c in (
+    os.path.join(_here, "dazvad_architecture.png"),
+    os.path.join(_here, "..", "docs", "09_paper", "dazvad_architecture.png"),
+    os.path.join(_here, "..", "docs", "06_presentations", "dazvad_architecture.png"),
+) if os.path.isfile(c)), "")
+if img:
     s.shapes.add_picture(img, Inches(L), Inches(1.95), width=Inches(7.5))
 box(s, L + 7.85, 1.95, 3.68, 0.3, "EVERY MODEL FROZEN", 11.5, bold=True,
     color=ACCENT)
@@ -310,8 +316,9 @@ bullets(s, [
 
 callout(s, L, 4.75, CW, 1.5, "Identifiability",
         "This is what makes the adaptation claim testable rather than asserted. "
-        "Methods that update weights cannot isolate the contribution of a "
-        "contextual input, because weights and context move together.", size=16)
+        "You cannot run our central experiment on the competing systems — their "
+        "text is learned on source data, or entangled in an LLM prior, or "
+        "accompanied by a trained adapter.", size=16)
 
 box(s, L, 6.5, CW, 0.4,
     "It also means the claim can be falsified — which is the next slide.",
@@ -339,11 +346,11 @@ callout(s, L, 5.15, CW, 1.35, "Predicted signature, fixed before measurement",
 # ================================================================ 7 SETUP
 s = slide("What we ran", "Experiments  ·  setup")
 table(s, [
-    ["Benchmark", "ShanghaiTech — campus CCTV, 13 camera views"],
-    ["Scale", "107 test clips · 40,791 frames · frame-level ground truth"],
+    ["Benchmarks", "ShanghaiTech (13 views) and CUHK Avenue (1 view)"],
+    ["Scale", "128 test clips · 28,118 frames · frame-level ground truth"],
     ["Hardware", "NVIDIA A40, college GPU server"],
     ["Backbone", "CLIP ViT-L/14 (LAION-2B), frozen · PyTorch 2.3.1 / CUDA 12.1"],
-    ["Runs", "3 full experiment runs + cached-embedding analysis"],
+    ["Runs", "5 full experiment runs + cached-embedding analysis"],
 ], L, 2.0, CW, col_w=[2.4, 9.23], size=15, header=False, row_h=0.52)
 
 callout(s, L, 4.8, CW, 1.75, "Every run records its own conditions",
@@ -368,9 +375,9 @@ box(s, L, 4.2, CW, 0.4, "And the central experiment came out backwards:",
 
 table(s, [
     ["Condition", "Predicted", "Observed"],
-    ["matched (correct description)", "Best", "WORST — 0.637"],
-    ["mismatched (wrong description)", "Worst", "Among the best — 0.678"],
-], L, 4.8, CW, col_w=[5.03, 3.3, 3.3], size=14.5, hi_rows=(), row_h=0.5)
+    ["matched (correct description)", "Best", "WORST — 0.666"],
+    ["mismatched (wrong description)", "Worst", "Among the best — 0.695"],
+], L, 4.8, CW, col_w=[5.03, 3.3, 3.3], size=14.5, row_h=0.5)
 
 box(s, L, 6.55, CW, 0.4,
     "This is the point at which the idea looks broken.",
@@ -393,7 +400,7 @@ box(s, L, 4.5, CW, 0.35,
 rect(s, L, 5.05, CW, 1.35, ACCENT_LT)
 bignum(s, L + 0.6, 5.12, "0.49", "as reported", color=MUTED, vsize=42, w=2.2)
 box(s, L + 3.0, 5.42, 0.9, 0.6, "→", 34, bold=True, color=ACCENT)
-bignum(s, L + 4.2, 5.12, "0.70", "correctly pooled", color=ACCENT, vsize=42, w=2.4)
+bignum(s, L + 4.2, 5.12, "0.71", "correctly pooled", color=ACCENT, vsize=42, w=2.4)
 box(s, L + 7.3, 5.35, 4.1, 0.9,
     "Identical scores. Uses no labels.\nWe report both figures in the paper.",
     14, color=INK, spacing=1.3)
@@ -434,26 +441,26 @@ callout(s, L, 6.25, CW, 0.85, "The fix",
 # ================================================================ 11 SWEEP
 s = slide("After the fix: the predicted signature", "Results  ·  central experiment")
 box(s, L, 1.9, CW, 0.35,
-    "Per-clip normalised frame-level AUROC. Every model frozen; only the "
-    "sentence and its injection point vary.", 14.5, color=MUTED)
+    "ShanghaiTech, all 107 clips, per-clip normalised. Every model frozen; "
+    "only the sentence and its injection point vary.", 14.5, color=MUTED)
 
 table(s, [
-    ["Injection point", "none", "generic", "matched", "mismatched"],
-    ["Both prompt sets", "0.685", "0.656", "0.637", "0.678"],
-    ["Normal set only", "0.685", "0.677", "0.692", "0.592"],
-], L, 2.5, CW, col_w=[3.63, 2.0, 2.0, 2.0, 2.0], size=15,
-    hi_rows=(2,), row_h=0.58, num_cols=(1, 2, 3, 4))
+    ["Injection point", "none", "generic", "matched", "mismatched", "gap"],
+    ["Both prompt sets", "0.707", "0.670", "0.666", "0.695", "−0.029"],
+    ["Normal set only", "0.707", "0.691", "0.734", "0.628", "+0.105"],
+], L, 2.5, CW, col_w=[3.23, 1.68, 1.68, 1.68, 1.68, 1.68], size=15,
+    hi_rows=(2,), row_h=0.58, num_cols=(1, 2, 3, 4, 5))
 
 box(s, L, 4.35, CW, 0.35,
     "The “none” column is identical in both rows — confirming nothing but the "
     "injection point changed.", 14, italic=True, color=MUTED)
 
 rect(s, L, 4.95, 5.55, 1.75, ACCENT_LT)
-bignum(s, L + 0.45, 5.1, "0.692", "correct description", color=ACCENT,
+bignum(s, L + 0.45, 5.1, "0.734", "correct description", color=ACCENT,
        vsize=44, w=3.5)
 
 rect(s, L + 5.95, 4.95, 5.55, 1.75, FAIL_LT)
-bignum(s, L + 6.4, 5.1, "0.592", "wrong description  —  a 10-point penalty",
+bignum(s, L + 6.4, 5.1, "0.628", "wrong description  —  a 10-point penalty",
        color=FAIL, vsize=44, w=4.9)
 
 box(s, L, 6.9, CW, 0.35,
@@ -463,28 +470,28 @@ box(s, L, 6.9, CW, 0.35,
 # ================================================================ 12 PRECISION
 s = slide("Stating the claim precisely", "Results  ·  interpretation")
 rect(s, L, 1.95, 5.55, 2.15, SURF)
-box(s, L + 0.4, 2.2, 4.8, 0.3, "WHAT WE DO NOT CLAIM", 11.5, bold=True, color=MUTED)
+box(s, L + 0.4, 2.2, 4.8, 0.3, "THE WEAKER HALF", 11.5, bold=True, color=MUTED)
 box(s, L + 0.4, 2.6, 4.8, 1.3,
-    "That a correct description improves detection.\n\n"
-    "It beats no description by 0.007 — which is nothing.",
-    15.5, color=INK, spacing=1.3)
+    "A correct description beats none by +0.027.\n\n"
+    "Positive at every window, but inside the ±0.036 split-to-split spread.",
+    15, color=INK, spacing=1.3)
 
 rect(s, L + 5.95, 1.95, 5.55, 2.15, ACCENT_LT)
-box(s, L + 6.35, 2.2, 4.8, 0.3, "WHAT WE DO CLAIM", 11.5, bold=True, color=ACCENT)
+box(s, L + 6.35, 2.2, 4.8, 0.3, "THE CLAIM WE MAKE", 11.5, bold=True, color=ACCENT)
 box(s, L + 6.35, 2.6, 4.8, 1.3,
-    "That the description is load-bearing.\n\n"
-    "Corrupting it costs 0.100 — and nothing else could have caused that.",
-    15.5, color=INK, spacing=1.3)
+    "A WRONG description costs −0.105.\n\n"
+    "Unambiguous, and nothing else could have caused it.",
+    15, color=INK, spacing=1.3)
 
 callout(s, L, 4.4, CW, 1.4, "How to read the mechanism",
         "The description constrains a decision boundary rather than adding "
-        "information. It does not lift performance when correct; it degrades "
-        "performance sharply when misdirected.", size=16)
+        "information. It does not reliably lift performance when correct; it "
+        "degrades performance sharply when misdirected.", size=16)
 
 box(s, L, 6.15, CW, 0.7,
-    "A secondary finding, and one not present in the literature: WHERE the "
-    "description is injected dominates WHAT it says — to the point of "
-    "reversing the direction of the effect.",
+    "A secondary finding, not present in the literature: WHERE the description "
+    "is injected dominates WHAT it says — to the point of reversing the "
+    "direction of the effect.",
     16, bold=True, color=INK, spacing=1.3)
 
 # ================================================================ 13 ABLATION
@@ -492,10 +499,10 @@ s = slide("Which components earn their place", "Results  ·  component ablation"
 table(s, [
     ["Scoring signal", "Held-out AUROC", "Full test set"],
     ["Scene-centre normality only", "0.585 ± 0.025", "0.585"],
-    ["Semantic — language only", "0.663 ± 0.021", "0.673"],
-    ["Kinematic — motion only", "0.676 ± 0.012", "0.684"],
-    ["Semantic + scene-centre", "0.649 ± 0.022", "0.657"],
-    ["Semantic + kinematic", "0.699 ± 0.017", "0.706"],
+    ["Semantic + scene-centre", "0.645 ± 0.034", "0.640"],
+    ["Kinematic — motion only", "0.685 ± 0.015", "0.686"],
+    ["Semantic + kinematic", "0.711 ± 0.034", "0.706"],
+    ["Semantic — language only", "0.718 ± 0.036", "0.707"],
 ], L, 2.0, CW, col_w=[5.2, 3.25, 3.18], size=14.5, hi_rows=(5,), row_h=0.47,
     num_cols=(1, 2))
 
@@ -504,101 +511,133 @@ box(s, L, 4.65, CW, 0.35,
     "spread across them.", 13.5, italic=True, color=MUTED)
 
 bullets(s, [
-    ("Complementary.", "Language notices a bicycle is present; motion notices "
-     "something is moving oddly. A ShanghaiTech anomaly needs both — a parked "
-     "bicycle is not an anomaly, nor is a brisk walk."),
-    ("Reported honestly.", "Motion alone nearly matches language alone. We "
-     "state this rather than present the score as evidence of semantic "
-     "understanding."),
+    ("The language pathway alone is best.", "Adding a motion signal costs 0.001 "
+     "on the full set; adding scene-centre normality costs 0.067."),
+    ("This was not the expected answer.", "ShanghaiTech's anomalies look "
+     "kinematic — a bicycle at cycling speed — so appearance and motion should "
+     "be complementary. Measured here, they are not."),
 ], 5.2, size=15, gap=1.0)
 
-# ================================================================ 14 NEGATIVES
-s = slide("Four hypotheses that failed", "Results  ·  negative findings")
+# ================================================================ 14 AVENUE
+s = slide("A second domain — the replication test", "Results  ·  cross-domain")
+box(s, L, 1.9, CW, 0.35,
+    "Identical frozen configuration applied to CUHK Avenue. Nothing retuned. "
+    "Only the scene sentence changed.", 15, color=INK_2)
+
 table(s, [
-    ["Hypothesis", "Outcome"],
-    ["Quadrant scoring would recover small objects",
-     "No improvement in any configuration"],
-    ["Prompts naming bicycles and vehicles would help",
-     "Much worse alone — 0.486"],
-    ["A clip's own average appearance defines normality",
-     "0.585, and it degrades the language signal"],
-    ["Scoring prompts individually rather than pooled",
-     "No measurable difference"],
-], L, 2.1, CW, col_w=[7.0, 4.63], size=14.5, row_h=0.58)
+    ["Dataset", "none", "generic", "matched", "mismatched", "gap"],
+    ["ShanghaiTech  (13 views)", "0.707", "0.691", "0.734", "0.628", "+0.105"],
+    ["CUHK Avenue  (1 view)", "0.706", "0.729", "0.677", "0.657", "+0.020"],
+], L, 2.5, CW, col_w=[3.23, 1.68, 1.68, 1.68, 1.68, 1.68], size=15,
+    hi_rows=(2,), row_h=0.58, num_cols=(1, 2, 3, 4, 5))
 
-callout(s, L, 5.0, CW, 1.6, "Why these are in the deck",
-        "All four are written into the paper. A study that reports only its "
-        "successful runs is a demonstration; reporting the refuted hypotheses "
-        "with the reasons they failed is what makes the surviving claims "
-        "credible.", size=16)
+rect(s, L, 4.35, 5.55, 1.5, ACCENT_LT)
+box(s, L + 0.35, 4.55, 4.9, 0.3, "DETECTION TRANSFERS", 11.5, bold=True, color=ACCENT)
+box(s, L + 0.35, 4.9, 4.9, 0.8,
+    "0.706 vs 0.707 with no descriptor.\nThe detector works equally well.",
+    15, color=INK, spacing=1.3)
 
-# ================================================================ 15 POSITION
+rect(s, L + 5.95, 4.35, 5.55, 1.5, FAIL_LT)
+box(s, L + 6.3, 4.55, 4.9, 0.3, "ADAPTATION DOES NOT", 11.5, bold=True, color=FAIL)
+box(s, L + 6.3, 4.9, 4.9, 0.8,
+    "Gap 5× smaller, and the correct\ndescription scores BELOW none.",
+    15, color=INK, spacing=1.3)
+
+callout(s, L, 6.0, CW, 1.15, "Our explanation — stated as a conjecture",
+        "ShanghaiTech has 13 camera views; Avenue has one. A scene description "
+        "has work to do only when there are several environments to tell "
+        "apart. Testable: run the sweep inside a single ShanghaiTech view.",
+        tone="caution", size=14.5)
+
+# ================================================================ 15 NEGATIVES
+s = slide("Six things that did not work", "Results  ·  negative findings")
+table(s, [
+    ["Modification", "Outcome"],
+    ["Quadrant scoring, to catch small objects", "No improvement in any configuration"],
+    ["Prompts naming bicycles and vehicles", "Much worse alone — 0.486"],
+    ["Clip's own average as the normality reference", "0.585, and it degrades the language signal"],
+    ["Adding a motion signal", "Costs 0.001 — not complementary"],
+    ["Local temporal deviation before projection", "Better scorer, but narrows the context gap"],
+    ["Per-prompt max pooling", "0.678 against 0.707"],
+], L, 2.0, CW, col_w=[6.6, 5.03], size=13.5, row_h=0.5)
+
+callout(s, L, 5.3, CW, 1.55, "Why these are in the deck",
+        "The claim is that the minimal configuration is the right one. That is "
+        "only credible alongside the alternatives that were tried. A clean "
+        "table of successes is the artefact that is easy to fabricate; six "
+        "diagnosed failures are not.", size=15.5)
+
+# ================================================================ 16 POSITION
 s = slide("Where this sits against the literature", "Assessment")
 table(s, [
     ["Method", "AUROC", "Cost per frame"],
+    ["Liu et al. 2018 — trained on the target scene", "≈ 0.728", "1 trained model"],
     ["LAVAD (CVPR 2024), training-free", "≈ 0.85", "Captioner + LLM + refiner"],
-    ["DA-ZVAD (ours), training-free", "0.706", "One frozen encoder + a sentence"],
-], L, 2.0, CW, col_w=[5.6, 2.3, 3.73], size=15, hi_rows=(2,), row_h=0.56)
+    ["DA-ZVAD (ours), training-free", "0.734", "One frozen encoder + a sentence"],
+], L, 2.0, CW, col_w=[5.6, 2.3, 3.73], size=14.5, hi_rows=(3,), row_h=0.56)
 
 bullets(s, [
-    ("Not a like-for-like comparison.", "LAVAD runs three large models on every "
-     "frame. Ours runs in roughly 7 GB and is not competing on accuracy."),
-    ("The contribution is not the number.", "It is a characterisation of the "
-     "shift type, a mechanism, and a measurement protocol with a falsifying "
-     "control."),
-], 3.65, size=16, gap=1.0)
+    ("The fair comparison is the trained baseline.", "We match the benchmark's "
+     "own 2018 baseline while using none of its training data."),
+    ("We do not match LAVAD, and say so.", "It runs three large models per "
+     "frame. We run in about 7 GB."),
+], 4.2, size=16, gap=1.0)
 
-callout(s, L, 5.6, CW, 1.25, "Honest position",
+callout(s, L, 6.0, CW, 1.15, "Honest position",
         "We do not expect to exceed trained state-of-the-art detectors on "
         "absolute AUROC, and the paper makes no such claim.", size=16)
 
-# ================================================================ 16 LIMITS
+# ================================================================ 17 LIMITS
 s = slide("Limitations we are stating ourselves", "Assessment")
 bullets(s, [
-    ("One domain only.", "Every measurement comes from ShanghaiTech. The "
-     "cross-domain transfer claim central to the framework is NOT yet tested."),
+    ("The mechanism is bounded.", "It works on ShanghaiTech and nearly vanishes "
+     "on Avenue. The scene-diversity explanation rests on two datasets and is "
+     "not established."),
     ("Resolution ceiling.", "Whole-frame embeddings at 224×224 cannot resolve "
-     "small objects. Quadrant scoring did not close the gap; patch-level "
-     "scoring is untested."),
-    ("Motion is a proxy.", "Frame-to-frame drift responds to movement, but also "
-     "to lighting change and compression artefacts. Not yet isolated."),
-    ("Configuration selection.", "No validation split exists for this benchmark, "
-     "so we split clips and report the half never used for selection."),
+     "small objects. Quadrant scoring did not close it; patch-level scoring is "
+     "untested."),
+    ("The metric is scale-sensitive.", "Per-clip normalisation is affine, so a "
+     "monotone rescaling of the score changes the pooled figure even though the "
+     "ranking is identical. We found this the hard way."),
+    ("Configuration selection.", "No validation split exists for these "
+     "benchmarks, so we split clips and report the half never used to select."),
+    ("Both video domains are outdoor pedestrian surveillance.", "The "
+     "industrial contrast is evaluated for detection but not for the sweep."),
     ("M4 not yet run.", "The explanation module has produced no video results."),
-], 1.95, size=15.5, gap=1.02)
+], 1.95, size=14.5, gap=0.86)
 
-# ================================================================ 17 NEXT
+# ================================================================ 18 NEXT
 s = slide("Phase 3 plan", "Next")
 table(s, [
     ["Priority", "Work", "Why it matters"],
-    ["1", "Second dataset — CUHK Avenue",
-     "Tests the transfer claim directly. Currently untested."],
-    ["2", "Patch-level scoring against spatial tokens",
-     "Most likely route to a materially higher figure."],
-    ["3", "Run M4 — explanation under matched vs mismatched context",
-     "Completes the framework; supplies the qualitative result."],
-    ["4", "Sharper motion signal",
-     "Isolate movement from lighting and compression effects."],
-], L, 2.0, CW, col_w=[1.2, 5.5, 4.93], size=14, row_h=0.6, num_cols=(0,))
+    ["1", "Sweep within a single ShanghaiTech camera view",
+     "Settles whether scene diversity is the operative variable"],
+    ["2", "Context sweep on MVTec AD",
+     "Gives the industrial–surveillance contrast for adaptation, not just detection"],
+    ["3", "Patch-level scoring against spatial tokens",
+     "Most likely route to a materially higher figure"],
+    ["4", "Run M4 — explanations under matched vs mismatched context",
+     "Completes the framework; supplies the qualitative result"],
+], L, 2.0, CW, col_w=[1.2, 5.5, 4.93], size=13.5, row_h=0.62, num_cols=(0,))
 
-callout(s, L, 5.05, CW, 1.5, "Infrastructure is now built",
-        "Server, dataset, driver and caching are in place. Encoding the "
+callout(s, L, 5.2, CW, 1.5, "Infrastructure is now built",
+        "Server, datasets, driver and embedding cache are in place. Encoding a "
         "benchmark once takes 21 minutes, after which a new scoring hypothesis "
         "is evaluated in seconds rather than 50 minutes.", size=15.5)
 
-# ================================================================ 18 SUMMARY
+# ================================================================ 19 SUMMARY
 s = slide("Summary", "Phase 2")
 items = [
     ("The gap", "Domain adaptation research targets covariate shift by explicit "
      "scoping. Anomaly detection is dominated by concept shift."),
     ("The method", "Every model frozen; adaptation carried entirely by a "
-     "sentence — which makes the claim identifiable."),
-    ("The result", "0.706 AUROC on ShanghaiTech with no training, and a wrong "
-     "description costs 0.100 — evidence the text is load-bearing."),
+     "sentence — which is what makes the claim identifiable."),
+    ("The result", "0.734 AUROC on ShanghaiTech with no training, and a wrong "
+     "description costs 0.105 — evidence the text is load-bearing."),
     ("The finding", "Where the description is injected dominates what it says, "
-     "to the point of reversing the effect. Not reported in the literature."),
-    ("What is missing", "Cross-domain transfer, on a second dataset. This is "
-     "Phase 3's first task."),
+     "to the point of reversing the effect. Not in the literature."),
+    ("The boundary", "It does not replicate on a single-scene benchmark. The "
+     "claim is scoped, not abandoned — and we named the test that settles it."),
 ]
 y = 1.95
 for i, (head, body) in enumerate(items, 1):
@@ -613,8 +652,6 @@ box(s, L, 6.75, CW, 0.35,
     13, italic=True, color=MUTED, align=PP_ALIGN.CENTER)
 
 # ================================================================ NOTES
-# Spoken track. Kept short deliberately -- these are prompts to talk from, not a
-# script to read out.
 NOTES = [
  "Title. Introduce yourself and the one-line premise: adapting an anomaly "
  "detector to a new place by writing a sentence, with nothing retrained.",
@@ -627,76 +664,75 @@ NOTES = [
  "aloud - the field scopes concept shift OUT by explicit decision. Make clear "
  "you are not criticising them: for object recognition it is the right call.",
 
- "Now land the consequence. In anomaly detection normality IS the deployment "
- "context, so concept shift is not a corner case - it is the whole task. "
- "Appearance-alignment methods cannot help when the appearance is identical.",
+ "Land the consequence. In anomaly detection normality IS the deployment "
+ "context. Mention the 2026 position paper yourself - an independent group "
+ "reached the same premise, which answers 'did you invent this problem?'",
 
  "Walk the four modules left to right in about thirty seconds. Then stop on "
- "M3 - the orange box - and say that is the only place the domain enters, and "
- "the entire research question.",
+ "M3 - the orange box - and say that is the only place the domain enters.",
 
- "The strongest methodological point in the deck. Say it slowly. Because "
- "nothing can change except the text, any effect is attributable to the text. "
- "Methods that update weights cannot make that argument.",
+ "The strongest methodological point in the deck. Say it slowly. And note that "
+ "the competing systems CANNOT run our experiment - their text is learned on "
+ "source data, or entangled in an LLM prior, or paired with a trained adapter.",
 
  "Emphasise that the interpretation was fixed BEFORE any measurement, and that "
  "the mismatched condition is designed to refute us. A panel will respect a "
- "test you could have failed.",
+ "test you could have failed - and later in the deck, one you partly did.",
 
  "Keep this brief - it is the credibility slide. If anyone doubts the work is "
- "yours, offer to open a manifest. It records the commit, the machine and the "
- "frame counts.",
+ "yours, offer to open a manifest. Five runs, all recorded.",
 
- "Do not rush past this and do not apologise for it. Say plainly: the first "
- "run was chance, and the key experiment came out backwards. Then pause. The "
- "next two slides are what makes this presentation worth listening to.",
+ "Do not rush past this and do not apologise for it. The first run was chance, "
+ "and the key experiment came out backwards. Then pause. The next two slides "
+ "are what makes this presentation worth listening to.",
 
  "The schools analogy works on everyone - use it. Stress twice that the fix "
  "uses no labels and is the benchmark's own published protocol, and that both "
  "figures appear in the paper.",
 
- "The most interesting slide. Point at the two prompts on screen and let them "
- "see the shared words. Then deliver the punchline: the more accurate the "
- "description, the more damage it does. That is why the result inverted.",
+ "The most interesting slide. Point at the two prompts and let them see the "
+ "shared words. Then the punchline: the more accurate the description, the "
+ "more damage it does. That is why the result inverted.",
 
  "The headline. Point at the none column being identical in both rows - that "
  "is the control, and it proves only the injection point changed. Then point "
- "at 0.592 and say a wrong sentence costs ten points.",
+ "at 0.628 and say a wrong sentence costs ten points.",
 
- "Be scrupulous here. Say out loud that you do NOT claim the correct "
- "description improves detection - it gains 0.007, which is nothing. The claim "
- "rests entirely on the mismatched condition. Understating protects you.",
+ "Be scrupulous. The +0.027 is positive at every window but sits inside the "
+ "spread, so we report direction and not magnitude. The claim rests on the "
+ "mismatched penalty. Understating here protects you.",
 
- "Explain complementarity with the bicycle: a parked bicycle is not an "
- "anomaly, a brisk walk is not an anomaly, a bicycle at cycling speed on a "
- "footpath is. Then volunteer the awkward part about motion alone.",
+ "Volunteer the surprise: we expected motion to help and it does not. The "
+ "pooled embedding already registers enough of it. Reporting the prediction "
+ "that failed is stronger than reporting only the ones that held.",
 
- "Say why you are showing failures: anyone can report the runs that worked. If "
- "the panel suspects generated work, this slide is your best answer - a clean "
- "table is easy to fabricate, four diagnosed failures are not.",
+ "The most important slide in the deck. Detection transfers almost exactly; "
+ "the adaptation does not. Give the honest reading - on Avenue a placeholder "
+ "beats an accurate description, so that benefit cannot be domain adaptation. "
+ "Then give the conjecture AND the experiment that would settle it.",
 
- "Pre-empt the obvious challenge. LAVAD is better and you say so. But it runs "
- "three large models per frame; you run one encoder and a sentence. You are "
- "not competing on accuracy and the paper states that.",
+ "Say why you are showing failures: the claim is that the minimal "
+ "configuration is right, and that is only credible next to what was tried. "
+ "If the panel suspects generated work, this slide is your best answer.",
 
- "Deliver these confidently rather than apologetically. Naming the single-"
- "domain limitation yourself is the point - if they raise it first you look "
- "like you had not noticed.",
+ "Anchor on the trained baseline, not on LAVAD. You match the benchmark's own "
+ "2018 baseline using none of its training data. Then concede LAVAD openly.",
 
- "Priority one is the second dataset because it tests the transfer claim, "
- "which is currently untested. Note that the infrastructure cost is now paid: "
- "21 minutes of encoding buys unlimited scoring experiments.",
+ "Deliver these confidently rather than apologetically. The metric limitation "
+ "is worth dwelling on - it is a real methodological point about a protocol "
+ "the whole field uses, and we found it by chasing our own bug.",
 
- "Close on the finding rather than the number: where the description is "
- "injected dominates what it says. Then state the missing piece and hand over "
- "to questions.",
+ "Priority one is the within-view control because it turns our explanation "
+ "from a conjecture into a result. Note the infrastructure cost is now paid.",
+
+ "Close on the boundary, not the number. The claim is scoped rather than "
+ "abandoned, and we named the experiment that settles it. Then hand over.",
 ]
 for sl, txt in zip(prs.slides, NOTES):
     sl.notes_slide.notes_text_frame.text = txt
 
 # ================================================================ SAVE
-out = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                   "DA-ZVAD_Phase2_Review.pptx")
+out = os.path.join(_here, "DA-ZVAD_Phase2_Review.pptx")
 prs.save(out)
 print(f"saved: {out}")
-print(f"slides: {len(prs.slides.__iter__.__self__._sldIdLst)}")
+print(f"slides: {len(prs.slides._sldIdLst)}   notes: {len(NOTES)}")
