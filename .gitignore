@@ -45,6 +45,12 @@ checkpoints/
 results/logs/*.json
 results/tables/*.csv
 results/figures/*.png
+results/raw/
+results/explanations/
+
+# Reference PDFs supplied by the guide — copyrighted (Elsevier/IEEE/ACM),
+# kept locally for study, never redistributed via this public repo.
+SurveyPapersStudy/
 
 # Editor / Office temp files
 ~$*

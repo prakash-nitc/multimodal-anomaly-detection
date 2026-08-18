@@ -13,6 +13,8 @@ what you're doing right now:**
 | Prepare for the viva | **[`05_viva/`](05_viva/) |
 | Find a slide deck / presentation script | **[`06_presentations/`](06_presentations/) |
 | Read a reference paper (PDF) | **[`07_reference_papers/`](07_reference_papers/) |
+| **Understand what we built & why (plain language)** | **[`08_understanding/`](08_understanding/) |
+| **Update the paper for my guide (living document)** | **[`09_paper/`](09_paper/) |
 
 ---
 

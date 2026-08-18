@@ -10,9 +10,12 @@ def get_dataset(config) -> "AnomalyDataset":
     if name == "mvtec":
         from .mvtec import MVTecDataset
         return MVTecDataset(config.data_root, config.category)
-    if name in ("shanghaitech", "avenue"):
-        from .video import VideoDataset
-        return VideoDataset(config.data_root, sample_fps=config.sample_fps, name=name)
+    if name == "shanghaitech":
+        from .shanghaitech import ShanghaiTechDataset
+        return ShanghaiTechDataset(config.data_root, frame_step=config.frame_step)
+    if name == "avenue":
+        from .avenue import AvenueDataset
+        return AvenueDataset(config.data_root, frame_step=config.frame_step)
     if name == "synthetic":
         from .base import SyntheticDataset
         return SyntheticDataset(seed=config.seed)

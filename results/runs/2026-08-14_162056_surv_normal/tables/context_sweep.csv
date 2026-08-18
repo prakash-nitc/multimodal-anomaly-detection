@@ -1,0 +1,9 @@
+dataset,context_variant,description,window,auroc_micro,auroc_micro_norm,auroc_macro,n_frames
+shanghaitech,none,-,1,0.4926,0.6666,0.6143,20449
+shanghaitech,none,-,5,0.5022,0.6852,0.6276,20449
+shanghaitech,generic,a generic scene,1,0.4876,0.6586,0.603,20449
+shanghaitech,generic,a generic scene,5,0.4958,0.6771,0.6131,20449
+shanghaitech,matched,a university campus walkway with pedestrians,1,0.4962,0.6744,0.6056,20449
+shanghaitech,matched,a university campus walkway with pedestrians,5,0.5061,0.6924,0.624,20449
+shanghaitech,mismatched,an industrial quality-inspection image of a manufactured product on a factory line,1,0.5006,0.5665,0.6153,20449
+shanghaitech,mismatched,an industrial quality-inspection image of a manufactured product on a factory line,5,0.5044,0.5921,0.618,20449

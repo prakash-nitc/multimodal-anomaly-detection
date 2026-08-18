@@ -46,6 +46,37 @@ DOMAINS: Dict[str, Tuple[List[str], List[str]]] = {
             "an abnormal and unsafe situation",
         ],
     ),
+    # ShanghaiTech / Avenue style campus footage.
+    #
+    # The "surveillance" ensemble above encodes a CRIME notion of anomaly
+    # (violence, robbery, accidents) inherited from datasets like UCF-Crime.
+    # Campus benchmarks do not contain those events. Their documented anomaly
+    # classes are wheeled vehicles intruding on pedestrian walkways plus abrupt
+    # human motion (Liu et al., 2018). Asked whether a frame shows "a robbery
+    # in progress", a frozen CLIP correctly answers "no" for every frame of the
+    # benchmark, anomalous ones included -- which is chance performance by
+    # construction, not an encoder failure.
+    #
+    # These prompts come from the dataset's PUBLISHED anomaly taxonomy, not
+    # from inspecting test labels. In DA-ZVAD terms that taxonomy is exactly
+    # what verbalized domain context is supposed to carry: an operator
+    # deploying to a campus states what counts as out of place there.
+    "campus": (
+        [
+            "pedestrians walking on a campus walkway",
+            "people strolling along a paved outdoor path",
+            "students walking on foot on a university campus",
+            "an ordinary walkway with people going about on foot",
+        ],
+        [
+            "a person riding a bicycle on a pedestrian walkway",
+            "a person riding a skateboard or scooter among pedestrians",
+            "a car or motor vehicle driving on a pedestrian path",
+            "a person running or chasing on a walkway",
+            "people fighting or pushing each other on a walkway",
+            "a person jumping, falling or brawling on a walkway",
+        ],
+    ),
 }
 
 

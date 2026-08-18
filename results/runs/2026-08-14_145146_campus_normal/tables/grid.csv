@@ -1,0 +1,9 @@
+dataset,domain,context,window,auroc_micro,auroc_micro_norm,auroc_macro,n_seqs,n_frames
+shanghaitech,campus,False,1,0.4741,0.4832,0.563,107,20449
+shanghaitech,campus,False,5,0.4692,0.4857,0.5612,107,20449
+shanghaitech,campus,False,9,0.4659,0.4889,0.56,107,20449
+shanghaitech,campus,False,15,0.4614,0.4916,0.5618,107,20449
+shanghaitech,campus,True,1,0.4822,0.4941,0.5816,107,20449
+shanghaitech,campus,True,5,0.4793,0.5041,0.5832,107,20449
+shanghaitech,campus,True,9,0.4775,0.5099,0.5842,107,20449
+shanghaitech,campus,True,15,0.4745,0.5178,0.5883,107,20449

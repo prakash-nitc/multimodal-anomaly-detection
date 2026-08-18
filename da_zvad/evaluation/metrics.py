@@ -80,6 +80,39 @@ def score_gap(scores, labels) -> float:
     return float(scores[labels == 1].mean() - scores[labels == 0].mean())
 
 
+def normalize_per_sequence(scores) -> np.ndarray:
+    """Min-max a single sequence's scores to [0, 1].
+
+    A constant sequence maps to all-zeros (no information, so no contribution
+    to the pooled ranking beyond ties).
+    """
+    scores = np.asarray(scores, dtype=float)
+    lo, hi = float(np.min(scores)), float(np.max(scores))
+    if not np.isfinite(lo) or not np.isfinite(hi) or hi <= lo:
+        return np.zeros_like(scores)
+    return (scores - lo) / (hi - lo)
+
+
+def pooled_auroc(score_seqs, label_seqs, normalize: bool = True) -> float:
+    """Frame-level AUROC over all sequences pooled into one ranking.
+
+    ``normalize=True`` min-maxes each sequence before pooling -- the standard
+    ShanghaiTech / Avenue protocol (Liu et al., 2018), and the number published
+    VAD papers report.
+
+    Why it is needed rather than cosmetic: the benchmark spans 13 camera views,
+    and a frozen CLIP scorer sits at a different similarity baseline in each. An
+    "0.7" under one camera is not the same evidence as an "0.7" under another,
+    so pooling raw scores compares frames across incomparable scales and
+    destroys within-clip ordering. Normalising first makes the pooled ranking
+    meaningful. It uses no labels, so it leaks nothing.
+    """
+    seqs = [normalize_per_sequence(s) if normalize else np.asarray(s, dtype=float)
+            for s in score_seqs]
+    return frame_auroc(np.concatenate(seqs),
+                       np.concatenate([np.asarray(l, dtype=int) for l in label_seqs]))
+
+
 def summarize(scores, labels) -> Dict[str, float]:
     return {
         "auroc": frame_auroc(scores, labels),

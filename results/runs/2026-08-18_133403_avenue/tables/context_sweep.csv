@@ -1,0 +1,9 @@
+dataset,context_variant,description,window,auroc_micro,auroc_micro_norm,auroc_macro,n_frames
+avenue,none,-,1,0.5991,0.6732,0.6593,7669
+avenue,none,-,5,0.6162,0.69,0.6911,7669
+avenue,generic,a generic scene,1,0.6473,0.6973,0.6869,7669
+avenue,generic,a generic scene,5,0.6612,0.7235,0.7138,7669
+avenue,matched,a subway station entrance with commuters,1,0.5258,0.6787,0.6434,7669
+avenue,matched,a subway station entrance with commuters,5,0.5315,0.6832,0.6673,7669
+avenue,mismatched,an industrial quality-inspection image of a manufactured product on a factory line,1,0.6011,0.6627,0.6398,7669
+avenue,mismatched,an industrial quality-inspection image of a manufactured product on a factory line,5,0.6109,0.6795,0.6641,7669

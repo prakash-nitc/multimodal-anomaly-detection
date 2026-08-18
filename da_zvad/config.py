@@ -17,7 +17,8 @@ class DAZVADConfig:
     dataset: str = "synthetic"              # synthetic | mvtec | shanghaitech | avenue
     data_root: Optional[str] = None
     category: Optional[str] = None          # e.g. MVTec category ("bottle")
-    sample_fps: int = 2                     # video frame sampling rate
+    sample_fps: int = 2                     # video frame sampling rate (video files)
+    frame_step: int = 1                     # stride for frame-folder datasets
 
     # --- M1: visual encoder ---
     clip_model: str = "ViT-L-14"
@@ -25,13 +26,19 @@ class DAZVADConfig:
     device: str = "cuda"                    # falls back to cpu automatically
 
     # --- domain / prompts ---
-    domain: str = "generic"                 # generic | industrial | surveillance
+    domain: str = "generic"                 # generic | industrial | surveillance | campus
     domain_description: str = "a generic scene"   # M3 verbalized context
+    context_mode: str = "normal"            # normal | both (see context.verbalized)
 
     # --- module toggles (ablation switches) ---
     use_temporal: bool = True               # M2 temporal aggregation
     use_context: bool = True                # M3 verbalized domain context
-    use_reasoning: bool = False             # M4 LLM reasoning (heavy; stub for now)
+    use_reasoning: bool = False             # M4 LLM reasoning
+
+    # --- M4 reasoning ---
+    reasoner: str = "stub"                  # stub | llava (llava needs a GPU)
+    llava_model: str = "llava-hf/llava-1.5-7b-hf"
+    max_explanations: int = 8               # explain at most N events per sequence
 
     # --- M2 temporal ---
     temporal_window: int = 5                # moving-average window (frames)
