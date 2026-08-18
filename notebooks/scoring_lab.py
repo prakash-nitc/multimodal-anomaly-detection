@@ -97,6 +97,40 @@ def zscore_per_clip(x: np.ndarray, clip_ids: np.ndarray) -> np.ndarray:
     return z
 
 
+
+def local_reference(feats: np.ndarray, clip_ids: np.ndarray,
+                    window: int, guard: int) -> np.ndarray:
+    """Mean embedding of each frame's temporal neighbourhood, per clip.
+
+    ``guard`` excludes a band around the frame itself so that an anomaly does
+    not contaminate the reference it is measured against. Anomalous events in
+    these benchmarks last a second or two, so a guard wider than the event and
+    a window several times wider leaves the reference dominated by normal
+    content without needing labels to say which frames those are.
+
+    Computed by cumulative sums, so cost is linear in frame count.
+    """
+    out = np.empty_like(feats, dtype=np.float32)
+    for c in np.unique(clip_ids):
+        idx = np.where(clip_ids == c)[0]
+        f = feats[idx]
+        n = len(f)
+        cs = np.concatenate([np.zeros((1, f.shape[1]), dtype=np.float64),
+                             np.cumsum(f.astype(np.float64), axis=0)])
+        t = np.arange(n)
+        lo, hi = np.maximum(t - window, 0), np.minimum(t + window + 1, n)
+        glo, ghi = np.maximum(t - guard, 0), np.minimum(t + guard + 1, n)
+        tot = cs[hi] - cs[lo]
+        inner = cs[ghi] - cs[glo]
+        cnt = (hi - lo) - (ghi - glo)
+        # clips shorter than the guard leave nothing outside it; fall back to
+        # the whole-clip mean rather than dividing by zero
+        bad = cnt <= 0
+        ref = np.where(bad[:, None], (cs[n] - cs[0]) / max(n, 1),
+                       (tot - inner) / np.maximum(cnt, 1)[:, None])
+        out[idx] = ref.astype(np.float32)
+    return out
+
 def build_scores(feats, clip_ids, texts, crop_agg: str):
     """feats (N, C, D); texts dict name -> (normal (P,D), abnormal (Q,D))."""
     agg = (lambda a: a.max(axis=1)) if crop_agg == "max" else (lambda a: a.mean(axis=1))
@@ -138,7 +172,41 @@ def build_scores(feats, clip_ids, texts, crop_agg: str):
             d[idx[:lag]] = d[idx[lag]]          # pad the head with the first value
         out[f"motion{lag}|-"] = d
 
+    # Text-directed local deviation.
+    #
+    # The margin strategies compare each frame independently against two fixed
+    # text prototypes. CLIP similarity on a surveillance frame is dominated by
+    # scene appearance -- lighting, crowd density, viewpoint -- which varies
+    # continuously within a clip and swamps the component that carries "a
+    # bicycle is present". Per-clip normalisation removes that baseline
+    # globally, which is why it moved pooled AUROC from 0.51 to 0.70, but a
+    # clip is a minute of video and the baseline drifts inside it.
+    #
+    # Subtracting a local temporal reference first, then projecting onto the
+    # text direction, asks a different question: how far does this frame depart
+    # from its recent context, in the direction the text calls anomalous? The
+    # direction still comes entirely from the prompts, so nothing is learned and
+    # the identifiability argument is unaffected.
+    #
+    # This also predicts the observed results. Motion works because it measures
+    # departure from recent context but carries no direction; the text margin
+    # works weakly because it carries direction but has no reference.
+    for pname, (tn, ta) in texts.items():
+        pn = tn.mean(0); pn /= np.linalg.norm(pn)
+        pa = ta.mean(0); pa /= np.linalg.norm(pa)
+        d = pa - pn
+        nd = np.linalg.norm(d)
+        if nd < 1e-8:
+            continue
+        d = d / nd
+        for w, g in ((50, 15), (150, 30)):
+            ref = local_reference(whole, clip_ids, w, g)
+            out[f"textdev_w{w}|{pname}"] = (whole - ref) @ d
+        out[f"textdev_clip|{pname}"] = (whole - np.stack(
+            [whole[clip_ids == c].mean(0) for c in clip_ids])) @ d
+
     base = [k for k in list(out) if k.startswith("margin_")]
+    base = base + [k for k in list(out) if k.startswith("textdev_")]
     for key in base:
         strat, pname = key.split("|")
         zk = zscore_per_clip(out[key], clip_ids)
