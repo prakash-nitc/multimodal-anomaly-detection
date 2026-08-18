@@ -549,7 +549,34 @@ callout(s, L, 6.0, CW, 1.15, "Our explanation — stated as a conjecture",
         "apart. Testable: run the sweep inside a single ShanghaiTech view.",
         tone="caution", size=14.5)
 
-# ================================================================ 15 NEGATIVES
+# ================================================================ 15 WITHIN-VIEW
+s = slide("We tested that explanation, and it held", "Results  ·  the control")
+box(s, L, 1.9, CW, 0.7,
+    "ShanghaiTech is thirteen single-view datasets stacked together. If the "
+    "descriptor works by telling the model WHICH scene it is in, then confining "
+    "the sweep to one camera view should reproduce Avenue's flat result.",
+    15.5, color=INK_2, spacing=1.3)
+
+table(s, [
+    ["Evaluation", "Views", "Clips", "Gap"],
+    ["Pooled across views", "13", "107", "+0.105"],
+    ["Within a single view (mean)", "9", "5–34 each", "+0.034"],
+    ["CUHK Avenue (single view)", "1", "21", "+0.020"],
+], L, 2.85, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=15, hi_rows=(2,), row_h=0.56,
+    num_cols=(3,))
+
+callout(s, L, 4.9, CW, 1.15, "The prediction could have failed",
+        "A within-view gap near +0.105 would have refuted the explanation "
+        "outright. It came back at a third of that, next to Avenue's figure.",
+        size=15.5)
+
+box(s, L, 6.25, CW, 0.7,
+    "What the sentence mainly supplies is WHICH scene you are in — not what "
+    "counts as normal within it. Three of nine views show a negative gap, so "
+    "inside one scene the effect is not reliable.",
+    15.5, bold=True, color=INK, spacing=1.3)
+
+# ================================================================ 16 NEGATIVES
 s = slide("Six things that did not work", "Results  ·  negative findings")
 table(s, [
     ["Modification", "Outcome"],
@@ -636,8 +663,9 @@ items = [
      "description costs 0.105 — evidence the text is load-bearing."),
     ("The finding", "Where the description is injected dominates what it says, "
      "to the point of reversing the effect. Not in the literature."),
-    ("The boundary", "It does not replicate on a single-scene benchmark. The "
-     "claim is scoped, not abandoned — and we named the test that settles it."),
+    ("The boundary", "It does not replicate on a single-scene benchmark, and a "
+     "within-view control shows why: the sentence tells the model which scene "
+     "it is in. The claim is scoped, and the scoping is measured."),
 ]
 y = 1.95
 for i, (head, body) in enumerate(items, 1):
@@ -710,6 +738,12 @@ NOTES = [
  "the adaptation does not. Give the honest reading - on Avenue a placeholder "
  "beats an accurate description, so that benefit cannot be domain adaptation. "
  "Then give the conjecture AND the experiment that would settle it.",
+
+ "This is the slide that shows a full cycle: we saw something odd, formed an "
+ "explanation, designed a test that could have killed it, ran it, and it held. "
+ "Say out loud that a gap near +0.105 here would have refuted us. Then give "
+ "the caveat yourself - three of nine views are negative, so within one scene "
+ "the effect is not reliable.",
 
  "Say why you are showing failures: the claim is that the minimal "
  "configuration is right, and that is only credible next to what was tried. "
