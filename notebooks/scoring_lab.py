@@ -87,6 +87,72 @@ def prompt_sets():
     return out
 
 
+
+# --- the four context-sweep conditions, as prompt sets ----------------------
+# The sweep varies the scene DESCRIPTION injected into the prompts, not the
+# prompt vocabulary. Reconstructing it here lets any scoring strategy be
+# evaluated under all four conditions against cached embeddings, which is how
+# we test whether a change to the scoring rule alters the size of the
+# matched-versus-mismatched gap rather than only the headline number.
+SWEEP_DEFAULTS = {
+    "matched": "a university campus walkway with pedestrians",
+    "mismatched": ("an industrial quality-inspection image of a manufactured "
+                   "product on a factory line"),
+    "generic": "a generic scene",
+}
+
+
+def sweep_prompt_sets(domain: str, matched: str, mismatched: str):
+    from da_zvad.context import VerbalizedContext
+    n, a = get_prompts(domain)
+    out = {"none": (list(n), list(a))}
+    for name, desc in (("generic", SWEEP_DEFAULTS["generic"]),
+                       ("matched", matched),
+                       ("mismatched", mismatched)):
+        out[name] = VerbalizedContext(desc, mode="normal").ground(n, a)
+    return out
+
+
+def print_sweep_gaps(rows, order=("none", "generic", "matched", "mismatched")):
+    """Per strategy: the four conditions, and the gap the thesis predicts.
+
+    The gap -- matched minus mismatched -- is the quantity the falsifying
+    control measures. A scoring change that raises every condition equally has
+    improved the detector without saying anything about whether the descriptor
+    is load-bearing; one that widens the gap has.
+    """
+    by = {}
+    for r in rows:
+        by.setdefault((r["strategy"], r["window"]), {})[r["prompts"]] = r
+    best = {}
+    for (strat, win), conds in by.items():
+        if not all(c in conds for c in order):
+            continue
+        score = sum(float(conds[c]["dev_mean"]) for c in order) / len(order)
+        if strat not in best or score > best[strat][0]:
+            best[strat] = (score, win, conds)
+
+    print()
+    print("=" * 78)
+    print("CONTEXT SWEEP BY SCORING STRATEGY  (held-out AUROC)")
+    print("=" * 78)
+    print(f"{'strategy':<28}{'win':>4}" + "".join(f"{c:>11}" for c in order)
+          + f"{'gap':>9}")
+    print("-" * 78)
+    ranked = sorted(best.items(),
+                    key=lambda kv: -(float(kv[1][2]["matched"]["heldout_mean"])
+                                     - float(kv[1][2]["mismatched"]["heldout_mean"])))
+    for strat, (_, win, conds) in ranked:
+        vals = [float(conds[c]["heldout_mean"]) for c in order]
+        gap = vals[order.index("matched")] - vals[order.index("mismatched")]
+        print(f"{strat:<28}{win:>4}" + "".join(f"{v:>11.4f}" for v in vals)
+              + f"{gap:>+9.4f}")
+    print()
+    print("gap = matched - mismatched. Positive and large is the signature the")
+    print("falsifying control looks for; near zero means the descriptor is inert")
+    print("under that scoring rule, whatever the headline number says.")
+
+
 def zscore_per_clip(x: np.ndarray, clip_ids: np.ndarray) -> np.ndarray:
     z = np.empty_like(x, dtype=float)
     for c in np.unique(clip_ids):
@@ -253,6 +319,14 @@ def main() -> int:
     p.add_argument("--dev-frac", type=float, default=0.5)
     p.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     p.add_argument("--top", type=int, default=20)
+    p.add_argument("--sweep", action="store_true",
+                   help="evaluate the four context-sweep conditions instead of "
+                        "the packaged prompt vocabularies, and report the "
+                        "matched-minus-mismatched gap per scoring strategy")
+    p.add_argument("--sweep-domain", default="surveillance",
+                   choices=["surveillance", "campus", "generic"])
+    p.add_argument("--matched-desc", default=SWEEP_DEFAULTS["matched"])
+    p.add_argument("--mismatched-desc", default=SWEEP_DEFAULTS["mismatched"])
     p.add_argument("--out", default=None)
     args = p.parse_args()
 
@@ -270,8 +344,11 @@ def main() -> int:
 
     from da_zvad.encoders import CLIPEncoder
     enc = CLIPEncoder(str(z["clip_model"]), str(z["clip_pretrained"]), "cpu")
+    sets = (sweep_prompt_sets(args.sweep_domain, args.matched_desc,
+                              args.mismatched_desc)
+            if args.sweep else prompt_sets())
     texts = {name: (enc.encode_texts(n), enc.encode_texts(a))
-             for name, (n, a) in prompt_sets().items()}
+             for name, (n, a) in sets.items()}
 
     rows = []
     for crop_agg in (args.crop_agg if n_crops > 1 else ["max"]):
@@ -319,6 +396,9 @@ def main() -> int:
     print("the number moves purely from which clips landed in which half.")
     print("'all' scores every clip, for comparison with published numbers that")
     print("use the full test set.")
+
+    if args.sweep:
+        print_sweep_gaps(rows)
 
     if args.out:
         import csv
