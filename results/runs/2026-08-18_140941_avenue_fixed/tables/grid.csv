@@ -1,0 +1,9 @@
+dataset,domain,context,window,auroc_micro,auroc_micro_norm,auroc_macro,n_seqs,n_frames
+avenue,surveillance,False,1,0.5991,0.6732,0.6593,21,7669
+avenue,surveillance,False,5,0.6162,0.69,0.6911,21,7669
+avenue,surveillance,False,9,0.6249,0.7006,0.7042,21,7669
+avenue,surveillance,False,15,0.6323,0.7029,0.7193,21,7669
+avenue,surveillance,True,1,0.6123,0.681,0.6563,21,7669
+avenue,surveillance,True,5,0.6215,0.6849,0.6711,21,7669
+avenue,surveillance,True,9,0.6266,0.6832,0.6819,21,7669
+avenue,surveillance,True,15,0.6307,0.6825,0.6937,21,7669

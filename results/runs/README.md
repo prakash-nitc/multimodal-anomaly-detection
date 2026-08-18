@@ -4,22 +4,16 @@ Measured results from GPU runs, kept under version control. Everything else
 under `results/` is gitignored scratch output from synthetic checks; this folder
 is the permanent record.
 
-The runs themselves were executed on a shared institutional machine that gets
-reimaged and whose accounts expire, so the server is not the archive — these
-files are.
+The runs were executed on a shared institutional machine that gets reimaged and
+whose accounts expire, so the server is not the archive — these files are.
 
 ## Layout
 
 ```
 <UTC date>_<time>_<tag>/
     MANIFEST.txt        conditions the run was executed under
-    tables/
-        grid.csv            dataset x context on/off x temporal window
-        context_sweep.csv   none / generic / matched / mismatched
-        reanalysis.csv      pooling protocols recomputed from cached scores
-scoring_lab/
-    scoring_lab.csv     scoring strategies, single dev/held-out partition
-    scoring_lab2.csv    with motion scoring, five partitions
+    tables/             that run's own output
+analysis/               post-hoc analysis over cached scores and embeddings
 ```
 
 Each `MANIFEST.txt` records the git commit and whether the working tree was
@@ -31,18 +25,44 @@ traced to the code and hardware that produced it, and the run can be repeated.
 
 | Run | Configuration | Outcome |
 |---|---|---|
-| `131113_shanghaitech` | surveillance prompts, context fused into **both** ensembles | Sweep inverted its own prediction: matched worst (0.637), mismatched best (0.678) |
-| `145146_campus_normal` | campus prompts, context into **normal** ensemble only | Campus anomaly vocabulary performed far worse in isolation (0.486) |
-| `162056_surv_normal` | surveillance prompts, context into **normal** ensemble only | Predicted signature: matched 0.692, none 0.685, mismatched 0.592 |
+| `08-14_131113_shanghaitech` | surveillance prompts, context into **both** ensembles | Sweep inverted its own prediction: matched worst, mismatched among the best |
+| `08-14_145146_campus_normal` | campus prompts, context into **normal** only | Campus anomaly vocabulary far worse in isolation (0.486) |
+| `08-14_162056_surv_normal` | surveillance prompts, context into **normal** only | Predicted signature: matched 0.734, none 0.707, mismatched 0.628 at w=31 |
+| `08-18_133403_avenue` | Avenue, first attempt | Scene descriptor was factually wrong (said "subway station"); superseded |
+| `08-18_140941_avenue_fixed` | Avenue, corrected descriptor | Detection transfers (0.706); context effect nearly absent (+0.020) |
 
-The three differ by one variable at a time. `none` is identical across the first
-and third (0.685), which confirms nothing but the fusion rule changed between
-them.
+The first and third differ by one variable. Their `none` columns agree to four
+decimals, which they must if nothing else changed — that is the internal control,
+and it is checkable here rather than merely asserted.
 
-AUROC figures above are per-clip normalised micro at window 5. Raw and macro
-figures are in the CSVs; the paper reports all three, because raw pooling on
-this benchmark sits near chance and reporting only the favourable convention
-would misrepresent the result.
+## Which analysis files are current
+
+`analysis/` accumulated during a debugging session and **not all of it is
+valid**. Superseded files are kept because the paper's limitation about the
+metric's scale-sensitivity is evidenced by the discrepancy between them.
+
+| File | Status |
+|---|---|
+| `within_view.csv` | **current** — computed from the driver's cached scores |
+| `components_fixed.csv` | **current** — whole-frame, windows to 31 |
+| `sweep_whole2.csv` | **current** — reproduces the driver's gap (+0.102 vs +0.105) |
+| `sweep_whole.csv` | **superseded** — see below |
+| `sweep_by_strategy.csv` | superseded — aggregates over five crops, so not comparable to the driver |
+| `scoring_lab.csv`, `scoring_lab2.csv`, `scoring_lab3.csv` | superseded — same crop issue |
+| `grid.csv`, `context_sweep.csv` | last driver run's tables, duplicated from `work/` |
+
+Two traps produced the superseded files, both worth knowing about:
+
+**Crop aggregation.** The scoring lab averaged over five crops while the
+experiment driver scores whole frames. Every lab figure was therefore
+incomparable to a driver figure until `--crop-agg whole` was added.
+
+**A flag that silently did nothing.** `sweep_whole.csv` was generated with
+`--crop-agg whole` *before* pulling the commit that added that option. The older
+argument parser had no `choices` restriction, so the value was accepted and fell
+through to the mean-crop branch. The file is named for a configuration it did
+not run. This is why it reports a gap of +0.020 where `sweep_whole2.csv`, run
+after the pull with the identical command, reports +0.102.
 
 ## Reproducing
 
@@ -50,8 +70,11 @@ would misrepresent the result.
 python notebooks/run_experiments_server.py \
     --shanghaitech <root> --domain surveillance --context-mode normal \
     --frame-step 2 --tag surv_normal
+
+python notebooks/within_view_control.py --raw <work>/raw --window 31
 ```
 
 The scoring lab needs a cached embedding pass first
 (`notebooks/cache_embeddings.py`), after which it re-evaluates scoring
-hypotheses without touching the GPU.
+hypotheses without touching the GPU. Pass `--crop-agg whole` for figures that
+are comparable to a driver run.

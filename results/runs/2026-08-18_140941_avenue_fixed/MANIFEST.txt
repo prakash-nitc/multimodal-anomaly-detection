@@ -1,0 +1,44 @@
+DA-ZVAD experiment run
+============================================================
+run id          : 2026-08-18_140941_avenue_fixed
+started (UTC)   : 2026-08-18T08:39:41+00:00
+
+-- provenance ----------------------------------------------
+git commit      : 1c3e5b23d1aa484cf6049bf7ed5f77c8387576a2
+git branch      : dev
+working tree    : clean
+repo path       : /home/m251250cs/dazvad/repo
+
+-- environment ----------------------------------------------
+host            : dellemc
+user            : m251250cs
+os              : Linux-5.19.0-46-generic-x86_64-with-glibc2.36
+python          : 3.10.7
+torch           : 2.3.1+cu121
+cuda (torch)    : 12.1
+gpu             : NVIDIA A40
+gpu memory      : 44.4 GB
+memory cap      : 40% of device
+thread cap      : 8
+
+-- configuration -------------------------------------------
+clip model      : ViT-L-14 / laion2b_s32b_b82k
+prompt domain   : surveillance
+context mode    : normal
+frame_step      : 2  (score every Nth frame)
+grid windows    : [1, 5, 9, 15]
+sweep windows   : [1, 5]
+
+-- datasets ------------------------------------------------
+avenue
+    root        : /home/m251250cs/dazvad/data/avenue
+    domain      : surveillance
+    description : "an outdoor campus walkway in front of a building entrance"
+    sequences   : 21
+    frames used : 7669  (after frame_step)
+    anomalous   : 1859 frames (24.2%)
+
+-- completion ----------------------------------------------
+finished (UTC)  : 2026-08-18T08:57:01+00:00
+wall clock      : 17.3 min
+peak gpu memory : 1.62 GB
