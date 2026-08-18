@@ -217,6 +217,13 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          modifications are now recorded as failing to improve on the minimal
          configuration. A limitation on the metric's sensitivity to monotone
          rescaling was added. \\
+18 Aug 2026 & Result~5 written: CUHK Avenue evaluated with the identical frozen
+         configuration. Detection transfers ($0.706$ against $0.707$) but the
+         context effect nearly vanishes ($+0.020$ against $+0.105$), with an
+         accurate descriptor scoring below none. Attributed to Avenue being a
+         single camera view where ShanghaiTech is thirteen, and marked as a
+         conjecture with the control experiment that would settle it. Conclusion
+         and limitations scoped accordingly. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -837,7 +844,7 @@ them.}\label{tbl:datasets}
 \midrule
 MVTec AD \citep{bergmann2019mvtec} & Industrial & 15 product categories, 1{,}725 test images, pixel-level masks & \done \\
 ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes, 107 test clips, 40{,}791 frames, frame-level ground truth & \done \\
-CUHK Avenue \citep{lu2013avenue} & Surveillance & Subway entrance, 21 test videos & \notstarted \\
+CUHK Avenue \citep{lu2013avenue} & Surveillance & Outdoor campus walkway, single view, 21 test videos, 15{,}324 frames & \done \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1142,12 +1149,63 @@ Region-level scoring at finer granularity than quadrants remains untested and is
 identified in Section~\ref{sec:conclusion} as the most promising route to a
 materially higher figure.
 
-\subsection{Result 5: cross-domain transfer}
-\pending{performance of a single frozen configuration evaluated across industrial
-and surveillance domains, isolating which shifts are absorbed by the backbone.
-Requires CUHK Avenue, which is not yet evaluated. This is the experiment that
-tests the transfer claim directly, and no cross-domain conclusion is drawn until
-it is complete.}
+\subsection{Result 5: replication on a second video domain}
+\label{sec:res-avenue}
+The identical frozen configuration was applied to CUHK Avenue
+\citep{lu2013avenue}: 21 test clips, 7{,}669 frames after subsampling, of which
+$24.2\%$ are anomalous. Nothing was retuned. Only the scene descriptor was
+changed, from a campus walkway to an outdoor walkway before a building entrance,
+which is what the framework claims is sufficient to redeploy it.
+
+\begin{table}[width=\linewidth,cols=6,pos=h]
+\caption{Replication on CUHK Avenue against ShanghaiTech, $w{=}31$, per-clip
+normalised frame-level AUROC. The configuration is identical; only the dataset
+and the scene descriptor differ.}\label{tbl:avenue}
+\begin{tabularx}{\linewidth}{@{}Z l l l l l@{}}
+\toprule
+\textbf{Dataset} & \textbf{none} & \textbf{generic} & \textbf{matched} & \textbf{mismatched} & \textbf{gap} \\
+\midrule
+ShanghaiTech & 0.707 & 0.691 & \textbf{0.734} & 0.628 & $+0.105$ \\
+CUHK Avenue  & 0.706 & \textbf{0.729} & 0.677 & 0.657 & $+0.020$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Detection transfers. With no descriptor the two benchmarks give $0.706$ and
+$0.707$, which is as close to identical as this measurement resolves. A frozen
+encoder and a pair of prompt ensembles carry over between two surveillance
+domains without adjustment, which is the covariate-shift half of the problem and
+is consistent with Observation~3.
+
+The adaptation mechanism does not transfer. The matched-minus-mismatched gap
+falls from $+0.105$ to $+0.020$, and the matched descriptor now scores
+\emph{below} supplying none. The best condition on Avenue is \texttt{generic}: a
+placeholder reading ``a generic scene'' outperforms an accurate description of
+the scene by $0.052$. Since \texttt{generic} carries no information about the
+deployment environment, whatever benefit it confers cannot be domain adaptation;
+the most economical reading is that an additional prompt improves the normal
+ensemble as an ensemble, independently of what it says.
+
+A residual effect survives. The mismatched condition remains the worst on both
+benchmarks, so a description of the wrong domain still costs something even
+where the correct one does not help. That the effect is directionally consistent
+and an order of magnitude weaker is more informative than either a clean
+replication or a flat null would have been.
+
+We attribute the difference to scene diversity. ShanghaiTech comprises thirteen
+camera views, so a descriptor has a discrimination to perform: it states which
+of several environments the model is operating in. Avenue is a single fixed
+view, and every clip shows it, so there is nothing for a scene description to
+resolve and the base prompts already cover the only environment present. This
+predicts that the utility of verbalized context scales with the domain variation
+it must resolve, and that a benchmark with one scene is close to the floor of
+that scale.
+
+That account is a conjecture consistent with two datasets, not a demonstrated
+relationship, and we mark it as such. It is testable: the prediction is that
+partitioning ShanghaiTech by camera view and running the sweep within a single
+view should reproduce Avenue's flat result, while the pooled version reproduces
+the effect. That experiment is not yet run.
 
 \subsection{Result 6: explanations under domain shift}
 \pending{qualitative gallery contrasting explanations generated under matched and
@@ -1212,12 +1270,19 @@ frozen encoder, two prompt ensembles, a moving average and one sentence is not a
 simplification of the method for presentation; it is what survived the
 alternatives.
 
-Results~5 and~6 remain outstanding, and the corresponding claims are not made.
-In particular, the transfer claim central to the framework requires a second
-video domain, and is therefore not yet tested. The present evidence for
-context-dependence comes from varying the descriptor within a single domain.
-That is a necessary condition for adaptation across domains, but not a
-sufficient one.
+\emph{The adaptation mechanism is bounded, and a second domain establishes
+where.} Applied unchanged to CUHK Avenue, the framework detects equally well
+($0.706$ against $0.707$) but its context effect nearly vanishes: the gap falls
+from $+0.105$ to $+0.020$ and an accurate descriptor scores below no descriptor
+at all. Avenue is a single camera view where ShanghaiTech is thirteen, which
+suggests that verbalized context earns its place in proportion to the domain
+variation it must resolve. On the evidence of two datasets that is a conjecture
+rather than a law, but it is a falsifiable one, and it converts an unqualified
+claim into a scoped one.
+
+Result~6 remains outstanding and the corresponding claim is not made: the
+explanation module has not been executed on video, so no assertion is offered
+about explanation quality under domain shift.
 
 \subsection{Limitations}
 \begin{itemize}
@@ -1257,16 +1322,26 @@ sufficient one.
         partitions with their spread, and the spread is comparable to the
         margins separating the leading configurations---which are consequently
         reported as tied rather than ranked.
-  \item Evidence for the adaptation mechanism is drawn from a single video
-        domain. Transfer across domains is asserted by the framework but not yet
-        measured.
+  \item The adaptation mechanism is demonstrated on one of the two video domains
+        evaluated. On CUHK Avenue the effect is five times smaller and an
+        accurate descriptor does not improve on none, so the claim is scoped to
+        settings with scene variation for the descriptor to resolve. The
+        explanation offered for that boundary rests on two datasets and is not
+        established.
+  \item Both video benchmarks are outdoor pedestrian surveillance. The
+        industrial and surveillance pairing that motivates the concept-shift
+        argument is evaluated for detection but not for the context sweep, which
+        has not been run on MVTec~AD.
 \end{itemize}
 
 \subsection{Future work}
 \begin{itemize}
-  \item Evaluation on a second video domain, completing Result~5. This is the
-        experiment that tests the transfer claim directly and takes precedence
-        over further optimisation within one domain.
+  \item The within-view control described in Section~\ref{sec:res-avenue}:
+        partitioning ShanghaiTech by camera and running the sweep inside a
+        single view. If the effect disappears there, scene diversity is
+        established as the operative variable rather than conjectured.
+  \item The context sweep on MVTec~AD, giving the industrial--surveillance
+        contrast for the adaptation mechanism and not only for detection.
   \item Patch-level scoring against the encoder's spatial tokens rather than the
         pooled embedding \citep{jeong2023winclip, zhou2024anomalyclip}. The
         present results use only the pooled representation, discarding the
