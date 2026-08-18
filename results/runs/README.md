@@ -51,18 +51,29 @@ metric's scale-sensitivity is evidenced by the discrepancy between them.
 | `scoring_lab.csv`, `scoring_lab2.csv`, `scoring_lab3.csv` | superseded — same crop issue |
 | `grid.csv`, `context_sweep.csv` | last driver run's tables, duplicated from `work/` |
 
-Two traps produced the superseded files, both worth knowing about:
+Two defects produced the superseded files, both worth knowing about.
 
 **Crop aggregation.** The scoring lab averaged over five crops while the
 experiment driver scores whole frames. Every lab figure was therefore
-incomparable to a driver figure until `--crop-agg whole` was added.
+incomparable to a driver figure until `--crop-agg whole` was added in `2b74a59`.
 
-**A flag that silently did nothing.** `sweep_whole.csv` was generated with
-`--crop-agg whole` *before* pulling the commit that added that option. The older
-argument parser had no `choices` restriction, so the value was accepted and fell
-through to the mean-crop branch. The file is named for a configuration it did
-not run. This is why it reports a gap of +0.020 where `sweep_whole2.csv`, run
-after the pull with the identical command, reports +0.102.
+**The score transform.** The driver scores the softmax probability of the
+abnormal prototype, `sigmoid(logit_scale * margin)`; the lab scored the margin
+itself. That is a monotone transform, so within-clip AUROC is identical and a
+rank correlation between the two score arrays comes back at exactly 1.0 — which
+is why the defect survived a correlation check. Pooled AUROC is not identical,
+because per-clip min-max normalisation is affine and an affine map applied after
+a nonlinear monotone one is not the affine map alone. The two normalise each
+clip onto [0, 1] differently and rank differently once clips are pooled.
+Corrected in `3635fd4`.
+
+`sweep_whole.csv` and `sweep_whole2.csv` were produced by the identical command
+either side of that fix, and report gaps of +0.020 and +0.102 respectively. The
+second reproduces the driver; the first does not.
+
+The lesson generalises past this repository: **a rank correlation of 1.0 does
+not establish that two scorings are equivalent under a metric that normalises
+per clip.** Check the metric, not the ordering.
 
 ## Reproducing
 
