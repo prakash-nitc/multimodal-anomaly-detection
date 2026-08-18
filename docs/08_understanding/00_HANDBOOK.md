@@ -337,6 +337,38 @@ leaves the original prompts intact.
 fits the idea: the scene tells you what normal looks like here; an anomaly is a
 departure from it.
 
+### 5.4a — and we measured it
+
+The prototypes are just averaged sentence embeddings, so the angle between them
+can be computed directly — no images needed, seconds to run.
+
+| Fusion | none | generic | matched | mismatched |
+|---|---|---|---|---|
+| **Both ensembles** | 35.7° | 26.3° | 26.3° | 25.0° |
+| **Normal only** | 35.7° | 34.5° | **41.9°** | 37.6° |
+
+**The collapse is real and large.** Grounding both ensembles contracts the angle
+from 35.7° to about 25°, nearly halving the margin the decision depends on — for
+every descriptor tested.
+
+**And the fix works geometrically.** Grounding the normal ensemble alone causes
+no contraction. The matched descriptor actually *widens* the angle to 41.9°,
+above the ungrounded baseline — and that condition has the best AUROC.
+
+**But one prediction failed.** We expected the *accurate* descriptor to collapse
+the prototypes furthest, since accurate text aligns with everything. It doesn't
+— mismatched collapses them marginally more. And the three grounded conditions
+sit within 1.3° of each other while their AUROC spans 0.029.
+
+> **So the account is incomplete, not confirmed.** Prototype angle explains why
+> grounding *both* ensembles hurts. It does not explain why an accurate
+> descriptor is the worst of the three. What's missing is the *direction* of the
+> collapse — toward the image distribution or away from it — and that hasn't
+> been measured.
+
+If asked, say exactly that. A mechanism that explains most of an effect and is
+honest about the remainder is stronger than one asserted to explain all of it.
+
 ## 5.5 Day two: a second dataset, and a bug of our own
 
 We ran **CUHK Avenue** to check the finding holds elsewhere. It didn't (§5.7).
@@ -687,8 +719,10 @@ replicate, and an error in our own analysis code invalidated four hours of work.
 
 1. **Why context helps on one benchmark and not the other** — the scene-diversity
    account is supported but the per-view estimates are noisy.
-2. **The dilution mechanism is inferred, not directly measured.** The prototype
-   distance under each condition has never been computed. Takes minutes.
+2. **The *direction* of prototype collapse is not measured.** The collapse
+   itself now is (§5.4a), but not whether it moves the prototypes toward or away
+   from where the image embeddings sit — which is what would explain why an
+   accurate descriptor is worse than a wrong one under `both` fusion.
 3. **The industrial↔surveillance contrast is argued, not measured.** The sweep
    has never been run on MVTec, and both video benchmarks are outdoor pedestrian
    surveillance.
