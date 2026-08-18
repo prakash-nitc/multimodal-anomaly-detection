@@ -97,10 +97,49 @@ sound trivial, because it is.
 **Answer honestly. This is not a question to bluff.**
 
 > "As it stands, not for a strong venue. We have a characterisation, a protocol,
-> and one finding — on a single dataset, with no new architecture. What would
-> make it publishable is cross-domain evidence and a direct measurement of the
-> dilution mechanism, both of which are next. For the thesis, the work is a
-> characterisation and a measurement method that already caught a real error."
+> two findings and a boundary condition — but no new architecture, and the
+> central effect holds on one of the two video benchmarks we tried. What would
+> strengthen it is the within-view control that would turn our explanation for
+> that boundary into a result, and a direct measurement of the dilution
+> mechanism. For the thesis, the work is a characterisation and a measurement
+> method that already caught two real errors in its own execution."
+
+---
+
+### A5. Your central finding does not replicate on the second dataset. Doesn't that refute it?
+
+**The hardest question you will get. Do not soften it.**
+
+**Short answer**
+> "It bounds it rather than refuting it. Detection transfers almost exactly —
+> 0.706 on Avenue against 0.707 on ShanghaiTech with no descriptor. What does not
+> transfer is the context effect: the gap falls from +0.105 to +0.020, and the
+> correct description scores below no description at all."
+
+**The explanation, offered as a conjecture**
+> "ShanghaiTech has thirteen camera views; Avenue has one. A scene description
+> has a discrimination to perform only when there are several environments to
+> tell apart. On Avenue every clip shows the same view, so the base prompts
+> already cover the only environment present and there is nothing for the
+> descriptor to resolve."
+
+**The part that must be conceded**
+> "The best condition on Avenue is the *generic* placeholder, which carries no
+> information about the environment. So whatever it contributes there cannot be
+> domain adaptation — most likely it just improves the prompt ensemble as an
+> ensemble. I can't explain that away."
+
+**Why this is still worth having**
+> "A residual effect survives: mismatched remains the worst condition on both
+> benchmarks. And the conjecture is testable — partition ShanghaiTech by camera
+> and run the sweep inside a single view. If the effect disappears there, scene
+> diversity is established as the operative variable. That experiment is named in
+> the paper and is our first Phase 3 task."
+
+**Trap**
+Do not claim the method "works on ShanghaiTech and needs more investigation on
+Avenue." That is evasive. Say the effect nearly vanishes, say the placeholder
+wins, then give the conjecture and the test.
 
 **Why answer this way**
 Overselling invites exactly the follow-up you cannot answer. Naming the shortfall
@@ -124,10 +163,12 @@ yourself and stating the remedy reads as command of the work.
 
 **If pressed**
 > "Liu et al. reach roughly 72.8% by training on ShanghaiTech's own training
-> split. Deploy to a different campus and that model does not yet exist. LAVAD
-> reaches 0.85 but runs three large models per frame and offers no channel for an
-> operator to state what normal means at their site. We run on day one, on one
-> frozen encoder, adaptable by editing a sentence."
+> split. We reach 0.734 using none of it — so we match the benchmark's original
+> trained baseline with zero training data. Deploy to a different campus and
+> their model does not yet exist. LAVAD reaches 0.85 but runs three large models
+> per frame and offers no channel for an operator to state what normal means at
+> their site. We run on day one, on one frozen encoder, adaptable by editing a
+> sentence."
 
 **The research half**
 > "But accuracy was never the question. We asked whether language alone can carry
@@ -135,7 +176,7 @@ yourself and stating the remedy reads as command of the work.
 > the objective."
 
 **The honest concession — volunteer it**
-> "0.706 is not a deployable autonomous detector, and I won't claim it is. The
+> "0.734 is not a deployable autonomous detector, and I won't claim it is. The
 > positioning is cold start: coverage from day one while data is collected for a
 > trained system, or triage that reduces hours of footage to minutes of review."
 
@@ -145,7 +186,7 @@ excuse. Always pair it with what you *are* competing on.
 
 ---
 
-### B2. Your MVTec result was 88.5%. Why is video only 0.706?
+### B2. Your MVTec result was 88.5%. Why is video only 0.734?
 
 **Short answer**
 > "Different tasks and different metrics — but more importantly, the MVTec
@@ -160,7 +201,7 @@ excuse. Always pair it with what you *are* competing on.
 | Textures (carpet, grid, leather, tile, wood) | ~99.5% | most of the image |
 | Objects (bottle, cable, capsule) | ~83.1% | a region |
 | Transistor — small localised defect | 72.7% | a few percent |
-| ShanghaiTech — cyclist in a wide frame | 70.6% | ~1–2% |
+| ShanghaiTech — cyclist in a wide frame | 73.4% | ~1–2% |
 
 > "One monotone trend across two benchmarks. And the MVTec prompt ablation said
 > the same thing independently — generic 89.1%, category-specific 88.6%, ensemble
@@ -225,27 +266,40 @@ the story as settled invites the person who noticed to dismantle it.
 
 ---
 
-### C3. The correct description only beats no description by 0.007. Does it help at all?
+### C3. Does a correct description actually help, or only a wrong one hurt?
 
 **Answer precisely. Understating protects you.**
 
-> "That is the right question, and our claim is narrower than you might expect.
-> We do *not* claim a correct description improves detection — 0.007 is nothing.
-> The evidence is that a *wrong* description costs 0.100. The descriptor
-> constrains a decision boundary rather than adding information: it degrades
-> sharply when misdirected."
+> "Both, but with very different confidence. A correct description beats none by
+> +0.027, and that margin is positive at every temporal window we measured and
+> grows with the window — so the direction is consistent, not a coincidence of
+> one setting. But it sits inside the ±0.036 spread across data splits, so I
+> report the direction and decline to claim the magnitude.
+>
+> The claim rests on the other half: a *wrong* description costs 0.105, which is
+> unambiguous. The descriptor constrains a decision boundary rather than adding
+> information — it degrades sharply when misdirected."
 
 ---
 
-### C4. Motion alone reaches 0.684 without any language. What is the language for?
+### C4. Motion alone reaches 0.686 without any language. What is the language for?
 
-**Raise this yourself before they do.**
+**The answer here changed when a measurement error was corrected. Know the current one.**
 
-> "A fair challenge, and we state it in the paper. On this benchmark the
-> anomalies are largely kinematic, so a change signal captures much of them. The
-> two are complementary — 0.706 together, above either alone — but we are careful
-> not to present a frame-level vision-language score on this benchmark as
-> evidence of semantic understanding."
+> "Motion reaches 0.686 alone, and the language pathway reaches 0.707. Adding
+> motion to language costs 0.001 — they are not complementary. That surprised us:
+> ShanghaiTech's anomalies look kinematic, a bicycle at cycling speed, so we
+> expected the two to combine. Measured properly they do not, which suggests the
+> frozen encoder's pooled embedding already registers enough of the motion that
+> an explicit term adds nothing."
+
+**If asked why this differs from an earlier draft**
+> "An analysis script scored the cosine margin where the pipeline scores its
+> softmax. Those rank frames identically, but the per-clip normalisation in the
+> metric is affine, so applying it after a nonlinear monotone map is not the same
+> operation — the pooled figures differ by up to 0.05. We caught it by requiring
+> the analysis tool to reproduce a pipeline result, corrected every affected
+> number, and the metric's scale-sensitivity is now recorded as a limitation."
 
 ---
 
@@ -276,7 +330,7 @@ the story as settled invites the person who noticed to dismantle it.
 | zxVAD 2023 | Source training | None | trained | none | — |
 | VERA 2025 | Text learned on source | Source needed | 1 VLM | text, learned offline | — |
 | LAVAD 2024 | None | None | **3 large models** | none | ~0.85 |
-| **DA-ZVAD** | **None** | **None** | **1 frozen encoder** | **text, at test time** | **0.706** |
+| **DA-ZVAD** | **None** | **None** | **1 frozen encoder** | **text, at test time** | **0.734** |
 
 *Verify every figure from the source papers before quoting.*
 
@@ -347,25 +401,34 @@ the story as settled invites the person who noticed to dismantle it.
 
 **Know these. Being caught without an answer is worse than volunteering one.**
 
-**F1. Have you demonstrated cross-domain transfer?**
-No. Every measurement is from ShanghaiTech. Say so before being asked.
+**F1. Why does context help on one benchmark and not the other?**
+The scene-diversity account is a conjecture from two datasets. The within-view
+control that would settle it is not yet run.
 
 **F2. Have you measured the dilution mechanism directly?**
-No — inferred from the performance ordering. Measurement pending.
+No — inferred from the performance ordering and from the fusion experiment
+inverting the effect. The direct measurement, comparing the distance between the
+two prompt prototypes under each condition, takes minutes and is not done.
 
-**F3. Does the finding replicate on another dataset?**
-Unknown. Untested.
+**F3. Does the industrial/surveillance contrast hold for adaptation?**
+Unknown. MVTec is evaluated for detection only; the context sweep has never been
+run on it. Both video benchmarks are outdoor pedestrian surveillance, so the
+concept-shift contrast that motivates the whole argument is currently argued
+rather than measured.
 
 **F4. Has M4 produced anything?**
 No. The explanation module has not been run on video.
 
-**F5. Is the kinematic signal really motion?**
-Not isolated from illumination change, compression artefacts or camera noise.
-
-**F6. Does AnyAnomaly already do the falsifying control?**
+**F5. Does AnyAnomaly already do the falsifying control?**
 Needs checking. Read the paper before the viva — this is the one that could
 weaken the protocol claim, and you want to find out from your own reading rather
 than from a panel member.
+
+**F6. How much does the headline depend on the temporal window?**
+More than is comfortable. The optimum is w=31 and performance falls at w=61;
+the driver's original sweep stopped at 15 and understated the result by 0.03.
+The window was selected on the same test set, since these benchmarks define no
+validation split.
 
 ---
 
