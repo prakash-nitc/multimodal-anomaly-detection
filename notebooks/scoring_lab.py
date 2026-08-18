@@ -199,7 +199,15 @@ def local_reference(feats: np.ndarray, clip_ids: np.ndarray,
 
 def build_scores(feats, clip_ids, texts, crop_agg: str):
     """feats (N, C, D); texts dict name -> (normal (P,D), abnormal (Q,D))."""
-    agg = (lambda a: a.max(axis=1)) if crop_agg == "max" else (lambda a: a.mean(axis=1))
+    # "whole" uses crop 0 only -- the full frame, which is what the experiment
+    # driver scores. Keeping it available lets a lab result be compared against
+    # a driver run without the crop aggregation confounding the comparison.
+    if crop_agg == "whole":
+        agg = lambda a: a[:, 0]
+    elif crop_agg == "max":
+        agg = lambda a: a.max(axis=1)
+    else:
+        agg = lambda a: a.mean(axis=1)
     out = {}
 
     for pname, (tn, ta) in texts.items():
@@ -315,7 +323,10 @@ def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--cache", required=True)
     p.add_argument("--windows", type=int, nargs="+", default=[1, 5, 15, 31])
-    p.add_argument("--crop-agg", nargs="+", default=["max", "mean"])
+    p.add_argument("--crop-agg", nargs="+", default=["max", "mean"],
+                   choices=["max", "mean", "whole"],
+                   help="'whole' scores the full frame only, matching the "
+                        "experiment driver")
     p.add_argument("--dev-frac", type=float, default=0.5)
     p.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     p.add_argument("--top", type=int, default=20)
@@ -351,7 +362,7 @@ def main() -> int:
              for name, (n, a) in sets.items()}
 
     rows = []
-    for crop_agg in (args.crop_agg if n_crops > 1 else ["max"]):
+    for crop_agg in (args.crop_agg if n_crops > 1 else ["whole"]):
         variants = build_scores(feats, clip_ids, texts, crop_agg)
         for key, s in variants.items():
             strat, pname = key.split("|")
