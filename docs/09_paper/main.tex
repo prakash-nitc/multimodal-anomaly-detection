@@ -224,6 +224,13 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          single camera view where ShanghaiTech is thirteen, and marked as a
          conjecture with the control experiment that would settle it. Conclusion
          and limitations scoped accordingly. \\
+19 Aug 2026 & Within-view control run. Evaluating the sweep inside a single
+         ShanghaiTech camera view reduces the gap from $+0.105$ to $+0.034$,
+         near the $+0.020$ measured on single-view Avenue, so the scene-diversity
+         account of Result~5 is supported by measurement rather than by analogy
+         between benchmarks. Qualifications recorded: the per-view estimates are
+         noisy, three of nine are negative, and one view scores below chance
+         throughout. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -1201,11 +1208,43 @@ predicts that the utility of verbalized context scales with the domain variation
 it must resolve, and that a benchmark with one scene is close to the floor of
 that scale.
 
-That account is a conjecture consistent with two datasets, not a demonstrated
-relationship, and we mark it as such. It is testable: the prediction is that
-partitioning ShanghaiTech by camera view and running the sweep within a single
-view should reproduce Avenue's flat result, while the pooled version reproduces
-the effect. That experiment is not yet run.
+That account makes a prediction on ShanghaiTech alone, because ShanghaiTech is
+thirteen single-view datasets stacked together. Partitioning it by camera and
+running the same sweep inside each view should reproduce Avenue's flat result,
+while the pooled evaluation reproduces the effect. A within-view gap comparable
+to the pooled one would refute the account outright.
+
+\begin{table}[width=\linewidth,cols=4,pos=h]
+\caption{Within-view control on ShanghaiTech, $w{=}31$. The same sweep evaluated
+inside each camera view separately, against the pooled evaluation of
+Table~\ref{tbl:sweep}. Four views with fewer than four scorable clips, or with
+only one class present, are excluded.}\label{tbl:withinview}
+\begin{tabularx}{\linewidth}{@{}Z l l l@{}}
+\toprule
+\textbf{Evaluation} & \textbf{Views} & \textbf{Clips} & \textbf{Gap} \\
+\midrule
+Pooled across views          & 13 & 107 & $+0.105$ \\
+\textbf{Mean within a view}  & 9  & 5--34 each & $\mathbf{+0.034}$ (sd $0.058$) \\
+CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The prediction holds. Confining the evaluation to a single environment reduces
+the gap to roughly a third of its pooled value, placing it near the figure
+measured on single-view Avenue. What the descriptor contributes is therefore
+substantially the resolution of \emph{which} scene is in view, rather than a
+characterisation of normality \emph{within} a scene.
+
+Three qualifications attach to that conclusion. The within-view estimates are
+noisy: each rests on between five and thirty-four clips, and three of the nine
+views return negative gaps, so the effect is not reliably positive inside a
+single view---which is the substance of the finding rather than a defect in it.
+The reduction is partial, not total: a third of the effect survives within one
+scene, so scene identification does not account for all of it. And the views
+differ enormously in difficulty, from $0.911$ on view~05 to $0.415$ on view~12,
+the latter below chance; a mean over such heterogeneous conditions should be
+read as an indication rather than a precise quantity.
 
 \subsection{Result 6: explanations under domain shift}
 \pending{qualitative gallery contrasting explanations generated under matched and
@@ -1270,15 +1309,19 @@ frozen encoder, two prompt ensembles, a moving average and one sentence is not a
 simplification of the method for presentation; it is what survived the
 alternatives.
 
-\emph{The adaptation mechanism is bounded, and a second domain establishes
-where.} Applied unchanged to CUHK Avenue, the framework detects equally well
-($0.706$ against $0.707$) but its context effect nearly vanishes: the gap falls
-from $+0.105$ to $+0.020$ and an accurate descriptor scores below no descriptor
-at all. Avenue is a single camera view where ShanghaiTech is thirteen, which
-suggests that verbalized context earns its place in proportion to the domain
-variation it must resolve. On the evidence of two datasets that is a conjecture
-rather than a law, but it is a falsifiable one, and it converts an unqualified
-claim into a scoped one.
+\emph{The adaptation mechanism is bounded, and we can say what bounds it.}
+Applied unchanged to CUHK Avenue, the framework detects equally well ($0.706$
+against $0.707$) but its context effect nearly vanishes: the gap falls from
+$+0.105$ to $+0.020$ and an accurate descriptor scores below no descriptor at
+all. Avenue is a single camera view where ShanghaiTech is thirteen. Confining
+the ShanghaiTech evaluation to one view at a time reproduces the flat result
+($+0.034$ against $+0.105$ pooled), which supports the reading directly rather
+than by analogy between benchmarks. What the descriptor mainly supplies is the
+identification of which environment is in view, not a characterisation of
+normality within it. This scopes the claim rather than abandoning it, and it
+predicts where verbalized adaptation should and should not be expected to
+help---in deployments spanning several environments, and not in a fixed
+single-camera installation.
 
 Result~6 remains outstanding and the corresponding claim is not made: the
 explanation module has not been executed on video, so no assertion is offered
@@ -1323,11 +1366,15 @@ about explanation quality under domain shift.
         margins separating the leading configurations---which are consequently
         reported as tied rather than ranked.
   \item The adaptation mechanism is demonstrated on one of the two video domains
-        evaluated. On CUHK Avenue the effect is five times smaller and an
-        accurate descriptor does not improve on none, so the claim is scoped to
-        settings with scene variation for the descriptor to resolve. The
-        explanation offered for that boundary rests on two datasets and is not
-        established.
+        evaluated, and the claim is scoped to settings with scene variation for
+        the descriptor to resolve. The within-view control supports that scoping
+        but does not establish it firmly: the nine per-view estimates rest on
+        between five and thirty-four clips each, three of them are negative, and
+        the standard deviation across views ($0.058$) exceeds the mean
+        ($0.034$).
+  \item One camera view (12) scores below chance at $0.415$ under every context
+        condition. No account is offered for that failure, and it is averaged
+        into the pooled figures rather than excluded.
   \item Both video benchmarks are outdoor pedestrian surveillance. The
         industrial and surveillance pairing that motivates the concept-shift
         argument is evaluated for detection but not for the context sweep, which
@@ -1336,12 +1383,13 @@ about explanation quality under domain shift.
 
 \subsection{Future work}
 \begin{itemize}
-  \item The within-view control described in Section~\ref{sec:res-avenue}:
-        partitioning ShanghaiTech by camera and running the sweep inside a
-        single view. If the effect disappears there, scene diversity is
-        established as the operative variable rather than conjectured.
   \item The context sweep on MVTec~AD, giving the industrial--surveillance
         contrast for the adaptation mechanism and not only for detection.
+  \item A descriptor exchanged between the two video domains, rather than
+        against a synthetic industrial control: ShanghaiTech's description
+        applied to Avenue and the reverse. Both are plausible surveillance
+        scenes, so this tests the mechanism without the model being able to
+        succeed by recognising an implausible descriptor.
   \item Patch-level scoring against the encoder's spatial tokens rather than the
         pooled embedding \citep{jeong2023winclip, zhou2024anomalyclip}. The
         present results use only the pooled representation, discarding the
