@@ -1036,12 +1036,49 @@ Each ensemble is mean-pooled into a single embedding. Text appended to both
 ensembles therefore enters both prototypes as a common component, which draws
 them together and contracts the margin that carries the decision.
 
-This accounts for the inversion. A descriptor that describes the imagery
-faithfully aligns strongly with every frame, so it absorbs more of the
-normal/abnormal contrast---which is why an \emph{accurate} description was the
-most damaging condition. A descriptor of an unrelated domain aligns with nothing
-in the scene, so it absorbs little and leaves the original prompts largely
-intact.
+The collapse is directly measurable, since the prototypes are mean-pooled text
+embeddings and the angle between them requires no images. Table~\ref{tbl:proto}
+reports it.
+
+\begin{table}[width=\linewidth,cols=5,pos=h]
+\caption{Angle between the normal and abnormal prototypes under each condition,
+with the margin $1-\cos$ and the corresponding AUROC. The prototypes are
+mean-pooled text embeddings, so this is a property of the prompts alone.}
+\label{tbl:proto}
+\begin{tabularx}{\linewidth}{@{}Z l l l l@{}}
+\toprule
+\textbf{Fusion} & \textbf{none} & \textbf{generic} & \textbf{matched} & \textbf{mismatched} \\
+\midrule
+Both ensembles  & $35.7^\circ$ & $26.3^\circ$ & $26.3^\circ$ & $25.0^\circ$ \\
+Normal only     & $35.7^\circ$ & $34.5^\circ$ & $\mathbf{41.9^\circ}$ & $37.6^\circ$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two things follow, and they do not both favour the account.
+
+The collapse is real and large. Injecting a descriptor into both ensembles
+contracts the prototype angle from $35.7^\circ$ to between $25^\circ$ and
+$26^\circ$, nearly halving the margin, and it does so for every descriptor
+tested. Injecting into the normal ensemble alone produces no such contraction;
+the matched descriptor instead \emph{widens} the angle to $41.9^\circ$, above
+the ungrounded baseline, and that condition also attains the highest AUROC. The
+fusion rule therefore behaves geometrically as the account claims.
+
+The finer ordering does not follow the geometry. We anticipated that an accurate
+descriptor would collapse the prototypes furthest, since accurate text aligns
+with every frame; in fact the mismatched descriptor collapses them marginally
+more ($0.907$ against $0.895$ cosine), and the three grounded conditions sit
+within $1.3^\circ$ of one another while their AUROC spans $0.029$. Prototype
+separation thus explains why grounding both ensembles is harmful, but not why an
+accurate descriptor is the most harmful of the three.
+
+The account is therefore incomplete rather than confirmed. What it is missing is
+the \emph{direction} of the collapse: a descriptor matching the imagery moves
+both prototypes toward the region the image embeddings occupy, so every frame
+scores alike, whereas a descriptor of an unrelated domain moves them somewhere
+the images are not and leaves the original prompts discriminating underneath.
+That is measurable against the cached image embeddings and is not yet done.
 
 Under \emph{normal}, where the descriptor no longer enters both prototypes, the
 predicted signature appears: matched $(0.734) >$ none $(0.707) \gg$ mismatched
