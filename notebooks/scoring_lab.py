@@ -153,6 +153,28 @@ def print_sweep_gaps(rows, order=("none", "generic", "matched", "mismatched")):
     print("under that scoring rule, whatever the headline number says.")
 
 
+
+# CLIP's learned inverse temperature. The driver scores the softmax probability
+# of the abnormal prototype, which is sigmoid(LOGIT_SCALE * margin); the margin
+# itself is a monotone transform of that, so within-clip AUROC is identical.
+#
+# Pooled AUROC is not. Per-clip min-max normalisation is affine, and an affine
+# map applied after a nonlinear monotone one is not the same as the affine map
+# alone -- so the two scorings normalise each clip onto [0, 1] differently and
+# rank differently once clips are pooled. Reproducing the driver therefore
+# requires reproducing its transform, not merely its ordering.
+#
+# This is a property of the protocol rather than of either implementation: a
+# metric defined through per-clip normalisation is sensitive to the score's
+# scale, not only to its ranking.
+LOGIT_SCALE = 100.0
+
+
+def as_probability(margin):
+    """Margin -> softmax probability, matching the driver's frame score."""
+    return 1.0 / (1.0 + np.exp(-LOGIT_SCALE * np.asarray(margin, dtype=np.float64)))
+
+
 def zscore_per_clip(x: np.ndarray, clip_ids: np.ndarray) -> np.ndarray:
     z = np.empty_like(x, dtype=float)
     for c in np.unique(clip_ids):
@@ -213,9 +235,10 @@ def build_scores(feats, clip_ids, texts, crop_agg: str):
     for pname, (tn, ta) in texts.items():
         pn = tn.mean(0); pn /= np.linalg.norm(pn)
         pa = ta.mean(0); pa /= np.linalg.norm(pa)
-        out[f"margin_pooled|{pname}"] = agg(feats @ pa) - agg(feats @ pn)
-        out[f"margin_maxmax|{pname}"] = (agg((feats @ ta.T).max(axis=-1))
-                                         - agg((feats @ tn.T).max(axis=-1)))
+        out[f"margin_pooled|{pname}"] = as_probability(
+            agg(feats @ pa) - agg(feats @ pn))
+        out[f"margin_maxmax|{pname}"] = as_probability(
+            agg((feats @ ta.T).max(axis=-1)) - agg((feats @ tn.T).max(axis=-1)))
 
     # Scene-conditional normality, from the clip's own (unlabelled) frames.
     whole = feats[:, 0, :]
@@ -275,9 +298,9 @@ def build_scores(feats, clip_ids, texts, crop_agg: str):
         d = d / nd
         for w, g in ((50, 15), (150, 30)):
             ref = local_reference(whole, clip_ids, w, g)
-            out[f"textdev_w{w}|{pname}"] = (whole - ref) @ d
-        out[f"textdev_clip|{pname}"] = (whole - np.stack(
-            [whole[clip_ids == c].mean(0) for c in clip_ids])) @ d
+            out[f"textdev_w{w}|{pname}"] = as_probability((whole - ref) @ d)
+        out[f"textdev_clip|{pname}"] = as_probability((whole - np.stack(
+            [whole[clip_ids == c].mean(0) for c in clip_ids])) @ d)
 
     base = [k for k in list(out) if k.startswith("margin_")]
     base = base + [k for k in list(out) if k.startswith("textdev_")]
