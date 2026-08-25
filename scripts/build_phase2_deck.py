@@ -284,8 +284,8 @@ s = slide("DA-ZVAD: adapt by writing a sentence", "Proposed framework")
 _here = os.path.dirname(os.path.abspath(__file__))
 img = next((c for c in (
     os.path.join(_here, "dazvad_architecture.png"),
-    os.path.join(_here, "..", "docs", "09_paper", "dazvad_architecture.png"),
     os.path.join(_here, "..", "docs", "06_presentations", "dazvad_architecture.png"),
+    os.path.join(_here, "..", "docs", "09_paper", "dazvad_architecture.png"),
 ) if os.path.isfile(c)), "")
 if img:
     s.shapes.add_picture(img, Inches(L), Inches(1.95), width=Inches(7.5))
