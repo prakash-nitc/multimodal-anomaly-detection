@@ -8,7 +8,7 @@ protocol -- can be evaluated in seconds instead of an hour.
 What this script answers: how much of DA-ZVAD's near-chance pooled AUROC is a
 detection failure, and how much is a *measurement* artefact?
 
-ShanghaiTech spans 13 camera views. A frozen scorer sits at a different
+The ShanghaiTech test split spans 12 camera views. A frozen scorer sits at a different
 similarity baseline under each, so concatenating raw scores from all clips into
 one ranking compares frames across incomparable scales. The standard protocol
 (Liu et al., 2018) min-maxes each clip first. That uses no labels and so leaks

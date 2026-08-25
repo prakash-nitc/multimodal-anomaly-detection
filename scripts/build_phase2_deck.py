@@ -346,7 +346,7 @@ callout(s, L, 5.15, CW, 1.35, "Predicted signature, fixed before measurement",
 # ================================================================ 7 SETUP
 s = slide("What we ran", "Experiments  ·  setup")
 table(s, [
-    ["Benchmarks", "ShanghaiTech (13 views) and CUHK Avenue (1 view)"],
+    ["Benchmarks", "ShanghaiTech (12 views) and CUHK Avenue (1 view)"],
     ["Scale", "128 test clips · 28,118 frames · frame-level ground truth"],
     ["Hardware", "NVIDIA A40, college GPU server"],
     ["Backbone", "CLIP ViT-L/14 (LAION-2B), frozen · PyTorch 2.3.1 / CUDA 12.1"],
@@ -386,9 +386,9 @@ box(s, L, 6.55, CW, 0.4,
 # ================================================================ 9 FIX 1
 s = slide("Diagnosis 1 — we were measuring it wrong", "Experiments  ·  diagnosis")
 bullets(s, [
-    ("13 camera views.", "CLIP sits at a different baseline score under each one "
+    ("12 camera views.", "CLIP sits at a different baseline score under each one "
      "— different lighting, different angle."),
-    ("Our error.", "We pooled every frame from all 13 cameras into one ranking."),
+    ("Our error.", "We pooled every frame from all 12 cameras into one ranking."),
     ("The analogy.", "Ranking students from different schools by raw marks when "
      "the schools grade differently. The comparison destroys the ordering."),
 ], 1.95, size=16, gap=0.88)
@@ -526,7 +526,7 @@ box(s, L, 1.9, CW, 0.35,
 
 table(s, [
     ["Dataset", "none", "generic", "matched", "mismatched", "gap"],
-    ["ShanghaiTech  (13 views)", "0.707", "0.691", "0.734", "0.628", "+0.105"],
+    ["ShanghaiTech  (12 views)", "0.707", "0.691", "0.734", "0.628", "+0.105"],
     ["CUHK Avenue  (1 view)", "0.706", "0.729", "0.677", "0.657", "+0.020"],
 ], L, 2.5, CW, col_w=[3.23, 1.68, 1.68, 1.68, 1.68, 1.68], size=15,
     hi_rows=(2,), row_h=0.58, num_cols=(1, 2, 3, 4, 5))
@@ -544,7 +544,7 @@ box(s, L + 6.3, 4.9, 4.9, 0.8,
     15, color=INK, spacing=1.3)
 
 callout(s, L, 6.0, CW, 1.15, "Our explanation — stated as a conjecture",
-        "ShanghaiTech has 13 camera views; Avenue has one. A scene description "
+        "ShanghaiTech has 12 camera views; Avenue has one. A scene description "
         "has work to do only when there are several environments to tell "
         "apart. Testable: run the sweep inside a single ShanghaiTech view.",
         tone="caution", size=14.5)
@@ -552,14 +552,14 @@ callout(s, L, 6.0, CW, 1.15, "Our explanation — stated as a conjecture",
 # ================================================================ 15 WITHIN-VIEW
 s = slide("We tested that explanation, and it held", "Results  ·  the control")
 box(s, L, 1.9, CW, 0.7,
-    "ShanghaiTech is thirteen single-view datasets stacked together. If the "
+    "ShanghaiTech is twelve single-view datasets stacked together. If the "
     "descriptor works by telling the model WHICH scene it is in, then confining "
     "the sweep to one camera view should reproduce Avenue's flat result.",
     15.5, color=INK_2, spacing=1.3)
 
 table(s, [
     ["Evaluation", "Views", "Clips", "Gap"],
-    ["Pooled across views", "13", "107", "+0.105"],
+    ["Pooled across views", "12", "107", "+0.105"],
     ["Within a single view (mean)", "9", "5–34 each", "+0.034"],
     ["CUHK Avenue (single view)", "1", "21", "+0.020"],
 ], L, 2.85, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=15, hi_rows=(2,), row_h=0.56,

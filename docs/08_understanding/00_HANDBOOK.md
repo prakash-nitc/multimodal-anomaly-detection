@@ -446,12 +446,12 @@ genuinely fail — and the first time, it did.
 
 | | |
 |---|---|
-| **ShanghaiTech** | Campus CCTV, **13 different cameras**, 107 clips, 40,791 frames |
+| **ShanghaiTech** | Campus CCTV, **12 camera views** in the test split, 107 clips, 40,791 frames |
 | **CUHK Avenue** | Outdoor walkway, **1 camera**, 21 clips |
 | Labels | A human marked every frame normal or anomalous |
 | Hardware | The college's NVIDIA A40 |
 
-That "13 cameras versus 1" difference turns out to matter enormously (§6.7).
+That "12 cameras versus 1" difference turns out to matter enormously (§6.7).
 
 ## 5.2 The first run failed completely
 
@@ -469,11 +469,11 @@ and finding them is most of the work.
 
 ### What went wrong
 
-ShanghaiTech has 13 cameras, each looking at a different part of campus with
+The ShanghaiTech test split spans 12 cameras, each looking at a different part of campus with
 different lighting and angles. CLIP produces slightly different baseline scores
 under each — not because anything is anomalous, simply because the scenes differ.
 
-We were taking every frame from all 13 cameras and ranking them in one big list.
+We were taking every frame from all 12 cameras and ranking them in one big list.
 
 ### Why that breaks things — a worked example
 
@@ -833,7 +833,7 @@ Don't try to explain that away. Say it, then give the mechanism below.
 
 ## 6.7 …and then we worked out why
 
-ShanghaiTech has **13 camera views**. Avenue has **one**.
+ShanghaiTech's test split has **12 camera views**. Avenue has **one**.
 
 **The idea:** a scene description only has a job to do when there are several
 places to tell apart. On Avenue every clip shows the same view. There's nothing
@@ -842,7 +842,7 @@ scene there is.
 
 ### The clever part — testing it without a third dataset
 
-ShanghaiTech is really **13 single-camera datasets stacked together**. The clip
+ShanghaiTech is really **12 single-camera datasets stacked together**. The clip
 names even say which camera each came from (`01_0014` is camera 01).
 
 So we ran the same experiment **inside each camera separately**. If the idea is
@@ -851,7 +851,7 @@ Avenue.
 
 | How it's evaluated | Gap |
 |---|---|
-| All 13 cameras pooled | **+0.105** |
+| All 12 cameras pooled | **+0.105** |
 | Inside a single camera (average of 9) | **+0.034** |
 | Avenue, which has one camera | +0.020 |
 
@@ -1047,7 +1047,7 @@ excuse. Always pair it with what you *are* competing on.
 
 **"Isn't the rescaling just flattering the number?"**
 
-> It uses no labels — it only puts 13 cameras on a common scale before comparing
+> It uses no labels — it only puts 12 cameras on a common scale before comparing
 > them. It's the benchmark's own published protocol, and we report the
 > un-rescaled figure in the same table.
 
@@ -1080,7 +1080,7 @@ excuse. Always pair it with what you *are* competing on.
 > 0.706 against 0.707. What doesn't transfer is the context effect: the gap falls
 > from ten points to two, and the correct description scores below none.
 >
-> We tested why. ShanghaiTech has thirteen camera views; Avenue has one.
+> We tested why. ShanghaiTech's test split has twelve camera views; Avenue has one.
 > Confining ShanghaiTech to a single view reproduces Avenue's flat result. So the
 > sentence mainly identifies *which* environment is in view — and Avenue has only
 > one.
@@ -1154,7 +1154,7 @@ If a question goes somewhere you didn't prepare, return to these.
 
 | Priority | Work | Cost | Why |
 |---|---|---|---|
-| 1 | A separate description per camera | ~1 hr | All 13 views currently share one sentence — and §6.7 says identifying the view *is* the mechanism |
+| 1 | A separate description per camera | ~1 hr | All 12 views currently share one sentence — and §6.7 says identifying the view *is* the mechanism |
 | 2 | The context sweep on the industrial benchmark | ~1 hr | Your concept-shift argument needs that contrast measured, not just argued |
 | 3 | Region-level scoring | 1–2 sessions | The best remaining shot at a higher number |
 | 4 | Run M4 | ~1 session | A quarter of the framework; makes a strong demo |
@@ -1254,7 +1254,7 @@ Answer each **out loud**, without looking. If you can't, reread the section.
 5. Why does freezing everything make the claim measurable? *(§4.4)*
 6. What is the mismatched condition for, and what result would have refuted you?
    *(§4.5)*
-7. Why did pooling raw scores across 13 cameras give 0.52? Use the two-camera
+7. Why did pooling raw scores across 12 cameras give 0.52? Use the two-camera
    example. *(§5.3)*
 8. Why does an **accurate** description do the most damage when added to both
    prompt sets? *(§5.4)*

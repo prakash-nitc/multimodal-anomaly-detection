@@ -9,8 +9,8 @@ repeated round trips.
 
 This writes a single small bundle instead. Frames are exported as JPEG, scores
 and labels for one worked example as arrays, and a subsample of embeddings with
-their camera identity so the thirteen views can be projected to two dimensions
-and shown as thirteen separate clusters -- which is the pooling problem made
+their camera identity so the twelve views can be projected to two dimensions
+and shown as twelve separate clusters -- which is the pooling problem made
 visible rather than described.
 
 Everything is chosen deterministically so the figures can be regenerated.
@@ -163,8 +163,8 @@ def export_worked_example(raw_dir, out_dir):
 def export_embedding_sample(emb_path, out_dir, per_clip=25, seed=0):
     """A subsample of frame embeddings tagged with camera view.
 
-    Enough to project to two dimensions and show that the thirteen views form
-    thirteen separate clusters -- the reason raw pooling across them destroyed
+    Enough to project to two dimensions and show that the twelve views form
+    twelve separate clusters -- the reason raw pooling across them destroyed
     the ranking.
     """
     z = np.load(os.path.expanduser(emb_path), allow_pickle=True)

@@ -3,13 +3,13 @@
 
 The context sweep produces a large matched-minus-mismatched gap on ShanghaiTech
 (+0.105) and almost none on CUHK Avenue (+0.020). The proposed explanation is
-scene diversity: ShanghaiTech spans thirteen camera views, so a scene descriptor
+scene diversity: the ShanghaiTech test split spans twelve camera views, so a descriptor
 has a discrimination to perform, whereas Avenue is a single fixed view where the
 base prompts already cover the only environment present.
 
 That explanation is a conjecture drawn from two datasets. This script tests it
 without needing a third, by exploiting the fact that ShanghaiTech is itself
-thirteen single-view datasets stacked together. Clip names carry the view in
+twelve single-view datasets stacked together. Clip names carry the view in
 their prefix (``01_0014`` is view 01), so the same sweep can be evaluated inside
 each view separately.
 
