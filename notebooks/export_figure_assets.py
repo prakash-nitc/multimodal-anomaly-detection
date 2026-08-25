@@ -155,8 +155,9 @@ def export_worked_example(raw_dir, out_dir):
     for c in conds:
         out[f"scores_{c}"] = data[c][f"s{best}"]
     np.savez(os.path.join(out_dir, "worked_example.npz"), **out)
-    print(f"[example] {names[best]}  {len(out['labels'])} frames, "
-          f"{counts[best]} anomalous")
+    lab = np.asarray(out["labels"], dtype=int)
+    print(f"[example] {names[best]}  {len(lab)} frames, {int(lab.sum())} "
+          f"anomalous ({100 * lab.mean():.0f}%)")
 
 
 def export_embedding_sample(emb_path, out_dir, per_clip=25, seed=0):
