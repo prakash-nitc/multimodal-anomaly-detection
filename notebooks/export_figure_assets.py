@@ -119,9 +119,37 @@ def export_worked_example(raw_dir, out_dir):
     z = data["none"]
     n = int(z["n"])
     names = [str(x) for x in z["names"]]
-    # the clip with the most anomalous frames makes the clearest illustration
-    counts = [int(np.asarray(z[f"l{i}"]).sum()) for i in range(n)]
-    best = int(np.argmax(counts))
+
+    # Pick the clip that illustrates a detection most clearly, which is not the
+    # one with the most anomalous frames -- a clip that is 89% event has almost
+    # no normal baseline to see the score rise from. What reads well is a single
+    # contiguous event with substantial normal footage on both sides of it.
+    def legibility(i):
+        lab = np.asarray(z[f"l{i}"], dtype=int)
+        if lab.sum() == 0:
+            return -1.0
+        runs, start = [], None
+        for k, v in enumerate(lab):
+            if v and start is None:
+                start = k
+            elif not v and start is not None:
+                runs.append((start, k)); start = None
+        if start is not None:
+            runs.append((start, len(lab)))
+        if len(runs) != 1:                       # one clean event, not several
+            return -1.0
+        lo, hi = runs[0]
+        head, tail, event = lo, len(lab) - hi, hi - lo
+        frac = lab.sum() / len(lab)
+        if not (0.10 <= frac <= 0.55) or event < 20:
+            return -1.0
+        return min(head, tail)                   # symmetric context either side
+
+    scores = [legibility(i) for i in range(n)]
+    if max(scores) < 0:
+        print("[example] no clip with a clean single event; falling back")
+        scores = [int(np.asarray(z[f"l{i}"]).sum()) for i in range(n)]
+    best = int(np.argmax(scores))
 
     out = {"clip": names[best], "labels": z[f"l{best}"]}
     for c in conds:
