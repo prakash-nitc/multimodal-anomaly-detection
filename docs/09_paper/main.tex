@@ -32,6 +32,12 @@
 
 % cas-sc already provides: geometry, graphicx, hyperref, xcolor, natbib
 % hooks, and enhanced enumerate/itemize. Do NOT load those again.
+% Graphics are searched for beside main.tex and in figures/, so a plain
+% \includegraphics{name.png} resolves either way: flat, as the PNGs sit in the
+% Overleaf project, or in the figures/ subdirectory, as they sit in the repo.
+% Keep the calls unprefixed -- adding "figures/" back would break the flat case.
+\graphicspath{{./}{figures/}}
+
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
@@ -858,7 +864,7 @@ CUHK Avenue \citep{lu2013avenue} & Surveillance & Outdoor campus walkway, single
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_dataset_samples.png}
+\includegraphics[width=\linewidth]{fig_dataset_samples.png}
 \caption{Normal and anomalous frames from the two video benchmarks. Each column
 is a single fixed camera, so within a column the scene, viewpoint and lighting
 are constant and only the event differs. The label is therefore a property of
@@ -1014,7 +1020,7 @@ never on a common scale.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_camera_baselines.png}
+\includegraphics[width=\linewidth]{fig_camera_baselines.png}
 \caption{Why pooling raw scores across cameras fails. (a) Frame embeddings
 projected with t-SNE, coloured by camera view: the views occupy distinct
 regions. (b) Distribution, per view, of each frame's similarity to the global
@@ -1028,7 +1034,7 @@ exactly as what counts as an anomalous \emph{event} is.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_detection_example.png}
+\includegraphics[width=\linewidth]{fig_detection_example.png}
 \caption{One clip scored end to end. The raw per-frame score is noisy enough
 that isolated frames outside the event exceed the level reached inside it;
 the moving average of Equation~\eqref{eq:smooth} suppresses those excursions
@@ -1066,7 +1072,7 @@ Both ensembles          & 0.707 & 0.670 & 0.666 & 0.695 & $-0.029$ \\
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_chart_sweep.png}
+\includegraphics[width=\linewidth]{fig_chart_sweep.png}
 \caption{Table~\ref{tbl:sweep} drawn. The quantity the sweep exists to produce is
 the distance between the matched and mismatched bars, which is annotated for
 each fusion rule. Moving the descriptor from both ensembles to the normal
@@ -1161,7 +1167,7 @@ measures one clip at a time.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_context_effect.png}
+\includegraphics[width=\linewidth]{fig_context_effect.png}
 \caption{The descriptor's contribution, per frame. Identical models, identical
 frames, identical smoothing; the only difference is whether the supplied
 sentence describes the scene or an industrial site. Because no parameter is free
@@ -1214,7 +1220,7 @@ Semantic $+$ kinematic           & 31 & $0.711 \pm 0.034$ & 0.706 \\
 
 \begin{figure*}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_chart_ablation.png}
+\includegraphics[width=\linewidth]{fig_chart_ablation.png}
 \caption{Left: frame-level AUROC against the temporal window $w$ under each
 pooling convention, with the matched-descriptor curve for comparison. Raw
 micro-pooling never leaves chance at any window, and every curve turns down
@@ -1351,7 +1357,7 @@ CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_chart_within_view.png}
+\includegraphics[width=\linewidth]{fig_chart_within_view.png}
 \caption{The context gap measured inside each camera view separately, against the
 pooled figure of Table~\ref{tbl:sweep}. Almost every view falls well short of the
 pooled bar and three return negative gaps, but two views (03 and 07) approach it;
