@@ -221,7 +221,7 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          configuration. Detection transfers ($0.706$ against $0.707$) but the
          context effect nearly vanishes ($+0.020$ against $+0.105$), with an
          accurate descriptor scoring below none. Attributed to Avenue being a
-         single camera view where ShanghaiTech is thirteen, and marked as a
+         single camera view where ShanghaiTech is twelve, and marked as a
          conjecture with the control experiment that would settle it. Conclusion
          and limitations scoped accordingly. \\
 19 Aug 2026 & Within-view control run. Evaluating the sweep inside a single
@@ -850,11 +850,23 @@ them.}\label{tbl:datasets}
 \textbf{Dataset} & \textbf{Domain} & \textbf{Content} & \textbf{Status} \\
 \midrule
 MVTec AD \citep{bergmann2019mvtec} & Industrial & 15 product categories, 1{,}725 test images, pixel-level masks & \done \\
-ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes, 107 test clips, 40{,}791 frames, frame-level ground truth & \done \\
+ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes (12 present in the test split), 107 test clips, 40{,}791 frames, frame-level ground truth & \done \\
 CUHK Avenue \citep{lu2013avenue} & Surveillance & Outdoor campus walkway, single view, 21 test videos, 15{,}324 frames & \done \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_dataset_samples.png}
+\caption{Normal and anomalous frames from the two video benchmarks. Each column
+is a single fixed camera, so within a column the scene, viewpoint and lighting
+are constant and only the event differs. The label is therefore a property of
+what is happening rather than of how the scene appears---an empty walkway and
+the same walkway carrying a cyclist are visually similar and oppositely
+labelled, which is the concept shift of Section~\ref{sec:gap} in a
+photograph.}\label{fig:samples}
+\end{figure}
 
 \subsection{Evaluation metrics}
 Anomaly detection is a strongly class-imbalanced problem, in which accuracy is
@@ -885,7 +897,7 @@ imbalance-aware measures.
         benchmarks are computed after min--max normalising each clip's scores,
         following the protocol established with the benchmark
         \citep{liu2018shanghaitech}. The step is necessary rather than
-        conventional: ShanghaiTech comprises thirteen camera views, and a frozen
+        conventional: the ShanghaiTech test split spans twelve camera views, and a frozen
         scorer occupies a different similarity baseline under each, so pooling
         raw scores compares frames drawn from incomparable scales. The
         transformation uses no labels and therefore leaks no test information.
@@ -986,16 +998,43 @@ obtained at zero cost.
 Second, and more consequential for evaluation practice, the raw micro figure is
 indistinguishable from chance while the same scores yield $0.707$ once
 normalised per clip. The gap is diagnostic rather than cosmetic. ShanghaiTech
-spans thirteen camera views, and a frozen scorer sits at a different similarity
+spans twelve camera views, and a frozen scorer sits at a different similarity
 baseline under each; concatenating raw scores therefore ranks frames drawn from
 incomparable scales against one another, destroying an ordering that is present
 within each clip. That the macro figure---which is by construction immune to
 cross-clip offsets---sits at $0.670$ while raw micro sits at $0.519$ confirms
 the cause. Only $31$ of $105$ scorable clips fall below chance individually.
 
+Figure~\ref{fig:baselines} shows the cause directly. Frame embeddings projected
+to two dimensions separate cleanly by camera, and each camera's similarity to
+the global mean sits at its own level---from $0.77$ on view~06 to $0.91$ on
+view~10. A raw score of a given magnitude therefore carries different evidence
+under different cameras, and concatenating them compares quantities that were
+never on a common scale.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_camera_baselines.png}
+\caption{Why pooling raw scores across cameras fails. (a) Frame embeddings
+projected with t-SNE, coloured by camera view: the views occupy distinct
+regions. (b) Distribution, per view, of each frame's similarity to the global
+mean embedding; the medians differ by more than $0.13$. Neither panel uses
+labels.}\label{fig:baselines}
+\end{figure}
+
 This is a concrete instance of the paper's general position appearing inside the
 measurement itself: what counts as an anomalous \emph{score} is scene-relative,
 exactly as what counts as an anomalous \emph{event} is.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_detection_example.png}
+\caption{One clip scored end to end. The raw per-frame score is noisy enough
+that isolated frames outside the event exceed the level reached inside it;
+the moving average of Equation~\eqref{eq:smooth} suppresses those excursions
+while the event, which persists across many frames, survives. This is the
+mechanism behind the monotone gains of Table~\ref{tbl:video}.}\label{fig:detect}
+\end{figure}
 
 \subsection{Result 3: context sweep (the central experiment)}
 \label{sec:res-sweep}
@@ -1101,6 +1140,22 @@ measurably improves on supplying none. Because no parameter is updated anywhere
 in the pipeline, that deficit is attributable to the text alone---no other
 quantity was free to vary. This is the identifiability property of
 Section~\ref{sec:contrib} realised as a measurement.
+
+Figure~\ref{fig:ctxeffect} shows the effect on a single clip rather than as a
+summary statistic. The two curves come from the same frozen models scoring the
+same frames; only the descriptor differs. They track each other outside the
+event and separate within it, which is what the aggregate gap of $+0.105$
+measures one clip at a time.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_context_effect.png}
+\caption{The descriptor's contribution, per frame. Identical models, identical
+frames, identical smoothing; the only difference is whether the supplied
+sentence describes the scene or an industrial site. Because no parameter is free
+to vary, the separation between the curves is attributable to the text
+alone.}\label{fig:ctxeffect}
+\end{figure}
 
 A secondary consequence is methodological. Verbalized context is frequently
 treated as a matter of wording; here the point of injection dominated the
@@ -1236,7 +1291,7 @@ where the correct one does not help. That the effect is directionally consistent
 and an order of magnitude weaker is more informative than either a clean
 replication or a flat null would have been.
 
-We attribute the difference to scene diversity. ShanghaiTech comprises thirteen
+We attribute the difference to scene diversity. The ShanghaiTech test split spans twelve
 camera views, so a descriptor has a discrimination to perform: it states which
 of several environments the model is operating in. Avenue is a single fixed
 view, and every clip shows it, so there is nothing for a scene description to
@@ -1246,7 +1301,7 @@ it must resolve, and that a benchmark with one scene is close to the floor of
 that scale.
 
 That account makes a prediction on ShanghaiTech alone, because ShanghaiTech is
-thirteen single-view datasets stacked together. Partitioning it by camera and
+twelve single-view datasets stacked together. Partitioning it by camera and
 running the same sweep inside each view should reproduce Avenue's flat result,
 while the pooled evaluation reproduces the effect. A within-view gap comparable
 to the pooled one would refute the account outright.
@@ -1260,7 +1315,7 @@ only one class present, are excluded.}\label{tbl:withinview}
 \toprule
 \textbf{Evaluation} & \textbf{Views} & \textbf{Clips} & \textbf{Gap} \\
 \midrule
-Pooled across views          & 13 & 107 & $+0.105$ \\
+Pooled across views          & 12 & 107 & $+0.105$ \\
 \textbf{Mean within a view}  & 9  & 5--34 each & $\mathbf{+0.034}$ (sd $0.058$) \\
 CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
 \bottomrule
@@ -1350,7 +1405,7 @@ alternatives.
 Applied unchanged to CUHK Avenue, the framework detects equally well ($0.706$
 against $0.707$) but its context effect nearly vanishes: the gap falls from
 $+0.105$ to $+0.020$ and an accurate descriptor scores below no descriptor at
-all. Avenue is a single camera view where ShanghaiTech is thirteen. Confining
+all. Avenue is a single camera view where ShanghaiTech is twelve. Confining
 the ShanghaiTech evaluation to one view at a time reproduces the flat result
 ($+0.034$ against $+0.105$ pooled), which supports the reading directly rather
 than by analogy between benchmarks. What the descriptor mainly supplies is the
