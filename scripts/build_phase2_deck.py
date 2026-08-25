@@ -1011,7 +1011,10 @@ for sl, txt in zip(prs.slides, NOTES):
     sl.notes_slide.notes_text_frame.text = txt
 
 # ================================================================ SAVE
-out = os.path.join(_here, "DA-ZVAD_Phase2_Review.pptx")
+# Written to the documented home for presentations rather than beside the
+# build script, so there is only ever one current deck to find.
+out = os.path.join(_here, "..", "docs", "06_presentations",
+                   "DA-ZVAD_Phase2_Review.pptx")
 prs.save(out)
 print(f"saved: {out}")
 print(f"slides: {len(prs.slides._sldIdLst)}   notes: {len(NOTES)}")
