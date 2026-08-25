@@ -24,6 +24,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt, Inches, RGBColor
+from PIL import Image as PILImage
 
 INK = RGBColor(0x14, 0x1C, 0x1E)
 INK_2 = RGBColor(0x3A, 0x4A, 0x4C)
@@ -153,6 +154,7 @@ def convert(md_path: str, out_path: str) -> None:
     normal.paragraph_format.line_spacing = 1.22
 
     seen_h1 = False
+    fig_no = [0]          # figures number themselves as they are met
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -206,6 +208,43 @@ def convert(md_path: str, out_path: str) -> None:
             heading(doc, m.group(2), lvl, not seen_h1)
             if lvl == 1:
                 seen_h1 = True
+            i += 1
+            continue
+
+        # --- figures --------------------------------------------------
+        # ![caption](path) alone on a line. Placed before the list branch so
+        # that the leading "!" is never mistaken for anything else, and
+        # numbered automatically so the running text can refer to "Figure 3"
+        # without the numbers having to be maintained by hand.
+        m = re.match(r"!\[(.*?)\]\((.+?)\)$", s)
+        if m:
+            caption, rel = m.group(1), m.group(2)
+            path = os.path.normpath(os.path.join(os.path.dirname(md_path), rel))
+            if not os.path.isfile(path):
+                raise FileNotFoundError(
+                    f"{md_path}: figure not found: {rel} -> {path}")
+            avail = (sec.page_width - sec.left_margin - sec.right_margin)
+            with PILImage.open(path) as im:
+                pw, ph = im.size
+            width = avail
+            # A tall figure at full text width would push its caption onto the
+            # next page, so cap the height instead and let the width follow.
+            max_h = Inches(7.4)
+            if width * ph / pw > max_h:
+                width = int(max_h * pw / ph)
+            p = doc.add_paragraph()
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p.paragraph_format.space_before = Pt(10)
+            p.paragraph_format.space_after = Pt(4)
+            p.add_run().add_picture(path, width=width)
+            fig_no[0] += 1
+            cap = doc.add_paragraph()
+            cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cap.paragraph_format.space_after = Pt(12)
+            r = cap.add_run(f"Figure {fig_no[0]}.  ")
+            r.font.size = Pt(9); r.font.bold = True
+            r.font.name = SANS; r.font.color.rgb = ACCENT
+            add_runs(cap, caption, 9, SANS, MUTED)
             i += 1
             continue
 

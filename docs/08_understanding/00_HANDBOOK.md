@@ -1,7 +1,8 @@
 # DA-ZVAD — Project Handbook
 
 *A document to learn from. Written to be read straight through.
-Last updated 19 August 2026, after five GPU runs across two benchmarks.*
+Last updated 25 August 2026: eight figures added, each with an explanation of
+how to read it and what to say about it.*
 
 ---
 
@@ -22,6 +23,12 @@ it's used, so reading in order costs less effort than jumping around.
 | 8 | Answering questions |
 | 9 | What's left, and where everything lives |
 | 10 | Glossary and a self-quiz |
+
+**The figures are part of the teaching, not decoration.** Eight of them are
+spread through Parts 2, 4, 5 and 6, and each is followed by a section explaining
+what to look at, in what order, and what a supervisor is likely to ask about it.
+Figure 2 (the architecture, §4.1) and Figure 7 (the two curves, §6.3) are the two
+you should be able to talk through from memory.
 
 **If you only have twenty minutes:** Part 1, then §6.9, then the self-quiz.
 
@@ -208,6 +215,24 @@ Real events last a second or more and survive the averaging. One-frame noise
 doesn't. This costs nothing — there's no parameter to learn, only a choice of
 window size. Ours is 31, and §6.2 shows why.
 
+![One clip scored from beginning to end. The faint jagged line is the raw per-frame score; the solid line is the same scores after smoothing. The shaded band marks where the real event is.](../09_paper/figures/fig_detection_example.png)
+
+### What this picture is showing you
+
+**Look at the faint jagged line first.** That is the raw score for each frame in
+order. Notice that it spikes *outside* the shaded band, where nothing is
+happening — sometimes reaching as high as it does inside the band. If you had to
+choose a threshold on that line, you would raise a great many false alarms.
+
+**Now the solid line.** The same numbers, averaged with their neighbours. The
+isolated spikes have flattened, because one odd frame surrounded by thirty
+ordinary ones barely moves an average. The event survived, because it lasts long
+enough that most of its neighbours belong to the event too.
+
+**That asymmetry is the whole justification for M2.** Noise is short and averages
+away; events are long and do not. Worth saying aloud: this costs nothing at all.
+No parameter is fitted here — only a choice of how wide to average.
+
 ## 2.6 AUROC — how we measure success
 
 **Read this properly.** Every number in Part 6 is an AUROC.
@@ -352,6 +377,40 @@ site gets mixed into the prompts, so "normal" means normal *here*.
 what looks wrong in a flagged frame. **We have never run this on video.** It's
 Phase 3 work.
 
+![The DA-ZVAD framework. Read it left to right: the video and the operator's sentence enter as two separate inputs, meet in the middle, and produce one score per frame.](../09_paper/dazvad_architecture.png)
+
+### How to read the diagram
+
+Spend a minute on this one, because you will be asked to walk through it.
+
+**There are two inputs, not one.** On the left, the video is one input and the
+operator's typed sentence is the other. Almost every other system in this area
+has only the first. The sentence being an *input* — something a person supplies
+at the moment of deployment, rather than something learned beforehand — is the
+whole idea of the project in one picture.
+
+**The two branches stay separate until they meet.** The top branch (M1) turns
+each frame into a list of numbers. The bottom branch (M3) turns the prompts, with
+your sentence mixed in, into two lists of numbers: one standing for "normal" and
+one for "abnormal". Neither branch knows anything about the other until they meet
+at the scoring step. That is *why* the sentence can only influence the result
+through those two prototype vectors, and through nothing else.
+
+**Every model box carries a snowflake.** That mark means the weights are frozen —
+nothing is trained, nothing is updated, not even slightly. Point at these if
+someone asks what makes the experiment trustworthy. Because nothing else is
+allowed to change, anything that *does* change must have been caused by the
+sentence. §4.4 is the long form of that argument.
+
+**The right-hand side turns a score into a decision.** Scores per frame, then M2
+smooths them over time, then a threshold turns the smoothed curve into flagged
+events, then M4 explains one frame per event. M4 is drawn lighter because we have
+not run it on video yet — do not let the diagram imply otherwise.
+
+**A question to expect:** *"where does the training happen?"* It doesn't, anywhere.
+CLIP and LLaVA were trained by other people on general web data; we use them
+exactly as they are. That is deliberate, not a shortcut, and §4.4 says why.
+
 ## 4.2 How M3 actually works
 
 This matters, because the project's most interesting finding is about it.
@@ -453,6 +512,25 @@ genuinely fail — and the first time, it did.
 
 That "12 cameras versus 1" difference turns out to matter enormously (§6.7).
 
+![Normal and anomalous frames from both benchmarks. Each column is a single fixed camera, so going down a column only the event changes.](../09_paper/figures/fig_dataset_samples.png)
+
+### Why this picture is worth showing
+
+**Compare down a column, not across.** Within a column the camera never moves,
+the lighting is the same, and the scene is the same walkway or building. The only
+difference between the upper and lower image is *what is happening*.
+
+**That is the concept-shift argument as a photograph.** An empty walkway and the
+same walkway with a cyclist on it look nearly identical to a computer — the
+pixels barely differ. Yet one is labelled normal and the other anomalous. So the
+label cannot be a property of how the scene *looks*. It must be a property of the
+situation. That is exactly the claim in §3.2, and it is why ordinary domain
+adaptation, which works by making two sets of pixels look alike, is the wrong
+instrument here.
+
+**If you get to show one image to explain the project, show this one.** It makes
+the point before you have said anything technical.
+
 ## 5.2 The first run failed completely
 
 Fifty minutes of GPU time. Result: **0.49**.
@@ -512,6 +590,32 @@ Macro said **0.67**. Micro on raw scores said **0.52**.
 
 That gap is the fingerprint. The signal existed *inside* each clip; pooling was
 destroying it. Only 31 of 105 clips were below chance individually.
+
+![Evidence that the twelve cameras really do sit at different baselines. Left: every frame drawn as a dot, coloured by which camera it came from. Right: how similar each camera's frames are to the average frame.](../09_paper/figures/fig_camera_baselines.png)
+
+### How to read this, and why it settles the argument
+
+**Left panel.** Every frame has been squashed from a long list of numbers down to
+a single dot on a flat page, arranged so that similar frames land near each
+other. Each dot is then coloured by which camera produced it. The colours fall
+into separate clumps. Nobody told the method which camera was which — it worked
+that out from the images alone. **As far as the model is concerned, the twelve
+views are genuinely different places.**
+
+**Right panel.** For each camera, how similar its frames are on average to the
+overall average frame. The typical value runs from about 0.77 on one view to
+about 0.91 on another. That is a wide spread, and it means a similarity of, say,
+0.85 is unremarkable under one camera and distinctly high under another.
+
+**Put the panels together and the §5.3 bug explains itself.** Pooling raw scores
+from all twelve cameras into a single ranking means ranking numbers that were
+never on the same scale. The ordering that genuinely exists inside each camera
+gets buried underneath the differences between cameras.
+
+**The sentence that wins this argument:** *neither panel uses the labels.* We did
+not see a bad result and then go looking for an excuse. The camera differences
+are visible in the raw data, before anyone checks whether a frame is normal or
+anomalous.
 
 ### Be ready to defend this
 
@@ -729,6 +833,40 @@ points. At 61 it gets *worse* — so 31 is a genuine best value, not an artefact
 raw pooling the same scores never beat 0.52; with correct pooling they reach
 0.707.
 
+![Left: the table above, drawn, with the matched-description curve added. Right: the component table from §6.1, drawn, with the spread across the five held-out splits shown as error bars.](../09_paper/figures/fig_chart_ablation.png)
+
+### Left panel — the window
+
+**Follow any curve from left to right.** It rises, peaks at 31, and comes back
+down at 61. That downturn is the important part. If the curves rose forever, a
+sceptic could fairly say the measure simply rewards blurring the scores until
+everything looks smooth. They do not rise forever, so 31 is a real optimum:
+enough smoothing to kill single-frame noise, not so much that short events get
+averaged into the background.
+
+**The grey dashed curve is the broken pooling.** It lies along the bottom near
+0.5 at every window. No amount of smoothing rescues it, because smoothing cannot
+fix a scale problem. Same scores, same everything — only the pooling differs
+between it and the curves above.
+
+### Right panel — the components, and an honest reading
+
+**The bars are the same five numbers as §6.1.** What the table cannot show you,
+and this can, is the *error bars*: how much each figure moved across the five
+different ways of splitting the clips.
+
+**Now look at how much they overlap.** The top three configurations — language
+only, language plus motion, and motion only — have intervals that substantially
+overlap. **This matters, and you should raise it before anyone asks.** It means
+the defensible claim is *"nothing we added improved on language alone"*, which is
+a negative result about our own additions. The claim is **not** *"language alone
+is significantly better"* — the data will not carry that, on a difference of
+0.007 against a spread of 0.036.
+
+Volunteering that your own error bars overlap is the cheapest way there is to
+look like you understand your own results. Someone who has to be told it, and
+then agrees, looks very different from someone who said it first.
+
 ## 6.3 The central experiment
 
 All 107 clips, 31-frame window, correct pooling. Every model frozen; only the
@@ -754,6 +892,51 @@ does worse than the lie. That's the broken version from §5.4.
 if there's no description, it can't matter where you'd have put it. That's a
 built-in check that nothing else changed between the two experiments. It's the
 kind of detail that makes an experiment trustworthy, and worth pointing at.
+
+![The table above, drawn. Grey bars put the description in both prompt sets; orange bars put it in the normal set only. The arrows are the gap — the distance between matched and mismatched.](../09_paper/figures/fig_chart_sweep.png)
+
+### How to read the chart
+
+**Ignore the bar heights at first and look only at the two arrows.** The arrow is
+the answer to the experiment: the distance between the matched bar and the
+mismatched bar. Everything else on the chart is scaffolding around it.
+
+**The grey arrow points the wrong way** (−0.029). Under that fusion rule, telling
+the system the truth does worse than lying to it. **The orange arrow points the
+right way** (+0.105).
+
+**Then say what separates the two.** Not the wording of the sentence. Not the
+models, the frames, the smoothing, or the threshold. Only *which prompt set the
+sentence was attached to*. One implementation decision, and it reversed the
+conclusion of the experiment.
+
+**Check the leftmost pair.** Both bars are the same height, because with no
+description there is nothing to attach anywhere. That is the control, made
+visible — the same point the "none" column makes in the table.
+
+![The same effect on a single clip rather than averaged over 107. Two runs of identical frozen models over identical frames; the only difference is the sentence.](../09_paper/figures/fig_context_effect.png)
+
+### The most convincing picture in the project
+
+The chart above is a summary over 107 clips, and a sceptic can always ask what
+the averaging concealed. This one has nowhere to hide.
+
+**Two curves, one clip.** Same frozen models, same frames, same smoothing, same
+threshold. One run was told the scene is a campus walkway. The other was told it
+is an industrial site.
+
+**Outside the event, the curves sit on top of one another.** Do not skip past
+that as a coincidence — it *is* the control. It shows the two runs really are
+identical except for the sentence, because wherever nothing is happening they
+behave identically.
+
+**Inside the event, they separate.** The run given the correct sentence pushes
+the score up; the run given the wrong one does not.
+
+**Then the line to deliver:** nothing in this system was free to change except
+those words. No weights updated, no threshold retuned, no data reselected. So the
+separation between those curves was caused by the text. That is what §4.4 means
+by *identifiability* — shown, rather than argued.
 
 ### How to state the claim — precisely
 
@@ -873,6 +1056,37 @@ cameras covering different environments, not a single fixed installation.
 the nine are negative, and the variation between cameras (0.058) is larger than
 the average effect (0.033). One camera scores 0.415 — below chance — under every
 condition, and we have no explanation for that.
+
+![The same experiment run inside each camera view on its own. The orange line is the pooled result across all views; each bar is one camera. The number of clips behind each bar is printed underneath it.](../09_paper/figures/fig_chart_within_view.png)
+
+### Read this one carefully — it is where honesty gets tested
+
+**The orange line across the top is the pooled result, +0.105.** Every bar is one
+camera evaluated on its own. Most fall well short of that line, and the dashed
+blue line — the average of the bars — sits at about a third of it. That is the
+finding: **confine the experiment to a single place and the effect largely goes
+away.**
+
+**Now look at what the chart will not let you hide.** Three bars point downwards:
+on cameras 04, 08 and 10 the correct description did *worse* than the wrong one.
+And two bars, cameras 03 and 07, come close to the pooled line — so this is not a
+clean collapse everywhere. It is a shift in the average with considerable scatter
+around it.
+
+**Look at the clip counts along the bottom.** One camera has 34 clips behind it;
+another has 5. A bar resting on 5 clips is not worth much by itself. That is
+precisely why the claim is about the average across cameras, and not about any
+individual one.
+
+**Why show a chart that complicates your own result?** Because the alternative is
+worse. The table above reports one tidy number, +0.033, and a supervisor is
+entitled to ask what that average conceals. With the chart on screen and "three
+of the nine are negative" already said aloud, the question is answered before it
+is asked. Show only the table, and let the scatter emerge under questioning, and
+it looks like something you were hoping would not come up.
+
+**The one-sentence version:** the direction of the finding is solid, its size is
+noisy, and saying more would need more clips per camera.
 
 ## 6.8 Everything in one place
 
@@ -1174,7 +1388,8 @@ pole.
 | This handbook | `docs/08_understanding/` (`.md` and `.docx`) |
 | The six surveys, in depth | `docs/08_understanding/03_domain_adaptation_deep_dive.md` |
 | The paper | `docs/09_paper/main.tex` |
-| The slides (21, with speaker notes) | `docs/06_presentations/DA-ZVAD_Phase2_Review.pptx` |
+| The figures, and the code that draws them | `docs/09_paper/figures/`, from `scripts/make_report_figures.py` and `scripts/make_result_charts.py` |
+| The slides (29, with speaker notes) | `docs/06_presentations/DA-ZVAD_Phase2_Review.pptx` |
 | **Proof you ran it** | `results/runs/*/MANIFEST.txt` |
 | Raw result tables | `results/runs/*/tables/*.csv` |
 
