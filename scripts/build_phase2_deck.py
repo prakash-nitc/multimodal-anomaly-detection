@@ -560,7 +560,7 @@ box(s, L, 1.9, CW, 0.7,
 table(s, [
     ["Evaluation", "Views", "Clips", "Gap"],
     ["Pooled across views", "12", "107", "+0.105"],
-    ["Within a single view (mean)", "9", "5–34 each", "+0.034"],
+    ["Within a single view (mean)", "9", "5–34 each", "+0.033"],
     ["CUHK Avenue (single view)", "1", "21", "+0.020"],
 ], L, 2.85, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=15, hi_rows=(2,), row_h=0.56,
     num_cols=(3,))

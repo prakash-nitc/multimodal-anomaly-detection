@@ -225,7 +225,7 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          conjecture with the control experiment that would settle it. Conclusion
          and limitations scoped accordingly. \\
 19 Aug 2026 & Within-view control run. Evaluating the sweep inside a single
-         ShanghaiTech camera view reduces the gap from $+0.105$ to $+0.034$,
+         ShanghaiTech camera view reduces the gap from $+0.105$ to $+0.033$,
          near the $+0.020$ measured on single-view Avenue, so the scene-diversity
          account of Result~5 is supported by measurement rather than by analogy
          between benchmarks. Qualifications recorded: the per-view estimates are
@@ -1045,6 +1045,8 @@ alike; in the \emph{normal} condition it is appended only to the normal
 ensemble. Every other quantity---weights, prompts, data, protocol---is
 identical, and in Table~\ref{tbl:sweep} the \texttt{none} column is common to
 both rows by construction, which serves as an internal control.
+Figure~\ref{fig:chartsweep} plots the same numbers with the matched--mismatched
+distance drawn explicitly for each fusion rule.
 
 \begin{table}[width=\linewidth,cols=6,pos=h]
 \caption{Context sweep on ShanghaiTech at the optimal window $w{=}31$, per-clip
@@ -1061,6 +1063,16 @@ Both ensembles          & 0.707 & 0.670 & 0.666 & 0.695 & $-0.029$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_chart_sweep.png}
+\caption{Table~\ref{tbl:sweep} drawn. The quantity the sweep exists to produce is
+the distance between the matched and mismatched bars, which is annotated for
+each fusion rule. Moving the descriptor from both ensembles to the normal
+ensemble alone changes that distance from $-0.029$ to
+$+0.105$.}\label{fig:chartsweep}
+\end{figure}
 
 \wnote{Interpretation was fixed before measurement to avoid post-hoc reasoning:
 if matched exceeds none and mismatched falls below it, the descriptor is
@@ -1178,7 +1190,9 @@ into development and held-out halves before measurement, at the clip level
 rather than the frame level---frames within a clip are strongly correlated, so a
 frame-level partition would leak across the boundary. Five independent
 partitions were drawn; ranking used the development halves only.
-Table~\ref{tbl:components} reports the outcome.
+Table~\ref{tbl:components} reports the outcome, and
+Figure~\ref{fig:chartablation} places it beside the window sweep that fixed
+$w{=}31$.
 
 \begin{table}[width=\linewidth,cols=4,pos=h]
 \caption{Component ablation on ShanghaiTech. Held-out AUROC is the mean over
@@ -1197,6 +1211,19 @@ Semantic $+$ kinematic           & 31 & $0.711 \pm 0.034$ & 0.706 \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure*}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_chart_ablation.png}
+\caption{Left: frame-level AUROC against the temporal window $w$ under each
+pooling convention, with the matched-descriptor curve for comparison. Raw
+micro-pooling never leaves chance at any window, and every curve turns down
+after $w{=}31$. Right: Table~\ref{tbl:components} drawn, held-out mean with the
+standard deviation across the five partitions. The intervals of the top three
+configurations overlap, so the claim the panel supports is that nothing added to
+the semantic pathway improves on it---not that semantic-only is separated from
+the alternatives.}\label{fig:chartablation}
+\end{figure*}
 
 The semantic signal alone is the strongest configuration, and nothing added to
 it helps. Combining it with the kinematic signal costs $0.001$ on the full test
@@ -1316,13 +1343,25 @@ only one class present, are excluded.}\label{tbl:withinview}
 \textbf{Evaluation} & \textbf{Views} & \textbf{Clips} & \textbf{Gap} \\
 \midrule
 Pooled across views          & 12 & 107 & $+0.105$ \\
-\textbf{Mean within a view}  & 9  & 5--34 each & $\mathbf{+0.034}$ (sd $0.058$) \\
+\textbf{Mean within a view}  & 9  & 5--34 each & $\mathbf{+0.033}$ (sd $0.058$) \\
 CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The prediction holds. Confining the evaluation to a single environment reduces
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_chart_within_view.png}
+\caption{The context gap measured inside each camera view separately, against the
+pooled figure of Table~\ref{tbl:sweep}. Almost every view falls well short of the
+pooled bar and three return negative gaps, but two views (03 and 07) approach it;
+the finding is in the mean and the spread, not in a uniform collapse. Clip counts
+per view are printed below the axis.}\label{fig:chartwithin}
+\end{figure}
+
+The prediction holds. Table~\ref{tbl:withinview} summarises it and
+Figure~\ref{fig:chartwithin} shows the per-view detail behind the mean.
+Confining the evaluation to a single environment reduces
 the gap to roughly a third of its pooled value, placing it near the figure
 measured on single-view Avenue. What the descriptor contributes is therefore
 substantially the resolution of \emph{which} scene is in view, rather than a
@@ -1407,7 +1446,7 @@ against $0.707$) but its context effect nearly vanishes: the gap falls from
 $+0.105$ to $+0.020$ and an accurate descriptor scores below no descriptor at
 all. Avenue is a single camera view where ShanghaiTech is twelve. Confining
 the ShanghaiTech evaluation to one view at a time reproduces the flat result
-($+0.034$ against $+0.105$ pooled), which supports the reading directly rather
+($+0.033$ against $+0.105$ pooled), which supports the reading directly rather
 than by analogy between benchmarks. What the descriptor mainly supplies is the
 identification of which environment is in view, not a characterisation of
 normality within it. This scopes the claim rather than abandoning it, and it
@@ -1463,7 +1502,7 @@ about explanation quality under domain shift.
         but does not establish it firmly: the nine per-view estimates rest on
         between five and thirty-four clips each, three of them are negative, and
         the standard deviation across views ($0.058$) exceeds the mean
-        ($0.034$).
+        ($0.033$).
   \item One camera view (12) scores below chance at $0.415$ under every context
         condition. No account is offered for that failure, and it is averaged
         into the pooled figures rather than excluded.
