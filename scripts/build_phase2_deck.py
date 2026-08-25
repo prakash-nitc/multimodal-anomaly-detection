@@ -12,6 +12,7 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
+from PIL import Image
 import os
 
 # ---------------------------------------------------------------- palette
@@ -184,6 +185,74 @@ def bignum(slide_, x, y, value, label, color=ACCENT, vsize=72, w=3.2):
     box(slide_, x, y + 1.08, w, 0.5, label, 13, color=MUTED)
 
 
+_here = os.path.dirname(os.path.abspath(__file__))
+FIGDIR = os.path.join(_here, "..", "docs", "09_paper", "figures")
+
+
+def figure_slide(title, eyebrow, png, read, tone="accent"):
+    """A slide that is one figure, a line telling the audience how to read it,
+    and nothing else. The figures are the paper's own, not redrawn for the
+    deck, so what is projected is what the report contains."""
+    path = os.path.join(FIGDIR, png)
+    if not os.path.isfile(path):
+        raise FileNotFoundError(
+            f"{png} not found in {FIGDIR}. Run scripts/make_report_figures.py "
+            f"and scripts/make_result_charts.py first.")
+    s = slide(title, eyebrow)
+    # The caption band is anchored, not pushed down by the picture: a tall
+    # figure would otherwise squeeze it to nothing. The picture is then fitted
+    # into whatever remains above it and centred there, so the six figure
+    # slides all place their caption on the same line.
+    TOP, CAP_H, CAP_Y = 1.95, 1.42, 5.72
+    with Image.open(path) as im:
+        pw, ph = im.size
+    avail_w, avail_h = CW, CAP_Y - 0.25 - TOP
+    w_in = min(avail_w, avail_h * pw / ph)
+    h_in = w_in * ph / pw
+    s.shapes.add_picture(path, Inches(L + (CW - w_in) / 2),
+                         Inches(TOP + (avail_h - h_in) / 2), Inches(w_in))
+    callout(s, L, CAP_Y, CW, CAP_H, "How to read it", read, tone=tone, size=14)
+    return s
+
+
+def refs_slide(title, eyebrow, columns):
+    """References, grouped by the role each group plays in the argument rather
+    than alphabetically -- in a viva the grouping is the useful information.
+
+    `columns` is a list of columns; each column is a list of (heading, entries)
+    groups. Entry rows are given room for two wrapped lines, because most
+    entries need one and the longest need two, and a fixed short step makes the
+    long ones collide with the entry beneath.
+    """
+    s = slide(title, eyebrow)
+    n = len(columns)
+    col_w = (CW - 0.5 * (n - 1)) / n
+    for ci, groups in enumerate(columns):
+        x = L + ci * (col_w + 0.5)
+        y = 1.98
+        for heading, entries in groups:
+            box(s, x, y, col_w, 0.26, heading.upper(), 10, bold=True,
+                color=ACCENT)
+            y += 0.34
+            for authors, rest in entries:
+                sh = s.shapes.add_textbox(Inches(x), Inches(y), Inches(col_w),
+                                          Inches(0.42))
+                tf = sh.text_frame
+                tf.word_wrap = True
+                tf.margin_left = tf.margin_right = 0
+                tf.margin_top = tf.margin_bottom = 0
+                p = tf.paragraphs[0]
+                p.line_spacing = 1.1
+                r = p.add_run(); r.text = authors + "  "
+                r.font.size = Pt(10); r.font.bold = True
+                r.font.color.rgb = INK; r.font.name = FONT
+                r = p.add_run(); r.text = rest
+                r.font.size = Pt(10); r.font.color.rgb = MUTED; r.font.name = FONT
+                y += 0.44
+            y += 0.14
+    return s
+
+
 
 # ================================================================ TITLE
 s = prs.slides.add_slide(BLANK)
@@ -216,21 +285,21 @@ bullets(s, [
      "camera until it learns what normal looks like there."),
     ("The cost.", "Move it anywhere else and it fails — a new site means new "
      "footage collection and a full retraining cycle."),
-], 1.95, width=CW, size=16.5)
+], 1.95, width=CW, size=16.5, gap=0.76)
 
-rect(s, L, 3.15, 5.55, 2.5, SURF)
-box(s, L + 0.35, 3.42, 4.9, 0.3, "SHOPPING MALL", 12, bold=True, color=ACCENT)
-box(s, L + 0.35, 3.85, 4.9, 1.5,
+rect(s, L, 3.55, 5.55, 2.4, SURF)
+box(s, L + 0.35, 3.80, 4.9, 0.3, "SHOPPING MALL", 12, bold=True, color=ACCENT)
+box(s, L + 0.35, 4.20, 4.9, 1.5,
     "A forklift moving through the aisles is\nan immediate alarm.",
     17, color=INK, spacing=1.35)
 
-rect(s, L + 5.95, 3.15, 5.55, 2.5, SURF)
-box(s, L + 6.3, 3.42, 4.9, 0.3, "FACTORY FLOOR", 12, bold=True, color=CAUTION)
-box(s, L + 6.3, 3.85, 4.9, 1.5,
+rect(s, L + 5.95, 3.55, 5.55, 2.4, SURF)
+box(s, L + 6.3, 3.80, 4.9, 0.3, "FACTORY FLOOR", 12, bold=True, color=CAUTION)
+box(s, L + 6.3, 4.20, 4.9, 1.5,
     "The identical forklift is completely\nroutine.",
     17, color=INK, spacing=1.35)
 
-box(s, L, 5.95, CW, 0.5,
+box(s, L, 6.30, CW, 0.5,
     "Same footage. Opposite answers. The picture did not change — the rule did.",
     17, bold=True, color=INK, align=PP_ALIGN.CENTER)
 
@@ -360,6 +429,15 @@ callout(s, L, 4.8, CW, 1.75, "Every run records its own conditions",
         "alongside the results — every figure in this deck is traceable to the "
         "state that produced it.", size=15)
 
+# ================================================================ 7b DATA
+figure_slide(
+    "What the two benchmarks actually look like", "Experiments  ·  the data",
+    "fig_dataset_samples.png",
+    "Each column is one fixed camera, so the scene, the angle and the lighting "
+    "are constant down a column and only the event changes. That is the whole "
+    "argument in a photograph: an empty walkway and the same walkway with a "
+    "cyclist look alike and are labelled opposite.")
+
 # ================================================================ 8 FAILURE
 s = slide("The first result was a failure", "Experiments  ·  what happened")
 rect(s, L, 1.95, CW, 1.9, FAIL_LT)
@@ -405,6 +483,15 @@ box(s, L + 7.3, 5.35, 4.1, 0.9,
     "Identical scores. Uses no labels.\nWe report both figures in the paper.",
     14, color=INK, spacing=1.3)
 
+# ================================================================ 9b EVIDENCE
+figure_slide(
+    "The evidence for that diagnosis", "Experiments  ·  diagnosis",
+    "fig_camera_baselines.png",
+    "Left: every frame projected to two dimensions and coloured by camera — the "
+    "views sit in separate regions. Right: how similar each view is to the "
+    "average frame, differing by more than 0.13 between views. Neither panel "
+    "uses labels, so this is not hindsight.")
+
 # ================================================================ 10 FIX 2
 s = slide("Diagnosis 2 — the description cancelled itself out",
           "Experiments  ·  the finding")
@@ -433,7 +520,7 @@ bullets(s, [
      "nothing, so it does no damage."),
 ], 3.85, size=15.5, gap=0.78)
 
-callout(s, L, 6.25, CW, 0.85, "The fix",
+callout(s, L, 5.88, CW, 1.05, "The fix",
         "Attach the description to the normal prompts only — the scene defines "
         "what normal looks like here; an anomaly is a departure from it.",
         size=15)
@@ -466,6 +553,24 @@ bignum(s, L + 6.4, 5.1, "0.628", "wrong description  —  a 10-point penalty",
 box(s, L, 6.9, CW, 0.35,
     "Nothing else in the system was permitted to change. The text caused it.",
     15.5, bold=True, color=INK, align=PP_ALIGN.CENTER)
+
+# ================================================================ 11b SWEEP CHART
+figure_slide(
+    "The same experiment, drawn", "Results  ·  central experiment",
+    "fig_chart_sweep.png",
+    "The number the experiment exists to produce is the arrow: the distance "
+    "between the matched and mismatched bars. Grey bars put the sentence in "
+    "both prompt sets and that distance is negative. Orange bars put it in the "
+    "normal set only and it becomes +0.105.")
+
+# ================================================================ 11c PER FRAME
+figure_slide(
+    "One clip, two sentences", "Results  ·  what the gap looks like",
+    "fig_context_effect.png",
+    "Same frozen models, same frames, same smoothing — the only difference is "
+    "whether the sentence describes a campus walkway or an industrial site. "
+    "The curves track each other outside the event and separate inside it. "
+    "Nothing else was free to vary, so the text caused the separation.")
 
 # ================================================================ 12 PRECISION
 s = slide("Stating the claim precisely", "Results  ·  interpretation")
@@ -517,6 +622,16 @@ bullets(s, [
      "kinematic — a bicycle at cycling speed — so appearance and motion should "
      "be complementary. Measured here, they are not."),
 ], 5.2, size=15, gap=1.0)
+
+# ================================================================ 13b ABLATION CHART
+figure_slide(
+    "Window length, and what each component adds", "Results  ·  ablation",
+    "fig_chart_ablation.png",
+    "Left: smoothing helps up to w=31 and then hurts, so the window has a real "
+    "optimum rather than the metric rewarding more blur; the grey curve is the "
+    "wrong pooling and never leaves chance. Right: the error bars overlap, so "
+    "the honest claim is that nothing added beats language alone — not that "
+    "language alone wins.", tone="caution")
 
 # ================================================================ 14 AVENUE
 s = slide("A second domain — the replication test", "Results  ·  cross-domain")
@@ -575,6 +690,16 @@ box(s, L, 6.25, CW, 0.7,
     "counts as normal within it. Three of nine views show a negative gap, so "
     "inside one scene the effect is not reliable.",
     15.5, bold=True, color=INK, spacing=1.3)
+
+# ================================================================ 15b WITHIN-VIEW CHART
+figure_slide(
+    "Every camera view, one at a time", "Results  ·  the control",
+    "fig_chart_within_view.png",
+    "The orange line is the pooled result; each bar is one view on its own. "
+    "Most fall well short of it and three are negative — but views 03 and 07 "
+    "nearly reach it, so this is a shift in the average, not a clean collapse. "
+    "The bars rest on between five and thirty-four clips each.",
+    tone="caution")
 
 # ================================================================ 16 NEGATIVES
 s = slide("Six things that did not work", "Results  ·  negative findings")
@@ -679,6 +804,74 @@ box(s, L, 6.75, CW, 0.35,
     "All results reproducible from committed code and run manifests.",
     13, italic=True, color=MUTED, align=PP_ALIGN.CENTER)
 
+# ================================================================ 20 REFERENCES
+# Every entry below is a real key in docs/09_paper/references.bib and is cited
+# in the paper; the two lists are kept in step deliberately, so a question about
+# any reference on screen can be answered from the document.
+refs_slide("References", "1 of 2  ·  the domain-adaptation literature", [
+    [("The six surveys the research gap is argued from", [
+        ("Liu et al.", "Deep unsupervised domain adaptation. APSIPA 2022. "
+                       "— the concept-shift quotation."),
+        ("Wang & Deng", "Deep visual domain adaptation: a survey. "
+                        "Neurocomputing 2018."),
+        ("Wilson & Cook", "A survey of unsupervised deep domain adaptation. "
+                          "ACM Comput. Surv. 2020."),
+        ("Singhal et al.", "Domain adaptation: challenges, methods, datasets. "
+                           "IEEE Access 2023."),
+        ("Patel et al.", "Visual domain adaptation. IEEE Signal Process. "
+                         "Mag. 2015."),
+        ("Kouw & Loog", "An introduction to domain adaptation and transfer "
+                        "learning. arXiv 2018."),
+        ("Fan et al.", "LLM adaptation strategies. Solid Earth Sci. 2026."),
+    ])],
+    [("Domain adaptation inside video anomaly detection", [
+        ("Guo et al.", "Ada-VAD: domain adaptable VAD. SDM 2024."),
+        ("Aich et al.", "zxVAD: cross-domain VAD without target adaptation. "
+                        "WACV 2023."),
+        ("Lu et al.", "Few-shot scene-adaptive anomaly detection. ECCV 2020."),
+     ]),
+     ("Concurrent work on the same premise", [
+        ("Wilkinghoff et al.", "Context-dependent normality. arXiv "
+                               "2604.13252, April 2026."),
+     ]),
+     ("Benchmarks", [
+        ("Liu et al.", "ShanghaiTech. CVPR 2018."),
+        ("Lu et al.", "CUHK Avenue. ICCV 2013."),
+        ("Bergmann et al.", "MVTec AD. CVPR 2019."),
+     ])],
+])
+
+refs_slide("References", "2 of 2  ·  anomaly detection, models, metrics", [
+    [("Zero-shot and training-free anomaly detection", [
+        ("Jeong et al.", "WinCLIP: zero-/few-shot anomaly classification and "
+                         "segmentation. CVPR 2023."),
+        ("Zhou et al.", "AnomalyCLIP: object-agnostic prompt learning. "
+                        "ICLR 2024."),
+        ("Zanella et al.", "LAVAD: training-free VAD with LLMs. CVPR 2024."),
+        ("Ye et al.", "VERA: explainable VAD via verbalised learning. "
+                      "CVPR 2025."),
+        ("Wu et al.", "OVVAD: open-vocabulary VAD. CVPR 2024."),
+        ("Ahn et al.", "AnyAnomaly: customisable VAD. arXiv 2503.04504, 2025."),
+        ("Roth et al.", "PatchCore: total recall in industrial anomaly "
+                        "detection. CVPR 2022."),
+    ])],
+    [("Models used, all frozen", [
+        ("Radford et al.", "CLIP. ICML 2021."),
+        ("Dosovitskiy et al.", "An image is worth 16x16 words (ViT). "
+                               "ICLR 2021."),
+        ("Vaswani et al.", "Attention is all you need. NeurIPS 2017."),
+        ("Liu et al.", "LLaVA: visual instruction tuning. NeurIPS 2023."),
+        ("Dettmers et al.", "QLoRA: 4-bit quantisation. NeurIPS 2023."),
+     ]),
+     ("Baseline and evaluation metrics", [
+        ("Schölkopf et al.", "One-class SVM. Neural Comput. 2001."),
+        ("Fawcett", "An introduction to ROC analysis. "
+                    "Pattern Recognit. Lett. 2006."),
+        ("Davis & Goadrich", "Precision-recall and ROC curves. ICML 2006."),
+        ("Bradley", "Area under the ROC curve. Pattern Recognit. 1997."),
+     ])],
+])
+
 # ================================================================ NOTES
 NOTES = [
  "Title. Introduce yourself and the one-line premise: adapting an anomaly "
@@ -762,6 +955,58 @@ NOTES = [
  "Close on the boundary, not the number. The claim is scoped rather than "
  "abandoned, and we named the experiment that settles it. Then hand over.",
 ]
+# Notes for the figure and reference slides, spliced in at the deck positions
+# those slides occupy. Inserted from the highest index downwards so that each
+# insertion leaves the lower indices still pointing where they were written.
+EXTRA_NOTES = {
+    8: "Thirty seconds, no more. Point down one column and say the scene never "
+       "changes - only the event does. If someone asks later why context "
+       "matters, come back to this slide.",
+
+    11: "This is the proof that the diagnosis was not invented after the fact. "
+        "Say clearly that neither panel uses labels. The cameras are separate "
+        "regions of the space and sit at different similarity levels, which is "
+        "exactly why pooling raw scores destroyed the ordering.",
+
+    14: "The picture of the previous table. Trace the two arrows with a finger. "
+        "The grey arrow points the wrong way and the orange one points the "
+        "right way, and the only thing separating them is where the sentence "
+        "was attached.",
+
+    15: "The most persuasive slide in the deck for a sceptical panel, because "
+        "there is no aggregation to argue with - two runs over identical "
+        "frames with identical frozen weights. Say that the curves coincide "
+        "outside the event on purpose: that is the control.",
+
+    18: "Volunteer the weakness before anyone asks. The error bars overlap, so "
+        "the top three are statistically tied. The claim is that nothing we "
+        "added beat plain language, which is a negative result about our own "
+        "elaborations, not a win over the alternatives.",
+
+    21: "Show the spread yourself. Three views are negative and two nearly "
+        "reach the pooled figure, so the result is a shift in the mean rather "
+        "than a collapse everywhere. Saying this before the panel spots it is "
+        "the difference between a caveat and a hole.",
+
+    27: "Do not read these out. They are here because they are the evidence "
+        "base for the gap: the six surveys are what let us say the field "
+        "scopes concept shift out. Be ready to say which one contains the "
+        "quote - it is Liu et al. 2022.",
+
+    28: "Also not read aloud. If asked how the work is positioned, this slide "
+        "is the answer: the frozen models are all off-the-shelf, the "
+        "benchmarks and metrics are the standard ones, and every method we "
+        "compare against is here.",
+}
+for _idx in sorted(EXTRA_NOTES, reverse=True):
+    NOTES.insert(_idx, EXTRA_NOTES[_idx])
+
+# zip() truncates silently, so a mismatch would drop notes off the end of the
+# deck without any error. Fail loudly instead.
+assert len(NOTES) == len(prs.slides._sldIdLst), (
+    f"{len(NOTES)} notes for {len(prs.slides._sldIdLst)} slides -- adding a "
+    f"slide requires adding its note at the matching index.")
+
 for sl, txt in zip(prs.slides, NOTES):
     sl.notes_slide.notes_text_frame.text = txt
 
