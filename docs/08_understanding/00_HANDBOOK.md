@@ -852,7 +852,7 @@ Avenue.
 | How it's evaluated | Gap |
 |---|---|
 | All 12 cameras pooled | **+0.105** |
-| Inside a single camera (average of 9) | **+0.034** |
+| Inside a single camera (average of 9) | **+0.033** |
 | Avenue, which has one camera | +0.020 |
 
 **The prediction held.** Confine it to one scene and the effect falls to roughly
@@ -871,7 +871,7 @@ cameras covering different environments, not a single fixed installation.
 
 **Caveats to state:** each camera's estimate rests on only 5–34 clips, three of
 the nine are negative, and the variation between cameras (0.058) is larger than
-the average effect (0.034). One camera scores 0.415 — below chance — under every
+the average effect (0.033). One camera scores 0.415 — below chance — under every
 condition, and we have no explanation for that.
 
 ## 6.8 Everything in one place
