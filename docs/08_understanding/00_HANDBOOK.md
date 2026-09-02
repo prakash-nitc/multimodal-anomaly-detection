@@ -1252,6 +1252,64 @@ excuse. Always pair it with what you *are* competing on.
 
 ## 8.3 On method
 
+**"Which domain adaptation technique did you use?"**
+
+*Asked in the Phase-2 slide review, with a list on screen: fine-tuning,
+discrepancy/MMD, adversarial, self-training/pseudo-labelling. The honest answer
+is "none of them", and it only sounds like a dodge if you stop there. Say all
+three parts.*
+
+> **One.** None of those four — by design. Every one of them adapts by changing
+> weights using target-domain data. Fine-tuning needs labelled target data;
+> discrepancy methods need target features to align against; adversarial methods
+> train a domain discriminator; self-training retrains on target pseudo-labels.
+> I have no target data and no gradient updates anywhere, so none of the four is
+> available to me.
+>
+> **Two.** They also all solve the wrong shift. Every technique on that list
+> aligns $p(x)$ — it makes source and target *look* alike — and that only works
+> if $p(y \mid x)$ is stable. My problem is the opposite: a bicycle on a walkway
+> and a bicycle on a road are the same pixels with opposite labels. $p(x)$ is
+> already identical, so there is nothing to align. Aligning appearance cannot
+> help when appearance was never the difference.
+>
+> **Three.** What I use instead is the LLM-era technique: adaptation through the
+> input context, with the model frozen. Fan et al. (2026) catalogue four
+> adaptation strategies for foundation models — prompt engineering, RAG,
+> domain-adaptive pretraining, fine-tuning — and I sit at the first. In the
+> vocabulary of the vision surveys my setting is **source-free, test-time,
+> training-free, language-mediated, concept-shift-oriented**. M3 is
+> prompt-based domain adaptation transplanted from the LLM literature into a
+> vision task, aimed at the shift type classical visual DA excluded.
+
+**"Why isn't your technique on that list?"**
+
+> Because the list is from the vision DA literature, and those surveys run
+> 2015–2023 — they predate foundation-model adaptation. Their taxonomies have no
+> category for "adapt by describing the domain in language," because when they
+> were written there was no frozen model you could steer with a sentence. That
+> absence is not an oversight I'm exploiting; it is the gap the thesis is about.
+
+**"Then is this really domain adaptation at all?"**
+
+> A fair challenge, and I concede the weak form of it. Fan et al. say
+> prompt-based adaptation "often lacks depth and robustness," and I am
+> deliberately at that known-weak end. What I add is measurement: +0.027 when
+> the description is correct, which sits inside the noise, and −0.105 when it is
+> wrong, which does not. I am not claiming it is strong. I am claiming it is
+> real, and that nobody had measured it.
+
+**"Isn't your per-clip normalisation just classical adaptation in disguise?"**
+
+*The sharpest version of this question. Concede the resemblance, then close it.*
+
+> It does resemble the recompute-the-statistics family — recalibrating on target
+> data without labels. But it is the benchmark's own published evaluation
+> protocol, not a component of the method, and it is applied identically in all
+> four context conditions. So it cannot be what produces the gap between matched
+> and mismatched: that comparison holds the normalisation fixed and varies only
+> the sentence.
+
 **"Did you tune on the test set?"**
 
 > Partly, and we control for it. These benchmarks define no validation split, so

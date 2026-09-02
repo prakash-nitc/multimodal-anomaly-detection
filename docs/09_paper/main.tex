@@ -33,9 +33,17 @@
 % cas-sc already provides: geometry, graphicx, hyperref, xcolor, natbib
 % hooks, and enhanced enumerate/itemize. Do NOT load those again.
 % Graphics are searched for beside main.tex and in figures/, so a plain
-% \includegraphics{name.png} resolves either way: flat, as the PNGs sit in the
+% \includegraphics{name} resolves either way: flat, as the files sit in the
 % Overleaf project, or in the figures/ subdirectory, as they sit in the repo.
 % Keep the calls unprefixed -- adding "figures/" back would break the flat case.
+%
+% The calls also carry NO file extension, deliberately. Under pdflatex graphicx
+% tries .pdf before .png, so the vector version of a figure is used wherever one
+% exists and the raster one is the automatic fallback where it does not. Every
+% figure used to be raster at 400dpi, which is ample for print yet still reads
+% as soft on screen, because a viewer at 175% zoom resamples a bitmap while
+% vector text does not resample at all. scripts/make_*.py now emit both forms;
+% upload the .pdf alongside the .png and the report picks it up with no edit.
 \graphicspath{{./}{figures/}}
 
 \usepackage{amsmath,amssymb}
@@ -47,7 +55,12 @@
 % ---------- colours for status markers ----------
 \definecolor{pendingcol}{HTML}{B03A2E}
 \definecolor{donecol}{HTML}{1E8449}
-\definecolor{notecol}{HTML}{6B6A63}
+% Was 6B6A63, a mid grey at about 5.4:1 on white. Legible in principle and
+% faded in practice, especially set in italic at body size. Darkened to ~11:1
+% so a working note reads as text rather than as a watermark; it stays a warm
+% near-black rather than pure black so the notes are still identifiable as
+% supervision material that gets commented out before submission.
+\definecolor{notecol}{HTML}{33322E}
 
 % ---------- status macros ----------
 % \pending{what is still required} -- visible marker for unfinished content
@@ -57,7 +70,12 @@
 \newcommand{\notstarted}{{\sffamily\bfseries\color{notecol}NOT STARTED}}
 % \wnote{...} -- working note to supervisor / self (named to avoid any
 % clash with class-provided note commands)
-\newcommand{\wnote}[1]{{\color{notecol}\itshape #1}}
+% Set upright, not italic. A multi-sentence note in italic reads narrower and
+% lighter than the body text around it, which is what made these look both grey
+% and small; upright at the same point size reads at full weight. Bolding the
+% whole block would be worse rather than better -- a paragraph set entirely in
+% bold carries no emphasis, it just sits heavy on the page.
+\newcommand{\wnote}[1]{{\color{notecol}#1}}
 
 % ---------- table column types ----------
 % cas-sc defines L, C and R itself, so ours use different letters.
@@ -721,7 +739,7 @@ cost does not scale with the length of quiet video.
 % float would have nothing extra to span.
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{dazvad_architecture.png}
+\includegraphics[width=\linewidth]{dazvad_architecture}
 \caption{The DA-ZVAD framework. Every model is frozen; the verbalised scene
 context (M3) is the sole adaptation mechanism, grounding both the prompt
 ensembles used for scoring and the generated explanations.}
@@ -864,7 +882,7 @@ CUHK Avenue \citep{lu2013avenue} & Surveillance & Outdoor campus walkway, single
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_dataset_samples.png}
+\includegraphics[width=\linewidth]{fig_dataset_samples}
 \caption{Normal and anomalous frames from the two video benchmarks. Each column
 is a single fixed camera, so within a column the scene, viewpoint and lighting
 are constant and only the event differs. The label is therefore a property of
@@ -1020,7 +1038,7 @@ never on a common scale.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_camera_baselines.png}
+\includegraphics[width=\linewidth]{fig_camera_baselines}
 \caption{Why pooling raw scores across cameras fails. (a) Frame embeddings
 projected with t-SNE, coloured by camera view: the views occupy distinct
 regions. (b) Distribution, per view, of each frame's similarity to the global
@@ -1034,7 +1052,7 @@ exactly as what counts as an anomalous \emph{event} is.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_detection_example.png}
+\includegraphics[width=\linewidth]{fig_detection_example}
 \caption{One clip scored end to end. The raw per-frame score is noisy enough
 that isolated frames outside the event exceed the level reached inside it;
 the moving average of Equation~\eqref{eq:smooth} suppresses those excursions
@@ -1072,7 +1090,7 @@ Both ensembles          & 0.707 & 0.670 & 0.666 & 0.695 & $-0.029$ \\
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_chart_sweep.png}
+\includegraphics[width=\linewidth]{fig_chart_sweep}
 \caption{Table~\ref{tbl:sweep} drawn. The quantity the sweep exists to produce is
 the distance between the matched and mismatched bars, which is annotated for
 each fusion rule. Moving the descriptor from both ensembles to the normal
@@ -1167,7 +1185,7 @@ measures one clip at a time.
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_context_effect.png}
+\includegraphics[width=\linewidth]{fig_context_effect}
 \caption{The descriptor's contribution, per frame. Identical models, identical
 frames, identical smoothing; the only difference is whether the supplied
 sentence describes the scene or an industrial site. Because no parameter is free
@@ -1220,7 +1238,7 @@ Semantic $+$ kinematic           & 31 & $0.711 \pm 0.034$ & 0.706 \\
 
 \begin{figure*}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_chart_ablation.png}
+\includegraphics[width=\linewidth]{fig_chart_ablation}
 \caption{Left: frame-level AUROC against the temporal window $w$ under each
 pooling convention, with the matched-descriptor curve for comparison. Raw
 micro-pooling never leaves chance at any window, and every curve turns down
@@ -1357,7 +1375,7 @@ CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
 
 \begin{figure}[pos=h]
 \centering
-\includegraphics[width=\linewidth]{fig_chart_within_view.png}
+\includegraphics[width=\linewidth]{fig_chart_within_view}
 \caption{The context gap measured inside each camera view separately, against the
 pooled figure of Table~\ref{tbl:sweep}. Almost every view falls well short of the
 pooled bar and three return negative gaps, but two views (03 and 07) approach it;
