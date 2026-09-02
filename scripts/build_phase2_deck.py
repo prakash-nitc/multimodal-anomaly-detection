@@ -266,7 +266,7 @@ REFS = [
     ('ye2025vera',
      'M. Ye, W. Liu, P. He, VERA: Explainable video anomaly detection via verbalized learning of vision-language models, in: Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2025. ArXiv:2412.01095.'),
     ('anyanomaly2025',
-     'S. Ahn, Y. Jo, K. Lee, S. Kwon, I. Hong, S. Park, AnyAnomaly: Zero-shot customizable video anomaly detection with LVLM, arXiv preprint arXiv:2503.04504 (2025).'),
+     'S. Ahn, Y. Jo, K. Lee, S. Kwon, I. Hong, S. Park, AnyAnomaly: Zero-shot customizable video anomaly detection with LVLM, in: Proc. IEEE/CVF Winter Conf. Appl. Comput. Vis. (WACV), 2026, pp. 3026–3035.'),
     ('wu2024ovvad',
      'P. Wu, X. Zhou, G. Pang, Y. Sun, J. Liu, P. Wang, Y. Zhang, Open-vocabulary video anomaly detection, in: Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2024, pp. 18297–18307.'),
     ('patel2015visual',
@@ -309,6 +309,20 @@ REFS = [
      'J. Davis, M. Goadrich, The relationship between precision-recall and ROC curves, in: Proc. Int. Conf. Mach. Learn. (ICML), 2006, pp. 233–240.'),
     ('scholkopf2001oneclass',
      'B. Schölkopf, J. C. Platt, J. Shawe-Taylor, A. J. Smola, R. C. Williamson, Estimating the support of a high-dimensional distribution, Neural Comput. 13 (2001) 1443–1471.'),
+    ('tian2021rtfm',
+     'Y. Tian, G. Pang, Y. Chen, R. Singh, J. W. Verjans, G. Carneiro, Weakly-supervised video anomaly detection with robust temporal feature magnitude learning, in: Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV), 2021, pp. 4975–4986.'),
+    ('gong2019memae',
+     'D. Gong, L. Liu, V. Le, B. Saha, M. R. Mansour, S. Venkatesh, A. van den Hengel, Memorizing normality to detect anomaly: Memory-augmented deep autoencoder for unsupervised anomaly detection, in: Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV), 2019, pp. 1705–1714.'),
+    ('park2020mnad',
+     'H. Park, J. Noh, B. Ham, Learning memory-guided normality for anomaly detection, in: Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2020, pp. 14372–14381.'),
+    ('liu2021hf2vad',
+     'Z. Liu, Y. Nie, C. Long, Q. Zhang, G. Li, A hybrid video anomaly detection framework via memory-augmented flow reconstruction and flow-guided frame prediction, in: Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV), 2021, pp. 13588–13597.'),
+    ('micorek2024mulde',
+     'J. Micorek, H. Possegger, D. Narnhofer, H. Bischof, M. Kampel, MULDE: Multiscale log-density estimation via denoising score matching for video anomaly detection, in: Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2024, pp. 18868–18877.'),
+    ('girdhar2023imagebind',
+     'R. Girdhar, A. El-Nouby, Z. Liu, M. Singh, K. V. Alwala, A. Joulin, I. Misra, ImageBind: One embedding space to bind them all, in: Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit. (CVPR), 2023, pp. 15180–15190.'),
+    ('maaz2024videochatgpt',
+     'M. Maaz, H. Rasheed, S. Khan, F. Khan, Video-ChatGPT: Towards detailed video understanding via large vision and language models, in: Proc. 62nd Annu. Meet. Assoc. Comput. Linguist. (ACL), 2024, pp. 12585–12602.'),
 ]
 
 REF_NO = {k: i for i, (k, _t) in enumerate(REFS, 1)}
@@ -814,25 +828,38 @@ callout(s, L, 5.3, CW, 1.55, "Why these are in the deck",
 
 # ================================================================ 16 POSITION
 s = slide("Where this sits against the literature", "Assessment")
+# Rebuilt Sep 2026. The previous version compared our ShanghaiTech figure with
+# LAVAD's, but LAVAD reports on UCF-Crime and XD-Violence and not on either
+# benchmark used here -- a cross-dataset comparison presented as a same-dataset
+# one. The comparison that isolates our claim is zero-shot CLIP: this pipeline
+# with the sentence removed.
 table(s, [
-    ["Method", "AUROC", "Cost per frame"],
-    ["Liu et al. 2018 " + cite("liu2018shanghaitech") + " — trained on the target scene",
-     "≈ 0.728", "1 trained model"],
-    ["LAVAD " + cite("zanella2024lavad") + " (CVPR 2024), training-free",
-     "≈ 0.85", "Captioner + LLM + refiner"],
-    ["DA-ZVAD (ours), training-free", "0.734", "One frozen encoder + a sentence"],
-], L, 2.0, CW, col_w=[5.6, 2.3, 3.73], size=14.5, hi_rows=(3,), row_h=0.56)
+    ["Training-free method (no target data)", "Avenue", "ShT"],
+    ["Zero-shot CLIP " + cite("radford2021clip"), "62.3", "60.9"],
+    ["Zero-shot ImageBind " + cite("girdhar2023imagebind"), "64.5", "61.3"],
+    ["LLaVA-1.5 " + cite("liu2023llava"), "67.4", "59.6"],
+    ["Video-ChatGPT " + cite("maaz2024videochatgpt"), "76.9", "69.1"],
+    ["DA-ZVAD (ours) — one frozen encoder + a sentence", "70.6", "73.4"],
+    ["AnyAnomaly " + cite("anyanomaly2025") + " — 3 LVLM queries per segment",
+     "87.3", "79.7"],
+], L, 1.92, CW, col_w=[7.4, 2.1, 2.13], size=14, hi_rows=(6,), row_h=0.44)
 
 bullets(s, [
-    ("The fair comparison is the trained baseline.", "We match the benchmark's "
-     "own 2018 baseline while using none of its training data."),
-    ("We do not match LAVAD, and say so.", "It runs three large models per "
-     "frame. We run in about 7 GB."),
-], 4.2, size=16, gap=1.0)
+    ("AnyAnomaly asks “is the thing I named happening?”  "
+     "We ask “is anything happening that doesn’t belong here?”",
+     "Theirs needs the operator to list what could go wrong. Ours needs a "
+     "description of the ordinary. Their 79.7 is obtained by handing the model "
+     "the benchmark’s own anomaly classes."),
+    ("Most of our margin over the plain baselines is protocol, not language.",
+     "With no descriptor we already reach 0.707 against zero-shot CLIP’s "
+     "60.9. The sentence adds 2.7 — the evidence for it is the mismatched "
+     "condition, not this table."),
+], 4.88, size=14, gap=0.90)
 
-callout(s, L, 6.0, CW, 1.15, "Honest position",
-        "We do not expect to exceed trained state-of-the-art detectors on "
-        "absolute AUROC, and the paper makes no such claim.", size=16)
+callout(s, L, 6.44, CW, 0.82, "What we solve that they do not",
+        "Detection of anomalies nobody enumerated in advance — and two "
+        "findings that transfer: injection point beats wording, and the benefit "
+        "scales with scene diversity.", size=14)
 
 # ================================================================ 17 LIMITS
 s = slide("Limitations we are stating ourselves", "Assessment")
@@ -904,10 +931,15 @@ box(s, L, 6.75, CW, 0.35,
 # Every entry below is a real key in docs/09_paper/references.bib and is cited
 # in the paper; the two lists are kept in step deliberately, so a question about
 # any reference on screen can be answered from the document.
+# Split across as many slides as the entries need rather than a fixed two:
+# the list grew from 30 to 37 with the comparative analysis and ran off the
+# bottom. 13 full Elsevier-style entries is what fits above the page number.
 _numbered = [(i, t) for i, (_k, t) in enumerate(REFS, 1)]
-_half = (len(_numbered) + 1) // 2
-refs_slide("References", "1 of 2", _numbered[:_half])
-refs_slide("References", "2 of 2", _numbered[_half:])
+_PER_SLIDE = 13
+_pages = [_numbered[i:i + _PER_SLIDE]
+          for i in range(0, len(_numbered), _PER_SLIDE)]
+for _i, _page in enumerate(_pages, 1):
+    refs_slide("References", "%d of %d" % (_i, len(_pages)), _page)
 
 # ================================================================ NOTES
 NOTES = [
@@ -1036,6 +1068,12 @@ EXTRA_NOTES = {
         "is the answer: the frozen models are all off-the-shelf, the "
         "benchmarks and metrics are the standard ones, and every method we "
         "compare against is here.",
+
+    29: "The third reference slide exists because the comparative analysis "
+        "added seven entries. If asked which of these you actually read "
+        "rather than cited from a table: the six DA surveys, AnyAnomaly, "
+        "LAVAD and WinCLIP. The one-class figures are as tabulated by "
+        "AnyAnomaly, and the slide says so.",
 }
 for _idx in sorted(EXTRA_NOTES):
     NOTES.insert(_idx, EXTRA_NOTES[_idx])

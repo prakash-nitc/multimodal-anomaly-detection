@@ -1401,6 +1401,265 @@ differ enormously in difficulty, from $0.911$ on view~05 to $0.415$ on view~12,
 the latter below chance; a mean over such heterogeneous conditions should be
 read as an indication rather than a precise quantity.
 
+\subsection{Comparison with published methods on the same benchmarks}
+\label{sec:res-comparison}
+Both benchmarks used here are standard, so published figures are available for
+direct comparison. Table~\ref{tbl:sota} groups methods by \emph{what each
+requires of the target scene}, because that is the axis along which they are not
+interchangeable: a detector that has trained on normal video from ShanghaiTech
+and one that has seen nothing of it are not solving the same problem, and a
+single ranking would misrepresent both.
+
+Every comparison figure in the table is taken from Tables~5 and~6 of
+\citet{anyanomaly2025}, which evaluate both benchmarks under the micro-AUROC
+protocol used here. Drawing them from one source rather than from each original
+paper is deliberate: it keeps the evaluation protocol constant across rows, and
+it means the whole table can be checked against a single document.
+
+\begin{table}[width=\linewidth,cols=4,pos=h]
+\caption{Frame-level micro AUROC (\%) on CUHK Avenue and ShanghaiTech, grouped
+by what the method requires of the target scene. Figures are as tabulated by
+\citet{anyanomaly2025}, Tables~5 and~6, except the row marked $^{\dagger}$,
+which is the benchmark's own baseline as reported in the paper introducing it. A
+dash indicates the benchmark is not reported. $^{\S}$~Our rows are the
+\texttt{matched} condition on both benchmarks---the configuration the method
+proposes---rather than the best condition on each. Reporting \texttt{none} for
+Avenue ($70.6$) and \texttt{matched} for ShanghaiTech would be a different
+configuration per dataset; Table~\ref{tbl:avenue} gives all four conditions for
+each.}\label{tbl:sota}
+\begin{tabularx}{\linewidth}{@{}Z l l@{}}
+\toprule
+\textbf{Method} & \textbf{Ave} & \textbf{ShT} \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{One-class --- normal video from the target scene, plus a training run}} \\
+Liu et al. \citep{liu2018shanghaitech}$^{\dagger}$ & 85.1 & 72.8 \\
+MPN \citep{lv2021mpn} & 89.5 & 73.8 \\
+FPDM \citep{yan2023fpdm} & 90.1 & 78.6 \\
+MA-PDM \citep{zhou2024mapdm} & 91.3 & 79.2 \\
+MULDE \citep{micorek2024mulde} & --- & 81.3 \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Training-free --- no target data, no gradient updates}} \\
+Zero-shot CLIP \citep{radford2021clip} & 62.3 & 60.9 \\
+Zero-shot ImageBind \citep{girdhar2023imagebind} & 64.5 & 61.3 \\
+LLaVA-1.5 \citep{liu2023llava} & 67.4 & 59.6 \\
+Video-ChatGPT \citep{maaz2024videochatgpt} & 76.9 & 69.1 \\
+\textbf{DA-ZVAD (ours)}$^{\S}$ & 67.7 & \textbf{73.4} \\
+AnyAnomaly \citep{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Where the present work sits}
+Among the six training-free entries, this work ranks second on ShanghaiTech
+behind AnyAnomaly and fifth on Avenue. The asymmetry is the same one
+Section~\ref{sec:res-avenue} reports internally: the method is competitive where
+several camera views must be told apart and is not where there is only one.
+
+The one-class rows are included because they set the scale, and because the
+cost they pay is the quantity this work is trying to remove. Each of them
+consumes hours of normal video from the target scene plus a training run before
+it produces its first score.
+
+Read against that band, $73.4$ on ShanghaiTech exceeds the benchmark's own
+baseline \citep{liu2018shanghaitech}, which reaches $72.8$ \emph{by training on
+ShanghaiTech's training split}, and sits alongside MPN ($73.8$). It falls below
+the later diffusion- and density-based methods, which reach $78$--$81$. So the
+claim is bounded and specific: training-free scoring with a supplied scene
+description reaches the level of the benchmark's established baseline at no
+target-data cost, and does not approach the current one-class state of the art.
+On Avenue it does not reach that band at all ($70.6$ against $85.1$), which is
+the single-scene limitation of Section~\ref{sec:res-avenue} appearing again.
+
+\subsubsection{Why the Avenue figure trails the field while ShanghaiTech does not}
+\label{sec:res-whyavenue}
+Table~\ref{tbl:sota} shows an asymmetry worth accounting for: on ShanghaiTech
+this work sits second among the training-free entries and above the benchmark's
+own trained baseline, whereas on Avenue it sits third and well below the
+one-class band. Two separate effects produce that, and only one of them is the
+scene-diversity limitation already reported.
+
+\emph{The detector itself does not degrade.} With no descriptor the two
+benchmarks give $0.706$ and $0.707$ (Table~\ref{tbl:avenue}). Whatever is
+happening on Avenue is not a failure of the frozen encoder to transfer; the
+base detector performs identically on both.
+
+\emph{Effect one: the descriptor has nothing to resolve.} Avenue is a single
+fixed view, so a scene description cannot perform the discrimination it performs
+across ShanghaiTech's twelve views. The matched condition therefore falls
+\emph{below} the ungrounded one ($0.677$ against $0.706$), and the within-view
+control of Section~\ref{sec:res-avenue} shows the same collapse inside a single
+ShanghaiTech view. This accounts for the loss relative to our own ShanghaiTech
+figure but not for the distance to the other methods.
+
+\emph{Effect two, and the larger one: Avenue's anomalies are of a kind
+whole-frame semantic matching cannot express.} The two benchmarks differ in what
+their anomaly classes \emph{are}, not merely in how many scenes they span.
+ShanghaiTech's appearance classes are object categories a web-scale
+image--text model represents directly---car, bicycle, motorcycle, hand
+truck---and asking whether a frame contains a bicycle is close to the task CLIP
+was trained on. Avenue's appearance classes are bicycle and ``too close'',
+the latter being a property of the object's distance from the camera rather
+than of its identity; no phrasing of a scene description expresses it, because
+the frame contains nothing that is semantically out of place. Its remaining
+classes---throwing, running, dancing---are brief, small in the frame, and
+defined by motion rather than by content.
+
+This is the resolution limitation identified on MVTec~AD
+(Section~\ref{sec:results}) reappearing on video: pooled whole-frame embeddings
+at $224\times224$ capture what a scene contains and not how large, how fast, or
+how near it is. It also explains why the one-class band is \emph{higher} on
+Avenue ($85$--$91$) than on ShanghaiTech ($73$--$81$) while ours is lower: a
+model trained on Avenue's own normal footage learns that scene's characteristic
+scale and motion statistics, which is precisely the information a frozen
+semantic encoder discards.
+
+The reading we take from this is that the method is suited to anomalies that are
+semantic---something present that does not belong---and unsuited to anomalies
+that are geometric or kinematic, and that this distinction predicts benchmark
+performance better than benchmark difficulty does. Patch-level scoring against
+the encoder's spatial tokens, listed in Section~\ref{sec:conclusion}, addresses
+the first half of that gap; the second half is a limitation of the
+representation rather than of the scoring rule.
+
+\subsubsection{Why the plain vision-language baselines score lower, and what
+that does \emph{not} establish}
+The four training-free baselines above this work's row on ShanghaiTech are
+instructive, and the reason they score lower is largely not the scene
+descriptor. It is worth stating precisely, because the natural reading of the
+table overstates the case.
+
+Zero-shot CLIP scores each frame against a fixed pair of prompts and pools the
+resulting scores directly. This pipeline differs from that in four respects
+before any domain descriptor is involved: it ensembles several phrasings per
+side rather than using one prompt \citep{jeong2023winclip}; it smooths over a
+$31$-frame window (Section~\ref{sec:results}, worth roughly four points); it
+normalises each clip before pooling, which Table~\ref{tbl:video} shows is worth
+close to twenty points on this benchmark; and it uses ViT-L/14 rather than the
+smaller backbones typical of that baseline.
+
+The decomposition matters. With \emph{no} descriptor at all this pipeline scores
+$0.707$ (Table~\ref{tbl:sweep}), already $9.8$ points above zero-shot CLIP. The
+descriptor moves it from $0.707$ to $0.734$, a further $2.7$ points, and
+Section~\ref{sec:res-sweep} reports that this margin sits inside the
+split-to-split spread and declines to claim its magnitude. \textbf{The gap
+between this work and the plain zero-shot baselines is therefore mostly
+attributable to protocol and scale, not to verbalised context.} The evidence
+that the descriptor is load-bearing remains the mismatched condition---a wrong
+description costs $0.105$---and not the margin over external baselines.
+
+LLaVA-1.5 and Video-ChatGPT are substantially larger models scoring below or
+near this pipeline, which is a comment on task fit rather than on capacity: both
+are general-purpose conversational models asked to emit a score, and neither is
+constructed to produce a well-ordered ranking over frames, which is what AUROC
+measures.
+
+\subsubsection{Against AnyAnomaly}
+AnyAnomaly \citep{anyanomaly2025} is the closest published work and leads on
+both benchmarks. Three differences the AUROC column does not show are worth
+recording.
+
+\emph{The supplied text points the opposite way.} AnyAnomaly implements
+\emph{customizable} VAD: the operator names what is \emph{abnormal}---
+``bicycle'', ``fighting'', ``jumping-falling''---and each frame is scored for the
+presence of that event. This work supplies a description of what is
+\emph{normal} in the deployment scene, and an anomaly is a departure from it.
+The distinction matters because \citet{anyanomaly2025} open by noting that
+abnormal events are ``rare and diverse, making it difficult to construct
+large-scale datasets''; a method requiring the operator to enumerate them in
+advance inherits that difficulty, whereas a description of normality does not.
+
+\emph{The benchmark evaluation supplies the anomaly taxonomy.} To obtain the
+figures in Table~\ref{tbl:sota}, \citet{anyanomaly2025} state that ``each
+anomaly class in the dataset was treated as $X$, and the maximum anomaly score
+among all computed scores was assigned to the corresponding segment.'' The
+method is told, per benchmark, which anomaly classes to look for and scored on
+the maximum over them. The present method receives a description of the scene
+and no information about the anomaly classes. The two rows do not describe
+equally informed systems.
+
+\emph{The inference budget differs by roughly an order of magnitude.}
+AnyAnomaly issues three large vision-language model queries per
+segment---representative key frame, position context and temporal
+context---having first run CLIP for key-frame selection and multi-scale
+windowing to construct them. This pipeline runs one frozen CLIP pass per frame
+and reads one sentence, within roughly $7$\,GB.
+
+\subsubsection{What this work solves that the comparison set does not}
+\label{sec:res-openset}
+Table~\ref{tbl:sota} invites the reading that this work is a weaker AnyAnomaly.
+It is not: the two answer different questions, and the difference is the one that
+motivates anomaly detection in the first place.
+
+\emph{The two methods require opposite things of the operator.} AnyAnomaly
+implements \emph{customizable} VAD, in which the operator names the event to be
+detected---``bicycle'', ``fighting'', ``jumping-falling''---and each frame is
+scored for the presence of that event. Detection is therefore closed over the
+supplied vocabulary: an event the operator did not anticipate produces no
+score, because nothing in the pipeline is looking for it. This work supplies a
+description of what is \emph{normal} in the deployment scene and flags departure
+from it, which is the one-class formulation carried into a zero-shot setting.
+Its detection surface is not enumerated in advance.
+
+The asymmetry is stark when stated as a deployment requirement.
+\begin{itemize}
+  \item AnyAnomaly asks: \emph{list the things that could go wrong here.}
+  \item This work asks: \emph{describe what ordinarily happens here.}
+\end{itemize}
+An operator can always do the second. The first is precisely what
+\citet{anyanomaly2025} identify as intractable in their own opening---abnormal
+events are ``rare and diverse, making it difficult to construct large-scale
+datasets''---and enumerating them in a prompt inherits that difficulty rather
+than removing it.
+
+\emph{This bears directly on how Table~\ref{tbl:sota} should be read.} The
+figures reported for AnyAnomaly are obtained by treating ``each anomaly class in
+the dataset'' as the query and taking the maximum score across them. The
+benchmark's anomaly taxonomy is therefore supplied to the method at evaluation
+time. That is a reasonable protocol for the task it defines, and it is the task
+its authors set out to solve. It does mean that $79.7$ measures closed-set
+performance with the class list provided, and is not evidence about behaviour at
+a deployment where the class list is unknown---which is the setting the present
+work targets. No claim is made here that this pipeline would exceed AnyAnomaly
+under a withheld taxonomy; that experiment has not been run, and it is named in
+Section~\ref{sec:conclusion} as the most informative one available.
+
+\subsubsection{Two findings that transfer beyond this pipeline}
+Framing the contribution as ``a control the others did not run'' understates it,
+because the control produced results that apply to any text-conditioned
+detector, including the methods in Table~\ref{tbl:sota}.
+
+\emph{Where the text enters dominates what the text says.} Injecting the same
+descriptor into both prompt ensembles rather than the normal ensemble alone
+moves the matched-minus-mismatched contrast from $-0.029$ to $+0.105$: the
+effect changes sign. The mechanism, prototype dilution under mean pooling
+(Section~\ref{sec:res-sweep}), is a property of ensemble-and-pool prompt
+construction generally, not of this implementation. Any study reporting that
+scene descriptions fail to help, without varying the fusion rule, has reported
+an artefact of an implementation detail. This work nearly did, and the record of
+that inversion is in Table~\ref{tbl:sweep}.
+
+\emph{Verbalised context pays in proportion to the scene diversity it must
+resolve.} The context gap is $+0.105$ pooled across twelve ShanghaiTech views,
+$+0.033$ within a single view, and $+0.020$ on single-view Avenue
+(Table~\ref{tbl:withinview}). That is a prescriptive statement about where such
+methods should be deployed---installations spanning several environments, not
+fixed single-camera sites---and it was obtained by measurement rather than by
+argument from benchmark identity.
+
+Neither finding is available without a condition in which the supplied text is
+deliberately wrong while everything else is held fixed. That condition is the
+instrument; these two results are what it produced.
+
+\wnote{Provenance, recorded deliberately. Every comparison number in
+Table~\ref{tbl:sota} is from Tables~5 and~6 of \citet{anyanomaly2025} and can be
+checked against that one paper. An earlier draft of this section compared
+against LAVAD \citep{zanella2024lavad} on ShanghaiTech; LAVAD reports on
+UCF-Crime and XD-Violence and on neither benchmark used here, and that
+comparison has been removed. Cross-paper AUROC also carries the caveat of
+Section~\ref{sec:conclusion}: the pooled per-clip-normalised metric is not
+invariant to monotone rescaling of the score, so rows produced by different
+scoring functions are not exactly commensurable.}
+
 \subsection{Result 6: explanations under domain shift}
 \pending{qualitative gallery contrasting explanations generated under matched and
 mismatched domain descriptors for identical flagged events. M4 has not yet been
@@ -1491,14 +1750,30 @@ about explanation quality under domain shift.
   \item Prompt-based adaptation occupies the lowest-cost, lowest-robustness point
         of the adaptation continuum \citep{fan2026llm}, and is evaluated as such.
   \item Explanation assessment is qualitative at the present scale.
-  \item Absolute performance on ShanghaiTech ($0.734$) is below training-free
-        methods that invoke a captioning language model over every frame
-        \citep{zanella2024lavad}. The gap is consistent with the resolution
-        limitation identified on MVTec~AD: whole-frame embeddings at
+  \item Absolute performance on ShanghaiTech ($0.734$) is below the strongest
+        training-free method evaluated on the same benchmark: AnyAnomaly
+        \citep{anyanomaly2025} reports $79.7$ there and $87.3$ on Avenue. It is
+        supplied the benchmark's anomaly classes as its query text and issues
+        three large vision-language model queries per segment, against this
+        work's single frozen encoder pass per frame and a scene description
+        carrying no anomaly information (Section~\ref{sec:res-comparison}); the
+        comparison is therefore not between equally informed systems, but the
+        gap on the reported metric is real and is stated as such. This work is
+        ahead of the plain zero-shot vision-language baselines on ShanghaiTech,
+        but Section~\ref{sec:res-comparison} attributes most of that margin to
+        prompt ensembling, temporal smoothing, per-clip normalisation and
+        backbone scale rather than to the descriptor, whose own contribution is
+        the $+0.027$ of Section~\ref{sec:res-sweep}. The gap to AnyAnomaly is
+        consistent with the
+        resolution limitation identified on MVTec~AD: whole-frame embeddings at
         $224\times224$ cannot resolve objects occupying a small fraction of a
         surveillance frame. Quadrant-level scoring did not close it; region- or
         patch-level scoring in the manner of \citet{jeong2023winclip} remains
         untested and is the most likely route to a materially higher figure.
+        Note that LAVAD \citep{zanella2024lavad}, the other training-free
+        pipeline discussed here, reports on UCF-Crime ($80.28$ AUC) and
+        XD-Violence ($62.01$ AP) and not on either benchmark used in this work,
+        so no comparison against it is drawn.
   \item Scoring is transductive in one respect: per-clip score normalisation
         reads the whole clip before ranking any of its frames. It consumes no
         labels, and it is the protocol established with the benchmark, but it

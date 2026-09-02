@@ -69,10 +69,24 @@ FS_GLOSS = 7.4      # the plain-language lines
 FS_TINY = 7.0
 
 
+# Rounded boxes are recorded alongside the dashed panels; a subtitle running
+# past its own box is the overflow that is easiest to miss and was the one that
+# actually shipped.
+BOXES = []
+
+
 def box(ax, x, y, w, h, fc, ec, lw=1.0, r=0.045, z=3):
     ax.add_patch(FancyBboxPatch((x, y), w, h,
                                 boxstyle=f"round,pad=0.010,rounding_size={r}",
                                 facecolor=fc, edgecolor=ec, linewidth=lw, zorder=z))
+    BOXES.append((x, y, w, h))
+
+
+# Every dashed panel records its bounds so check_overflow can test the labels
+# that sit inside it. Eyeballing a thumbnail does not reliably catch a line that
+# runs a few points past a panel edge, and at this type scale that is exactly
+# the failure mode.
+CONTAINERS = []
 
 
 def container(ax, x, y, w, h, ec, label):
@@ -81,6 +95,63 @@ def container(ax, x, y, w, h, ec, label):
     ax.text(x + 0.09, y + h - 0.05, label, fontsize=FS_PANEL, color=ec,
             fontweight="bold", va="center", zorder=6,
             bbox=dict(facecolor=PAPER, edgecolor="none", pad=1.6))
+    CONTAINERS.append((x, y, w, h, label))
+
+
+def check_overflow(fig, ax, pad=0.015):
+    """Warn about any text whose rendered box runs outside its dashed panel.
+
+    Each text is assigned to the panel containing its centre, then its full
+    extent is compared against that panel. The panel's own title is skipped: it
+    is drawn deliberately straddling the top edge.
+    """
+    fig.canvas.draw()
+    inv = ax.transData.inverted()
+    panel_labels = {lab for *_r, lab in CONTAINERS}
+    problems = []
+    for t in ax.texts:
+        s = t.get_text().strip()
+        if not s:
+            continue
+        bb = t.get_window_extent(fig.canvas.get_renderer())
+        (x0, y0), (x1, y1) = inv.transform([[bb.x0, bb.y0], [bb.x1, bb.y1]])
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+
+        # A panel's own title straddles the top edge by design, so only its
+        # width is meaningful -- but that width is exactly what overflowed.
+        if s in panel_labels:
+            for px, py, pw, ph, lab in CONTAINERS:
+                if lab == s and x1 > px + pw - pad:
+                    problems.append((lab, "panel title too wide", s[:46]))
+            continue
+
+        # Smallest enclosing region wins: a rounded box before the dashed panel
+        # it sits in, since the box is the tighter constraint.
+        region = None
+        for bx, by, bw, bh in BOXES:
+            if bx <= cx <= bx + bw and by <= cy <= by + bh:
+                region = (bx, by, bw, bh, "box")
+                break
+        if region is None:
+            for px, py, pw, ph, lab in CONTAINERS:
+                if px <= cx <= px + pw and py <= cy <= py + ph:
+                    region = (px, py, pw, ph, lab)
+                    break
+        if region is None:
+            continue
+        rx, ry, rw, rh, lab = region
+        over = []
+        if x0 < rx - pad:        over.append("left")
+        if x1 > rx + rw + pad:   over.append("right")
+        if y0 < ry - pad:        over.append("bottom")
+        if y1 > ry + rh + pad:   over.append("top")
+        if over:
+            problems.append((lab, "/".join(over), s[:46]))
+    for lab, side, s in problems:
+        print("  OVERFLOW: %-24s %-12s %r" % (lab, side, s))
+    if not problems:
+        print("  panels: no text overflows its container")
+    return problems
 
 
 def arrow(ax, p, q, color=INK, lw=1.15, rad=0.0, z=5):
@@ -251,14 +322,12 @@ def build(assets: str, out: str) -> str:
     ax.text(5.59, 3.18, "$\\rightarrow\\; s_t = P(\\mathrm{abnormal})$",
             fontsize=FS_FORM, color=INK, ha="center", va="center",
             fontweight="bold", zorder=5)
-    gloss(ax, 5.59, 2.80, "$e^{\\pm}$: prompts encoded, averaged", fs=FS_TINY)
     gloss(ax, 5.59, 2.66, "$\\lambda$: CLIP logit scale $\\approx$ 100", fs=FS_TINY)
-    gloss(ax, 5.59, 2.52, "$s_t\\in(0,1)$: leans abnormal", fs=FS_TINY)
 
     # ------------------------------------------------ M2 (its own module)
-    container(ax, 4.66, 0.44, 1.86, 1.74, TMP, "M2 · TEMPORAL SMOOTHING")
+    container(ax, 4.66, 0.44, 1.86, 1.74, TMP, "M2 · SMOOTHING")
     module(ax, 4.82, 1.58, 1.54, 0.44, "centred moving average",
-           "$w = 31$ frames · no parameters", TMP, TMP_BG, frozen=False, ts=7.6)
+           "window $w = 31$ frames", TMP, TMP_BG, frozen=False, ts=7.6)
     ax.text(5.59, 1.36,
             r"$\tilde{s}_t=\frac{1}{w}\sum_{i=t-15}^{\,t+15} s_i$",
             fontsize=8.4, color=INK, ha="center", va="center", zorder=6)
@@ -286,7 +355,6 @@ def build(assets: str, out: str) -> str:
         frame_img(ax, normal, 7.05, 3.74, 0.038, border=OUT_OK, lw=1.3)
         frame_img(ax, anom, 7.47, 3.74, 0.038, border=OUT_BAD, lw=1.9)
         frame_img(ax, normal, 7.89, 3.74, 0.038, border=OUT_OK, lw=1.3)
-    gloss(ax, 7.47, 3.44, "one decision per frame", fs=FS_TINY)
 
     module(ax, 6.86, 2.84, 1.22, 0.44, "LLaVA-1.5", "4-bit · frozen", RSN, RSN_BG,
            ts=FS_TITLE)
@@ -317,6 +385,7 @@ def build(assets: str, out: str) -> str:
                          "pooling, following the benchmark protocol",
             fontsize=FS_TINY, color=INK, ha="center", fontweight="medium")
 
+    check_overflow(fig, ax)
     figsave.save(fig, out, facecolor=PAPER)
     plt.close(fig)
     return out

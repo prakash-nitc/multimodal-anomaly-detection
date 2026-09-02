@@ -13,7 +13,7 @@ exactly as written are marked **SAY**; everything else, put in your own words. A
 talk sounds recited.
 
 Each slide ends with a **→ Next** line. That sentence is the bridge into the following
-slide, and it is what turns twenty-nine slides into one argument. If you learn nothing else
+slide, and it is what turns thirty slides into one argument. If you learn nothing else
 from this document, learn the bridges — a talk that flows is mostly a talk where no slide
 arrives without warning.
 
@@ -652,6 +652,18 @@ well on a dataset it was never tuned for.
 description. Whatever benefit the description is giving here, it cannot be domain
 adaptation."
 
+**If asked why Avenue trails the other methods** (it comes up again on slide 24), the
+answer has two halves, and the second is the bigger one:
+
+**SAY** — "It isn't the detector failing to transfer — with no descriptor the two
+benchmarks give 0.706 and 0.707, identical. The first half is that a scene description has
+nothing to resolve on a single-camera benchmark. The second half is that Avenue's anomalies
+are a different *kind*. ShanghaiTech's are object categories — car, bicycle, motorcycle —
+which is exactly what CLIP is built for. Avenue's include 'too close', where nothing is
+semantically out of place and the anomaly is how *near* the object is. No sentence
+expresses that. It's the same resolution limit I found on MVTec: whole-frame embeddings
+capture what is in a scene, not how big, how fast or how near it is."
+
 Then the conjecture, stated as a conjecture, with the experiment that tests it: ShanghaiTech
 has twelve camera views and Avenue has one. A scene description has work to do only when
 there are several environments to tell apart.
@@ -748,35 +760,86 @@ much worse, 0.685 down to 0.486, because the rewritten prompts repeated "walkway
 
 # Part 7 — Assessment and close (slides 24–29)
 
-## Slide 24 — Where this sits against the literature · 60s · *running 24:10*
+## Slide 24 — Where this sits against the literature · 75s · *running 24:25*
 
-**On screen:** the three-row comparison table.
+**On screen:** six training-free methods on Avenue and ShanghaiTech, ours highlighted.
 
-**The beat:** pick the right comparison, and concede the wrong one openly.
+**The beat:** we sit second among training-free methods on ShanghaiTech — and be
+honest about how much of that margin is the sentence, because most of it is not.
 
-| Method | AUROC | Cost per frame |
+*This slide was rebuilt in September 2026. The old version compared us against LAVAD,
+which reports on UCF-Crime and XD-Violence and not on either of our benchmarks. Do not
+deliver the old line about "we don't match LAVAD."*
+
+| Training-free method | Ave | ShT |
 |---|---|---|
-| Liu et al. 2018 — trained on the target scene | ≈ 0.728 | 1 trained model |
-| LAVAD (CVPR 2024), training-free | ≈ 0.85 | Captioner + LLM + refiner |
-| DA-ZVAD (ours), training-free | **0.734** | One frozen encoder + a sentence |
+| Zero-shot CLIP | 62.3 | 60.9 |
+| Zero-shot ImageBind | 64.5 | 61.3 |
+| LLaVA-1.5 | 67.4 | 59.6 |
+| Video-ChatGPT | 76.9 | 69.1 |
+| **DA-ZVAD (ours)** | **70.6** | **73.4** |
+| AnyAnomaly | 87.3 | 79.7 |
 
-**Anchor on the trained baseline, not on LAVAD.**
+**Point at the zero-shot CLIP row first. That is the row that matters.**
 
-**SAY** — "I match the benchmark's own 2018 baseline, 0.734 against 0.728, using none of its
-training data."
+**SAY** — "Zero-shot CLIP gets 60.9 on ShanghaiTech; I get 73.4. But I want to be careful
+with that gap. With no sentence at all my pipeline already gets 70.7 — so the sentence is
+worth about two and a half points of it, and the rest is temporal smoothing, per-clip
+normalisation, prompt ensembling and a larger backbone. Most of my margin over those
+baselines is protocol, not language."
 
-**Then concede LAVAD openly, in the same breath.** It reaches about 0.85, and it runs a
-captioner, a large language model and a refiner on every frame. This runs one frozen encoder
-and a sentence, in about 7 GB.
+*Volunteering that is the whole point of the slide. If you claim the twelve points and a
+panelist opens your own Table 9, you lose the room.*
 
-**SAY** — "I don't expect to exceed trained state-of-the-art detectors on absolute AUROC, and
-the paper makes no such claim."
+**SAY** — "The evidence that the language is doing work isn't this table. It's the
+mismatched condition: a wrong description costs ten points with everything else frozen."
 
-Deliver this confidently rather than apologetically. Choosing the fair comparison yourself is
-a strength.
+**Then reframe, because the table invites the wrong reading.**
 
-**→ Next:** "In the same spirit, here are the limitations — stated by me rather than found by
-you."
+The panel will read this as "you are a weaker AnyAnomaly." You are not — you answer a
+different question, and it is the harder one.
+
+**SAY** — "AnyAnomaly asks *is the thing I named happening?* I ask *is anything happening
+that doesn't belong here?* To deploy theirs you have to list what could go wrong —
+bicycle, fighting, someone falling. Anything you didn't think of produces no score,
+because nothing is looking for it. To deploy mine you describe what ordinarily happens,
+and anything departing from it gets flagged."
+
+**SAY** — "An operator can always describe the ordinary. Nobody can enumerate the
+extraordinary. And that isn't my claim — it's theirs: their paper opens by saying abnormal
+events are rare and diverse and hard to collect. Putting that list in a prompt instead of
+a training set doesn't make the problem go away."
+
+**Then the consequence for their number.**
+
+**SAY** — "Which is why 79.7 needs reading carefully. To get it they state that each
+anomaly class in the dataset was treated as the query and the maximum taken over them. The
+benchmark hands them the answer key. That's fair for the task they defined — it measures
+closed-set performance with the class list supplied, not open-set performance at a site
+where nobody knows the list yet."
+
+**Do not claim you would beat them with the taxonomy withheld.** You haven't run it. Say
+that, and name it as the next experiment — that reads as stronger than an unbacked claim.
+
+**Then the two findings, which are the actual contribution.**
+
+**SAY** — "And the control produced two things that apply to anyone building these
+systems. First, where you inject the text matters more than what it says — enough to flip
+the sign. Both prompt sets: minus 0.029. Normal set only: plus 0.105. Same sentence.
+That's prototype dilution, and it's a property of averaged prompt ensembles generally — so
+any paper reporting that scene descriptions don't help, without varying the fusion rule,
+has reported an implementation artefact. I nearly published that artefact myself."
+
+**SAY** — "Second, the benefit scales with how many environments the description has to
+tell apart. Twelve views, plus 0.105. One view, plus 0.033. So deploy this across several
+scenes, not on a fixed single camera. That's a prescription, and I measured it."
+
+**If you only get one sentence on this slide:** *"They detect the anomalies you can name.
+I detect the ones you can't — and along the way I found that where you put the text matters
+more than what it says, which would have inverted my own conclusion if I hadn't checked."*
+
+**→ Next:** "In the same spirit, here are the limitations — stated by me rather than found
+by you."
 
 ## Slide 25 — Limitations we are stating ourselves · 50s · *running 25:00*
 
@@ -839,7 +902,7 @@ Then stop. Do not trail off, and do not add a thank-you paragraph.
 
 **→ Next:** hand over for questions. Advance to the references only if asked.
 
-## Slides 28–29 — References
+## Slides 28–30 — References
 
 **Do not read these out.** They are an evidence base, not a slide.
 

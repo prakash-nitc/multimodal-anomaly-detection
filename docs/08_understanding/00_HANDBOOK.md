@@ -1206,8 +1206,12 @@ industrial sweep and ideally the region-level scoring.
 > is the *only* thing that can vary — and without that you can't test whether the
 > text does anything. The architecture exists to make the experiment possible.
 
-⚠️ Don't claim "text at inference time" as new. A 2025 paper (AnyAnomaly) does
-that. **Name it yourself before they do.**
+⚠️ Don't claim "text at inference time" as new. AnyAnomaly (WACV 2026) does that,
+on *your two benchmarks*, and beats you on both. **Name it yourself before they
+do** — see the full answer in §8.3. The short version: their text names what is
+*abnormal* and they are handed the benchmark's anomaly classes; mine describes
+what is *normal* and is told nothing about the anomalies. And they never corrupt
+their text, so they cannot show it is causally responsible.
 
 **"What exactly is your research gap?"**
 
@@ -1310,7 +1314,337 @@ three parts.*
 > and mismatched: that comparison holds the normalisation fixed and varies only
 > the sentence.
 
-**"Did you tune on the test set?"**
+**"Why is your Avenue result poor when your ShanghaiTech one is respectable?"**
+
+*A sharp panelist will spot this in the comparison table: second among
+training-free methods on ShanghaiTech, third and far behind on Avenue. There are
+two separate reasons and only one of them is the scene-diversity story you
+already tell. Give both.*
+
+**Start by ruling out the boring explanation.**
+
+> It isn't that the detector fails to transfer. With no descriptor at all the
+> two benchmarks give 0.706 and 0.707 — identical. The frozen encoder works just
+> as well on Avenue. Something else is going on.
+
+**Reason 1 — the sentence has nothing to do there.** *(You already know this one.)*
+
+> Avenue is one fixed camera. A scene description can't tell the model which of
+> several environments it's in, because there's only one. So the matched
+> condition actually scores *below* having no descriptor — 0.677 against 0.706 —
+> and the within-view control shows the same collapse inside a single
+> ShanghaiTech view.
+
+But that only explains why *we* lose ground against our own ShanghaiTech number.
+It does not explain the distance to the other methods. For that:
+
+**Reason 2 — and this is the bigger one. Avenue's anomalies are the kind CLIP
+cannot express.**
+
+Look at what each benchmark actually calls anomalous:
+
+| | ShanghaiTech | CUHK Avenue |
+|---|---|---|
+| Appearance | car, bicycle, motorcycle, hand truck | bicycle, **"too close"** |
+| Action | skateboarding, running, jumping, fighting… | throwing, running, dancing |
+
+> ShanghaiTech's appearance anomalies are **object categories** — is there a
+> bicycle in this frame, is there a car. That is almost exactly what CLIP was
+> trained to do, so a frozen encoder is strong at it.
+>
+> Avenue's are different. One of its two appearance classes is **"too close"** —
+> an object near the camera. Nothing in that frame is semantically out of place;
+> the anomaly is *how near the thing is*, and no sentence expresses that. Its
+> other classes — throwing, dancing — are brief, small in the frame, and defined
+> by motion rather than by content.
+
+**Then land the general point:**
+
+> So the method is good at anomalies that are **semantic** — something present
+> that doesn't belong — and poor at anomalies that are **geometric or
+> kinematic**. That distinction predicts my results better than benchmark
+> difficulty does. It's the same limitation I found on MVTec AD: whole-frame
+> embeddings at 224×224 capture *what* is in a scene, not how big, how fast, or
+> how near it is.
+
+**And the observation that closes it neatly:**
+
+> It also explains something that looks odd in the table — the one-class methods
+> score *higher* on Avenue (85–91) than on ShanghaiTech (73–81), while I score
+> lower. A model trained on Avenue's own normal footage learns that scene's
+> scale and motion statistics. That's exactly the information a frozen semantic
+> encoder throws away.
+
+**If you get one sentence:** *"ShanghaiTech's anomalies are things that shouldn't
+be there, which is what CLIP is good at. Avenue's are things that are too close
+or moving oddly, which a whole-frame semantic embedding simply cannot see."*
+
+**A supporting detail if you want it:** AnyAnomaly's own per-class table shows
+their frame-level baseline scoring 57.2 on Avenue's "too close" class — near
+chance — and only recovering to 91.8 once they add an explicit temporal-context
+image. So even a large vision-language model can't do that class from semantics
+alone. That's independent evidence the limitation is representational, not an
+artefact of my pipeline.
+
+
+---
+
+**"What do you actually solve that the existing methods don't?"**
+
+*This is the question the whole comparison exists to answer, and "we ran a
+control they didn't" is the wrong answer — it describes your method, not your
+contribution. There are three real answers. Learn them in this order.*
+
+### Answer 1 — We answer a different question, and it's the harder one
+
+This is the strongest thing you have. Lead with it.
+
+> AnyAnomaly asks: **"is the thing I named happening?"**
+> We ask: **"is anything happening that doesn't belong here?"**
+>
+> To deploy theirs you have to list what could go wrong — "bicycle", "fighting",
+> "someone falling". Anything you didn't think of produces no score, because
+> nothing in the pipeline is looking for it. To deploy mine you describe what
+> ordinarily happens. Anything that departs from it gets flagged.
+>
+> An operator can always describe the ordinary. Nobody can enumerate the
+> extraordinary — and that's not my claim, it's theirs: their paper opens by
+> saying abnormal events are "rare and diverse, making it difficult to construct
+> large-scale datasets." Putting that list in a prompt instead of a training set
+> doesn't make the problem go away.
+
+**Then land the consequence for the table:**
+
+> And that's why their 79.7 needs reading carefully. To get it, they state that
+> "each anomaly class in the dataset was treated as X" and take the maximum over
+> them. The benchmark hands them the answer key. That's fair for the task they
+> defined — but it measures closed-set performance with the class list supplied,
+> not open-set performance at a site where nobody knows the list yet.
+
+**What you must NOT claim:** that you'd beat them with the taxonomy withheld.
+You haven't run it. Say so, and name it as the experiment you'd run next — that
+is a stronger position than an unbacked claim.
+
+### Answer 2 — We found a failure mode that affects everyone building these
+
+Not "we ran a control." **We found something with the control.**
+
+> Where you inject the text matters more than what the text says — enough to
+> flip the sign of the result. Put the scene description into both prompt sets
+> and the gap is −0.029; put it into the normal set only and it's +0.105. Same
+> sentence, same models, same frames.
+>
+> The cause is prototype dilution: shared words enter both averaged prompt
+> vectors and pull them together. That's a property of ensemble-and-pool prompt
+> construction in general, not of my code. So **any paper reporting that scene
+> descriptions don't help, without varying the fusion rule, has reported an
+> implementation artefact.** I nearly published that artefact myself — it's in
+> my Table 9.
+
+That is a transferable result. It changes what other people should do.
+
+### Answer 3 — We can say where this works and where it doesn't
+
+> Verbalised context pays off in proportion to how many environments it has to
+> tell apart. Twelve camera views: +0.105. One view: +0.033. Single-view Avenue:
+> +0.020. So deploy this where an installation spans several scenes; don't
+> bother on a fixed single camera.
+>
+> That's a prescription, and I measured it rather than arguing it from the fact
+> that the two benchmarks differ.
+
+### How the three fit together
+
+Say it in this shape:
+
+> **The gap:** the domain-adaptation field excludes concept shift; anomaly
+> detection is made of it.
+> **The mechanism:** describe normality in one sentence, freeze everything, and
+> the effect becomes attributable.
+> **What that bought:** two findings nobody had — that injection point beats
+> wording, and that the benefit scales with scene diversity — plus a deployment
+> model that doesn't need anyone to enumerate anomalies in advance.
+
+**The falsifying control is the instrument, not the contribution.** Mention it
+as *how* you got Answers 2 and 3, never as the answer itself. If a panelist
+hears "my contribution is that I ran an experiment others didn't," they will
+correctly ask what the experiment found. Answers 2 and 3 are what it found.
+
+### The one-liner, if you only get a sentence
+
+> *"They detect the anomalies you can name. We detect the ones you can't — and
+> along the way we found that where you put the text matters more than what it
+> says, which would have inverted our own conclusion if we hadn't checked."*
+
+
+---
+
+**"How do you compare to the other methods on these benchmarks?"**
+
+*Your supervisor asked for this comparison, so expect to be walked through it.
+The table is Section 7.8 of the paper. Here it is in plain words.*
+
+**Where you actually stand — say it precisely, not flatteringly.**
+
+> Among the six training-free methods, I'm **second on ShanghaiTech** and
+> **fifth on Avenue**. So "second best" is true only on one benchmark and only
+> within the training-free group. Against the one-class methods — the ones that
+> train on normal video from the scene — I'm level with the older ones and below
+> the recent ones.
+
+**The three groups, and why grouping matters.**
+
+Think of it as three different games, not one leaderboard:
+
+| Group | What it gets to use | Where they land |
+|---|---|---|
+| One-class | Hours of normal video *from your scene*, plus a training run | 74–81 on ShT |
+| Training-free | Nothing from your scene at all | 60–80 on ShT |
+| Us | Nothing, plus one sentence | 73.4 on ShT |
+
+A one-class method that scores 79 has been shown the actual site. You haven't.
+Comparing the raw numbers without saying that is the mistake the table is
+grouped to prevent.
+
+---
+
+**"Why do the other training-free methods score lower than you?"**
+
+*This is the question where it is easy to over-claim, and where over-claiming
+would be caught. Learn the honest version.*
+
+The tempting answer is "because of my sentence." **That is wrong, and your own
+Table 9 proves it.**
+
+> Zero-shot CLIP gets 60.9 on ShanghaiTech. I get 73.4. But with **no sentence
+> at all**, my pipeline already gets 70.7. So the sentence accounts for 2.7 of
+> that 12.5-point gap. The other ~10 points come from four things that have
+> nothing to do with domain context:
+>
+> - **Prompt ensembling** — several phrasings averaged, instead of one prompt.
+> - **Temporal smoothing** — a 31-frame window, worth about four points.
+> - **Per-clip normalisation** — worth close to twenty points on this benchmark
+>   on its own. Plain zero-shot CLIP pools raw scores across twelve cameras,
+>   which is the exact bug that cost me my first run.
+> - **A bigger backbone** — ViT-L/14 against the smaller CLIP those baselines use.
+
+**So the honest sentence is:** *"Most of my margin over the plain baselines is
+protocol and scale, not language. The evidence that language is doing work is
+the mismatched condition — a wrong description costs ten points — not the
+comparison against other papers."*
+
+Saying that yourself is worth far more than claiming the twelve points. If you
+claim the twelve and a panelist opens your own Table 9, you lose the room.
+
+**On LLaVA-1.5 (59.6) and Video-ChatGPT (69.1):** these are much bigger models
+scoring at or below you. That's not because you beat them at understanding
+video. It's task fit — they're conversational models being asked to emit a
+number, and AUROC measures how well frames are *ranked*, which is not what they
+are built to produce.
+
+---
+
+**"Then what are you actually doing that the others aren't?"**
+
+One thing, and it is not a score:
+
+> Every method in that table supplies text and reports that it helps. **Not one
+> of them ever supplies text that is deliberately wrong.** AnyAnomaly tunes how
+> the prompt is phrased and ablates its visual context modules, but its query is
+> always a correct anomaly class for the benchmark. So all of them show the text
+> *helps*. None shows the text is *responsible*.
+>
+> That's the difference between a method whose text is decorative and one whose
+> text is load-bearing, and the only way to tell them apart is to corrupt the
+> text and hold everything else fixed. That is what my mismatched condition
+> does, and it is why the pipeline is fully frozen — so there is nothing else
+> the change could be attributed to.
+
+**One sentence if you're pressed:** *"They built better detectors. I built the
+experiment that tells you whether the language is doing the work."*
+
+---
+
+**"Are these numbers reliable? Where did they come from?"**
+
+*Answer this one straight — it shows you handle sources carefully.*
+
+> Every comparison figure in my table comes from Tables 5 and 6 of the
+> AnyAnomaly paper, WACV 2026. I took them from one source on purpose: it keeps
+> the evaluation protocol constant across rows, and it means the whole table can
+> be checked against a single document rather than fifteen.
+>
+> My own two numbers are measured on our A40 and carry run manifests.
+
+**Know this too, in case it comes up:** an earlier draft compared against LAVAD
+on ShanghaiTech. LAVAD reports on UCF-Crime and XD-Violence and on **neither**
+of our benchmarks — that comparison was wrong and has been removed. If asked
+about LAVAD now, say it isn't comparable because it doesn't evaluate on these
+datasets.
+
+
+**"How do you differ from AnyAnomaly? It is training-free, uses text at
+inference, and beats you on both your benchmarks."**
+
+*The hardest question on the method, and now the best-evidenced answer you have.
+AnyAnomaly is WACV 2026, and it uses exactly your two benchmarks. Learn the four
+moves below in order.*
+
+**1. Concede the number first, without hedging.**
+
+> Yes. AnyAnomaly gets 87.3 on Avenue and 79.7 on ShanghaiTech. I get 70.6 and
+> 73.4. It is ahead on both and I report that in the paper.
+
+**2. Then give the comparison that actually isolates my contribution.**
+
+> But the baseline that tests *my* claim is zero-shot CLIP, because that is my
+> pipeline with the scene description removed. AnyAnomaly's own Table 6 reports
+> it at 60.9 on ShanghaiTech. I get 73.4. But be careful with that gap: with
+> **no sentence at all** I already get 70.7, so the sentence is worth 2.7 of
+> it and the rest is smoothing, per-clip normalisation, prompt ensembling and
+> a bigger backbone. The evidence for the sentence is the mismatched condition,
+> not this comparison.
+
+*Do not inflate this. The twelve-point gap is real but mostly protocol; the
+honest figure for the sentence is the 2.7 your own Table 9 reports, and the
+falsifying control is the evidence that matters.*
+
+**3. Then the three things the AUROC column does not show.**
+
+> **The text points the opposite way.** AnyAnomaly asks the user to name what is
+> *abnormal* — "bicycle", "fighting". I ask for a description of what is
+> *normal*, and an anomaly is a departure from it. Their own introduction says
+> abnormal events are "rare and diverse, making it difficult to construct
+> large-scale datasets" — a method that needs the operator to enumerate them in
+> advance inherits that problem. A description of normality does not.
+>
+> **They are told the answer key.** To get 79.7 they state that "each anomaly
+> class in the dataset was treated as X, and the maximum anomaly score among all
+> computed scores was assigned." So the model is given the benchmark's anomaly
+> taxonomy and scored on the max over it. I am given a scene description and
+> nothing about the anomaly classes. Those two columns are not equally informed
+> systems.
+>
+> **The compute differs by about an order of magnitude.** Three LVLM queries per
+> segment plus CLIP key-frame selection plus multi-scale WinCLIP windowing,
+> against my one frozen CLIP pass per frame in 7 GB.
+
+**4. Then land where the contribution actually is.**
+
+> None of that makes me better than them at detection. It makes the gap partly a
+> difference in task specification and budget. My claim is elsewhere: AnyAnomaly
+> ablates its *visual* context modules and tunes prompt *style*, but never
+> supplies a deliberately **wrong** text. The query is always a correct anomaly
+> class for the benchmark. So their ablations show performance varies with
+> phrasing and with visual context — they never show the text is causally
+> responsible for adapting to the domain, because no condition corrupts the text
+> and holds everything else fixed. That is exactly Gap G2, and the mismatched
+> condition is built to close it.
+
+**If pushed to one sentence:** *"They built a better detector; I built the
+experiment that tells you whether the language is doing the work."*
+
+**"Did you tune on the test set?"****"Did you tune on the test set?"**
 
 > Partly, and we control for it. These benchmarks define no validation split, so
 > we split the clips in half, chose settings on one half, and report the half we
@@ -1398,8 +1732,13 @@ hours of work.
    sweep has never been run on the industrial benchmark, and both video datasets
    are outdoor pedestrian scenes.
 4. **M4 has produced nothing.** The explanation module has never run on video.
-5. **Does AnyAnomaly already run a wrong-text control?** Needs checking. Read it
-   (arXiv 2503.04504) before the viva.
+5. ~~Does AnyAnomaly already run a wrong-text control?~~ **Checked, September
+   2026 — it does not.** AnyAnomaly ablates prompt *style* (simple, reasoning,
+   consideration) and reports that the choice matters, but never supplies a
+   deliberately wrong description. So it establishes that performance varies
+   with phrasing, not that the text is causally responsible. That distinction is
+   the whole of Gap G2, and it survives. See §8.3, "How do you differ from
+   AnyAnomaly?"
 6. **The smoothing window was chosen on the test set** — no validation split
    exists for these benchmarks.
 
