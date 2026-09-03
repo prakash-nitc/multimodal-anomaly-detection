@@ -108,27 +108,29 @@ def context_sweep(out):
     ax.text(len(CONDS) - 0.45, 0.507, "chance", fontsize=8.2, color=BAD,
             ha="right", va="bottom", fontweight="bold")
 
-    # The gap is the experiment's output, so draw it. One annotation sits above
-    # the bars and the other below, because placing both at bar height puts the
-    # lower series' label across the taller series' bar.
-    for series, off, col, y, va in (
-            ("normal", w / 2, CTX, 0.775, "bottom"),
-            # #8895A0 matched the bar edge but sits at ~3:1 on white, so the
-            # annotation carrying half the experiment's result was the
-            # faintest text on the chart. The bars stay pale -- they are a
-            # fill, and the pallor is deliberate since this is the rule we
-            # reject -- but the label reads at ~7:1.
-            ("both", -w / 2, "#4A5560", 0.556, "top")):
+    # The gap is the experiment's output, so draw it. Both annotations now sit
+    # ABOVE every bar. The previous layout put the BOTH-ensembles arrow at
+    # y=0.556 to keep it clear of the orange bars, but the two series are
+    # interleaved on the x axis, so an arrow spanning matched->mismatched at any
+    # height below 0.734 crosses the orange matched bar -- an arrow measuring
+    # one series was drawn over the other's data. Each label also names its
+    # series, so the reader does not have to match arrow colour to the legend.
+    # The colour #8895A0 that matched the bar edge sat at ~3:1 on white; the
+    # bars stay pale (deliberate -- this is the rule we reject) but the label
+    # reads at ~7:1.
+    for series, off, col, y, name in (
+            ("both",   -w / 2, "#4A5560", 0.790, "BOTH ensembles"),
+            ("normal",  w / 2, CTX,       0.850, "NORMAL only")):
         m, mm = SWEEP[series][2], SWEEP[series][3]
         xm, xmm = 2 + off, 3 + off
         ax.annotate("", xy=(xmm, y), xytext=(xm, y),
-                    arrowprops=dict(arrowstyle="<->", color=col, lw=1.0))
-        ax.text((xm + xmm) / 2, y + (0.005 if va == "bottom" else -0.005),
-                f"gap {m - mm:+.3f}", ha="center", va=va, fontsize=8.8,
-                color=col, fontweight="bold")
+                    arrowprops=dict(arrowstyle="<->", color=col, lw=1.1))
+        ax.text((xm + xmm) / 2, y + 0.006,
+                f"{name}:  gap {m - mm:+.3f}", ha="center", va="bottom",
+                fontsize=8.8, color=col, fontweight="bold")
 
     ax.set_xticks(x); ax.set_xticklabels(CONDS)
-    ax.set_ylim(0.48, 0.80); ax.set_ylabel("frame-level AUROC")
+    ax.set_ylim(0.48, 0.90); ax.set_ylabel("frame-level AUROC")
     ax.grid(axis="y", color=GRID, lw=0.5); ax.set_axisbelow(True)
     ax.legend(fontsize=8.6, loc="upper left", frameon=True, edgecolor=GRID,
               framealpha=0.95)

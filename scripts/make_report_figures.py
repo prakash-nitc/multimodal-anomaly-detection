@@ -248,12 +248,15 @@ def camera_baselines(assets, out):
     axes[1].set_title("Each camera sits at its own baseline", pad=4)
     _panel_label(axes[1], "(b)")
 
-    fig.text(0.5, 0.012,
+    # Raised off the canvas edge: at the larger type the second line's
+    # descenders ran off the bottom, which figsave's clip check caught. The
+    # reserved strip below the axes grows to match.
+    fig.text(0.5, 0.035,
              "Twelve cameras occupy twelve regions of the embedding space (a) "
              "and score at different baselines (b),\nso the same numeric score "
              "means different things under different cameras.",
              ha="center", fontsize=7.6, color=MUTED, linespacing=1.5)
-    fig.tight_layout(rect=(0, 0.085, 1, 1), w_pad=1.4)
+    fig.tight_layout(rect=(0, 0.135, 1, 1), w_pad=1.4)
     p = os.path.join(out, "fig_camera_baselines.png")
     figsave.save(fig, p); plt.close(fig)
     return p

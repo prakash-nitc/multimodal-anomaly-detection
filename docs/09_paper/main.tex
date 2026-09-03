@@ -1528,14 +1528,17 @@ instructive, and the reason they score lower is largely not the scene
 descriptor. It is worth stating precisely, because the natural reading of the
 table overstates the case.
 
-Zero-shot CLIP scores each frame against a fixed pair of prompts and pools the
-resulting scores directly. This pipeline differs from that in four respects
-before any domain descriptor is involved: it ensembles several phrasings per
-side rather than using one prompt \citep{jeong2023winclip}; it smooths over a
-$31$-frame window (Section~\ref{sec:results}, worth roughly four points); it
-normalises each clip before pooling, which Table~\ref{tbl:video} shows is worth
-close to twenty points on this benchmark; and it uses ViT-L/14 rather than the
-smaller backbones typical of that baseline.
+The zero-shot CLIP baseline is a close relative of this pipeline's M1 stage with
+everything else stripped away. \citet{zanella2024lavad}, who construct the same
+baseline, describe it as scoring each frame by the softmax over its cosine
+similarity to two single prompts---``a standard scene'' and ``a scene with
+suspicious or potentially criminal activities''---on a ViT-B/32 backbone. This
+pipeline differs from that in four respects before any domain descriptor is
+involved: it ensembles several phrasings per side rather than using one prompt
+\citep{jeong2023winclip}; it smooths over a $31$-frame window
+(Section~\ref{sec:results}, worth roughly four points); it normalises each clip
+before pooling, which Table~\ref{tbl:video} shows is worth close to twenty
+points on this benchmark; and it uses the larger ViT-L/14.
 
 The decomposition matters. With \emph{no} descriptor at all this pipeline scores
 $0.707$ (Table~\ref{tbl:sweep}), already $9.8$ points above zero-shot CLIP. The
