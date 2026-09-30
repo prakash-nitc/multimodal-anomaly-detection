@@ -218,10 +218,12 @@ def run(args) -> int:
         print("VALIDATION FAILED -- nothing further reported.")
         return 1
 
-    if not os.path.exists(DESC):
-        print("\nno %s yet -- write the per-view sentences, then rerun." % DESC)
+    desc_path = args.desc or DESC
+    if not os.path.exists(desc_path):
+        print("\nno %s yet -- write the per-view sentences, then rerun." % desc_path)
         return 2
-    desc = json.load(open(DESC, encoding="utf-8"))
+    desc = json.load(open(desc_path, encoding="utf-8"))
+    print("\ndescriptors: %s" % os.path.basename(desc_path))
     vs = sorted(set(views))
     missing = [v for v in vs if v not in desc]
     if missing:
