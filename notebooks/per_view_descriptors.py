@@ -23,6 +23,14 @@ Step 1 (on the server):  python notebooks/per_view_descriptors.py sheet
     -> ~/dazvad/work/view_sheet.jpg, one normal frame per view; copy to laptop.
 Step 2 (after descriptors are written into notebooks/view_descriptors.json):
                           python notebooks/per_view_descriptors.py run
+
+Automatic descriptors (removes the manual step):
+    python notebooks/per_view_descriptors.py caption
+        -> LLaVA-1.5 (M4, frozen, 4-bit) captions 3 normal frames per view; the
+           caption closest to the other two in CLIP text space is kept, so one
+           odd frame cannot set the sentence. Written to
+           notebooks/view_descriptors_llava.json.
+    python notebooks/per_view_descriptors.py run --desc notebooks/view_descriptors_llava.json
 """
 from __future__ import annotations
 
@@ -86,6 +94,61 @@ def sheet(args) -> int:
     print("wrote %s  (%d views: %s)" % (out, len(views), " ".join(views)))
     return 0
 
+
+
+# ---------------------------------------------------------------- captioning
+CAPTION_PROMPT = (
+    "USER: <image>\nDescribe the place shown in this fixed surveillance camera "
+    "frame in one short sentence. Describe only the location and its layout "
+    "(paths, roads, buildings, trees, water). Do not mention people or what "
+    "anyone is doing. ASSISTANT:")
+
+
+def clean(text: str) -> str:
+    t = text.strip().split(".")[0].strip()
+    return (t[:1].lower() + t[1:]) if t else t
+
+
+def caption(args) -> int:
+    from da_zvad.config import DAZVADConfig
+    from da_zvad.datasets import get_dataset
+    from da_zvad.reasoning import LlavaReasoner
+    from PIL import Image
+
+    seqs = get_dataset(DAZVADConfig(dataset="shanghaitech",
+                                    data_root=os.path.expanduser(DATA),
+                                    frame_step=2)).sequences()
+    frames = {}
+    for s in seqs:                       # 3 normal frames from each view's first clip
+        v = view_of(s.name)
+        if v in frames:
+            continue
+        normal = np.where(np.asarray(s.labels) == 0)[0]
+        if len(normal) >= 3:
+            frames[v] = [s.frames[int(normal[int(q * (len(normal) - 1))])]
+                         for q in (0.1, 0.5, 0.9)]
+
+    llava = LlavaReasoner(max_new_tokens=40)
+    pool = encoder()
+    out, raw = {}, {}
+    for v in sorted(frames):
+        caps = []
+        for f in frames[v]:
+            im = (Image.open(f) if isinstance(f, str) else f).convert("RGB")
+            caps.append(clean(llava._generate(im, CAPTION_PROMPT)))
+        emb = np.stack([pool([c]) for c in caps])
+        medoid = int(np.argmax((emb @ emb.T).sum(1)))
+        out[v], raw[v] = caps[medoid], caps
+        print("  view %s  %s" % (v, out[v]))
+
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "view_descriptors_llava.json")
+    json.dump(out, open(path, "w", encoding="utf-8"), indent=1)
+    json.dump({"model": llava.model_id, "prompt": CAPTION_PROMPT, "all_captions": raw},
+              open(os.path.expanduser("~/dazvad/work/tables/llava_captions_raw.json"), "w"),
+              indent=1)
+    print("\nwrote %s" % path)
+    return 0
 
 # ---------------------------------------------------------------- step 2
 def encoder():
@@ -183,7 +246,8 @@ def run(args) -> int:
           % (res["per_view"] - res["shuffled_mean"], len(shuf),
              "YES" if res["per_view"] > res["shuffled_max"] else "no"))
 
-    out = os.path.expanduser("~/dazvad/work/tables/per_view_descriptors.json")
+    tag = os.path.splitext(os.path.basename(desc_path))[0]
+    out = os.path.expanduser("~/dazvad/work/tables/per_view_%s.json" % tag)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     json.dump({"results": res, "shuffled_all": shuf, "descriptors": desc}, open(out, "w"), indent=1)
     print("\nsaved %s" % out)
@@ -192,6 +256,7 @@ def run(args) -> int:
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("step", choices=["sheet", "run"])
+    p.add_argument("step", choices=["sheet", "caption", "run"])
+    p.add_argument("--desc", default=None, help="descriptor JSON (default: hand-written)")
     a = p.parse_args()
-    sys.exit(sheet(a) if a.step == "sheet" else run(a))
+    sys.exit({"sheet": sheet, "caption": caption, "run": run}[a.step](a))
