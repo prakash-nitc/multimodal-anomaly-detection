@@ -711,6 +711,36 @@ producing noticeably different results.
 Say precisely that if asked. A mechanism that explains most of an effect and is
 honest about the rest is far stronger than one claimed to explain everything.
 
+### Update, Phase 3 — the missing half, now measured
+
+We measured the direction. For each condition we asked: on average, how similar
+are the video frames to the two arrows? Higher means the arrows have moved
+toward where the video sits.
+
+| Description added to both sets | Arrows' similarity to the video | Change |
+|---|---|---|
+| none | 0.216 | — |
+| generic | 0.230 | +0.014 |
+| **accurate (matched)** | **0.282** | **+0.067** |
+| wrong (mismatched) | 0.199 | −0.017 |
+
+> **In plain words.** All three descriptions squeeze the two arrows together by
+> about the same amount. But the accurate one also *drags both arrows onto the
+> video* — almost five times further than the placeholder does. Once both
+> arrows sit right where the frames are, every frame looks equally close to
+> "normal" and to "abnormal", and the system can't tell them apart. The wrong
+> description moves the arrows *away* from the video, so the original prompts
+> underneath still do their job. That is exactly why accurate was worst and
+> wrong was nearly harmless.
+
+**How we know the measurement is trustworthy:** the script first rebuilds the
+prompts and reproduces all eight angles in the paper's table exactly, and the
+frame sample reproduces the same ranking of conditions. Only then does it report.
+
+**One thing that did *not* explain it**, so you can say so if asked: how much
+the score varies from frame to frame. It doesn't follow the ranking. Direction
+does.
+
 ## 5.5 Problem three — a hypothesis of ours that was simply wrong
 
 We thought the abnormal sentences were badly chosen. They mention *"a fight,
@@ -1088,6 +1118,81 @@ it looks like something you were hoping would not come up.
 **The one-sentence version:** the direction of the finding is solid, its size is
 noisy, and saying more would need more clips per camera.
 
+### Update, Phase 3 — putting an error bar on it
+
+We resampled the nine cameras 50,000 times to see how much the +0.033 could
+wobble. The 95% range is **−0.005 to +0.070**.
+
+That separates two claims, and you should keep them apart:
+
+- **"The gap shrinks inside one camera"** — **established.** The whole range sits
+  below the pooled +0.105; not one resample reached it. This is the claim the
+  paper makes.
+- **"The gap is still positive inside one camera"** — **not established.** The
+  range includes zero. The paper never claims this.
+
+Two more things you can now say:
+
+- **"Aren't the negative cameras just the small ones?"** No. Gap and clip count
+  barely correlate (+0.19).
+- **Avenue's +0.020 falls inside that range.** So Avenue isn't just *close to* a
+  single ShanghaiTech camera — statistically it's indistinguishable from one.
+
+**If someone recomputes from the CSV:** they'll get a standard deviation of 0.061,
+not the 0.058 in the table. Both are right — 0.058 treats the nine cameras as the
+whole population, 0.061 as a sample. Nothing depends on it; both are bigger than
+the mean, which is the point.
+
+## 6.7b Giving each camera its own sentence — and letting the system write it
+
+**Why try this.** §6.7 says the sentence mostly tells the model *which* scene it
+is looking at. But all twelve ShanghaiTech cameras were getting the *same*
+sentence — which can't tell them apart. So: give each camera its own.
+
+**The control that makes it convincing.** We also gave each camera *another*
+camera's sentence, in all 11 possible rotations. Every one of those is a
+perfectly realistic campus description. So if the per-camera version wins, it
+can't be because the model rejects weird text — it can only be because the
+sentence matches *its own* camera.
+
+**Two ways of writing the sentences.**
+1. **By hand** — I looked at one normal frame per camera and wrote one sentence
+   each, once, no second attempt.
+2. **Automatically** — M4 (LLaVA, frozen) looked at three ordinary frames per
+   camera and described the place. We kept whichever of its three captions
+   agreed best with the other two.
+
+**What happened.**
+
+| Sentence | AUROC |
+|---|---|
+| none | 0.707 |
+| one shared sentence (the published result) | 0.734 |
+| per camera, by hand | 0.749 |
+| **per camera, written by M4 — no human** | **0.755** |
+| per camera, swapped between cameras (average) | 0.708–0.715 |
+
+> **In plain words.** A sentence written for each camera beats every scrambled
+> arrangement — so the benefit really does come from the sentence matching the
+> camera. And the system can write those sentences itself from a few minutes of
+> ordinary footage. Setting up a new camera needs no training, no labels, and no
+> person writing anything.
+
+**Don't overclaim — two traps:**
+- **"LLaVA writes better sentences than a human."** No. 0.755 vs 0.749 is noise.
+  Say *"it matches."*
+- **"Per-camera beats shared by 0.021."** That's inside the ±0.036 wobble. Report
+  the direction, not the size. The solid comparison is against the *swapped*
+  sentences (+0.047).
+
+**Know the captions are rough** — it helps you. Six of twelve describe people
+("a man is walking...") even though we told it not to, and two cameras got
+word-for-word identical sentences. It *still* worked. So the method doesn't need
+perfect captions.
+
+**This also means M4 now runs on video** — for writing descriptions. It hasn't
+yet written *explanations* of flagged events; that's still Result 6.
+
 ## 6.8 Everything in one place
 
 | | |
@@ -1098,6 +1203,7 @@ noisy, and saying more would need more clips per camera.
 | Mechanism | Prototype angle collapses 35.7° → 25° when misapplied |
 | Boundary | Effect nearly vanishes on a single-camera benchmark |
 | Why | The sentence identifies *which* scene — measured |
+| Per camera | **0.755** with sentences written automatically by M4 — no human input |
 | Failed attempts | Six, all reported |
 
 ## 6.9 The five sentences to memorise
@@ -1725,13 +1831,18 @@ hours of work.
 
 1. **Why context helps on one benchmark and not the other** — the scene-count
    explanation is supported, but the per-camera estimates are noisy.
-2. **Which direction the prototypes collapse.** We measured *how much* (§5.4),
-   not whether they move toward or away from where the video sits — which is what
-   would explain why an accurate description is the worst of the three.
-3. **The industrial-versus-surveillance contrast is argued, not measured.** The
-   sweep has never been run on the industrial benchmark, and both video datasets
-   are outdoor pedestrian scenes.
-4. **M4 has produced nothing.** The explanation module has never run on video.
+2. ~~Which direction the prototypes collapse.~~ **Answered, Phase 3.** The
+   accurate description drags both arrows onto the video (+0.067); the wrong one
+   moves them away (−0.017). See §5.4, "Update, Phase 3".
+3. **Both video datasets are outdoor pedestrian scenes.** The sweep is scoped to
+   video; MVTec is a detection baseline only, by decision (Phase 3), not an
+   omission. If asked "why not run the sweep on MVTec?": the thesis is *video*
+   anomaly detection, and the better domain contrast is UCF-Crime and
+   XD-Violence — crime footage from streets, shops and highways against campus
+   walkways — which is next.
+4. **M4 has not explained anything yet.** It now runs on video and writes the
+   per-camera sentences (§6.7b), but it has not yet been run on flagged events to
+   produce explanations.
 5. ~~Does AnyAnomaly already run a wrong-text control?~~ **Checked, September
    2026 — it does not.** AnyAnomaly ablates prompt *style* (simple, reasoning,
    consideration) and reports that the choice matters, but never supplies a
@@ -1765,12 +1876,16 @@ If a question goes somewhere you didn't prepare, return to these.
 
 | Priority | Work | Cost | Why |
 |---|---|---|---|
-| 1 | A separate description per camera | ~1 hr | All 12 views currently share one sentence — and §6.7 says identifying the view *is* the mechanism |
-| 2 | The context sweep on the industrial benchmark | ~1 hr | Your concept-shift argument needs that contrast measured, not just argued |
-| 3 | Region-level scoring | 1–2 sessions | The best remaining shot at a higher number |
-| 4 | Run M4 | ~1 session | A quarter of the framework; makes a strong demo |
-| 5 | Swap descriptions between the two video datasets | ~1 hr | A fairer transfer test than the factory description |
-| 6 | Which direction the prototypes move | minutes | Completes the mechanism from §5.4 |
+| Status | Work | Why |
+|---|---|---|
+| ✅ done | A separate description per camera | 0.749 by hand, **0.755 written by M4** — §6.7b |
+| ✅ done | Which direction the prototypes move | Completes the mechanism — §5.4 update |
+| ✅ done | Error bar on the within-view control | §6.7 update |
+| dropped | Context sweep on the industrial benchmark | Thesis is video; UCF-Crime / XD-Violence give a better domain contrast |
+| covered | Swap descriptions between the two video datasets | The per-camera shuffled control already tests wrong-but-realistic text |
+| next | Region-level scoring | The best remaining shot at a higher number |
+| next | UCF-Crime and XD-Violence | Many more scenes → the account predicts a bigger gap; makes LAVAD comparable |
+| later | M4 explanations of flagged events | Result 6, still pending |
 
 ## 9.2 Phase 4
 
