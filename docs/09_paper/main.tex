@@ -52,6 +52,15 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
+% cas-sc emits the first-page "ORCID(s):" footnote heading unconditionally, so
+% it still prints -- empty -- once every \author has no orcid option. This
+% silences the macro that produces it. Guarded with \@ifundefined so the build
+% is unaffected if a future class version renames or drops it.
+% REMOVE THIS BLOCK once the authors have ORCIDs and the line should appear.
+\makeatletter
+\@ifundefined{printorcid}{}{\renewcommand{\printorcid}{}}
+\makeatother
+
 % ---------- colours for status markers ----------
 \definecolor{pendingcol}{HTML}{B03A2E}
 \definecolor{donecol}{HTML}{1E8449}
@@ -99,9 +108,20 @@
 Vision-Language Models}
 
 % ---------- authors ----------
-\author[1]{Prakash Kumar Sarangi}[orcid=]
-\cormark[1]
-\ead{prakash_m251250cs@nitc.ac.in}
+% The three commented lines below (\cormark, \ead, \cortext further down)
+% generate cas-sc's first-page author footnote: the corresponding-author mark,
+% the email, and the ORCID list. They are suppressed while this is a supervision
+% draft, because with the Document Status section in front of the Introduction
+% the footnote lands at the foot of a later page, away from the front matter it
+% belongs to.
+%
+% RESTORE ALL FOUR before journal submission -- Elsevier requires a corresponding
+% author and a contact email. An empty [orcid=] makes cas-sc print a bare
+% "ORCID(s):" heading with nothing after it, so leave that option off until
+% there is an ORCID to put in it.
+\author[1]{Prakash Kumar Sarangi}
+% \cormark[1]
+% \ead{prakash_m251250cs@nitc.ac.in}
 \credit{Conceptualization, Methodology, Software, Investigation, Writing --
 original draft}
 
@@ -118,7 +138,8 @@ original draft}
 \author[1]{Raju Hazari}
 \credit{Supervision, Writing -- review and editing}
 
-\cortext[cor1]{Corresponding author}
+% Suppressed with \cormark and \ead above; restore before submission.
+% \cortext[cor1]{Corresponding author}
 
 % ---------- abstract ----------
 \begin{abstract}
@@ -1451,7 +1472,7 @@ AnyAnomaly \citep{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} \\
 
 \subsubsection{Where the present work sits}
 Among the six training-free entries, this work ranks second on ShanghaiTech
-behind AnyAnomaly and fifth on Avenue. The asymmetry is the same one
+behind AnyAnomaly and third on Avenue. The asymmetry is the same one
 Section~\ref{sec:res-avenue} reports internally: the method is competitive where
 several camera views must be told apart and is not where there is only one.
 
@@ -1467,7 +1488,7 @@ the later diffusion- and density-based methods, which reach $78$--$81$. So the
 claim is bounded and specific: training-free scoring with a supplied scene
 description reaches the level of the benchmark's established baseline at no
 target-data cost, and does not approach the current one-class state of the art.
-On Avenue it does not reach that band at all ($70.6$ against $85.1$), which is
+On Avenue it does not reach that band at all ($67.7$ against $85.1$), which is
 the single-scene limitation of Section~\ref{sec:res-avenue} appearing again.
 
 \subsubsection{Why the Avenue figure trails the field while ShanghaiTech does not}

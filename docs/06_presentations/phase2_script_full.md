@@ -12,6 +12,14 @@ Learn the **beat** of each slide — the one thing it exists to say. Sentences w
 exactly as written are marked **SAY**; everything else, put in your own words. A recited
 talk sounds recited.
 
+Every slide also carries an **In plain words** block in a tinted box. That is the slide
+explained to somebody who does not work in this field — no notation, no term left
+undefined, and for the slides that cover something we built, an account of *how* it was
+built rather than of what it scores. It is written to be said aloud roughly as it stands.
+Use it as your default register and drop into the technical wording only when a panelist
+asks for it. A panel that follows you is a panel that asks good questions; a panel that
+has lost the thread asks whether you wrote this yourself.
+
 Each slide ends with a **→ Next** line. That sentence is the bridge into the following
 slide, and it is what turns thirty slides into one argument. If you learn nothing else
 from this document, learn the bridges — a talk that flows is mostly a talk where no slide
@@ -34,6 +42,12 @@ failures are the most credible material you have.
 
 **The beat:** set expectations, including that there is a negative result coming.
 
+> **In plain words.** A security camera system that spots unusual events has to be
+> taught what "usual" looks like at that particular camera, using weeks of its own
+> footage. Move it to a new place and you start over. What I built lets you move it
+> by typing one sentence describing the new place. Nothing is retrained — and part
+> of the talk is about the version of this that failed before it worked.
+
 Do not read the slide. They can read.
 
 **SAY** — "This is Phase 2 of my thesis work: domain-adaptive zero-shot video anomaly
@@ -51,6 +65,12 @@ not selling, which changes how they listen for the next twenty-five minutes.
 **On screen:** mall vs factory, the same forklift, opposite answers.
 
 **The beat:** normality is a property of the place, not the object.
+
+> **In plain words.** The reason you cannot just copy a detector from one site to
+> another is not that the new camera looks different. It is that the *rule* is
+> different. A forklift is an emergency in a shopping mall and completely ordinary
+> in a warehouse — and no amount of adjusting for lighting or camera angle will
+> ever tell you which building you are in.
 
 Lead with the example, never the definition.
 
@@ -71,6 +91,12 @@ its attention is the gap I'm working in."
 **On screen:** the covariate/concept shift table, and the Liu quotation.
 
 **The beat:** the field excludes concept shift by explicit decision.
+
+> **In plain words.** When researchers talk about moving a model to a new place,
+> they almost always mean the pictures look different — fog instead of sunshine.
+> They say openly that they are setting aside the other case, where the picture is
+> the same and the correct answer changes. For recognising objects that is a
+> sensible thing to set aside. For anomaly detection it is the entire problem.
 
 This is the slide that proves you read the six surveys your supervisor assigned. Slow down.
 
@@ -98,6 +124,11 @@ detection."
 anomalous in the other.
 
 **The beat:** in this task, normality *is* the deployment context.
+
+> **In plain words.** In this task "normal" is not a property of the object, it is
+> a property of the place. So the thing the field set aside is the thing I am left
+> holding. That is the gap: not that anyone was careless, but that the tools were
+> built for a different kind of difference than the one anomaly detection has.
 
 Walk one row only. A person running is normal in a park and anomalous in a bank vault.
 
@@ -138,6 +169,15 @@ Every design choice in the figure serves that claim. If you keep that sentence i
 walkthrough tells itself.
 
 ### The thirty-second version, if you get cut short
+> **In plain words, before any of the boxes.** Video comes in on the left. A person
+> types one sentence about where the camera is. Both go through models that were
+> already trained by somebody else and that I never modify. They meet in the middle,
+> where each frame gets a score for how much it looks like the written description of
+> "something wrong" rather than the written description of "an ordinary day here".
+> That score is smoothed over about a second, and anything that stays high gets
+> flagged and described in words. To move this to a new building, you edit the
+> sentence. That is the entire deployment procedure.
+
 
 **SAY** — "Video comes in on the left and goes through a frozen CLIP image encoder. An
 operator writes one sentence describing the scene, and that goes through a frozen CLIP text
@@ -149,6 +189,13 @@ sentence."
 ![The DA-ZVAD framework. Every model is frozen; the verbalised scene context (M3) is the only adaptation mechanism.](dazvad_architecture.png)
 
 ### Stop 1 — Two inputs, and why they are drawn separately
+
+> **In plain words.** Two arrows come in, not one, and that is deliberate. The
+> camera supplies pictures. A *person* supplies the place, by typing a sentence.
+> If I had drawn one arrow feeding both branches it would suggest the system works
+> out the location from the video by itself — it does not, and that separation is
+> the whole method.
+
 
 Start at the far left. There are **two** input panels, not one, and the separation is
 deliberate.
@@ -165,6 +212,14 @@ That is the deployment story in six words.
 
 ### Stop 2 — M1, the visual branch
 
+> **In plain words.** How this part was built: I did not build it. It is an
+> off-the-shelf model called CLIP, which somebody trained on hundreds of millions of
+> pictures paired with their captions. Because of that training it puts a photograph
+> and a sentence describing that photograph in the same place. I use it exactly as
+> shipped — I feed it a frame, and it hands back a list of 768 numbers standing for
+> what is in that frame. The snowflake means I never touch its settings.
+
+
 Frozen CLIP image encoder, ViT-L/14, pretrained on LAION-2B. It turns each frame into 768
 numbers scaled to unit length.
 
@@ -177,6 +232,17 @@ The snowflake is doing real work. Say it: nothing here is trained, and nothing h
 trained on my data. This is an off-the-shelf model used as-is.
 
 ### Stop 3 — M3, the language branch — the heart of the method
+
+> **In plain words.** This is the part I actually built, so let me go slowly. I
+> keep two short lists of phrases: things you would write about a normal scene, and
+> things you would write about an alarming one. The operator's sentence — "a campus
+> walkway with pedestrians" — gets pasted onto the ends of the *normal* list only.
+> Each list is then run through the same off-the-shelf model and averaged down to a
+> single summary. So I end up with two reference points: one meaning "normal here",
+> one meaning "abnormal". Pasting the sentence onto one side rather than both is one
+> line of code, and it is the difference between the method working and the method
+> inverting. I will show you that in about ten minutes.
+
 
 Slow down. This is the module the thesis is about.
 
@@ -204,6 +270,15 @@ vector for "normal here," one for "abnormal."
 
 ### Stop 4 — Frame scoring, where the branches meet
 
+> **In plain words.** Now the two branches meet. I have a frame as numbers, and two
+> reference points as numbers. I measure which of the two the frame is closer to,
+> and turn that into a value between 0 and 1. There is no classifier here that I
+> trained — the entire decision is which of the two written descriptions the picture
+> resembles more. And I should be precise about what the number means: it is *how
+> much more* abnormal than normal the frame reads, not the probability that
+> something bad is happening.
+
+
 The two prototypes sit at the top of the panel; the frame vector arrives from the left. The
 operation is a softmax over two similarities — how well the frame matches the normal
 prototype, and how well it matches the abnormal one, each scaled by a factor. The output is
@@ -224,6 +299,14 @@ own number.
 
 ### Stop 5 — M2, temporal smoothing
 
+> **In plain words.** Frame-by-frame scores jump around. So I replace each frame's
+> score with the average of it and the fifteen frames either side — about a second
+> in each direction. One freak frame can no longer raise an alarm, but a real event
+> lasting a couple of seconds still stands out clearly. There is nothing learned in
+> this step at all; it is an average. The little plot inside the box shows it: thin
+> grey is before, thick blue is after, the shaded band is the real event.
+
+
 A centred moving average over a 31-frame window. No parameters at all.
 
 **SAY** — "Per-frame scores are noisy. This averages each frame with the fifteen before and
@@ -239,6 +322,15 @@ and falls after. Concede immediately that no validation split exists for these b
 so it was selected on held-out clips rather than a clean validation set.
 
 ### Stop 6 — M4, detection and explanation
+
+> **In plain words.** Once a stretch of frames crosses the threshold, I pick the
+> single worst frame from that stretch and hand it — along with the same operator
+> sentence — to a second off-the-shelf model that can look at a picture and write
+> about it. Only one frame per event, so the expensive part runs a handful of times
+> per video rather than thousands. I should say plainly that this part is built and
+> runs, but has not produced video results yet. It is the first thing on the Phase 3
+> list.
+
 
 The smoothed score is thresholded. Then a frozen LLaVA-1.5, running 4-bit, writes a sentence
 explaining what it sees.
@@ -307,6 +399,13 @@ testable, and that's worth one slide on its own."
 
 **The beat:** freezing is what makes the claim attributable rather than asserted.
 
+> **In plain words.** Here is the reason nothing in the system is allowed to learn.
+> If any part of it adapted to the new site on its own and the numbers went up, I
+> could never say whether the sentence did it or the learning did. By bolting
+> everything down, I leave exactly one thing free to change. Then if the number
+> moves, there is only one thing that could have moved it. That is not me being
+> frugal with GPU time — it is the only way to make the claim checkable.
+
 The strongest methodological point in the deck. Say it slowly.
 
 - **The risk.** If the system learned even a little from the new site and performance
@@ -330,6 +429,14 @@ signature.
 
 **The beat:** the interpretation was fixed before any measurement.
 
+> **In plain words.** How I built the test: run the whole system four times over
+> the identical video, changing nothing but the sentence. Once with no sentence.
+> Once with a meaningless one. Once with a correct description. And once with a
+> description of somewhere else entirely. That last run is the important one — if
+> feeding the system a deliberately wrong description costs it nothing, then it was
+> never reading the sentence and my whole idea is wrong. I wrote down what each
+> outcome would mean before I ran any of them.
+
 Run the identical pipeline four times, changing only the sentence. *Generic* controls for
 merely having context at all. *Mismatched* is the falsifying control.
 
@@ -347,6 +454,12 @@ partly did."
 **On screen:** benchmarks, scale, hardware, backbone, run count, and the manifest note.
 
 **The beat:** provenance. Keep it brief and let the content do the work.
+
+> **In plain words.** Every time a run finishes, the code automatically writes a
+> small record beside the results: which version of the code ran, on which machine
+> and graphics card, with which library versions, and how many frames and labels it
+> actually saw. I did not do that by hand afterwards. It means any number in this
+> talk can be traced back to the exact state of the project that produced it.
 
 Two benchmarks, 128 test clips, 28,118 frames with frame-level ground truth. College A40.
 Frozen CLIP ViT-L/14. Five full runs.
@@ -367,6 +480,11 @@ the pictures make the argument better than I can."
 **On screen:** the grid of normal and anomalous frames, one camera per column.
 
 **The beat:** the concept-shift argument, as a photograph.
+
+> **In plain words.** Look down any one column. It is the same camera, same angle,
+> same lighting, in both pictures. The only thing that changes is what is happening
+> in the frame — and the label flips from normal to anomalous. That is the whole
+> argument of the first four slides, sitting in a photograph.
 
 Thirty seconds, no more. Point down one column.
 
@@ -395,6 +513,12 @@ happened is that it failed."
 
 **The beat:** land the failure honestly. Do not rush and do not apologise.
 
+> **In plain words.** The first complete run came back at 0.49. Half. A coin flip
+> would have done as well. And the central experiment came out backwards: the
+> correct description performed worse than the deliberately wrong one. I want to
+> show you this rather than skip to the version that works, because everything
+> useful in the project came out of taking it apart.
+
 **0.49 AUROC.** Fifty minutes of GPU time to produce a detector performing exactly as well
 as a coin flip.
 
@@ -415,6 +539,16 @@ method at all — it was in how I was measuring."
 **On screen:** the twelve views, the error, the analogy, and 0.49 → 0.71.
 
 **The beat:** a measurement bug, fixed with no labels, using the benchmark's own protocol.
+
+> **In plain words.** The first problem had nothing to do with my idea. This
+> dataset has twelve different cameras, and the model naturally scores some cameras
+> higher than others simply because of how they look. I had thrown every frame from
+> all twelve cameras into one big pile and ranked them together. It is like ranking
+> students from twelve schools on raw marks when the schools mark to different
+> standards — you destroy the ordering that was correct inside each school. Ranking
+> within each clip first, then combining, took the same scores from 0.49 to 0.71.
+> No labels involved, and it is the dataset's own published procedure. I simply had
+> not been following it.
 
 ShanghaiTech has 12 camera views, and CLIP sits at a different baseline score under each —
 different lighting, different angle. My error was pooling every frame from all twelve into
@@ -441,6 +575,12 @@ similarity.
 
 **The beat:** the diagnosis was not invented after the fact.
 
+> **In plain words.** I did not want to just assert that explanation, so here is
+> the check. I took every frame, flattened it onto a two-dimensional map, and
+> coloured each point by which camera it came from. The cameras land in separate
+> clumps. Neither picture uses the answer key at all, so this is not me
+> rationalising after the fact — it is the cause, visible directly.
+
 ![Left: every frame projected to two dimensions and coloured by camera. Right: similarity of each view to the average frame.](../09_paper/figures/fig_camera_baselines.png)
 
 Left: every frame projected to two dimensions and coloured by camera — the views sit in
@@ -460,6 +600,17 @@ of the two."
 **On screen:** the two prompt sets with their shared words highlighted, and the fix.
 
 **The beat:** the mechanism of the inversion — and why a *better* sentence did more damage.
+
+> **In plain words.** The second problem was mine, and it is the interesting one.
+> The system compares each frame against two written descriptions: one of normal,
+> one of abnormal. I had been pasting the scene sentence onto *both* of them. Each
+> side gets averaged into a single summary, so the same words landed on both sides
+> and the two summaries drifted toward each other — and the whole method depends on
+> them being far apart. I was rubbing out the very contrast I was measuring. Worse:
+> an accurate sentence matches everything on screen, so it does the *most* damage.
+> That is exactly why the better sentence scored worse. The fix was one line --
+> attach the sentence to the "normal" side only, because the scene is what defines
+> normal here and an anomaly is a departure from it.
 
 The most interesting slide in the deck. Give it the time.
 
@@ -494,6 +645,14 @@ result the project exists to produce."
 
 **The beat:** the headline number, and the control that makes it mean something.
 
+> **In plain words.** Same models, same video, same everything — the only two
+> things that vary are which sentence is supplied and which side it is attached to.
+> Start with the first column, where no sentence is supplied at all: 0.707 in both
+> rows. It has to be identical, because with no sentence there is nothing to attach
+> anywhere. That column is my proof that nothing else changed between the two rows.
+> Then look at 0.628: that is what a wrong sentence costs. Ten points, with nothing
+> else in the system permitted to move.
+
 ShanghaiTech, all 107 clips, per-clip normalised. Every model frozen; only the sentence and
 its injection point vary.
 
@@ -521,6 +680,12 @@ distance is easier to see than to read."
 
 **The beat:** the quantity of interest is the gap, and it changes sign.
 
+> **In plain words.** The same numbers as a picture. Do not read the height of any
+> single bar — the thing that matters is the *distance* between the matched bar and
+> the mismatched bar. In grey, that distance runs the wrong way. In orange, it runs
+> the right way. The only difference between grey and orange is which side of the
+> comparison the sentence was pasted onto.
+
 ![Grey bars put the sentence in both prompt sets; orange bars put it in the normal set only.](../09_paper/figures/fig_chart_sweep.png)
 
 Trace the two arrows with your finger. The number the experiment exists to produce is the
@@ -537,6 +702,13 @@ one, where there's nothing aggregated to argue with."
 **On screen:** two score curves over one clip, with the event marked.
 
 **The beat:** the cleanest evidence in the deck — no aggregation involved.
+
+> **In plain words.** Everything so far has been an average over a hundred clips.
+> This is one clip. Two lines: the same frozen models scoring the same frames, and
+> the only difference is whether the sentence describes a campus walkway or a
+> factory. Outside the event they sit on top of each other — which is what should
+> happen. Inside the event they separate. There is no averaging here for anyone to
+> argue with.
 
 ![Same frozen models, same frames, same smoothing. Only the scene description differs.](../09_paper/figures/fig_context_effect.png)
 
@@ -555,6 +727,15 @@ the two halves of the result are not equally strong."
 **On screen:** the weaker half, the claim made, and the mechanism.
 
 **The beat:** understate deliberately. This is where credibility is won.
+
+> **In plain words.** I want to split my own result in half, because the two halves
+> are not equally strong. Correct sentence versus no sentence: it helps, but only by
+> about 0.027, and when I reshuffle which clips I test on, the numbers wobble by
+> more than that. So I will say it points the right way and I will not claim the
+> size of it. Wrong sentence versus correct: 0.105, far outside that wobble, and
+> nothing else in the system was free to move. That one I will claim. The honest
+> summary is that the sentence is doing real work, and what proves it is the damage
+> from getting it wrong, not the benefit from getting it right.
 
 **The weaker half.** A correct description beats no description by **+0.027**. Positive at
 every smoothing window, but inside the ±0.036 split-to-split spread.
@@ -586,6 +767,15 @@ the other components I built are earning their place."
 
 **The beat:** language alone wins, and a prediction of mine failed.
 
+> **In plain words.** Having got it working, I checked whether every piece I built
+> was actually earning its place. I tried scoring frames by how much they move
+> instead of what they contain, by how far they sit from the clip's own average, and
+> by combinations of those with the language pathway. Language on its own wins.
+> I will point out the one that embarrasses me: I predicted motion would help,
+> because a bicycle at cycling speed is the obvious example of an anomaly you would
+> think needs motion to spot. It added nothing. The image model is evidently already
+> picking up enough of the movement on its own.
+
 | Scoring signal | Held-out AUROC | Full test set |
 |---|---|---|
 | Scene-centre normality only | 0.585 ± 0.025 | 0.585 |
@@ -613,6 +803,13 @@ so — briefly."
 **The beat:** the window has a real optimum; the component differences do not survive their
 error bars.
 
+> **In plain words.** Left panel: smoothing helps up to about a second of averaging
+> and then starts hurting. That matters — it means there is a real best setting,
+> rather than the measurement simply rewarding more and more blur. Right panel: the
+> error bars. Look at how much they overlap. So the honest reading is not "language
+> beats the alternatives", it is "nothing I added beat plain language". That is a
+> negative result about my own extra machinery.
+
 ![Left: the smoothing window sweep. Right: components with error bars.](../09_paper/figures/fig_chart_ablation.png)
 
 Left: smoothing helps up to a window of 31 and then hurts — so the window has a genuine
@@ -633,6 +830,14 @@ a second one."
 **On screen:** the two-dataset comparison table.
 
 **The beat:** detection transfers, adaptation does not — and say so plainly.
+
+> **In plain words.** A result on one dataset is not a result. So I took the system
+> exactly as it stood, changed nothing, retuned nothing, and pointed it at a second
+> benchmark — swapping only the sentence. Two different things happened. The
+> *detection* transferred perfectly: 0.706 against 0.707. But the *adaptation*
+> almost disappeared, and a meaningless placeholder sentence actually beat an
+> accurate description. I am telling you that myself: whatever the sentence is doing
+> on this second dataset, it is not domain adaptation.
 
 Identical frozen configuration applied to CUHK Avenue. Nothing retuned. Only the sentence
 changed.
@@ -677,6 +882,16 @@ a test that could have destroyed it."
 
 **The beat:** a complete research cycle — observation, explanation, falsifiable test, result.
 
+> **In plain words.** I had a comfortable explanation for that — the second
+> dataset has one camera, the first has twelve, and a scene description only earns
+> its keep when there are several places to tell apart. Comfortable explanations for
+> your own bad results deserve suspicion, so I built a test that could have
+> destroyed it. The first dataset is really twelve single-camera datasets stacked
+> together. So I ran the same experiment *inside* each camera separately. If my
+> explanation were wrong, the effect would have stayed strong. It dropped to a
+> third, landing right next to the single-camera dataset. The explanation survived a
+> test it could have failed.
+
 ShanghaiTech is effectively twelve single-view datasets stacked together. If the descriptor
 works by telling the model *which* scene it is in, then confining the sweep to a single
 camera view should reproduce Avenue's flat result.
@@ -709,6 +924,12 @@ individually."
 
 **The beat:** show the spread yourself rather than letting them find it.
 
+> **In plain words.** That was an average of nine cameras, so here are all nine
+> individually rather than hidden inside a mean. Most fall well below the pooled
+> line, three actually go the wrong way, and two nearly reach it. Each bar rests on
+> as few as five clips. So this is a shift in the average, not a clean collapse
+> everywhere — and I would rather say that than have someone find it.
+
 ![The orange line is the pooled result; each bar is one view on its own.](../09_paper/figures/fig_chart_within_view.png)
 
 The orange line is the pooled result; each bar is one view alone. Most fall well short, three
@@ -727,6 +948,12 @@ configuration is the right one, so here is everything I tried that didn't work."
 **On screen:** the six-row negative-results table.
 
 **The beat:** negative results as evidence of real work.
+
+> **In plain words.** My claim is that the simplest version of the system is the
+> right one. That claim is only worth anything next to the list of more complicated
+> things I tried first. Six of them, none of which helped. A table of nothing but
+> successes is the easiest thing in the world to produce; six diagnosed failures are
+> not.
 
 | Modification | Outcome |
 |---|---|
@@ -767,6 +994,16 @@ much worse, 0.685 down to 0.486, because the rewritten prompts repeated "walkway
 **The beat:** we sit second among training-free methods on ShanghaiTech — and be
 honest about how much of that margin is the sentence, because most of it is not.
 
+> **In plain words.** Two things to be careful about on this table. First, my own
+> number: I beat the plain CLIP baseline by twelve points, but with no sentence at
+> all I already have ten of those twelve. Most of my margin is careful measurement
+> and a bigger backbone, not language, and I would rather say that than have a
+> panelist open my own table and find it. Second, the method above me is answering a
+> different question. It asks "is the specific thing I named happening?" — so to
+> deploy it you must first list everything that could go wrong. I ask "is anything
+> happening that does not belong here?" — so you describe the ordinary instead.
+> Anyone can describe the ordinary. Nobody can list the extraordinary.
+
 *This slide was rebuilt in September 2026. The old version compared us against LAVAD,
 which reports on UCF-Crime and XD-Violence and not on either of our benchmarks. Do not
 deliver the old line about "we don't match LAVAD."*
@@ -777,8 +1014,14 @@ deliver the old line about "we don't match LAVAD."*
 | Zero-shot ImageBind | 64.5 | 61.3 |
 | LLaVA-1.5 | 67.4 | 59.6 |
 | Video-ChatGPT | 76.9 | 69.1 |
-| **DA-ZVAD (ours)** | **70.6** | **73.4** |
+| **DA-ZVAD (ours)** | **67.7** | **73.4** |
 | AnyAnomaly | 87.3 | 79.7 |
+
+**If asked why the Avenue cell is 67.7 when slide 20 showed 0.706:** because this row
+reports the *matched* condition on both benchmarks — the configuration the method
+proposes — rather than the best condition on each. Picking `none` for Avenue and
+`matched` for ShanghaiTech would be quoting a different setup per dataset to flatter
+the table. Say that plainly; it is a point in your favour, not against you.
 
 **Point at the zero-shot CLIP row first. That is the row that matters.**
 
@@ -847,6 +1090,13 @@ by you."
 
 **The beat:** deliver these as findings, not confessions.
 
+> **In plain words.** These are limitations I found and am choosing to put on a
+> slide, not ones the panel had to dig out. The third one is worth dwelling on,
+> because it is not really about my system: the scoring procedure that this whole
+> field uses turns out to be sensitive to a rescaling of the score that ought not to
+> matter at all. I found it while chasing my own bug, and it applies to everybody's
+> numbers, not just mine.
+
 - **The mechanism is bounded.** It works on ShanghaiTech and nearly vanishes on Avenue, and
   the scene-diversity explanation rests on two datasets.
 - **Resolution ceiling.** Whole-frame embeddings at 224×224 can't resolve small objects;
@@ -869,6 +1119,12 @@ by you."
 
 **The beat:** the boundary is scoped, and the experiment that settles it is named.
 
+> **In plain words.** Each limitation maps to a specific next experiment, and they
+> are ordered by how much they would change the conclusions. The practical point is
+> that the expensive part is now behind me: encoding a benchmark takes twenty-one
+> minutes once, after which testing a new idea against it takes seconds instead of
+> the fifty minutes each of these early runs cost.
+
 **Priority one is the within-view sweep** — **SAY** "That's the one that turns my explanation
 from a conjecture into a result."
 
@@ -885,6 +1141,11 @@ which a new scoring hypothesis is evaluated in seconds instead of fifty minutes.
 **On screen:** the five numbered beats.
 
 **The beat:** close on the boundary, not the number.
+
+> **In plain words.** One line each. What I want to leave you with is not the
+> headline number — it is the boundary. I can tell you where this works, where it
+> does not, and which single experiment settles the part I am unsure about. And
+> every figure here comes out of committed code with a run record attached.
 
 One line each, no elaboration:
 
