@@ -17,6 +17,8 @@ Storage is trivial: 20k frames x 768 dims x float32 is ~63 MB whole-frame, or
 Usage:
     python notebooks/cache_embeddings.py \
         --shanghaitech ~/dazvad/data/shanghaitech --crops 5
+    python notebooks/cache_embeddings.py \
+        --dataset ucf_crime --root ~/dazvad/data/ucf_crime --frame-step 16 --crops 1
 """
 from __future__ import annotations
 
@@ -34,7 +36,11 @@ sys.path.insert(0, REPO)
 
 def main() -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--shanghaitech", required=True)
+    p.add_argument("--shanghaitech", default=None,
+                   help="shorthand for --dataset shanghaitech --root PATH")
+    p.add_argument("--dataset", default="shanghaitech",
+                   choices=["shanghaitech", "avenue", "ucf_crime"])
+    p.add_argument("--root", default=None)
     p.add_argument("--out", default=os.path.expanduser("~/dazvad/work/embeddings"))
     p.add_argument("--frame-step", type=int, default=2)
     p.add_argument("--crops", type=int, default=5, choices=[1, 5],
@@ -59,8 +65,13 @@ def main() -> int:
     print(f"[gpu] {torch.cuda.get_device_properties(0).name} "
           f"capped at {args.gpu_frac:.0%}")
 
-    cfg = DAZVADConfig(dataset="shanghaitech",
-                       data_root=os.path.expanduser(args.shanghaitech),
+    root = args.root or args.shanghaitech
+    if args.shanghaitech:
+        args.dataset = "shanghaitech"
+    if not root:
+        p.error("give --root (or --shanghaitech PATH)")
+    cfg = DAZVADConfig(dataset=args.dataset,
+                       data_root=os.path.expanduser(root),
                        frame_step=args.frame_step)
     seqs = get_dataset(cfg).sequences()
     total = sum(len(s.frames) for s in seqs)
@@ -85,7 +96,7 @@ def main() -> int:
 
     os.makedirs(os.path.expanduser(args.out), exist_ok=True)
     path = os.path.join(os.path.expanduser(args.out),
-                        f"shanghaitech_{args.clip_model}_step{args.frame_step}"
+                        f"{args.dataset}_{args.clip_model}_step{args.frame_step}"
                         f"_crops{args.crops}.npz")
     np.savez(path,
              feats=np.concatenate(feats, axis=0),

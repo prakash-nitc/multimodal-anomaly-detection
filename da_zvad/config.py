@@ -14,7 +14,7 @@ import json
 @dataclass
 class DAZVADConfig:
     # --- data ---
-    dataset: str = "synthetic"              # synthetic | mvtec | shanghaitech | avenue
+    dataset: str = "synthetic"              # synthetic | mvtec | shanghaitech | avenue | ucf_crime
     data_root: Optional[str] = None
     category: Optional[str] = None          # e.g. MVTec category ("bottle")
     sample_fps: int = 2                     # video frame sampling rate (video files)
