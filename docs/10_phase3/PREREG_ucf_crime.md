@@ -79,3 +79,37 @@ will be reported whatever it shows.
 ## Addenda
 
 *(dated, below this line, after results)*
+
+### Addendum 1 — 30 Sep 2026, results (nothing above was edited)
+
+Primary metric raw pooled AUROC, w = 5:
+
+| Condition | raw w5 | raw w1 | norm w5 | norm w1 |
+|---|---|---|---|---|
+| none | 0.7561 | 0.7577 | 0.7589 | 0.7607 |
+| generic | 0.7293 | 0.7308 | 0.7400 | 0.7414 |
+| shared matched | 0.8129 | 0.8033 | 0.7666 | 0.7553 |
+| **per-video (generated)** | **0.8235** | 0.8150 | 0.7892 | 0.7850 |
+| shuffled, mean of 20 | 0.7133 | 0.7173 | 0.7410 | 0.7383 |
+| shuffled, best of 20 | 0.7787 | 0.7804 | 0.7841 | 0.7872 |
+| mismatched | 0.7271 | 0.7307 | 0.7457 | 0.7431 |
+
+| # | Outcome |
+|---|---|
+| P1 | **Refuted.** per-video − mismatched = +0.096, not > +0.105. The gap is comparable to ShanghaiTech's, not larger. |
+| P2 | Holds. per-video beats the shuffled mean by +0.110 and the best of 20 by +0.045. |
+| P3 | Holds as a direction, +0.011. |
+| P4 | Holds, +0.086. |
+
+Notes. Shuffled captions (0.713) score below no descriptor (0.756): another
+video's description actively misleads. Per-video 0.824 is above LAVAD's reported
+80.28, but LAVAD scores every frame and this protocol every 16th; the comparison
+is close, not identical. As anticipated, per-video normalisation lowers every
+figure on a benchmark where half the videos contain no anomaly.
+
+### Addendum 2 — 30 Sep 2026, ShanghaiTech per-view rerun without labels
+
+The published Result 5b captions were generated from frames chosen using ground
+truth labels. Rerun with frames chosen by position only (`--label-free`):
+per-view 0.7507 (was 0.7550), shuffled mean 0.7074 / best 0.7224, beats all 11
+rotations. The conclusion is unchanged; 0.751 replaces 0.755 in the paper.
