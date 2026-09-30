@@ -1158,9 +1158,10 @@ sentence matches *its own* camera.
 **Two ways of writing the sentences.**
 1. **By hand** — I looked at one normal frame per camera and wrote one sentence
    each, once, no second attempt.
-2. **Automatically** — M4 (LLaVA, frozen) looked at three ordinary frames per
-   camera and described the place. We kept whichever of its three captions
-   agreed best with the other two.
+2. **Automatically** — M4 (LLaVA, frozen) looked at the camera's *first three
+   frames* and described the place. We kept whichever of its three captions
+   agreed best with the other two. The frames are picked by position — nobody
+   checks whether something unusual is in them, exactly as at a real install.
 
 **What happened.**
 
@@ -1169,8 +1170,8 @@ sentence matches *its own* camera.
 | none | 0.707 |
 | one shared sentence (the published result) | 0.734 |
 | per camera, by hand | 0.749 |
-| **per camera, written by M4 — no human** | **0.755** |
-| per camera, swapped between cameras (average) | 0.708–0.715 |
+| **per camera, written by M4 — no human, no labels** | **0.751** |
+| per camera, swapped between cameras (average) | 0.707–0.715 |
 
 > **In plain words.** A sentence written for each camera beats every scrambled
 > arrangement — so the benefit really does come from the sentence matching the
@@ -1179,19 +1180,94 @@ sentence matches *its own* camera.
 > person writing anything.
 
 **Don't overclaim — two traps:**
-- **"LLaVA writes better sentences than a human."** No. 0.755 vs 0.749 is noise.
+- **"LLaVA writes better sentences than a human."** No. 0.751 vs 0.749 is noise.
   Say *"it matches."*
-- **"Per-camera beats shared by 0.021."** That's inside the ±0.036 wobble. Report
+- **"Per-camera beats shared by 0.017."** That's inside the ±0.036 wobble. Report
   the direction, not the size. The solid comparison is against the *swapped*
-  sentences (+0.047).
+  sentences (+0.043).
 
-**Know the captions are rough** — it helps you. Six of twelve describe people
+**A mistake we caught ourselves — know this one.** The first automatic run
+picked "normal" frames to caption by looking at the answer key (the labels). A
+real installation has no answer key. We reran it picking frames by position
+only: 0.755 became **0.751**. The paper quotes 0.751. If asked: *"The first
+version used labels to choose frames; I removed that, and it changed the result
+by 0.004."*
+
+**Know the captions are rough** — it helps you. In that first run, six of twelve described people
 ("a man is walking...") even though we told it not to, and two cameras got
 word-for-word identical sentences. It *still* worked. So the method doesn't need
 perfect captions.
 
 **This also means M4 now runs on video** — for writing descriptions. It hasn't
 yet written *explanations* of flagged events; that's still Result 6.
+
+## 6.7c UCF-Crime — a test we wrote the answer to in advance
+
+**Why this dataset.** Everything so far is campus walkways. UCF-Crime is 290
+real CCTV videos from ~290 different places — shops, streets, homes, highways —
+140 with a crime (robbery, fighting, arson, road accidents…) and 150 normal. It
+is also where LAVAD, the main competing training-free system, reports its number.
+
+**What "pre-registered" means, and why it's your strongest card.** Before running
+anything, we wrote down four predictions and what result would prove each wrong,
+and committed that file to git — the timestamp proves it came first. Then we ran
+it. You can't be accused of explaining the result after the fact.
+
+**What happened.**
+
+| Sentence given to each video | AUROC |
+|---|---|
+| none | 0.756 |
+| one shared sentence ("CCTV footage of streets, shops and buildings") | 0.813 |
+| **each video's own sentence, written by M4** | **0.824** |
+| each video given *another* video's sentence | 0.713 |
+| a factory description (wrong domain) | 0.727 |
+
+| Prediction | Result |
+|---|---|
+| P1: the sentence matters *more* here than on ShanghaiTech (gap > 0.105) | **Wrong** — 0.096 |
+| P2: own sentence beats borrowed sentences | Right — by 0.110 |
+| P3: own sentence beats the shared one | Right, but small (0.011) |
+| P4: correct description beats the factory one | Right — 0.086 |
+
+> **In plain words.** On 290 completely different places, giving each video a
+> sentence about its own scene works — and giving it a sentence about *another*
+> place is worse than giving it nothing. That's the clearest proof yet that the
+> sentence works by telling the model where it is. But we'd also predicted the
+> effect would keep growing with more places, and it didn't: 290 places gave
+> about the same boost as 12. So we drop that stronger claim.
+
+**How to say P1 failing — practise this.**
+> "I registered four predictions before running it. Three held. The one that
+> failed was the most ambitious: I predicted the effect would grow with the
+> number of scenes. It didn't — it levels off. So I've narrowed the claim from
+> 'the benefit scales with scene diversity' to 'the benefit needs scene
+> diversity'."
+
+A panel hears that as a researcher who tests their own ideas. Don't apologise
+for it and don't bury it.
+
+**Against LAVAD — be precise.** LAVAD reports **80.28**; you get **82.4**. Say
+*"comparable or better"*, not *"we beat LAVAD"*, because:
+- LAVAD scores every frame; we score every 16th.
+- If asked for the fairer version: *"Scoring every frame is on the future-work
+  list; I expect it to move the number slightly, not reverse it."*
+
+What you *can* stress: LAVAD chains three large models (captioner, LLM,
+refiner); you use one frozen CLIP pass per frame and one caption per video.
+
+**Why the primary number here is "raw", not "per-clip normalised".** Half the
+UCF videos have no crime at all. Per-clip normalising stretches every video so
+its highest frame is 1.0 — so every normal video gets a "maximally anomalous"
+frame. We decided that *before* running it, and the normalised numbers came out
+lower, as predicted. Both are in the paper.
+
+**Two honest caveats to have ready:**
+- Each video's sentence comes from its first second. In 3 of 140 crime videos
+  the crime has already started then — we kept those, because removing them
+  would need the answer key.
+- The shared sentence already gives most of the gain here (0.813). Per-video
+  adds a little on top.
 
 ## 6.8 Everything in one place
 
@@ -1203,7 +1279,8 @@ yet written *explanations* of flagged events; that's still Result 6.
 | Mechanism | Prototype angle collapses 35.7° → 25° when misapplied |
 | Boundary | Effect nearly vanishes on a single-camera benchmark |
 | Why | The sentence identifies *which* scene — measured |
-| Per camera | **0.755** with sentences written automatically by M4 — no human input |
+| Per camera | **0.751** with sentences written automatically by M4 — no human, no labels |
+| UCF-Crime | **0.824**, 290 videos, no training; LAVAD reports 80.28 |
 | Failed attempts | Six, all reported |
 
 ## 6.9 The five sentences to memorise
@@ -1878,13 +1955,14 @@ If a question goes somewhere you didn't prepare, return to these.
 |---|---|---|---|
 | Status | Work | Why |
 |---|---|---|
-| ✅ done | A separate description per camera | 0.749 by hand, **0.755 written by M4** — §6.7b |
+| ✅ done | A separate description per camera | 0.749 by hand, **0.751 written by M4** — §6.7b |
 | ✅ done | Which direction the prototypes move | Completes the mechanism — §5.4 update |
 | ✅ done | Error bar on the within-view control | §6.7 update |
 | dropped | Context sweep on the industrial benchmark | Thesis is video; UCF-Crime / XD-Violence give a better domain contrast |
 | covered | Swap descriptions between the two video datasets | The per-camera shuffled control already tests wrong-but-realistic text |
 | next | Region-level scoring | The best remaining shot at a higher number |
-| next | UCF-Crime and XD-Violence | Many more scenes → the account predicts a bigger gap; makes LAVAD comparable |
+| ✅ done | UCF-Crime | 0.824; mechanism holds, "grows with scenes" refuted — §6.7c |
+| next | XD-Violence | Second LAVAD benchmark; metric is AP |
 | later | M4 explanations of flagged events | Result 6, still pending |
 
 ## 9.2 Phase 4
