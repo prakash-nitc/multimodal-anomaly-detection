@@ -123,6 +123,14 @@ def caption(args) -> int:
         v = view_of(s.name)
         if v in frames:
             continue
+        if getattr(args, "label_free", False):
+            # Deployment-faithful: the first three frames of the view's first
+            # clip, chosen by position. No label is consulted.
+            frames[v] = list(s.frames[:3])
+            continue
+        # Original (Result 5b) selection. It uses ground-truth labels to pick
+        # normal frames -- a mild leak, since a deployment has no labels. Kept
+        # only so the published run stays reproducible; use --label-free.
         normal = np.where(np.asarray(s.labels) == 0)[0]
         if len(normal) >= 3:
             frames[v] = [s.frames[int(normal[int(q * (len(normal) - 1))])]
@@ -142,7 +150,7 @@ def caption(args) -> int:
         print("  view %s  %s" % (v, out[v]))
 
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        "view_descriptors_llava.json")
+                        "view_descriptors_llava_labelfree.json" if getattr(args, "label_free", False) else "view_descriptors_llava.json")
     json.dump(out, open(path, "w", encoding="utf-8"), indent=1)
     json.dump({"model": llava.model_id, "prompt": CAPTION_PROMPT, "all_captions": raw},
               open(os.path.expanduser("~/dazvad/work/tables/llava_captions_raw.json"), "w"),
@@ -260,5 +268,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("step", choices=["sheet", "caption", "run"])
     p.add_argument("--desc", default=None, help="descriptor JSON (default: hand-written)")
+    p.add_argument("--label-free", action="store_true", help="caption the first frames, never consult labels")
     a = p.parse_args()
     sys.exit({"sheet": sheet, "caption": caption, "run": run}[a.step](a))
