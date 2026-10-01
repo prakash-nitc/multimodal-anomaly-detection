@@ -37,20 +37,28 @@ import os
 
 import matplotlib
 matplotlib.use("Agg")
+
+import figsave
 import matplotlib.pyplot as plt
 import numpy as np
 
-INK, MUTED = "#141C1E", "#5F6E70"
+# MUTED was #5F6E70, ~4.4:1 on white -- the same washed-out grey the
+# architecture figure carried, and the reason secondary labels read as
+# faded in print. Darkened to ~9:1, matching make_architecture.py so every
+# figure in the report now uses one ink for secondary text.
+INK, MUTED = "#101718", "#394547"
 VIS, CTX, TMP = "#0D6B67", "#B4571A", "#3B5BA5"
 OK, BAD = "#1E8449", "#B03A2E"
 GRID = "#D8E0DF"
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Segoe UI", "DejaVu Sans"],
-    "axes.edgecolor": "#B9C6C5", "axes.linewidth": 0.7,
-    "xtick.color": MUTED, "ytick.color": MUTED,
-    "xtick.labelsize": 7.0, "ytick.labelsize": 7.0,
-    "axes.labelsize": 7.6, "axes.titlesize": 8.0,
+    "axes.edgecolor": "#8E9E9D", "axes.linewidth": 0.9,
+    "xtick.color": INK, "ytick.color": INK,
+    "xtick.labelsize": 8.0, "ytick.labelsize": 8.0,
+    "axes.labelsize": 8.7, "axes.titlesize": 9.2,
+    "axes.labelweight": "bold", "axes.titleweight": "bold",
+    "font.weight": "medium",
 })
 
 CONDS = ["none", "generic", "matched", "mismatched"]
@@ -94,36 +102,43 @@ def context_sweep(out):
         for r in bars:
             ax.text(r.get_x() + r.get_width() / 2, r.get_height() + 0.004,
                     f"{r.get_height():.3f}", ha="center", va="bottom",
-                    fontsize=6.4, color=INK)
+                    fontsize=8.6, color=INK, fontweight="bold")
 
     ax.axhline(0.5, color=BAD, lw=0.8, ls=(0, (4, 3)))
-    ax.text(len(CONDS) - 0.45, 0.507, "chance", fontsize=6.2, color=BAD,
-            ha="right", va="bottom")
+    ax.text(len(CONDS) - 0.45, 0.507, "chance", fontsize=8.2, color=BAD,
+            ha="right", va="bottom", fontweight="bold")
 
-    # The gap is the experiment's output, so draw it. One annotation sits above
-    # the bars and the other below, because placing both at bar height puts the
-    # lower series' label across the taller series' bar.
-    for series, off, col, y, va in (
-            ("normal", w / 2, CTX, 0.775, "bottom"),
-            ("both", -w / 2, "#8895A0", 0.556, "top")):
+    # The gap is the experiment's output, so draw it. Both annotations now sit
+    # ABOVE every bar. The previous layout put the BOTH-ensembles arrow at
+    # y=0.556 to keep it clear of the orange bars, but the two series are
+    # interleaved on the x axis, so an arrow spanning matched->mismatched at any
+    # height below 0.734 crosses the orange matched bar -- an arrow measuring
+    # one series was drawn over the other's data. Each label also names its
+    # series, so the reader does not have to match arrow colour to the legend.
+    # The colour #8895A0 that matched the bar edge sat at ~3:1 on white; the
+    # bars stay pale (deliberate -- this is the rule we reject) but the label
+    # reads at ~7:1.
+    for series, off, col, y, name in (
+            ("both",   -w / 2, "#4A5560", 0.790, "BOTH ensembles"),
+            ("normal",  w / 2, CTX,       0.850, "NORMAL only")):
         m, mm = SWEEP[series][2], SWEEP[series][3]
         xm, xmm = 2 + off, 3 + off
         ax.annotate("", xy=(xmm, y), xytext=(xm, y),
-                    arrowprops=dict(arrowstyle="<->", color=col, lw=1.0))
-        ax.text((xm + xmm) / 2, y + (0.005 if va == "bottom" else -0.005),
-                f"gap {m - mm:+.3f}", ha="center", va=va, fontsize=6.6,
-                color=col, fontweight="bold")
+                    arrowprops=dict(arrowstyle="<->", color=col, lw=1.1))
+        ax.text((xm + xmm) / 2, y + 0.006,
+                f"{name}:  gap {m - mm:+.3f}", ha="center", va="bottom",
+                fontsize=8.8, color=col, fontweight="bold")
 
     ax.set_xticks(x); ax.set_xticklabels(CONDS)
-    ax.set_ylim(0.48, 0.80); ax.set_ylabel("frame-level AUROC")
+    ax.set_ylim(0.48, 0.90); ax.set_ylabel("frame-level AUROC")
     ax.grid(axis="y", color=GRID, lw=0.5); ax.set_axisbelow(True)
-    ax.legend(fontsize=6.6, loc="upper left", frameon=True, edgecolor=GRID,
+    ax.legend(fontsize=8.6, loc="upper left", frameon=True, edgecolor=GRID,
               framealpha=0.95)
     ax.set_title("Context sweep, ShanghaiTech, $w{=}31$ — everything frozen; "
                  "only the sentence and where it goes change", pad=6)
     fig.tight_layout()
     p = os.path.join(out, "fig_chart_sweep.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 
@@ -144,7 +159,8 @@ def window_and_ablation(out):
         ax.plot(xs, vals, lw=1.4, ms=3.4, label=name, **styles[name])
     ax.axhline(0.5, color=BAD, lw=0.8, ls=(0, (4, 3)))
     ax.axvline(31, color=MUTED, lw=0.7, ls=(0, (2, 2)))
-    ax.text(31, 0.767, "optimum", fontsize=6.4, color=MUTED, ha="center",
+    ax.text(31, 0.767, "optimum", fontsize=8.4, color=INK, fontweight="bold",
+            ha="center",
             va="top", bbox=dict(facecolor="white", edgecolor="none", pad=1.2))
     ax.set_xscale("log"); ax.set_xticks(WINDOWS)
     ax.set_xticklabels([str(w) for w in WINDOWS])
@@ -152,7 +168,7 @@ def window_and_ablation(out):
     ax.set_ylabel("frame-level AUROC")
     ax.set_ylim(0.44, 0.78)
     ax.grid(color=GRID, lw=0.5); ax.set_axisbelow(True)
-    ax.legend(fontsize=5.9, loc="lower left", frameon=True, edgecolor=GRID,
+    ax.legend(fontsize=8.0, loc="lower left", frameon=True, edgecolor=GRID,
               framealpha=0.95)
     ax.set_title("Temporal window and pooling convention", pad=5)
 
@@ -166,19 +182,22 @@ def window_and_ablation(out):
     ax.barh(y, vals, xerr=errs, color=cols, edgecolor="#8895A0", lw=0.7,
             error_kw=dict(ecolor=MUTED, lw=0.8, capsize=2.2))
     for i, v in enumerate(vals):
-        ax.text(v + errs[i] + 0.006, i, f"{v:.3f}", va="center", fontsize=6.4,
+        ax.text(v + errs[i] + 0.006, i, f"{v:.3f}", va="center", fontsize=7.7,
                 color=INK)
     ax.axvline(0.5, color=BAD, lw=0.8, ls=(0, (4, 3)))
-    ax.set_yticks(y); ax.set_yticklabels(names, fontsize=6.6)
+    ax.set_yticks(y); ax.set_yticklabels(names, fontsize=8.8)
     ax.set_xlim(0.48, 0.82)
-    ax.set_xlabel("held-out AUROC (mean $\pm$ sd over 5 partitions)")
+    # Raw string: "\p" is not an escape sequence and Python 3.12+ warns on it.
+    # Shortened too -- at the larger bold type the full wording ran off the
+    # right edge of the canvas, which figsave's clip check caught.
+    ax.set_xlabel(r"held-out AUROC (mean $\pm$ sd, 5 splits)")
     ax.grid(axis="x", color=GRID, lw=0.5); ax.set_axisbelow(True)
-    ax.set_title("Component ablation — nothing added to the\nsemantic pathway "
-                 "improves on it", pad=5, fontsize=7.6)
+    ax.set_title("Component ablation — nothing added\nto the semantic pathway "
+                 "improves on it", pad=5, fontsize=9.1)
 
     fig.tight_layout(w_pad=1.6)
     p = os.path.join(out, "fig_chart_ablation.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 
@@ -195,16 +214,16 @@ def within_view(csv_path, out):
     ax.bar(x, gaps, 0.62, color=cols, alpha=0.70, edgecolor="#8895A0", lw=0.7)
     for i, (g, c) in enumerate(zip(gaps, n)):
         ax.text(i, g + (0.004 if g >= 0 else -0.004), f"{g:+.3f}", ha="center",
-                va="bottom" if g >= 0 else "top", fontsize=6.0, color=INK)
-        ax.text(i, -0.088, f"n={c}", ha="center", fontsize=5.6, color=MUTED)
+                va="bottom" if g >= 0 else "top", fontsize=7.2, color=INK)
+        ax.text(i, -0.088, f"n={c}", ha="center", fontsize=6.7, color=MUTED)
 
     ax.axhline(0, color="#8895A0", lw=0.8)
     ax.axhline(pooled, color=CTX, lw=1.5)
     ax.text(len(views) - 0.4, pooled + 0.004, f"pooled across views  {pooled:+.3f}",
-            ha="right", va="bottom", fontsize=6.8, color=CTX, fontweight="bold")
+            ha="right", va="bottom", fontsize=8.2, color=CTX, fontweight="bold")
     ax.axhline(mean_within, color=TMP, lw=1.2, ls=(0, (4, 2.5)))
     ax.text(-0.4, mean_within + 0.004, f"mean within a view  {mean_within:+.3f}",
-            ha="left", va="bottom", fontsize=6.6, color=TMP, fontweight="bold")
+            ha="left", va="bottom", fontsize=7.9, color=TMP, fontweight="bold")
 
     ax.set_xticks(x); ax.set_xticklabels(views)
     ax.set_xlabel("camera view"); ax.set_ylabel("matched $-$ mismatched")
@@ -212,12 +231,14 @@ def within_view(csv_path, out):
     ax.grid(axis="y", color=GRID, lw=0.5); ax.set_axisbelow(True)
     # "collapses" overstates it: two views nearly reach the pooled figure. The
     # claim the data supports is about the mean and the spread, so say that.
-    ax.set_title("Per-camera gaps against the pooled figure — the mean within a "
-                 "view is a third of pooled, and three views are negative",
-                 pad=5, fontsize=7.6)
+    # Wrapped explicitly. tight_layout pads the axes but never shrinks or wraps
+    # a title, so at the larger type this ran off the right edge of the canvas.
+    ax.set_title("Per-camera gaps against the pooled figure — the mean within\n"
+                 "a view is a third of pooled, and three views are negative",
+                 pad=5, fontsize=9.1)
     fig.tight_layout()
     p = os.path.join(out, "fig_chart_within_view.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 

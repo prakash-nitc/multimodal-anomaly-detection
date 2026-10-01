@@ -711,6 +711,36 @@ producing noticeably different results.
 Say precisely that if asked. A mechanism that explains most of an effect and is
 honest about the rest is far stronger than one claimed to explain everything.
 
+### Update, Phase 3 — the missing half, now measured
+
+We measured the direction. For each condition we asked: on average, how similar
+are the video frames to the two arrows? Higher means the arrows have moved
+toward where the video sits.
+
+| Description added to both sets | Arrows' similarity to the video | Change |
+|---|---|---|
+| none | 0.216 | — |
+| generic | 0.230 | +0.014 |
+| **accurate (matched)** | **0.282** | **+0.067** |
+| wrong (mismatched) | 0.199 | −0.017 |
+
+> **In plain words.** All three descriptions squeeze the two arrows together by
+> about the same amount. But the accurate one also *drags both arrows onto the
+> video* — almost five times further than the placeholder does. Once both
+> arrows sit right where the frames are, every frame looks equally close to
+> "normal" and to "abnormal", and the system can't tell them apart. The wrong
+> description moves the arrows *away* from the video, so the original prompts
+> underneath still do their job. That is exactly why accurate was worst and
+> wrong was nearly harmless.
+
+**How we know the measurement is trustworthy:** the script first rebuilds the
+prompts and reproduces all eight angles in the paper's table exactly, and the
+frame sample reproduces the same ranking of conditions. Only then does it report.
+
+**One thing that did *not* explain it**, so you can say so if asked: how much
+the score varies from frame to frame. It doesn't follow the ranking. Direction
+does.
+
 ## 5.5 Problem three — a hypothesis of ours that was simply wrong
 
 We thought the abnormal sentences were badly chosen. They mention *"a fight,
@@ -1088,6 +1118,157 @@ it looks like something you were hoping would not come up.
 **The one-sentence version:** the direction of the finding is solid, its size is
 noisy, and saying more would need more clips per camera.
 
+### Update, Phase 3 — putting an error bar on it
+
+We resampled the nine cameras 50,000 times to see how much the +0.033 could
+wobble. The 95% range is **−0.005 to +0.070**.
+
+That separates two claims, and you should keep them apart:
+
+- **"The gap shrinks inside one camera"** — **established.** The whole range sits
+  below the pooled +0.105; not one resample reached it. This is the claim the
+  paper makes.
+- **"The gap is still positive inside one camera"** — **not established.** The
+  range includes zero. The paper never claims this.
+
+Two more things you can now say:
+
+- **"Aren't the negative cameras just the small ones?"** No. Gap and clip count
+  barely correlate (+0.19).
+- **Avenue's +0.020 falls inside that range.** So Avenue isn't just *close to* a
+  single ShanghaiTech camera — statistically it's indistinguishable from one.
+
+**If someone recomputes from the CSV:** they'll get a standard deviation of 0.061,
+not the 0.058 in the table. Both are right — 0.058 treats the nine cameras as the
+whole population, 0.061 as a sample. Nothing depends on it; both are bigger than
+the mean, which is the point.
+
+## 6.7b Giving each camera its own sentence — and letting the system write it
+
+**Why try this.** §6.7 says the sentence mostly tells the model *which* scene it
+is looking at. But all twelve ShanghaiTech cameras were getting the *same*
+sentence — which can't tell them apart. So: give each camera its own.
+
+**The control that makes it convincing.** We also gave each camera *another*
+camera's sentence, in all 11 possible rotations. Every one of those is a
+perfectly realistic campus description. So if the per-camera version wins, it
+can't be because the model rejects weird text — it can only be because the
+sentence matches *its own* camera.
+
+**Two ways of writing the sentences.**
+1. **By hand** — I looked at one normal frame per camera and wrote one sentence
+   each, once, no second attempt.
+2. **Automatically** — M4 (LLaVA, frozen) looked at the camera's *first three
+   frames* and described the place. We kept whichever of its three captions
+   agreed best with the other two. The frames are picked by position — nobody
+   checks whether something unusual is in them, exactly as at a real install.
+
+**What happened.**
+
+| Sentence | AUROC |
+|---|---|
+| none | 0.707 |
+| one shared sentence (the published result) | 0.734 |
+| per camera, by hand | 0.749 |
+| **per camera, written by M4 — no human, no labels** | **0.751** |
+| per camera, swapped between cameras (average) | 0.707–0.715 |
+
+> **In plain words.** A sentence written for each camera beats every scrambled
+> arrangement — so the benefit really does come from the sentence matching the
+> camera. And the system can write those sentences itself from a few minutes of
+> ordinary footage. Setting up a new camera needs no training, no labels, and no
+> person writing anything.
+
+**Don't overclaim — two traps:**
+- **"LLaVA writes better sentences than a human."** No. 0.751 vs 0.749 is noise.
+  Say *"it matches."*
+- **"Per-camera beats shared by 0.017."** That's inside the ±0.036 wobble. Report
+  the direction, not the size. The solid comparison is against the *swapped*
+  sentences (+0.043).
+
+**A mistake we caught ourselves — know this one.** The first automatic run
+picked "normal" frames to caption by looking at the answer key (the labels). A
+real installation has no answer key. We reran it picking frames by position
+only: 0.755 became **0.751**. The paper quotes 0.751. If asked: *"The first
+version used labels to choose frames; I removed that, and it changed the result
+by 0.004."*
+
+**Know the captions are rough** — it helps you. In that first run, six of twelve described people
+("a man is walking...") even though we told it not to, and two cameras got
+word-for-word identical sentences. It *still* worked. So the method doesn't need
+perfect captions.
+
+**This also means M4 now runs on video** — for writing descriptions. It hasn't
+yet written *explanations* of flagged events; that's still Result 6.
+
+## 6.7c UCF-Crime — a test we wrote the answer to in advance
+
+**Why this dataset.** Everything so far is campus walkways. UCF-Crime is 290
+real CCTV videos from ~290 different places — shops, streets, homes, highways —
+140 with a crime (robbery, fighting, arson, road accidents…) and 150 normal. It
+is also where LAVAD, the main competing training-free system, reports its number.
+
+**What "pre-registered" means, and why it's your strongest card.** Before running
+anything, we wrote down four predictions and what result would prove each wrong,
+and committed that file to git — the timestamp proves it came first. Then we ran
+it. You can't be accused of explaining the result after the fact.
+
+**What happened.**
+
+| Sentence given to each video | AUROC |
+|---|---|
+| none | 0.756 |
+| one shared sentence ("CCTV footage of streets, shops and buildings") | 0.813 |
+| **each video's own sentence, written by M4** | **0.824** |
+| each video given *another* video's sentence | 0.713 |
+| a factory description (wrong domain) | 0.727 |
+
+| Prediction | Result |
+|---|---|
+| P1: the sentence matters *more* here than on ShanghaiTech (gap > 0.105) | **Wrong** — 0.096 |
+| P2: own sentence beats borrowed sentences | Right — by 0.110 |
+| P3: own sentence beats the shared one | Right, but small (0.011) |
+| P4: correct description beats the factory one | Right — 0.086 |
+
+> **In plain words.** On 290 completely different places, giving each video a
+> sentence about its own scene works — and giving it a sentence about *another*
+> place is worse than giving it nothing. That's the clearest proof yet that the
+> sentence works by telling the model where it is. But we'd also predicted the
+> effect would keep growing with more places, and it didn't: 290 places gave
+> about the same boost as 12. So we drop that stronger claim.
+
+**How to say P1 failing — practise this.**
+> "I registered four predictions before running it. Three held. The one that
+> failed was the most ambitious: I predicted the effect would grow with the
+> number of scenes. It didn't — it levels off. So I've narrowed the claim from
+> 'the benefit scales with scene diversity' to 'the benefit needs scene
+> diversity'."
+
+A panel hears that as a researcher who tests their own ideas. Don't apologise
+for it and don't bury it.
+
+**Against LAVAD — be precise.** LAVAD reports **80.28**; you get **82.4**. Say
+*"comparable or better"*, not *"we beat LAVAD"*, because:
+- LAVAD scores every frame; we score every 16th.
+- If asked for the fairer version: *"Scoring every frame is on the future-work
+  list; I expect it to move the number slightly, not reverse it."*
+
+What you *can* stress: LAVAD chains three large models (captioner, LLM,
+refiner); you use one frozen CLIP pass per frame and one caption per video.
+
+**Why the primary number here is "raw", not "per-clip normalised".** Half the
+UCF videos have no crime at all. Per-clip normalising stretches every video so
+its highest frame is 1.0 — so every normal video gets a "maximally anomalous"
+frame. We decided that *before* running it, and the normalised numbers came out
+lower, as predicted. Both are in the paper.
+
+**Two honest caveats to have ready:**
+- Each video's sentence comes from its first second. In 3 of 140 crime videos
+  the crime has already started then — we kept those, because removing them
+  would need the answer key.
+- The shared sentence already gives most of the gain here (0.813). Per-video
+  adds a little on top.
+
 ## 6.8 Everything in one place
 
 | | |
@@ -1098,6 +1279,8 @@ noisy, and saying more would need more clips per camera.
 | Mechanism | Prototype angle collapses 35.7° → 25° when misapplied |
 | Boundary | Effect nearly vanishes on a single-camera benchmark |
 | Why | The sentence identifies *which* scene — measured |
+| Per camera | **0.751** with sentences written automatically by M4 — no human, no labels |
+| UCF-Crime | **0.824**, 290 videos, no training; LAVAD reports 80.28 |
 | Failed attempts | Six, all reported |
 
 ## 6.9 The five sentences to memorise
@@ -1206,8 +1389,12 @@ industrial sweep and ideally the region-level scoring.
 > is the *only* thing that can vary — and without that you can't test whether the
 > text does anything. The architecture exists to make the experiment possible.
 
-⚠️ Don't claim "text at inference time" as new. A 2025 paper (AnyAnomaly) does
-that. **Name it yourself before they do.**
+⚠️ Don't claim "text at inference time" as new. AnyAnomaly (WACV 2026) does that,
+on *your two benchmarks*, and beats you on both. **Name it yourself before they
+do** — see the full answer in §8.3. The short version: their text names what is
+*abnormal* and they are handed the benchmark's anomaly classes; mine describes
+what is *normal* and is told nothing about the anomalies. And they never corrupt
+their text, so they cannot show it is causally responsible.
 
 **"What exactly is your research gap?"**
 
@@ -1252,7 +1439,395 @@ excuse. Always pair it with what you *are* competing on.
 
 ## 8.3 On method
 
-**"Did you tune on the test set?"**
+**"Which domain adaptation technique did you use?"**
+
+*Asked in the Phase-2 slide review, with a list on screen: fine-tuning,
+discrepancy/MMD, adversarial, self-training/pseudo-labelling. The honest answer
+is "none of them", and it only sounds like a dodge if you stop there. Say all
+three parts.*
+
+> **One.** None of those four — by design. Every one of them adapts by changing
+> weights using target-domain data. Fine-tuning needs labelled target data;
+> discrepancy methods need target features to align against; adversarial methods
+> train a domain discriminator; self-training retrains on target pseudo-labels.
+> I have no target data and no gradient updates anywhere, so none of the four is
+> available to me.
+>
+> **Two.** They also all solve the wrong shift. Every technique on that list
+> aligns $p(x)$ — it makes source and target *look* alike — and that only works
+> if $p(y \mid x)$ is stable. My problem is the opposite: a bicycle on a walkway
+> and a bicycle on a road are the same pixels with opposite labels. $p(x)$ is
+> already identical, so there is nothing to align. Aligning appearance cannot
+> help when appearance was never the difference.
+>
+> **Three.** What I use instead is the LLM-era technique: adaptation through the
+> input context, with the model frozen. Fan et al. (2026) catalogue four
+> adaptation strategies for foundation models — prompt engineering, RAG,
+> domain-adaptive pretraining, fine-tuning — and I sit at the first. In the
+> vocabulary of the vision surveys my setting is **source-free, test-time,
+> training-free, language-mediated, concept-shift-oriented**. M3 is
+> prompt-based domain adaptation transplanted from the LLM literature into a
+> vision task, aimed at the shift type classical visual DA excluded.
+
+**"Why isn't your technique on that list?"**
+
+> Because the list is from the vision DA literature, and those surveys run
+> 2015–2023 — they predate foundation-model adaptation. Their taxonomies have no
+> category for "adapt by describing the domain in language," because when they
+> were written there was no frozen model you could steer with a sentence. That
+> absence is not an oversight I'm exploiting; it is the gap the thesis is about.
+
+**"Then is this really domain adaptation at all?"**
+
+> A fair challenge, and I concede the weak form of it. Fan et al. say
+> prompt-based adaptation "often lacks depth and robustness," and I am
+> deliberately at that known-weak end. What I add is measurement: +0.027 when
+> the description is correct, which sits inside the noise, and −0.105 when it is
+> wrong, which does not. I am not claiming it is strong. I am claiming it is
+> real, and that nobody had measured it.
+
+**"Isn't your per-clip normalisation just classical adaptation in disguise?"**
+
+*The sharpest version of this question. Concede the resemblance, then close it.*
+
+> It does resemble the recompute-the-statistics family — recalibrating on target
+> data without labels. But it is the benchmark's own published evaluation
+> protocol, not a component of the method, and it is applied identically in all
+> four context conditions. So it cannot be what produces the gap between matched
+> and mismatched: that comparison holds the normalisation fixed and varies only
+> the sentence.
+
+**"Why is your Avenue result poor when your ShanghaiTech one is respectable?"**
+
+*A sharp panelist will spot this in the comparison table: second among
+training-free methods on ShanghaiTech, third and far behind on Avenue. There are
+two separate reasons and only one of them is the scene-diversity story you
+already tell. Give both.*
+
+**Start by ruling out the boring explanation.**
+
+> It isn't that the detector fails to transfer. With no descriptor at all the
+> two benchmarks give 0.706 and 0.707 — identical. The frozen encoder works just
+> as well on Avenue. Something else is going on.
+
+**Reason 1 — the sentence has nothing to do there.** *(You already know this one.)*
+
+> Avenue is one fixed camera. A scene description can't tell the model which of
+> several environments it's in, because there's only one. So the matched
+> condition actually scores *below* having no descriptor — 0.677 against 0.706 —
+> and the within-view control shows the same collapse inside a single
+> ShanghaiTech view.
+
+But that only explains why *we* lose ground against our own ShanghaiTech number.
+It does not explain the distance to the other methods. For that:
+
+**Reason 2 — and this is the bigger one. Avenue's anomalies are the kind CLIP
+cannot express.**
+
+Look at what each benchmark actually calls anomalous:
+
+| | ShanghaiTech | CUHK Avenue |
+|---|---|---|
+| Appearance | car, bicycle, motorcycle, hand truck | bicycle, **"too close"** |
+| Action | skateboarding, running, jumping, fighting… | throwing, running, dancing |
+
+> ShanghaiTech's appearance anomalies are **object categories** — is there a
+> bicycle in this frame, is there a car. That is almost exactly what CLIP was
+> trained to do, so a frozen encoder is strong at it.
+>
+> Avenue's are different. One of its two appearance classes is **"too close"** —
+> an object near the camera. Nothing in that frame is semantically out of place;
+> the anomaly is *how near the thing is*, and no sentence expresses that. Its
+> other classes — throwing, dancing — are brief, small in the frame, and defined
+> by motion rather than by content.
+
+**Then land the general point:**
+
+> So the method is good at anomalies that are **semantic** — something present
+> that doesn't belong — and poor at anomalies that are **geometric or
+> kinematic**. That distinction predicts my results better than benchmark
+> difficulty does. It's the same limitation I found on MVTec AD: whole-frame
+> embeddings at 224×224 capture *what* is in a scene, not how big, how fast, or
+> how near it is.
+
+**And the observation that closes it neatly:**
+
+> It also explains something that looks odd in the table — the one-class methods
+> score *higher* on Avenue (85–91) than on ShanghaiTech (73–81), while I score
+> lower. A model trained on Avenue's own normal footage learns that scene's
+> scale and motion statistics. That's exactly the information a frozen semantic
+> encoder throws away.
+
+**If you get one sentence:** *"ShanghaiTech's anomalies are things that shouldn't
+be there, which is what CLIP is good at. Avenue's are things that are too close
+or moving oddly, which a whole-frame semantic embedding simply cannot see."*
+
+**A supporting detail if you want it:** AnyAnomaly's own per-class table shows
+their frame-level baseline scoring 57.2 on Avenue's "too close" class — near
+chance — and only recovering to 91.8 once they add an explicit temporal-context
+image. So even a large vision-language model can't do that class from semantics
+alone. That's independent evidence the limitation is representational, not an
+artefact of my pipeline.
+
+
+---
+
+**"What do you actually solve that the existing methods don't?"**
+
+*This is the question the whole comparison exists to answer, and "we ran a
+control they didn't" is the wrong answer — it describes your method, not your
+contribution. There are three real answers. Learn them in this order.*
+
+### Answer 1 — We answer a different question, and it's the harder one
+
+This is the strongest thing you have. Lead with it.
+
+> AnyAnomaly asks: **"is the thing I named happening?"**
+> We ask: **"is anything happening that doesn't belong here?"**
+>
+> To deploy theirs you have to list what could go wrong — "bicycle", "fighting",
+> "someone falling". Anything you didn't think of produces no score, because
+> nothing in the pipeline is looking for it. To deploy mine you describe what
+> ordinarily happens. Anything that departs from it gets flagged.
+>
+> An operator can always describe the ordinary. Nobody can enumerate the
+> extraordinary — and that's not my claim, it's theirs: their paper opens by
+> saying abnormal events are "rare and diverse, making it difficult to construct
+> large-scale datasets." Putting that list in a prompt instead of a training set
+> doesn't make the problem go away.
+
+**Then land the consequence for the table:**
+
+> And that's why their 79.7 needs reading carefully. To get it, they state that
+> "each anomaly class in the dataset was treated as X" and take the maximum over
+> them. The benchmark hands them the answer key. That's fair for the task they
+> defined — but it measures closed-set performance with the class list supplied,
+> not open-set performance at a site where nobody knows the list yet.
+
+**What you must NOT claim:** that you'd beat them with the taxonomy withheld.
+You haven't run it. Say so, and name it as the experiment you'd run next — that
+is a stronger position than an unbacked claim.
+
+### Answer 2 — We found a failure mode that affects everyone building these
+
+Not "we ran a control." **We found something with the control.**
+
+> Where you inject the text matters more than what the text says — enough to
+> flip the sign of the result. Put the scene description into both prompt sets
+> and the gap is −0.029; put it into the normal set only and it's +0.105. Same
+> sentence, same models, same frames.
+>
+> The cause is prototype dilution: shared words enter both averaged prompt
+> vectors and pull them together. That's a property of ensemble-and-pool prompt
+> construction in general, not of my code. So **any paper reporting that scene
+> descriptions don't help, without varying the fusion rule, has reported an
+> implementation artefact.** I nearly published that artefact myself — it's in
+> my Table 9.
+
+That is a transferable result. It changes what other people should do.
+
+### Answer 3 — We can say where this works and where it doesn't
+
+> Verbalised context pays off in proportion to how many environments it has to
+> tell apart. Twelve camera views: +0.105. One view: +0.033. Single-view Avenue:
+> +0.020. So deploy this where an installation spans several scenes; don't
+> bother on a fixed single camera.
+>
+> That's a prescription, and I measured it rather than arguing it from the fact
+> that the two benchmarks differ.
+
+### How the three fit together
+
+Say it in this shape:
+
+> **The gap:** the domain-adaptation field excludes concept shift; anomaly
+> detection is made of it.
+> **The mechanism:** describe normality in one sentence, freeze everything, and
+> the effect becomes attributable.
+> **What that bought:** two findings nobody had — that injection point beats
+> wording, and that the benefit scales with scene diversity — plus a deployment
+> model that doesn't need anyone to enumerate anomalies in advance.
+
+**The falsifying control is the instrument, not the contribution.** Mention it
+as *how* you got Answers 2 and 3, never as the answer itself. If a panelist
+hears "my contribution is that I ran an experiment others didn't," they will
+correctly ask what the experiment found. Answers 2 and 3 are what it found.
+
+### The one-liner, if you only get a sentence
+
+> *"They detect the anomalies you can name. We detect the ones you can't — and
+> along the way we found that where you put the text matters more than what it
+> says, which would have inverted our own conclusion if we hadn't checked."*
+
+
+---
+
+**"How do you compare to the other methods on these benchmarks?"**
+
+*Your supervisor asked for this comparison, so expect to be walked through it.
+The table is Section 7.8 of the paper. Here it is in plain words.*
+
+**Where you actually stand — say it precisely, not flatteringly.**
+
+> Among the six training-free methods, I'm **second on ShanghaiTech** and
+> **fifth on Avenue**. So "second best" is true only on one benchmark and only
+> within the training-free group. Against the one-class methods — the ones that
+> train on normal video from the scene — I'm level with the older ones and below
+> the recent ones.
+
+**The three groups, and why grouping matters.**
+
+Think of it as three different games, not one leaderboard:
+
+| Group | What it gets to use | Where they land |
+|---|---|---|
+| One-class | Hours of normal video *from your scene*, plus a training run | 74–81 on ShT |
+| Training-free | Nothing from your scene at all | 60–80 on ShT |
+| Us | Nothing, plus one sentence | 73.4 on ShT |
+
+A one-class method that scores 79 has been shown the actual site. You haven't.
+Comparing the raw numbers without saying that is the mistake the table is
+grouped to prevent.
+
+---
+
+**"Why do the other training-free methods score lower than you?"**
+
+*This is the question where it is easy to over-claim, and where over-claiming
+would be caught. Learn the honest version.*
+
+The tempting answer is "because of my sentence." **That is wrong, and your own
+Table 9 proves it.**
+
+> Zero-shot CLIP gets 60.9 on ShanghaiTech. I get 73.4. But with **no sentence
+> at all**, my pipeline already gets 70.7. So the sentence accounts for 2.7 of
+> that 12.5-point gap. The other ~10 points come from four things that have
+> nothing to do with domain context:
+>
+> - **Prompt ensembling** — several phrasings averaged, instead of one prompt.
+> - **Temporal smoothing** — a 31-frame window, worth about four points.
+> - **Per-clip normalisation** — worth close to twenty points on this benchmark
+>   on its own. Plain zero-shot CLIP pools raw scores across twelve cameras,
+>   which is the exact bug that cost me my first run.
+> - **A bigger backbone** — ViT-L/14 against the smaller CLIP those baselines use.
+
+**So the honest sentence is:** *"Most of my margin over the plain baselines is
+protocol and scale, not language. The evidence that language is doing work is
+the mismatched condition — a wrong description costs ten points — not the
+comparison against other papers."*
+
+Saying that yourself is worth far more than claiming the twelve points. If you
+claim the twelve and a panelist opens your own Table 9, you lose the room.
+
+**On LLaVA-1.5 (59.6) and Video-ChatGPT (69.1):** these are much bigger models
+scoring at or below you. That's not because you beat them at understanding
+video. It's task fit — they're conversational models being asked to emit a
+number, and AUROC measures how well frames are *ranked*, which is not what they
+are built to produce.
+
+---
+
+**"Then what are you actually doing that the others aren't?"**
+
+One thing, and it is not a score:
+
+> Every method in that table supplies text and reports that it helps. **Not one
+> of them ever supplies text that is deliberately wrong.** AnyAnomaly tunes how
+> the prompt is phrased and ablates its visual context modules, but its query is
+> always a correct anomaly class for the benchmark. So all of them show the text
+> *helps*. None shows the text is *responsible*.
+>
+> That's the difference between a method whose text is decorative and one whose
+> text is load-bearing, and the only way to tell them apart is to corrupt the
+> text and hold everything else fixed. That is what my mismatched condition
+> does, and it is why the pipeline is fully frozen — so there is nothing else
+> the change could be attributed to.
+
+**One sentence if you're pressed:** *"They built better detectors. I built the
+experiment that tells you whether the language is doing the work."*
+
+---
+
+**"Are these numbers reliable? Where did they come from?"**
+
+*Answer this one straight — it shows you handle sources carefully.*
+
+> Every comparison figure in my table comes from Tables 5 and 6 of the
+> AnyAnomaly paper, WACV 2026. I took them from one source on purpose: it keeps
+> the evaluation protocol constant across rows, and it means the whole table can
+> be checked against a single document rather than fifteen.
+>
+> My own two numbers are measured on our A40 and carry run manifests.
+
+**Know this too, in case it comes up:** an earlier draft compared against LAVAD
+on ShanghaiTech. LAVAD reports on UCF-Crime and XD-Violence and on **neither**
+of our benchmarks — that comparison was wrong and has been removed. If asked
+about LAVAD now, say it isn't comparable because it doesn't evaluate on these
+datasets.
+
+
+**"How do you differ from AnyAnomaly? It is training-free, uses text at
+inference, and beats you on both your benchmarks."**
+
+*The hardest question on the method, and now the best-evidenced answer you have.
+AnyAnomaly is WACV 2026, and it uses exactly your two benchmarks. Learn the four
+moves below in order.*
+
+**1. Concede the number first, without hedging.**
+
+> Yes. AnyAnomaly gets 87.3 on Avenue and 79.7 on ShanghaiTech. I get 70.6 and
+> 73.4. It is ahead on both and I report that in the paper.
+
+**2. Then give the comparison that actually isolates my contribution.**
+
+> But the baseline that tests *my* claim is zero-shot CLIP, because that is my
+> pipeline with the scene description removed. AnyAnomaly's own Table 6 reports
+> it at 60.9 on ShanghaiTech. I get 73.4. But be careful with that gap: with
+> **no sentence at all** I already get 70.7, so the sentence is worth 2.7 of
+> it and the rest is smoothing, per-clip normalisation, prompt ensembling and
+> a bigger backbone. The evidence for the sentence is the mismatched condition,
+> not this comparison.
+
+*Do not inflate this. The twelve-point gap is real but mostly protocol; the
+honest figure for the sentence is the 2.7 your own Table 9 reports, and the
+falsifying control is the evidence that matters.*
+
+**3. Then the three things the AUROC column does not show.**
+
+> **The text points the opposite way.** AnyAnomaly asks the user to name what is
+> *abnormal* — "bicycle", "fighting". I ask for a description of what is
+> *normal*, and an anomaly is a departure from it. Their own introduction says
+> abnormal events are "rare and diverse, making it difficult to construct
+> large-scale datasets" — a method that needs the operator to enumerate them in
+> advance inherits that problem. A description of normality does not.
+>
+> **They are told the answer key.** To get 79.7 they state that "each anomaly
+> class in the dataset was treated as X, and the maximum anomaly score among all
+> computed scores was assigned." So the model is given the benchmark's anomaly
+> taxonomy and scored on the max over it. I am given a scene description and
+> nothing about the anomaly classes. Those two columns are not equally informed
+> systems.
+>
+> **The compute differs by about an order of magnitude.** Three LVLM queries per
+> segment plus CLIP key-frame selection plus multi-scale WinCLIP windowing,
+> against my one frozen CLIP pass per frame in 7 GB.
+
+**4. Then land where the contribution actually is.**
+
+> None of that makes me better than them at detection. It makes the gap partly a
+> difference in task specification and budget. My claim is elsewhere: AnyAnomaly
+> ablates its *visual* context modules and tunes prompt *style*, but never
+> supplies a deliberately **wrong** text. The query is always a correct anomaly
+> class for the benchmark. So their ablations show performance varies with
+> phrasing and with visual context — they never show the text is causally
+> responsible for adapting to the domain, because no condition corrupts the text
+> and holds everything else fixed. That is exactly Gap G2, and the mismatched
+> condition is built to close it.
+
+**If pushed to one sentence:** *"They built a better detector; I built the
+experiment that tells you whether the language is doing the work."*
+
+**"Did you tune on the test set?"****"Did you tune on the test set?"**
 
 > Partly, and we control for it. These benchmarks define no validation split, so
 > we split the clips in half, chose settings on one half, and report the half we
@@ -1333,15 +1908,25 @@ hours of work.
 
 1. **Why context helps on one benchmark and not the other** — the scene-count
    explanation is supported, but the per-camera estimates are noisy.
-2. **Which direction the prototypes collapse.** We measured *how much* (§5.4),
-   not whether they move toward or away from where the video sits — which is what
-   would explain why an accurate description is the worst of the three.
-3. **The industrial-versus-surveillance contrast is argued, not measured.** The
-   sweep has never been run on the industrial benchmark, and both video datasets
-   are outdoor pedestrian scenes.
-4. **M4 has produced nothing.** The explanation module has never run on video.
-5. **Does AnyAnomaly already run a wrong-text control?** Needs checking. Read it
-   (arXiv 2503.04504) before the viva.
+2. ~~Which direction the prototypes collapse.~~ **Answered, Phase 3.** The
+   accurate description drags both arrows onto the video (+0.067); the wrong one
+   moves them away (−0.017). See §5.4, "Update, Phase 3".
+3. **Both video datasets are outdoor pedestrian scenes.** The sweep is scoped to
+   video; MVTec is a detection baseline only, by decision (Phase 3), not an
+   omission. If asked "why not run the sweep on MVTec?": the thesis is *video*
+   anomaly detection, and the better domain contrast is UCF-Crime and
+   XD-Violence — crime footage from streets, shops and highways against campus
+   walkways — which is next.
+4. **M4 has not explained anything yet.** It now runs on video and writes the
+   per-camera sentences (§6.7b), but it has not yet been run on flagged events to
+   produce explanations.
+5. ~~Does AnyAnomaly already run a wrong-text control?~~ **Checked, September
+   2026 — it does not.** AnyAnomaly ablates prompt *style* (simple, reasoning,
+   consideration) and reports that the choice matters, but never supplies a
+   deliberately wrong description. So it establishes that performance varies
+   with phrasing, not that the text is causally responsible. That distinction is
+   the whole of Gap G2, and it survives. See §8.3, "How do you differ from
+   AnyAnomaly?"
 6. **The smoothing window was chosen on the test set** — no validation split
    exists for these benchmarks.
 
@@ -1368,12 +1953,17 @@ If a question goes somewhere you didn't prepare, return to these.
 
 | Priority | Work | Cost | Why |
 |---|---|---|---|
-| 1 | A separate description per camera | ~1 hr | All 12 views currently share one sentence — and §6.7 says identifying the view *is* the mechanism |
-| 2 | The context sweep on the industrial benchmark | ~1 hr | Your concept-shift argument needs that contrast measured, not just argued |
-| 3 | Region-level scoring | 1–2 sessions | The best remaining shot at a higher number |
-| 4 | Run M4 | ~1 session | A quarter of the framework; makes a strong demo |
-| 5 | Swap descriptions between the two video datasets | ~1 hr | A fairer transfer test than the factory description |
-| 6 | Which direction the prototypes move | minutes | Completes the mechanism from §5.4 |
+| Status | Work | Why |
+|---|---|---|
+| ✅ done | A separate description per camera | 0.749 by hand, **0.751 written by M4** — §6.7b |
+| ✅ done | Which direction the prototypes move | Completes the mechanism — §5.4 update |
+| ✅ done | Error bar on the within-view control | §6.7 update |
+| dropped | Context sweep on the industrial benchmark | Thesis is video; UCF-Crime / XD-Violence give a better domain contrast |
+| covered | Swap descriptions between the two video datasets | The per-camera shuffled control already tests wrong-but-realistic text |
+| next | Region-level scoring | The best remaining shot at a higher number |
+| ✅ done | UCF-Crime | 0.824; mechanism holds, "grows with scenes" refuted — §6.7c |
+| next | XD-Violence | Second LAVAD benchmark; metric is AP |
+| later | M4 explanations of flagged events | Result 6, still pending |
 
 ## 9.2 Phase 4
 

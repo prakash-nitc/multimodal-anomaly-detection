@@ -110,6 +110,12 @@ def heading(doc, text: str, level: int, first: bool) -> None:
     r.font.name = SANS
     r.font.bold = True
     r.font.color.rgb = ACCENT if level <= 2 else INK
+    # Outline level only -- the look stays exactly as set above, but Word's
+    # navigation pane populates, which is what makes a long document usable
+    # as something you jump around in rather than only read straight through.
+    lvl = OxmlElement("w:outlineLvl")
+    lvl.set(qn("w:val"), str(level - 1))
+    p._p.get_or_add_pPr().append(lvl)
     if level == 1:
         rule(p, "0D6B67")
 

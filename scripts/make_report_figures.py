@@ -38,26 +38,34 @@ import os
 
 import matplotlib
 matplotlib.use("Agg")
+
+import figsave
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
 
-INK, MUTED = "#141C1E", "#5F6E70"
+# MUTED was #5F6E70, ~4.4:1 on white -- the same washed-out grey the
+# architecture figure carried, and the reason secondary labels read as
+# faded in print. Darkened to ~9:1, matching make_architecture.py so every
+# figure in the report now uses one ink for secondary text.
+INK, MUTED = "#101718", "#394547"
 VIS, CTX, TMP = "#0D6B67", "#B4571A", "#3B5BA5"
 OK, BAD = "#1E8449", "#B03A2E"
 GRID = "#D8E0DF"
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Segoe UI", "DejaVu Sans"],
-    "axes.edgecolor": "#B9C6C5", "axes.linewidth": 0.7,
-    "xtick.color": MUTED, "ytick.color": MUTED,
-    "xtick.labelsize": 6.5, "ytick.labelsize": 6.5,
-    "axes.labelsize": 7.2, "axes.titlesize": 7.6,
+    "axes.edgecolor": "#8E9E9D", "axes.linewidth": 0.9,
+    "xtick.color": INK, "ytick.color": INK,
+    "xtick.labelsize": 7.5, "ytick.labelsize": 7.5,
+    "axes.labelsize": 8.3, "axes.titlesize": 8.7,
+    "axes.labelweight": "bold", "axes.titleweight": "bold",
+    "font.weight": "medium",
 })
 
 
 def _panel_label(ax, s):
-    ax.text(-0.02, 1.06, s, transform=ax.transAxes, fontsize=8.4,
+    ax.text(-0.02, 1.06, s, transform=ax.transAxes, fontsize=10.1,
             fontweight="bold", color=INK, ha="right", va="bottom")
 
 
@@ -75,8 +83,15 @@ def dataset_samples(assets, out):
         a = sorted(glob.glob(os.path.join(d, f"{clip}_anomaly_*.jpg")))
         if n and a:
             pairs.append((label, n[0], a[0]))
-    if not pairs:
-        return None
+    # Bailing only on zero pairs meant a machine holding a subset of the frames
+    # drew a 2x4 grid with empty columns and wrote it over a good committed
+    # figure -- an 80% smaller file that still looked like a successful run.
+    # The full set or nothing.
+    if len(pairs) < 4:
+        raise FileNotFoundError(
+            "dataset_samples needs 4 normal/anomalous frame pairs under "
+            f"{root}, found {len(pairs)}. Regenerate where the frame assets "
+            "live rather than overwriting the committed figure with a partial one.")
 
     fig, axes = plt.subplots(2, 4, figsize=(6.9, 2.95))
     for j, (label, npath, apath) in enumerate(pairs):
@@ -88,16 +103,16 @@ def dataset_samples(assets, out):
             for sp in ax.spines.values():
                 sp.set_color(col); sp.set_linewidth(1.8)
             if j == 0:
-                ax.set_ylabel(tag, fontsize=7.4, color=col, fontweight="bold")
+                ax.set_ylabel(tag, fontsize=8.9, color=col, fontweight="bold")
             if i == 0:
-                ax.set_title(label, fontsize=6.8, color=INK, pad=3)
+                ax.set_title(label, fontsize=8.2, color=INK, pad=3)
     fig.text(0.5, 0.015,
              "Each column is one camera. Only the event differs between the two "
              "rows — the scene, angle and lighting are identical.",
-             ha="center", fontsize=6.4, color=MUTED)
+             ha="center", fontsize=7.7, color=MUTED)
     fig.tight_layout(rect=(0, 0.045, 1, 1), h_pad=0.6, w_pad=0.4)
     p = os.path.join(out, "fig_dataset_samples.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 
@@ -124,7 +139,7 @@ def detection_example(assets, out):
     fired = np.where(sm >= 0.45)[0]
     if len(fired):
         ax.axvspan(fired[0], fired[-1], ymin=0.0, ymax=0.045, color=OK, lw=0)
-        ax.text((fired[0] + fired[-1]) / 2, -0.10, "detected", fontsize=6.4,
+        ax.text((fired[0] + fired[-1]) / 2, -0.10, "detected", fontsize=7.7,
                 color=OK, ha="center", va="top", fontweight="bold")
 
     ax.set_xlim(0, len(sm)); ax.set_ylim(-0.18, 1.40)
@@ -132,13 +147,13 @@ def detection_example(assets, out):
     ax.set_yticks([0, 0.5, 1.0])
     ax.grid(axis="y", color=GRID, lw=0.5)
     ax.set_axisbelow(True)
-    ax.legend(fontsize=6.2, loc="upper left", frameon=True, framealpha=0.95,
+    ax.legend(fontsize=7.4, loc="upper left", frameon=True, framealpha=0.95,
               edgecolor=GRID, ncol=2, handlelength=1.6)
     ax.set_title(f"Detection on {clip} — smoothing suppresses isolated spikes "
-                 f"while the event survives", fontsize=7.2, color=INK, pad=5)
+                 f"while the event survives", fontsize=8.6, color=INK, pad=5)
     fig.tight_layout()
     p = os.path.join(out, "fig_detection_example.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 
@@ -168,20 +183,20 @@ def context_effect(assets, out):
         ax.annotate("", xy=(b + 12, m[a:b].mean()), xytext=(b + 12, mm[a:b].mean()),
                     arrowprops=dict(arrowstyle="<->", color=INK, lw=0.9))
         ax.text(b + 20, (m[a:b].mean() + mm[a:b].mean()) / 2,
-                "separation during\nthe event", fontsize=6.2, color=INK,
+                "separation during\nthe event", fontsize=7.4, color=INK,
                 va="center", linespacing=1.4)
 
     ax.set_xlim(0, len(m)); ax.set_ylim(-0.08, 1.30)
     ax.set_xlabel("frame index"); ax.set_ylabel("smoothed score")
     ax.set_yticks([0, 0.5, 1.0])
     ax.grid(axis="y", color=GRID, lw=0.5); ax.set_axisbelow(True)
-    ax.legend(fontsize=6.2, loc="upper left", frameon=True, framealpha=0.95,
+    ax.legend(fontsize=7.4, loc="upper left", frameon=True, framealpha=0.95,
               edgecolor=GRID, handlelength=2.0)
     ax.set_title(f"Same clip ({clip}), same frozen models — only the sentence differs",
-                 fontsize=7.2, color=INK, pad=5)
+                 fontsize=8.6, color=INK, pad=5)
     fig.tight_layout()
     p = os.path.join(out, "fig_context_effect.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 
@@ -211,10 +226,10 @@ def camera_baselines(assets, out):
                         color=cmap(i % 20), linewidths=0, label=v)
     axes[0].set_xticks([]); axes[0].set_yticks([])
     axes[0].set_title("Frame embeddings, coloured by camera", pad=4)
-    axes[0].legend(fontsize=5.0, ncol=4, loc="lower center", frameon=True,
+    axes[0].legend(fontsize=6.0, ncol=4, loc="lower center", frameon=True,
                    edgecolor=GRID, framealpha=0.95, handletextpad=0.2,
                    columnspacing=0.7, markerscale=1.6,
-                   title="camera", title_fontsize=5.2)
+                   title="camera", title_fontsize=6.2)
     _panel_label(axes[0], "(a)")
 
     data = [sim[view == v] for v in views]
@@ -227,20 +242,23 @@ def camera_baselines(assets, out):
     for k in ("whiskers", "caps"):
         for a in bp[k]:
             a.set(color="#8895A0", lw=0.7)
-    axes[1].set_xticklabels(views, fontsize=5.8)
+    axes[1].set_xticklabels(views, fontsize=7.0)
     axes[1].set_xlabel("camera view"); axes[1].set_ylabel("similarity to global mean")
     axes[1].grid(axis="y", color=GRID, lw=0.5); axes[1].set_axisbelow(True)
     axes[1].set_title("Each camera sits at its own baseline", pad=4)
     _panel_label(axes[1], "(b)")
 
-    fig.text(0.5, 0.012,
+    # Raised off the canvas edge: at the larger type the second line's
+    # descenders ran off the bottom, which figsave's clip check caught. The
+    # reserved strip below the axes grows to match.
+    fig.text(0.5, 0.035,
              "Twelve cameras occupy twelve regions of the embedding space (a) "
              "and score at different baselines (b),\nso the same numeric score "
              "means different things under different cameras.",
-             ha="center", fontsize=6.3, color=MUTED, linespacing=1.5)
-    fig.tight_layout(rect=(0, 0.085, 1, 1), w_pad=1.4)
+             ha="center", fontsize=7.6, color=MUTED, linespacing=1.5)
+    fig.tight_layout(rect=(0, 0.135, 1, 1), w_pad=1.4)
     p = os.path.join(out, "fig_camera_baselines.png")
-    fig.savefig(p, dpi=400, facecolor="white"); plt.close(fig)
+    figsave.save(fig, p); plt.close(fig)
     return p
 
 

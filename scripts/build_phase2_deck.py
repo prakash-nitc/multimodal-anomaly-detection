@@ -215,43 +215,136 @@ def figure_slide(title, eyebrow, png, read, tone="accent"):
     return s
 
 
-def refs_slide(title, eyebrow, columns):
-    """References, grouped by the role each group plays in the argument rather
-    than alphabetically -- in a viva the grouping is the useful information.
+def refs_slide(title, eyebrow, entries):
+    """A plain numbered reference list, set the way the report sets it.
 
-    `columns` is a list of columns; each column is a list of (heading, entries)
-    groups. Entry rows are given room for two wrapped lines, because most
-    entries need one and the longest need two, and a fixed short step makes the
-    long ones collide with the entry beneath.
+    Full Elsevier-style entries run 200-290 characters. Two columns would wrap
+    almost every one onto four short lines, so this is a single column across
+    the full text width. No group headings and no accent colour: on a reference
+    slide the number is the only thing anyone needs to find.
     """
     s = slide(title, eyebrow)
-    n = len(columns)
-    col_w = (CW - 0.5 * (n - 1)) / n
-    for ci, groups in enumerate(columns):
-        x = L + ci * (col_w + 0.5)
-        y = 1.98
-        for heading, entries in groups:
-            box(s, x, y, col_w, 0.26, heading.upper(), 10, bold=True,
-                color=ACCENT)
-            y += 0.34
-            for authors, rest in entries:
-                sh = s.shapes.add_textbox(Inches(x), Inches(y), Inches(col_w),
-                                          Inches(0.42))
-                tf = sh.text_frame
-                tf.word_wrap = True
-                tf.margin_left = tf.margin_right = 0
-                tf.margin_top = tf.margin_bottom = 0
-                p = tf.paragraphs[0]
-                p.line_spacing = 1.1
-                r = p.add_run(); r.text = authors + "  "
-                r.font.size = Pt(10); r.font.bold = True
-                r.font.color.rgb = INK; r.font.name = FONT
-                r = p.add_run(); r.text = rest
-                r.font.size = Pt(10); r.font.color.rgb = MUTED; r.font.name = FONT
-                y += 0.44
-            y += 0.14
+    y = 1.92
+    for n, text in entries:
+        sh = s.shapes.add_textbox(Inches(L), Inches(y), Inches(CW), Inches(0.30))
+        tf = sh.text_frame
+        tf.word_wrap = True
+        tf.margin_left = tf.margin_right = 0
+        tf.margin_top = tf.margin_bottom = 0
+        p = tf.paragraphs[0]
+        p.line_spacing = 1.02
+        r = p.add_run(); r.text = "[%d]  " % n
+        r.font.size = Pt(9); r.font.bold = True
+        r.font.color.rgb = INK; r.font.name = FONT
+        r = p.add_run(); r.text = text
+        r.font.size = Pt(9); r.font.color.rgb = INK; r.font.name = FONT
+        y += 0.335
     return s
 
+
+
+# ================================================================ REFERENCES
+# Generated from docs/09_paper/references.bib by scripts/make_refs.py, in the
+# paper's own first-citation order -- so [n] on a slide is [n] in the printed
+# report and the two cannot drift apart. Regenerate after editing the .bib:
+#     PYTHONIOENCODING=utf-8 python scripts/make_refs.py > refs_generated.py
+REFS = [
+    ('wilkinghoff2026context',
+     'K. Wilkinghoff, N. Madan, J. M. Valverde, K. Nasrollahi, R. T. Ionescu, R. Wisniewski, T. B. Moeslund, W. Wang, Z.-H. Tan, Out of context: Reliability in multimodal anomaly detection requires contextual inference, arXiv preprint arXiv:2604.13252 (2026).'),
+    ('radford2021clip',
+     'A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G. Krueger, I. Sutskever, Learning transferable visual models from natural language supervision, in: Proceedings of the International Conference on Machine Learning (ICML), 2021, pp. 8748–8763.'),
+    ('jeong2023winclip',
+     'J. Jeong, Y. Zou, T. Kim, D. Zhang, A. Ravichandran, O. Dabeer, WinCLIP: Zero-/few-shot anomaly classification and segmentation, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2023, pp. 19606–19616.'),
+    ('zhou2024anomalyclip',
+     'Q. Zhou, G. Pang, Y. Tian, S. He, J. Chen, AnomalyCLIP: Object-agnostic prompt learning for zero-shot anomaly detection, in: Proceedings of the International Conference on Learning Representations (ICLR), 2024.'),
+    ('bergmann2019mvtec',
+     'P. Bergmann, M. Fauser, D. Sattlegger, C. Steger, MVTec AD — A comprehensive real-world dataset for unsupervised anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2019, pp. 9592–9600.'),
+    ('roth2022patchcore',
+     'K. Roth, L. Pemula, J. Zepeda, B. Schölkopf, T. Brox, P. Gehler, Towards total recall in industrial anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2022, pp. 14318–14328.'),
+    ('zanella2024lavad',
+     'L. Zanella, W. Menapace, M. Mancini, Y. Wang, E. Ricci, Harnessing large language models for training-free video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18527–18536.'),
+    ('ye2025vera',
+     'M. Ye, W. Liu, P. He, VERA: Explainable video anomaly detection via verbalized learning of vision-language models, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2025. ArXiv:2412.01095.'),
+    ('anyanomaly2025',
+     'S. Ahn, Y. Jo, K. Lee, S. Kwon, I. Hong, S. Park, AnyAnomaly: Zero-shot customizable video anomaly detection with LVLM, in: Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), 2026, pp. 3026–3035.'),
+    ('wu2024ovvad',
+     'P. Wu, X. Zhou, G. Pang, Y. Sun, J. Liu, P. Wang, Y. Zhang, Open-vocabulary video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18297–18307.'),
+    ('patel2015visual',
+     'V. M. Patel, R. Gopalan, R. Li, R. Chellappa, Visual domain adaptation: A survey of recent advances, IEEE Signal Processing Magazine 32 (2015) 53–69.'),
+    ('wang2018deep',
+     'M. Wang, W. Deng, Deep visual domain adaptation: A survey, Neurocomputing 312 (2018) 135–153.'),
+    ('wilson2020survey',
+     'G. Wilson, D. J. Cook, A survey of unsupervised deep domain adaptation, ACM Computing Surveys 51 (2020) 1–46.'),
+    ('liu2022deep',
+     'X. Liu, C. Yoo, F. Xing, H. Oh, G. El Fakhri, J.-W. Kang, J. Woo, Deep unsupervised domain adaptation: A review of recent advances and perspectives, APSIPA Transactions on Signal and Information Processing 11 (2022). ArXiv:2208.07422.'),
+    ('singhal2023domain',
+     'P. Singhal, R. Walambe, S. Ramanna, K. Kotecha, Domain adaptation: Challenges, methods, datasets, and applications, IEEE Access 11 (2023) 6973–7020.'),
+    ('fan2026llm',
+     'L. Fan, F. Liu, C. Chen, Domain adaptation of large language models for geotechnical applications, Solid Earth Sciences (2026). Art. no. 100285.'),
+    ('adavad2024',
+     'D. Guo, Y. Fu, S. Li, Ada-VAD: Domain adaptable video anomaly detection, in: Proceedings of the SIAM International Conference on Data Mining (SDM), 2024, pp. 634–642.'),
+    ('lu2020fewshot',
+     'Y. Lu, F. Yu, M. K. K. Reddy, Y. Wang, Few-shot scene-adaptive anomaly detection, in: Proceedings of the European Conference on Computer Vision (ECCV), 2020, pp. 125–141.'),
+    ('aich2023zxvad',
+     'A. Aich, K.-C. Peng, A. K. Roy-Chowdhury, Cross-domain video anomaly detection without target domain adaptation, in: Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), 2023, pp. 2578–2590.'),
+    ('kouw2018introduction',
+     'W. M. Kouw, M. Loog, An introduction to domain adaptation and transfer learning, arXiv preprint arXiv:1812.11806 (2018).'),
+    ('liu2018shanghaitech',
+     'W. Liu, W. Luo, D. Lian, S. Gao, Future frame prediction for anomaly detection — A new baseline, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2018, pp. 6536–6545.'),
+    ('dosovitskiy2021vit',
+     'A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, N. Houlsby, An image is worth 16x16 words: Transformers for image recognition at scale, in: Proceedings of the International Conference on Learning Representations (ICLR), 2021.'),
+    ('vaswani2017attention',
+     'A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, I. Polosukhin, Attention is all you need, in: Advances in Neural Information Processing Systems (NeurIPS), 2017, pp. 5998–6008.'),
+    ('liu2023llava',
+     'H. Liu, C. Li, Q. Wu, Y. J. Lee, Visual instruction tuning, in: Advances in Neural Information Processing Systems (NeurIPS), 2023, pp. 34892–34916.'),
+    ('dettmers2023qlora',
+     'T. Dettmers, A. Pagnoni, A. Holtzman, L. Zettlemoyer, QLoRA: Efficient finetuning of quantized LLMs, in: Advances in Neural Information Processing Systems (NeurIPS), 2023, pp. 10088–10115.'),
+    ('lu2013avenue',
+     'C. Lu, J. Shi, J. Jia, Abnormal event detection at 150 FPS in MATLAB, in: Proceedings of the IEEE International Conference on Computer Vision (ICCV), 2013, pp. 2720–2727.'),
+    ('fawcett2006roc',
+     'T. Fawcett, An introduction to ROC analysis, Pattern Recognition Letters 27 (2006) 861–874.'),
+    ('bradley1997auc',
+     'A. P. Bradley, The use of the area under the ROC curve in the evaluation of machine learning algorithms, Pattern Recognition 30 (1997) 1145–1159.'),
+    ('davis2006pr',
+     'J. Davis, M. Goadrich, The relationship between precision-recall and ROC curves, in: Proceedings of the International Conference on Machine Learning (ICML), 2006, pp. 233–240.'),
+    ('scholkopf2001oneclass',
+     'B. Schölkopf, J. C. Platt, J. Shawe-Taylor, A. J. Smola, R. C. Williamson, Estimating the support of a high-dimensional distribution, Neural Computation 13 (2001) 1443–1471.'),
+    ('lv2021mpn',
+     'H. Lv, C. Chen, Z. Cui, C. Xu, Y. Li, J. Yang, Learning normal dynamics in videos with meta prototype network, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2021, pp. 15425–15434.'),
+    ('yan2023fpdm',
+     'C. Yan, S. Zhang, Y. Liu, G. Pang, W. Wang, Feature prediction diffusion model for video anomaly detection, in: Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV), 2023, pp. 5527–5537.'),
+    ('zhou2024mapdm',
+     'H. Zhou, J. Cai, Y. Ye, Y. Feng, C. Gao, J. Yu, Z. Song, W. Yang, Video anomaly detection with motion and appearance guided patch diffusion model, arXiv preprint arXiv:2412.09026 (2024).'),
+    ('micorek2024mulde',
+     'J. Micorek, H. Possegger, D. Narnhofer, H. Bischof, M. Kampel, MULDE: Multiscale log-density estimation via denoising score matching for video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18868–18877.'),
+    ('girdhar2023imagebind',
+     'R. Girdhar, A. El-Nouby, Z. Liu, M. Singh, K. V. Alwala, A. Joulin, I. Misra, ImageBind: One embedding space to bind them all, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2023, pp. 15180–15190.'),
+    ('maaz2024videochatgpt',
+     'M. Maaz, H. Rasheed, S. Khan, F. Khan, Video-ChatGPT: Towards detailed video understanding via large vision and language models, in: Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (ACL), 2024, pp. 12585–12602.'),
+]
+
+REF_NO = {k: i for i, (k, _t) in enumerate(REFS, 1)}
+
+
+def cite(*keys):
+    """Inline marker, set the way the report sets one.
+
+    Numbers are sorted and runs of three or more collapse to a range, so
+    citing all six surveys reads [11-15, 20] rather than a bare list in
+    whatever order the argument happened to name them.
+    """
+    ns = sorted({REF_NO[k] for k in keys})
+    parts, i = [], 0
+    while i < len(ns):
+        j = i
+        while j + 1 < len(ns) and ns[j + 1] == ns[j] + 1:
+            j += 1
+        if j - i >= 2:
+            parts.append("%d–%d" % (ns[i], ns[j]))
+        else:
+            parts.extend(str(n) for n in ns[i:j + 1])
+        i = j + 1
+    return "[" + ", ".join(parts) + "]"
 
 
 # ================================================================ TITLE
@@ -306,7 +399,9 @@ box(s, L, 6.30, CW, 0.5,
 # ================================================================ 2 SHIFT
 s = slide("The literature solves the adjacent problem", "Research gap  ·  1 of 2")
 box(s, L, 1.95, CW, 0.4,
-    "Domain adaptation distinguishes between kinds of difference between places.",
+    "Domain adaptation distinguishes between kinds of difference between "
+    "places. " + cite("liu2022deep", "wang2018deep", "wilson2020survey", "singhal2023domain",
+                      "patel2015visual", "kouw2018introduction"),
     16, color=INK_2)
 
 table(s, [
@@ -318,8 +413,9 @@ table(s, [
 callout(s, L, 4.85, CW, 1.35, "What the surveys say",
         "“Concept shift is usually not a common problem in popular object "
         "classification… this review mainly focuses on covariate shift.”   "
-        "— Liu et al., 2022.   Singhal et al. (2023) list stable p(y|x) as the "
-        "first condition under which domain adaptation is justified.",
+        "— Liu et al., 2022 " + cite("liu2022deep") + ".   Singhal et al. "
+        + cite("singhal2023domain") + " list stable p(y|x) as the first condition "
+        "under which domain adaptation is justified.",
         tone="caution", size=14.5)
 
 box(s, L, 6.45, CW, 0.4,
@@ -344,9 +440,9 @@ table(s, [
 callout(s, L, 5.0, CW, 1.35, "The gap we target",
         "Methods that align appearance cannot help here — the appearance is "
         "already identical. Two domains can share p(x) exactly while the "
-        "labelling function differs. A 2026 position paper argues the same "
-        "premise independently; what is missing is a test of whether supplied "
-        "context does any work.", size=14.5)
+        "labelling function differs. A 2026 position paper " + cite("wilkinghoff2026context")
+        + " argues the same premise independently; what is missing is a test "
+        "of whether supplied context does any work.", size=14.5)
 
 # ================================================================ 4 APPROACH
 s = slide("DA-ZVAD: adapt by writing a sentence", "Proposed framework")
@@ -357,19 +453,24 @@ img = next((c for c in (
     os.path.join(_here, "..", "docs", "06_presentations", "dazvad_architecture.png"),
 ) if os.path.isfile(c)), "")
 if img:
-    s.shapes.add_picture(img, Inches(L), Inches(1.95), width=Inches(7.5))
-box(s, L + 7.85, 1.95, 3.68, 0.3, "EVERY MODEL FROZEN", 11.5, bold=True,
+    # The supervisor's review was that the figure did not read at projection
+    # size. The figure itself was redrawn darker and larger (make_architecture.py);
+    # the other half of that fix is here -- giving it 8.85in instead of 7.5in by
+    # narrowing the module list beside it, which the figure now restates in
+    # more detail anyway.
+    s.shapes.add_picture(img, Inches(L), Inches(1.80), width=Inches(8.85))
+box(s, L + 9.15, 1.80, 2.90, 0.3, "EVERY MODEL FROZEN", 11.5, bold=True,
     color=ACCENT)
 bullets(s, [
-    ("M1", "Frozen CLIP scores each frame against “normal” and “abnormal” text."),
+    ("M1", "Frozen CLIP " + cite("radford2021clip") + " scores each frame: "
+           "normal vs abnormal text."),
     ("M2", "Moving average over time — no parameters."),
     ("M3", "The scene description. The adaptation mechanism."),
-    ("M4", "Frozen LLaVA explains each detected event."),
-], 2.45, left=L + 7.85, width=3.68, size=13, gap=0.78)
+    ("M4", "Frozen LLaVA " + cite("liu2023llava") + " explains each detected event."),
+], 2.30, left=L + 9.15, width=2.90, size=11.5, gap=0.82)
 
-callout(s, L + 7.85, 5.65, 3.68, 1.15, "Deployment",
-        "Moving to a new site = editing one sentence. No target data. "
-        "No gradients.", size=13)
+callout(s, L + 9.15, 5.75, 2.90, 1.15, "Deployment",
+        "Editing one sentence. No target data, no gradients.", size=13)
 
 # ================================================================ 5 FROZEN
 s = slide("Why freezing everything is the point", "Method  ·  design rationale")
@@ -385,9 +486,10 @@ bullets(s, [
 
 callout(s, L, 4.75, CW, 1.5, "Identifiability",
         "This is what makes the adaptation claim testable rather than asserted. "
-        "You cannot run our central experiment on the competing systems — their "
-        "text is learned on source data, or entangled in an LLM prior, or "
-        "accompanied by a trained adapter.", size=16)
+        "You cannot run our central experiment on the competing systems — "
+        "their text is learned on source data " + cite("zhou2024anomalyclip") + ", or "
+        "entangled in an LLM prior " + cite("zanella2024lavad") + ", or accompanied by a "
+        "trained adapter " + cite("adavad2024") + ".", size=16)
 
 box(s, L, 6.5, CW, 0.4,
     "It also means the claim can be falsified — which is the next slide.",
@@ -415,10 +517,12 @@ callout(s, L, 5.15, CW, 1.35, "Predicted signature, fixed before measurement",
 # ================================================================ 7 SETUP
 s = slide("What we ran", "Experiments  ·  setup")
 table(s, [
-    ["Benchmarks", "ShanghaiTech (12 views) and CUHK Avenue (1 view)"],
+    ["Benchmarks", "ShanghaiTech " + cite("liu2018shanghaitech") + " (12 views) and "
+                   "CUHK Avenue " + cite("lu2013avenue") + " (1 view)"],
     ["Scale", "128 test clips · 28,118 frames · frame-level ground truth"],
     ["Hardware", "NVIDIA A40, college GPU server"],
-    ["Backbone", "CLIP ViT-L/14 (LAION-2B), frozen · PyTorch 2.3.1 / CUDA 12.1"],
+    ["Backbone", "CLIP ViT-L/14 " + cite("radford2021clip", "dosovitskiy2021vit") + " (LAION-2B), "
+                  "frozen · PyTorch 2.3.1 / CUDA 12.1"],
     ["Runs", "5 full experiment runs + cached-embedding analysis"],
 ], L, 2.0, CW, col_w=[2.4, 9.23], size=15, header=False, row_h=0.52)
 
@@ -472,7 +576,8 @@ bullets(s, [
 ], 1.95, size=16, gap=0.88)
 
 box(s, L, 4.5, CW, 0.35,
-    "The published protocol for this benchmark normalises each clip first. "
+    "The published protocol for this benchmark " + cite("liu2018shanghaitech") + " "
+    "normalises each clip first. "
     "We were not doing it.", 15.5, color=MUTED)
 
 rect(s, L, 5.05, CW, 1.35, ACCENT_LT)
@@ -721,23 +826,38 @@ callout(s, L, 5.3, CW, 1.55, "Why these are in the deck",
 
 # ================================================================ 16 POSITION
 s = slide("Where this sits against the literature", "Assessment")
+# Rebuilt Sep 2026. The previous version compared our ShanghaiTech figure with
+# LAVAD's, but LAVAD reports on UCF-Crime and XD-Violence and not on either
+# benchmark used here -- a cross-dataset comparison presented as a same-dataset
+# one. The comparison that isolates our claim is zero-shot CLIP: this pipeline
+# with the sentence removed.
 table(s, [
-    ["Method", "AUROC", "Cost per frame"],
-    ["Liu et al. 2018 — trained on the target scene", "≈ 0.728", "1 trained model"],
-    ["LAVAD (CVPR 2024), training-free", "≈ 0.85", "Captioner + LLM + refiner"],
-    ["DA-ZVAD (ours), training-free", "0.734", "One frozen encoder + a sentence"],
-], L, 2.0, CW, col_w=[5.6, 2.3, 3.73], size=14.5, hi_rows=(3,), row_h=0.56)
+    ["Training-free method (no target data)", "Avenue", "ShT"],
+    ["Zero-shot CLIP " + cite("radford2021clip"), "62.3", "60.9"],
+    ["Zero-shot ImageBind " + cite("girdhar2023imagebind"), "64.5", "61.3"],
+    ["LLaVA-1.5 " + cite("liu2023llava"), "67.4", "59.6"],
+    ["Video-ChatGPT " + cite("maaz2024videochatgpt"), "76.9", "69.1"],
+    ["DA-ZVAD (ours) — one frozen encoder + a sentence", "70.6", "73.4"],
+    ["AnyAnomaly " + cite("anyanomaly2025") + " — 3 LVLM queries per segment",
+     "87.3", "79.7"],
+], L, 1.92, CW, col_w=[7.4, 2.1, 2.13], size=14, hi_rows=(6,), row_h=0.44)
 
 bullets(s, [
-    ("The fair comparison is the trained baseline.", "We match the benchmark's "
-     "own 2018 baseline while using none of its training data."),
-    ("We do not match LAVAD, and say so.", "It runs three large models per "
-     "frame. We run in about 7 GB."),
-], 4.2, size=16, gap=1.0)
+    ("AnyAnomaly asks “is the thing I named happening?”  "
+     "We ask “is anything happening that doesn’t belong here?”",
+     "Theirs needs the operator to list what could go wrong. Ours needs a "
+     "description of the ordinary. Their 79.7 is obtained by handing the model "
+     "the benchmark’s own anomaly classes."),
+    ("Most of our margin over the plain baselines is protocol, not language.",
+     "With no descriptor we already reach 0.707 against zero-shot CLIP’s "
+     "60.9. The sentence adds 2.7 — the evidence for it is the mismatched "
+     "condition, not this table."),
+], 4.88, size=14, gap=0.90)
 
-callout(s, L, 6.0, CW, 1.15, "Honest position",
-        "We do not expect to exceed trained state-of-the-art detectors on "
-        "absolute AUROC, and the paper makes no such claim.", size=16)
+callout(s, L, 6.44, CW, 0.82, "What we solve that they do not",
+        "Detection of anomalies nobody enumerated in advance — and two "
+        "findings that transfer: injection point beats wording, and the benefit "
+        "scales with scene diversity.", size=14)
 
 # ================================================================ 17 LIMITS
 s = slide("Limitations we are stating ourselves", "Assessment")
@@ -764,7 +884,7 @@ table(s, [
     ["Priority", "Work", "Why it matters"],
     ["1", "Sweep within a single ShanghaiTech camera view",
      "Settles whether scene diversity is the operative variable"],
-    ["2", "Context sweep on MVTec AD",
+    ["2", "Context sweep on MVTec AD " + cite("bergmann2019mvtec"),
      "Gives the industrial–surveillance contrast for adaptation, not just detection"],
     ["3", "Patch-level scoring against spatial tokens",
      "Most likely route to a materially higher figure"],
@@ -780,8 +900,9 @@ callout(s, L, 5.2, CW, 1.5, "Infrastructure is now built",
 # ================================================================ 19 SUMMARY
 s = slide("Summary", "Phase 2")
 items = [
-    ("The gap", "Domain adaptation research targets covariate shift by explicit "
-     "scoping. Anomaly detection is dominated by concept shift."),
+    ("The gap", "Domain adaptation research targets covariate shift by "
+     "explicit scoping " + cite("liu2022deep", "singhal2023domain") + ". Anomaly "
+     "detection is dominated by concept shift."),
     ("The method", "Every model frozen; adaptation carried entirely by a "
      "sentence — which is what makes the claim identifiable."),
     ("The result", "0.734 AUROC on ShanghaiTech with no training, and a wrong "
@@ -808,69 +929,15 @@ box(s, L, 6.75, CW, 0.35,
 # Every entry below is a real key in docs/09_paper/references.bib and is cited
 # in the paper; the two lists are kept in step deliberately, so a question about
 # any reference on screen can be answered from the document.
-refs_slide("References", "1 of 2  ·  the domain-adaptation literature", [
-    [("The six surveys the research gap is argued from", [
-        ("Liu et al.", "Deep unsupervised domain adaptation. APSIPA 2022. "
-                       "— the concept-shift quotation."),
-        ("Wang & Deng", "Deep visual domain adaptation: a survey. "
-                        "Neurocomputing 2018."),
-        ("Wilson & Cook", "A survey of unsupervised deep domain adaptation. "
-                          "ACM Comput. Surv. 2020."),
-        ("Singhal et al.", "Domain adaptation: challenges, methods, datasets. "
-                           "IEEE Access 2023."),
-        ("Patel et al.", "Visual domain adaptation. IEEE Signal Process. "
-                         "Mag. 2015."),
-        ("Kouw & Loog", "An introduction to domain adaptation and transfer "
-                        "learning. arXiv 2018."),
-        ("Fan et al.", "LLM adaptation strategies. Solid Earth Sci. 2026."),
-    ])],
-    [("Domain adaptation inside video anomaly detection", [
-        ("Guo et al.", "Ada-VAD: domain adaptable VAD. SDM 2024."),
-        ("Aich et al.", "zxVAD: cross-domain VAD without target adaptation. "
-                        "WACV 2023."),
-        ("Lu et al.", "Few-shot scene-adaptive anomaly detection. ECCV 2020."),
-     ]),
-     ("Concurrent work on the same premise", [
-        ("Wilkinghoff et al.", "Context-dependent normality. arXiv "
-                               "2604.13252, April 2026."),
-     ]),
-     ("Benchmarks", [
-        ("Liu et al.", "ShanghaiTech. CVPR 2018."),
-        ("Lu et al.", "CUHK Avenue. ICCV 2013."),
-        ("Bergmann et al.", "MVTec AD. CVPR 2019."),
-     ])],
-])
-
-refs_slide("References", "2 of 2  ·  anomaly detection, models, metrics", [
-    [("Zero-shot and training-free anomaly detection", [
-        ("Jeong et al.", "WinCLIP: zero-/few-shot anomaly classification and "
-                         "segmentation. CVPR 2023."),
-        ("Zhou et al.", "AnomalyCLIP: object-agnostic prompt learning. "
-                        "ICLR 2024."),
-        ("Zanella et al.", "LAVAD: training-free VAD with LLMs. CVPR 2024."),
-        ("Ye et al.", "VERA: explainable VAD via verbalised learning. "
-                      "CVPR 2025."),
-        ("Wu et al.", "OVVAD: open-vocabulary VAD. CVPR 2024."),
-        ("Ahn et al.", "AnyAnomaly: customisable VAD. arXiv 2503.04504, 2025."),
-        ("Roth et al.", "PatchCore: total recall in industrial anomaly "
-                        "detection. CVPR 2022."),
-    ])],
-    [("Models used, all frozen", [
-        ("Radford et al.", "CLIP. ICML 2021."),
-        ("Dosovitskiy et al.", "An image is worth 16x16 words (ViT). "
-                               "ICLR 2021."),
-        ("Vaswani et al.", "Attention is all you need. NeurIPS 2017."),
-        ("Liu et al.", "LLaVA: visual instruction tuning. NeurIPS 2023."),
-        ("Dettmers et al.", "QLoRA: 4-bit quantisation. NeurIPS 2023."),
-     ]),
-     ("Baseline and evaluation metrics", [
-        ("Schölkopf et al.", "One-class SVM. Neural Comput. 2001."),
-        ("Fawcett", "An introduction to ROC analysis. "
-                    "Pattern Recognit. Lett. 2006."),
-        ("Davis & Goadrich", "Precision-recall and ROC curves. ICML 2006."),
-        ("Bradley", "Area under the ROC curve. Pattern Recognit. 1997."),
-     ])],
-])
+# Split across as many slides as the entries need rather than a fixed two:
+# the list grew from 30 to 37 with the comparative analysis and ran off the
+# bottom. 13 full Elsevier-style entries is what fits above the page number.
+_numbered = [(i, t) for i, (_k, t) in enumerate(REFS, 1)]
+_PER_SLIDE = 13
+_pages = [_numbered[i:i + _PER_SLIDE]
+          for i in range(0, len(_numbered), _PER_SLIDE)]
+for _i, _page in enumerate(_pages, 1):
+    refs_slide("References", "%d of %d" % (_i, len(_pages)), _page)
 
 # ================================================================ NOTES
 NOTES = [
@@ -956,8 +1023,10 @@ NOTES = [
  "abandoned, and we named the experiment that settles it. Then hand over.",
 ]
 # Notes for the figure and reference slides, spliced in at the deck positions
-# those slides occupy. Inserted from the highest index downwards so that each
-# insertion leaves the lower indices still pointing where they were written.
+# those slides occupy. Keys are FINAL (0-based) deck positions, so insert in
+# ASCENDING order: by the time we insert at key k, every lower-keyed slide is
+# already in place and index k is the slot the note belongs in. Descending
+# order silently shifts every note after the first splice onto the wrong slide.
 EXTRA_NOTES = {
     8: "Thirty seconds, no more. Point down one column and say the scene never "
        "changes - only the event does. If someone asks later why context "
@@ -997,8 +1066,14 @@ EXTRA_NOTES = {
         "is the answer: the frozen models are all off-the-shelf, the "
         "benchmarks and metrics are the standard ones, and every method we "
         "compare against is here.",
+
+    29: "The third reference slide exists because the comparative analysis "
+        "added seven entries. If asked which of these you actually read "
+        "rather than cited from a table: the six DA surveys, AnyAnomaly, "
+        "LAVAD and WinCLIP. The one-class figures are as tabulated by "
+        "AnyAnomaly, and the slide says so.",
 }
-for _idx in sorted(EXTRA_NOTES, reverse=True):
+for _idx in sorted(EXTRA_NOTES):
     NOTES.insert(_idx, EXTRA_NOTES[_idx])
 
 # zip() truncates silently, so a mismatch would drop notes off the end of the
