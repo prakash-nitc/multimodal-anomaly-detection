@@ -304,6 +304,14 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          per-camera result (formerly 5b) is now Result~6, UCF-Crime is
          Result~7, explanations are Result~8. UCF-Crime added to the datasets
          table; status table and limitations brought up to date. \\
+02 Oct 2026 & UCF-Crime added to the comparison table (UCF column from
+         \citet{anyanomaly2025} Table~5 and \citet{zanella2024lavad} Table~1,
+         all entered in the provenance ledger): this work is first of six
+         training-free methods there, above AnyAnomaly's $80.7$. UCF-Crime added
+         to the cross-benchmark sweep and scene-count tables. Correction: LAVAD
+         samples every sixteenth frame, as we do; earlier text said it scored
+         every frame. The weaker context effect under per-video normalisation
+         on UCF-Crime is now stated. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -1403,15 +1411,22 @@ changed, from a campus walkway to an outdoor walkway before a building entrance,
 which is what the framework claims is sufficient to redeploy it.
 
 \begin{table}[width=\linewidth,cols=6,pos=h]
-\caption{Replication on CUHK Avenue against ShanghaiTech, $w{=}31$, per-clip
-normalised frame-level AUROC. The configuration is identical; only the dataset
-and the scene descriptor differ.}\label{tbl:avenue}
+\caption{The context sweep across the three video benchmarks, one shared
+descriptor per benchmark, normal-ensemble fusion, frame-level AUROC. The
+configuration is identical; only the dataset and the scene descriptor differ.
+ShanghaiTech and Avenue: $w{=}31$, per-clip normalised. UCF-Crime: $w{=}5$ (the
+same duration at its sampling, Section~\ref{sec:res-ucf}), shown under both its
+pre-registered primary metric (raw pooled) and the campus protocol (per-video
+normalised); the two disagree on the size of the gap, and both are given.}
+\label{tbl:avenue}
 \begin{tabularx}{\linewidth}{@{}Z l l l l l@{}}
 \toprule
 \textbf{Dataset} & \textbf{none} & \textbf{generic} & \textbf{matched} & \textbf{mismatched} & \textbf{gap} \\
 \midrule
 ShanghaiTech & 0.707 & 0.691 & \textbf{0.734} & 0.628 & $+0.105$ \\
 CUHK Avenue  & 0.706 & \textbf{0.729} & 0.677 & 0.657 & $+0.020$ \\
+UCF-Crime, raw (primary)        & 0.756 & 0.729 & \textbf{0.813} & 0.727 & $+0.086$ \\
+UCF-Crime, per-video normalised & 0.759 & 0.740 & \textbf{0.767} & 0.746 & $+0.021$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1454,17 +1469,21 @@ while the pooled evaluation reproduces the effect. A within-view gap comparable
 to the pooled one would refute the account outright.
 
 \begin{table}[width=\linewidth,cols=4,pos=h]
-\caption{Within-view control on ShanghaiTech, $w{=}31$. The same sweep evaluated
-inside each camera view separately, against the pooled evaluation of
-Table~\ref{tbl:sweep}. Four views with fewer than four scorable clips, or with
-only one class present, are excluded.}\label{tbl:withinview}
+\caption{The context gap (matched $-$ mismatched) against the number of scenes
+the descriptor must resolve. ShanghaiTech rows: $w{=}31$, the sweep evaluated
+inside each camera view separately and pooled. Four ShanghaiTech views with
+fewer than four scorable clips, or with only one class present, are excluded.
+The UCF-Crime row was added later and is the test of prediction~P1
+(Section~\ref{sec:res-ucf}): per-video generated descriptors, raw pooled,
+$w{=}5$.}\label{tbl:withinview}
 \begin{tabularx}{\linewidth}{@{}Z l l l@{}}
 \toprule
-\textbf{Evaluation} & \textbf{Views} & \textbf{Clips} & \textbf{Gap} \\
+\textbf{Evaluation} & \textbf{Scenes} & \textbf{Clips} & \textbf{Gap} \\
 \midrule
-Pooled across views          & 12 & 107 & $+0.105$ \\
-\textbf{Mean within a view}  & 9  & 5--34 each & $\mathbf{+0.033}$ (sd $0.058$) \\
 CUHK Avenue (single view)    & 1  & 21  & $+0.020$ \\
+\textbf{ShanghaiTech, mean within a view}  & 1 each, 9 views  & 5--34 each & $\mathbf{+0.033}$ (sd $0.058$) \\
+ShanghaiTech, pooled across views          & 12 & 107 & $+0.105$ \\
+UCF-Crime, per-video descriptors & ${\sim}290$ & 290 & $+0.096$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1642,9 +1661,9 @@ P4: shared beats mismatched & $+0.086$ & holds \\
 \includegraphics[width=\linewidth]{fig_chart_ucf_crime}
 \caption{Table~\ref{tbl:ucf} drawn, primary metric. The shuffled row is the mean
 over 20 derangements, with a whisker to the best. The dashed line marks LAVAD's
-reported $80.28$ \citep{zanella2024lavad}, obtained by scoring every frame
-rather than every sixteenth, so it is a reference rather than a like-for-like
-comparison. The axis begins at $0.68$.}\label{fig:chartucf}
+reported $80.28$ \citep{zanella2024lavad}, which likewise samples every
+sixteenth frame; it is a published figure from a different pipeline, not a run
+of ours. The axis begins at $0.68$.}\label{fig:chartucf}
 \end{figure}
 
 The mechanism transfers, and more strongly than on ShanghaiTech. A video's own
@@ -1670,68 +1689,96 @@ than one campus sentence describes twelve walkways. And the per-video normalised
 figures are lower throughout, as the registered rationale for the primary metric
 anticipated.
 
+The choice of metric matters more than that, and is stated rather than left in
+the table. Under per-video normalisation the shared-sentence gap over the
+mismatched descriptor shrinks from $+0.086$ to $+0.021$
+(Table~\ref{tbl:avenue}), and the per-video descriptors beat the shuffled mean by
+$+0.048$ but the best of the twenty derangements by only $+0.005$. The
+predictions were registered on the raw metric for the reason given above, and
+are reported on it; but on the secondary metric the context effect on UCF-Crime
+is markedly weaker, and the claim that it is robust to the evaluation protocol
+is not made.
+
 \emph{Relation to LAVAD.} LAVAD \citep{zanella2024lavad}, the closest
 training-free pipeline, reports $80.28$ AUROC on this benchmark. The per-video
-figure of $82.4$ is above it. The two protocols are close but not identical:
-LAVAD scores every frame, this evaluation every sixteenth, and LAVAD's pipeline
-chains a captioner, a large language model and a cross-modal refinement stage
-where this one uses a single frozen encoder pass per sampled frame and one
-caption per video. We report the comparison as comparable-or-better rather than
-as a margin.
+figure of $82.4$ is above it, and above AnyAnomaly's $80.7$ on the same
+benchmark \citep{anyanomaly2025}. The sampling matches: LAVAD also samples each
+video every sixteen frames. Two differences remain. LAVAD does not state whether
+its frame-level AUROC is computed over the sampled frames, as here, or with
+scores propagated to every frame; and its pipeline chains a captioner, a large
+language model and a cross-modal refinement stage, where this one uses a single
+frozen encoder pass per sampled frame and one caption per video. A margin of two
+points across papers is within what such protocol details can move, so we report
+the comparison as comparable-or-better rather than as a win.
 
 \subsection{Comparison with published methods on the same benchmarks}
 \label{sec:res-comparison}
-Both benchmarks used here are standard, so published figures are available for
-direct comparison. Table~\ref{tbl:sota} groups methods by \emph{what each
+All three video benchmarks used here are standard, so published figures are
+available for direct comparison. Table~\ref{tbl:sota} groups methods by \emph{what each
 requires of the target scene}, because that is the axis along which they are not
 interchangeable: a detector that has trained on normal video from ShanghaiTech
 and one that has seen nothing of it are not solving the same problem, and a
 single ranking would misrepresent both.
 
-Every comparison figure in the table is taken from Tables~5 and~6 of
-\citet{anyanomaly2025}, which evaluate both benchmarks under the micro-AUROC
-protocol used here. Drawing them from one source rather than from each original
-paper is deliberate: it keeps the evaluation protocol constant across rows, and
-it means the whole table can be checked against a single document.
+Almost every comparison figure in the table is taken from Tables~5 and~6 of
+\citet{anyanomaly2025}, which evaluate Avenue, ShanghaiTech and UCF-Crime under
+the frame-level AUROC protocol used here. Drawing them from one source rather
+than from each original paper is deliberate: it keeps the evaluation protocol
+constant across rows, and it means the table can be checked against a single
+document. The exceptions are the benchmark's own baseline on the campus data,
+and LAVAD and its three zero-shot baselines on UCF-Crime, which
+\citet{anyanomaly2025} does not report and which are therefore taken from
+\citet{zanella2024lavad}, Table~1.
 
 \begin{table}[width=\linewidth,cols=4,pos=h]
-\caption{Frame-level micro AUROC (\%) on CUHK Avenue and ShanghaiTech, grouped
-by what the method requires of the target scene. Figures are as tabulated by
-\citet{anyanomaly2025}, Tables~5 and~6, except the row marked $^{\dagger}$,
-which is the benchmark's own baseline as reported in the paper introducing it. A
-dash indicates the benchmark is not reported. $^{\S}$~Our rows are the
-\texttt{matched} condition on both benchmarks---the configuration the method
-proposes---rather than the best condition on each. Reporting \texttt{none} for
-Avenue ($70.6$) and \texttt{matched} for ShanghaiTech would be a different
-configuration per dataset; Table~\ref{tbl:avenue} gives all four conditions for
-each.}\label{tbl:sota}
-\begin{tabularx}{\linewidth}{@{}Z l l@{}}
+\caption{Frame-level AUROC (\%) on CUHK Avenue, ShanghaiTech and UCF-Crime,
+grouped by what the method requires of the target scene. Avenue and
+ShanghaiTech figures, and the UCF-Crime figures for FPDM, MULDE and AnyAnomaly,
+are as tabulated by \citet{anyanomaly2025}, Tables~5 and~6. The row marked
+$^{\dagger}$ is the benchmark's own baseline as reported in the paper introducing
+it. UCF-Crime figures marked $^{\ddagger}$ are as tabulated by
+\citet{zanella2024lavad}, Table~1, whose zero-shot baselines are constructed
+independently of those in \citet{anyanomaly2025}; ImageBind is its image-encoder
+variant. A dash indicates the benchmark is not reported. $^{\S}$~Our Avenue and
+ShanghaiTech entries are the shared \texttt{matched} descriptor on both---the
+configuration the method proposes, rather than the best condition on each;
+Table~\ref{tbl:avenue} gives all conditions. Our UCF-Crime entry is the
+pre-registered per-video generated descriptor on the primary raw-pooled metric
+(Section~\ref{sec:res-ucf}).}\label{tbl:sota}
+\begin{tabularx}{\linewidth}{@{}Z l l l@{}}
 \toprule
-\textbf{Method} & \textbf{Ave} & \textbf{ShT} \\
+\textbf{Method} & \textbf{Ave} & \textbf{ShT} & \textbf{UCF} \\
 \midrule
-\multicolumn{3}{@{}l}{\emph{One-class --- normal video from the target scene, plus a training run}} \\
-Liu et al. \citep{liu2018shanghaitech}$^{\dagger}$ & 85.1 & 72.8 \\
-MPN \citep{lv2021mpn} & 89.5 & 73.8 \\
-FPDM \citep{yan2023fpdm} & 90.1 & 78.6 \\
-MA-PDM \citep{zhou2024mapdm} & 91.3 & 79.2 \\
-MULDE \citep{micorek2024mulde} & --- & 81.3 \\
+\multicolumn{4}{@{}l}{\emph{One-class --- normal video from the target scene, plus a training run}} \\
+Liu et al. \citep{liu2018shanghaitech}$^{\dagger}$ & 85.1 & 72.8 & --- \\
+MPN \citep{lv2021mpn} & 89.5 & 73.8 & --- \\
+FPDM \citep{yan2023fpdm} & 90.1 & 78.6 & 74.7 \\
+MA-PDM \citep{zhou2024mapdm} & 91.3 & 79.2 & --- \\
+MULDE \citep{micorek2024mulde} & --- & 81.3 & 78.5 \\
 \midrule
-\multicolumn{3}{@{}l}{\emph{Training-free --- no target data, no gradient updates}} \\
-Zero-shot CLIP \citep{radford2021clip} & 62.3 & 60.9 \\
-Zero-shot ImageBind \citep{girdhar2023imagebind} & 64.5 & 61.3 \\
-LLaVA-1.5 \citep{liu2023llava} & 67.4 & 59.6 \\
-Video-ChatGPT \citep{maaz2024videochatgpt} & 76.9 & 69.1 \\
-\textbf{DA-ZVAD (ours)}$^{\S}$ & 67.7 & \textbf{73.4} \\
-AnyAnomaly \citep{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} \\
+\multicolumn{4}{@{}l}{\emph{Training-free --- no target data, no gradient updates}} \\
+Zero-shot CLIP \citep{radford2021clip} & 62.3 & 60.9 & 53.2$^{\ddagger}$ \\
+Zero-shot ImageBind \citep{girdhar2023imagebind} & 64.5 & 61.3 & 53.7$^{\ddagger}$ \\
+LLaVA-1.5 \citep{liu2023llava} & 67.4 & 59.6 & 72.8$^{\ddagger}$ \\
+Video-ChatGPT \citep{maaz2024videochatgpt} & 76.9 & 69.1 & --- \\
+LAVAD \citep{zanella2024lavad} & --- & --- & 80.3$^{\ddagger}$ \\
+\textbf{DA-ZVAD (ours)}$^{\S}$ & 67.7 & 73.4 & \textbf{82.4} \\
+AnyAnomaly \citep{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} & 80.7 \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsubsection{Where the present work sits}
-Among the six training-free entries, this work ranks second on ShanghaiTech
-behind AnyAnomaly and third on Avenue. The asymmetry is the same one
-Section~\ref{sec:res-avenue} reports internally: the method is competitive where
-several camera views must be told apart and is not where there is only one.
+Among the training-free entries reporting each benchmark, this work ranks first
+of six on UCF-Crime, second of six on ShanghaiTech behind AnyAnomaly, and third
+of six on Avenue. The ordering follows scene diversity: UCF-Crime spans several
+hundred scenes, ShanghaiTech twelve and Avenue one, which is the same asymmetry
+Sections~\ref{sec:res-avenue} and~\ref{sec:res-ucf} report internally. On
+UCF-Crime the figure also exceeds the two one-class methods that report it
+(FPDM $74.7$, MULDE $78.5$), both of which train on that benchmark's normal
+footage. The cross-paper caveats of this section apply: the UCF-Crime zero-shot
+rows come from a different paper than the campus rows, and our UCF-Crime row
+uses per-video descriptors where the campus rows use one shared sentence.
 
 The one-class rows are included because they set the scale, and because the
 cost they pay is the quantity this work is trying to remove. Each of them
@@ -1934,8 +1981,9 @@ deliberately wrong while everything else is held fixed. That condition is the
 instrument; these two results are what it produced.
 
 \wnote{Provenance, recorded deliberately. Every comparison number in
-Table~\ref{tbl:sota} is from Tables~5 and~6 of \citet{anyanomaly2025} and can be
-checked against that one paper. An earlier draft of this section compared
+Table~\ref{tbl:sota} is from Tables~5 and~6 of \citet{anyanomaly2025}, Table~1
+of \citet{zanella2024lavad}, or Table~1 of \citet{liu2018shanghaitech}, and each
+is recorded with its location in the repository's provenance ledger. An earlier draft of this section compared
 against LAVAD \citep{zanella2024lavad} on ShanghaiTech; LAVAD reports on
 UCF-Crime and XD-Violence and on neither campus benchmark, so that comparison
 was removed and is now made on UCF-Crime instead (Section~\ref{sec:res-ucf}).
@@ -2076,10 +2124,10 @@ offered about explanation quality under domain shift.
         LAVAD \citep{zanella2024lavad}, the other training-free pipeline
         discussed here, reports on neither ShanghaiTech nor Avenue; it is
         compared on UCF-Crime in Section~\ref{sec:res-ucf}, where it reports
-        $80.28$ against $82.4$ here, under protocols that differ in frame
-        sampling.
-  \item On UCF-Crime every sixteenth frame is scored rather than every frame,
-        and each video's descriptor is generated from its first second of
+        $80.28$ against $82.4$ here. Both sample every sixteenth frame, but
+        whether LAVAD computes AUROC over the sampled frames is not stated.
+  \item On UCF-Crime AUROC is computed over the sampled frames only, and each
+        video's descriptor is generated from its first second of
         footage; in 3 of 140 anomalous videos that footage already contains the
         event. The pre-registered prediction that the context effect grows with
         scene diversity (P1) was refuted there.
@@ -2132,8 +2180,8 @@ offered about explanation quality under domain shift.
   \item The same pre-registered sweep on XD-Violence, the second benchmark on
         which LAVAD \citep{zanella2024lavad} reports, where the standard metric
         is average precision.
-  \item UCF-Crime scored at every frame, removing the one protocol difference
-        from LAVAD's evaluation.
+  \item UCF-Crime AUROC with scores propagated to every frame, so that the
+        figure is comparable under either reading of LAVAD's protocol.
   \item A descriptor exchanged between the two video domains, rather than
         against a synthetic industrial control: ShanghaiTech's description
         applied to Avenue and the reverse. Both are plausible surveillance

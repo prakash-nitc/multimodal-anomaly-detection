@@ -59,6 +59,13 @@ weaker evidence and must be either confirmed or removed.
 | 87.3 | Avenue AUROC | AnyAnomaly | `anyanomaly` | Tables 5 and 6, both give 87.3 | verified |
 | 79.7 | ShT AUROC | AnyAnomaly | `anyanomaly` | Tables 5 and 6, both give 79.7 | verified |
 | 80.28 | UCF-Crime AUC | LAVAD | `lavad` | Table 1, p.6, row LAVAD | verified |
+| 80.3 | UCF AUROC | LAVAD | `lavad` | Table 1, p.6, row LAVAD (80.28, shown to one decimal in `tbl:sota`) | verified |
+| 53.2 | UCF AUROC | Zero-shot CLIP | `lavad` | Table 1, p.6, row ZS CLIP[22] (53.16) | verified |
+| 53.7 | UCF AUROC | Zero-shot ImageBind | `lavad` | Table 1, p.6, row ZS IMAGEBIND (IMAGE)[6] (53.65); the video variant is 55.78 | verified |
+| 72.8 | UCF AUROC | LLaVA-1.5 | `lavad` | Table 1, p.6, row LLAVA-1.5[17] (72.84) | verified |
+| 74.7 | UCF AUROC | FPDM | `anyanomaly` | Table 5, p.8, row FPDM[34], UCF column | verified |
+| 78.5 | UCF AUROC | MULDE | `anyanomaly` | Table 5, p.8, row MULDE[24], UCF column | verified |
+| 80.7 | UCF AUROC | AnyAnomaly | `anyanomaly` | Table 5, p.8, row AnyAnomaly, UCF column (77.8 without context) | verified |
 | 62.01 | XD-Violence AP | LAVAD | `lavad` | Table 2, p.6, row LAVAD (AUC there is 85.36) | verified |
 
 **Our own rows** — Avenue 67.7 and ShanghaiTech 73.4 — are not in this ledger.
@@ -84,6 +91,8 @@ close paraphrases the argument leans on, and they carry the same rule.
 | Both papers report frame-level AUC, so the rows are commensurable | `shanghaitech` | §4.2, Evaluation Metric | verified |
 | LAVAD evaluates only on UCF-Crime and XD-Violence, so it is not comparable on our benchmarks | `lavad` | §4, Datasets | verified |
 | A zero-shot CLIP VAD baseline is built from two single prompts scored by softmax over cosine similarity, on ViT-B/32 | `lavad` | §4.1, description of the ZS CLIP baseline | verified |
+| LAVAD samples each video every 16 frames — the same as our UCF-Crime protocol | `lavad` | §4, Implementation Details: "We sample each video every 16 frames for computational efficiency" | verified |
+| ~~LAVAD scores every frame~~ — **this was wrong** (stated in the paper, deck, script and handbook 30 Sep – 2 Oct 2026, corrected 2 Oct). Whether LAVAD computes AUROC over sampled frames or propagated scores is not stated | `lavad` | §4 | corrected |
 
 ---
 

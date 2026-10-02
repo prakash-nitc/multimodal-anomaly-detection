@@ -113,3 +113,20 @@ The published Result 5b captions were generated from frames chosen using ground
 truth labels. Rerun with frames chosen by position only (`--label-free`):
 per-view 0.7507 (was 0.7550), shuffled mean 0.7074 / best 0.7224, beats all 11
 rotations. The conclusion is unchanged; 0.751 replaces 0.755 in the paper.
+
+### Addendum 3 — 2 Oct 2026, two corrections to Addendum 1's notes
+
+1. **LAVAD's sampling was misstated.** Addendum 1 says LAVAD "scores every
+   frame". It does not: LAVAD §4 states "We sample each video every 16 frames",
+   the same as this protocol. Whether LAVAD then computes AUROC over the sampled
+   frames or over scores propagated to every frame is not stated. The comparison
+   is therefore closer to like-for-like than Addendum 1 said, but still reported
+   as comparable-or-better rather than as a margin.
+2. **The secondary metric is weaker than Addendum 1 implies.** Under per-video
+   normalisation, shared − mismatched is +0.021 (raw: +0.086), and per-video
+   beats the best of 20 derangements by only +0.005 (raw: +0.045). The
+   predictions were registered on the raw metric and stand as reported, but the
+   context effect on UCF-Crime is not robust to the choice of protocol.
+
+Also added for comparison (verified in the source PDFs, see PROVENANCE.md):
+AnyAnomaly reports 80.7 on UCF-Crime (AnyAnomaly Table 5).
