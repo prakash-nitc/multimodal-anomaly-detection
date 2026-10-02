@@ -827,7 +827,7 @@ box(s, L, 1.9, CW, 0.72,
     "different places, 140 with a crime. Four predictions were committed to "
     "git before any score was computed.",
     15, color=INK_2, spacing=1.3)
-bignum(s, L, 2.75, "0.824", "AUROC, no training — LAVAD reports 0.803",
+bignum(s, L, 2.75, "0.824", "AUROC, no training — LAVAD 0.803, AnyAnomaly 0.807",
        w=3.6, vsize=60)
 table(s, [
     ["Registered prediction", "Measured", "Outcome"],
@@ -847,8 +847,9 @@ figure_slide(
     "UCF-Crime, drawn", "Phase 3  ·  Result 7",
     "fig_chart_ucf_crime.png",
     "The video's own LLaVA sentence reaches 0.824; borrowed sentences average "
-    "0.713, below having none. The dashed line is LAVAD's 0.803 — it scores every "
-    "frame and we score every 16th, so read it as comparable, not as a margin.")
+    "0.713, below having none. The dashed line is LAVAD's 0.803 (AnyAnomaly: "
+    "0.807). Both are other papers' numbers, so read it as comparable, not as a "
+    "margin.")
 
 # ================================================================ 16 NEGATIVES
 s = slide("Six things that did not work", "Results  ·  negative findings")
@@ -916,8 +917,8 @@ bullets(s, [
      "ranking is identical. We found this the hard way."),
     ("Configuration selection.", "No validation split exists for these "
      "benchmarks, so we split clips and report the half never used to select."),
-    ("Protocol differences.", "UCF-Crime is scored every 16th frame, LAVAD "
-     "every frame; each video's sentence comes from its first second of footage."),
+    ("Metric sensitivity on UCF-Crime.", "Under per-video normalisation the "
+     "context effect shrinks sharply; we report the pre-registered raw metric."),
     ("No explanations yet.", "M4 now writes the camera sentences, but has not "
      "yet explained flagged events."),
 ], 1.95, size=14.5, gap=0.86)
@@ -932,8 +933,8 @@ table(s, [
      "Most likely route to a materially higher figure"],
     ["3", "M4 explanations under matched vs mismatched context",
      "Completes the framework; supplies the qualitative result"],
-    ["4", "UCF-Crime scored at every frame",
-     "Removes the one protocol difference from LAVAD"],
+    ["4", "UCF-Crime with scores propagated to every frame",
+     "Comparable to LAVAD under either reading of its protocol"],
 ], L, 2.0, CW, col_w=[1.2, 5.5, 4.93], size=13.5, row_h=0.62, num_cols=(0,))
 
 callout(s, L, 5.2, CW, 1.5, "Done since Phase 2",
@@ -1113,7 +1114,9 @@ EXTRA_NOTES = {
     23: "The strongest slide for credibility. The predictions were committed "
         "to git before any score existed. Say P1 failed before anyone asks, "
         "and that the claim was narrowed because of it. On LAVAD: 'comparable "
-        "or better' - they score every frame, we score every 16th.",
+        "or better'. LAVAD samples every 16th frame too, but other papers' "
+        "numbers can differ by small protocol details. AnyAnomaly gets 0.807 "
+        "here - below us, unlike on the campus benchmarks.",
 
     24: "Point at the borrowed-sentence bar first: worse than no sentence at "
         "all. That is the clearest evidence that the sentence tells the model "

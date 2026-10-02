@@ -1282,9 +1282,22 @@ for it and don't bury it.
 
 **Against LAVAD — be precise.** LAVAD reports **80.28**; you get **82.4**. Say
 *"comparable or better"*, not *"we beat LAVAD"*, because:
-- LAVAD scores every frame; we score every 16th.
-- If asked for the fairer version: *"Scoring every frame is on the future-work
-  list; I expect it to move the number slightly, not reverse it."*
+- Both sample every 16th frame — but these are numbers from different papers,
+  and small protocol details (e.g. how sampled scores are spread to every frame
+  for the AUROC) can move them by a point or two.
+- **Bonus fact:** AnyAnomaly, which beats you on both campus benchmarks, gets
+  **0.807** on UCF-Crime — *below* you. On the most diverse benchmark you're
+  first among training-free methods.
+
+> **Correction you should know about:** an earlier version of these notes said
+> "LAVAD scores every frame". That was wrong — LAVAD's paper says it samples
+> every 16 frames, same as us. If you said it to anyone, the fix is: *"same
+> sampling, but cross-paper numbers can still differ slightly."*
+
+**One weakness to have ready.** Under the campus scoring method (per-video
+normalisation), the UCF-Crime sentence effect is much smaller (+0.086 drops to
++0.021). Say: *"I registered the raw metric in advance, so I report it — and I
+say openly the effect isn't robust to the scoring method."*
 
 What you *can* stress: LAVAD chains three large models (captioner, LLM,
 refiner); you use one frozen CLIP pass per frame and one caption per video.
@@ -1359,8 +1372,9 @@ question.
 
 > LAVAD (CVPR 2024) reports **0.803**. You reach **0.824**.
 
-Say *"comparable or better"*, never *"we beat LAVAD"* — they score every frame,
-you score every 16th. And add the cost point: LAVAD chains **three** big models
+Say *"comparable or better"*, never *"we beat LAVAD"* — it's a cross-paper
+comparison, and two points is within what protocol details can move. **AnyAnomaly
+gets 0.807 here — also below you.** And add the cost point: LAVAD chains **three** big models
 (captioner + language model + refiner); you use **one** frozen CLIP pass per
 frame and one caption per video.
 
@@ -2159,5 +2173,5 @@ If you can do all twenty aloud, you know this project.
 > 16. To pick "normal" frames to caption. Removed → 0.755 became 0.751. Basically no change.
 > 17. Predictions written and committed to git *before* running. Can't be fitted after the fact.
 > 18. P1: "the effect grows with more scenes." It didn't (+0.096 vs +0.105). Claim narrowed: "needs" scenes, not "scales with".
-> 19. 0.824 vs 0.803 — but they score every frame, I score every 16th.
+> 19. 0.824 vs 0.803 (AnyAnomaly 0.807). "Comparable" because these are other papers' numbers — both sample every 16th frame, but details can differ.
 > 20. It drags *both* arrows onto the video itself, so every frame looks the same. A wrong description pulls them away.

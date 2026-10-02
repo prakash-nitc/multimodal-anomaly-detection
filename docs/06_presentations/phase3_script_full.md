@@ -1005,8 +1005,9 @@ down and committed them before computing a single score. So nothing here is expl
 after the fact."
 
 Then the number: **0.824**. LAVAD, the leading training-free method, reports 0.803 here.
-**SAY** — "That's comparable or better, not a clean win — LAVAD scores every frame and I
-score every sixteenth."
+**SAY** — "That's comparable or better, not a clean win — these are other papers'
+numbers, and small protocol details can move them. For context, AnyAnomaly gets 0.807
+here — so on the most diverse benchmark, we're ahead of both."
 
 **Then P1, before anyone asks.** **SAY** — "P1 failed. I predicted the effect would grow
 with the number of scenes — 290 scenes instead of 12. It didn't; it came out the same. So
@@ -1041,8 +1042,7 @@ convincing thing in Phase 3."
 **Point at the bottom bar, then the "no sentence" bar.** **SAY** — "Another video's sentence
 is worse than none. The model really is using the sentence to decide where it is."
 
-Then the dashed line — LAVAD 0.803 — with the caveat once more: every frame versus every
-sixteenth.
+Then the dashed line — LAVAD 0.803 — and say "comparable", not "better".
 
 **→ Next:** "Those are the new results. The claim throughout is that the simplest
 configuration is the right one, so here is everything I tried that didn't work."
@@ -1220,9 +1220,11 @@ by you."
   whole field uses, and I found it by chasing my own bug."
 - **Configuration selection.** No validation split exists for these benchmarks, so I split
   clips and report the half never used to select.
-- **Protocol differences.** UCF-Crime is scored every 16th frame where LAVAD scores every
-  frame, and each video's sentence comes from its first second of footage — in 3 of 140
-  crime videos the crime has already started then.
+- **Metric sensitivity on UCF-Crime.** Under the campus scoring method (per-video
+  normalisation) the context effect shrinks sharply — shared vs wrong-domain falls from
+  +0.086 to +0.021. I report the raw metric because I registered it in advance, and I say
+  the effect is not robust to the protocol. Also: each video's sentence comes from its
+  first second, and in 3 of 140 crime videos the crime has already started then.
 - **No explanations yet.** LLaVA writes the camera sentences but hasn't explained flagged
   events.
 
@@ -1238,8 +1240,8 @@ by you."
 > the missing half of the mechanism, the per-camera sentences, and a whole new
 > benchmark are done since Phase 2. Next is XD-Violence, the other benchmark
 > LAVAD reports on; then patch-level scoring, my best shot at a higher number; then
-> LLaVA's explanations; and UCF-Crime on every frame, to remove the one difference
-> from LAVAD's protocol.
+> LLaVA's explanations; and UCF-Crime with scores spread to every frame, so the LAVAD
+> comparison holds however they computed theirs.
 
 **SAY** — "XD-Violence first, because it completes the LAVAD comparison. Patch-level scoring
 second, because it's the most likely way to move the headline number."
