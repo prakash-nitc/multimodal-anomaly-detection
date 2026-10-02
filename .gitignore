@@ -58,3 +58,7 @@ SurveyPapersStudy/
 # Secrets
 .env
 *.key
+
+# Reference papers: kept locally, never committed (publisher copies; repo is public)
+docs/07_reference_papers/*.pdf
+SurveyPapersStudy/*.pdf

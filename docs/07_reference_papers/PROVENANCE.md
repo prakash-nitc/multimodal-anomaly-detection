@@ -23,6 +23,8 @@ unverified. Run it before every upload to Overleaf.
 
 ## Source PDFs required in this folder
 
+**The PDFs are kept on the local machine only and are not committed** — most are publisher copies licensed to the downloader, and the repository is public. `.gitignore` excludes them; `scripts/check_provenance.py` still checks they are present locally.
+
 | Key | File | Supplies |
 |---|---|---|
 | `anyanomaly` | `AnyAnomaly_WACV2026.pdf` | every comparison row in Table `tbl:sota` |
@@ -33,7 +35,7 @@ unverified. Run it before every upload to Overleaf.
 | `ucfcrime` | `Sultani et al. 2018, UCF-Crime (CVPR 2018).pdf` | dataset description; Result 7 |
 | `ovvad` | `Wu et al. 2024, OVVAD (CVPR)-….pdf` | literature review |
 | `zxvad` | `Aich et al. 2023, zxVAD (WACV)-….pdf` | literature review; also the secondary source for Lu et al. 2020 |
-| — | `Guo et al. 2024, Ada-VAD (SDM).pdf` | **wrong file** — contains Zhu et al., "Survey of Trustworthy Representation Learning Across Domains" (TKDD 2024), not Ada-VAD |
+| — | (none — paywalled) | Ada-VAD verified from the publisher's abstract page. The file once saved under that name was a different paper (Zhu et al., TKDD 2024) and was removed |
 
 ---
 
@@ -110,7 +112,7 @@ close paraphrases the argument leans on, and they carry the same rule.
 | Lu et al. 2020: meta-learned scene adaptation from few frames, future-frame prediction | `zxvad` (secondary) | zxVAD p.3 and ref. [1]: "use meta-learning approaches and adapt to the target domain with few scenes" | verified (secondary source) |
 | UCF-Crime: 1,900 videos, 13 anomaly classes; test split 150 normal + 140 anomalous | `ucfcrime` | p.1 Abstract; p.5 "Training and testing sets" | verified |
 | Page ranges: UCF-Crime 6479–6488, VERA 8679–8688, OVVAD 18297–18307, zxVAD 2578–2590, Lu 2020 125–141 | PDFs | running page numbers; Lu 2020 via zxVAD ref. [1] | verified |
-| Ada-VAD: synthesised abnormal samples, then adversarial adaptation to a few target frames | — | **the PDF supplied was a different paper** (Zhu et al., TKDD 2024 survey) | **unverified — correct PDF needed** |
+| Ada-VAD: synthesised abnormal samples, then adversarial adaptation to a few target frames | publisher abstract | SIAM SDM 2024 abstract page (doi:10.1137/1.9781611978032.73): "we synthesize abnormal samples … pretrain a domain invariant model … adapt the pre-trained model to target domain with few-shot samples … with an adversarial training approach"; authors Guo, Fu, Li; pp. 634–642 | verified (abstract; full text paywalled) |
 | LAVAD samples each video every 16 frames — the same as our UCF-Crime protocol | `lavad` | §4, Implementation Details: "We sample each video every 16 frames for computational efficiency" | verified |
 | ~~LAVAD scores every frame~~ — **this was wrong** (stated in the paper, deck, script and handbook 30 Sep – 2 Oct 2026, corrected 2 Oct). Whether LAVAD computes AUROC over sampled frames or propagated scores is not stated | `lavad` | §4 | corrected |
 
