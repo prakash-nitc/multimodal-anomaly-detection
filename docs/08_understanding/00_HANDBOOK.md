@@ -370,24 +370,41 @@ as in §2.4.
 
 **M2 — the smoother.** Averages scores over time, as in §2.5.
 
-**M3 — the scene description.** *This is the research.* Your sentence about the
-site gets mixed into the prompts, so "normal" means normal *here*.
+**M3 — the scene description.** *This is the research.* A sentence about the
+camera's place gets mixed into the "normal" prompts, so "normal" means normal
+*here*. **One sentence per camera.**
 
-**M4 — the explainer.** A second frozen model (LLaVA) writes a sentence saying
-what looks wrong in a flagged frame. **We have never run this on video.** It's
-Phase 3 work.
+**M4 — the writer.** A second frozen model (LLaVA) that looks at a picture and
+writes about it. It has **two jobs**:
+1. **At setup** — it looks at a new camera's first 3 frames and writes that
+   camera's sentence. *This works now.*
+2. **During operation** — it explains a flagged frame. *Not run on video yet.*
 
-![The DA-ZVAD framework. Read it left to right: the video and the operator's sentence enter as two separate inputs, meet in the middle, and produce one score per frame.](../09_paper/dazvad_architecture.png)
+> **Remember it as:** *"M1 looks, M2 smooths, M3 says where we are, M4 writes."*
+
+![The DA-ZVAD framework. Read it left to right: the video, and the setup step that writes each camera's sentence, enter as two separate inputs, meet in the middle, and produce one score per frame.](../09_paper/dazvad_architecture.png)
 
 ### How to read the diagram
 
 Spend a minute on this one, because you will be asked to walk through it.
 
-**There are two inputs, not one.** On the left, the video is one input and the
-operator's typed sentence is the other. Almost every other system in this area
-has only the first. The sentence being an *input* — something a person supplies
-at the moment of deployment, rather than something learned beforehand — is the
-whole idea of the project in one picture.
+> **The one line to say first:** *"Video comes in on top. A sentence about the
+> place comes in on the bottom — and the system writes that sentence itself.
+> They meet in the middle. Nothing is trained."*
+
+**There are two inputs, not one.** On the left, the video is one input. The
+second is the **SETUP** box: when a camera is installed, LLaVA looks at its
+first three frames and writes one sentence about the place, like *"a park with
+a sidewalk and a bench."* Almost every other system in this area has only the
+video.
+
+**What changed since Phase 2 — say this if asked.** In Phase 2 a *person* typed
+the sentence. Now the *system* writes it. Same result (0.749 by hand, 0.751 by
+LLaVA), but no human needed. The small grey line *(or an operator writes c_k)*
+shows the manual route still works.
+
+> **Easy way to remember:** *"Installing a camera = it looks at itself for one
+> second and describes where it is."*
 
 **The two branches stay separate until they meet.** The top branch (M1) turns
 each frame into a list of numbers. The bottom branch (M3) turns the prompts, with
@@ -404,8 +421,13 @@ sentence. §4.4 is the long form of that argument.
 
 **The right-hand side turns a score into a decision.** Scores per frame, then M2
 smooths them over time, then a threshold turns the smoothed curve into flagged
-events, then M4 explains one frame per event. M4 is drawn lighter because we have
-not run it on video yet — do not let the diagram imply otherwise.
+events, then M4 explains one frame per event. LLaVA appears twice in the
+picture — in SETUP and on the right — and the label *"M4 · same model"* says
+it's **one** frozen model doing two jobs, not two models. Its explaining job
+hasn't been run on video yet; say so if the diagram is questioned.
+
+**The footer is the whole deployment story:** *"New camera = caption its first
+frames · no labels · no gradients · every model frozen."* Read it out.
 
 **A question to expect:** *"where does the training happen?"* It doesn't, anywhere.
 CLIP and LLaVA were trained by other people on general web data; we use them
@@ -426,6 +448,13 @@ before.
 
 So the scene description changes **where the normal prototype points**. That's
 the entire adaptation mechanism. One sentence, one arrow moved.
+
+> **Remember it as:** *"The sentence moves the 'normal' arrow to point at this
+> place. Anything far from that arrow looks abnormal."*
+
+Since Phase 3 each camera gets its **own** sentence, so each camera gets its own
+"normal" arrow. The example above (*campus walkway*) is the Phase 2 version, one
+sentence shared by all twelve cameras.
 
 ## 4.3 The obvious version, which turned out to be wrong
 
@@ -1173,6 +1202,8 @@ sentence matches *its own* camera.
 | **per camera, written by M4 — no human, no labels** | **0.751** |
 | per camera, swapped between cameras (average) | 0.707–0.715 |
 
+![Per-camera sentences on ShanghaiTech: own sentence (hand or LLaVA) against swapped sentences. Read the whiskers: even the best swap loses.](../09_paper/figures/fig_chart_per_camera.png)
+
 > **In plain words.** A sentence written for each camera beats every scrambled
 > arrangement — so the benefit really does come from the sentence matching the
 > camera. And the system can write those sentences itself from a few minutes of
@@ -1230,6 +1261,8 @@ it. You can't be accused of explaining the result after the fact.
 | P3: own sentence beats the shared one | Right, but small (0.011) |
 | P4: correct description beats the factory one | Right — 0.086 |
 
+![UCF-Crime: look at the bottom bar first — another video's sentence scores below no sentence at all. The dashed line is LAVAD's 0.803.](../09_paper/figures/fig_chart_ucf_crime.png)
+
 > **In plain words.** On 290 completely different places, giving each video a
 > sentence about its own scene works — and giving it a sentence about *another*
 > place is worse than giving it nothing. That's the clearest proof yet that the
@@ -1285,16 +1318,22 @@ lower, as predicted. Both are in the paper.
 
 ## 6.9 The five sentences to memorise
 
-1. Anomaly detectors are stuck in the place they learned; we move them by
-   writing a sentence.
-2. The domain-adaptation field handles "things look different"; anomaly
-   detection is "the same thing means something different".
-3. 0.734 with no training at all — matching the benchmark's own trained
-   baseline — and a *wrong* sentence costs ten points.
-4. Where you put the sentence matters more than what it says; putting it wrongly
-   reverses the result.
-5. It works where there are several scenes to tell apart, and we measured that
-   rather than assuming it.
+If you remember nothing else, remember these. Each one answers a likely
+question.
+
+1. **The problem.** *"Anomaly detectors are stuck in the place they learned; I
+   move them with one sentence about the new place."*
+2. **The gap.** *"Domain adaptation handles 'things look different'. Anomaly
+   detection is 'the same thing means something different'."*
+3. **The numbers.** *"0.751 on ShanghaiTech and 0.824 on UCF-Crime with no
+   training at all — and a wrong sentence costs ten points."*
+4. **The surprise.** *"Where you put the sentence matters more than what it
+   says; put it in the wrong place and the result flips."*
+5. **The honest boundary.** *"It needs several scenes to work. I predicted it
+   would keep growing with more scenes; the test said no, so I narrowed the
+   claim."*
+
+> **Memory trick — P, G, N, S, B:** Problem, Gap, Numbers, Surprise, Boundary.
 
 ---
 
@@ -1302,76 +1341,98 @@ lower, as predicted. Both are in the paper.
 
 # Part 7 — Is it any good?
 
-## 7.1 As a detector: modest, and one comparison saves it
+## 7.1 As a detector: better than expected, on the right comparisons
 
-The best training-free method published (LAVAD, 2024) reaches about 0.85. You
-reach 0.734. That's a real gap and you shouldn't minimise it.
+> **The one line:** *"With zero training, it matches the trained baseline on
+> ShanghaiTech and is comparable to the best training-free method on
+> UCF-Crime."*
 
-**But that isn't the comparison that matters.**
+**Three comparisons, in the order to say them.**
 
-> Liu et al. (2018) — the researchers who *created* ShanghaiTech — reach about
-> **0.728** by training a model on ShanghaiTech's own training footage.
->
-> **You reach 0.734 having never seen a frame of it.**
+**1. ShanghaiTech — against a trained model.**
 
-Matching the benchmark's original trained baseline with zero training data is a
-genuine result.
+> Liu et al. (2018) — who *created* ShanghaiTech — reach **0.728** by training
+> on ShanghaiTech's own footage. **You reach 0.734 having never seen a frame of
+> it** (0.751 with a sentence per camera).
 
-There's also a deployment argument. At a brand-new site, the trained model's
-accuracy isn't 0.728 — it's *undefined*, because it doesn't exist yet. Someone
-has to spend weeks producing it. Yours runs on day one.
+**2. UCF-Crime — against the best training-free system.**
 
-**Don't overstate that, though.** 0.734 is not good enough to run a building
-unsupervised. The honest framing is **cold start**: something from day one while
-footage is collected for a trained system, or narrowing hours of video down to
-minutes worth reviewing.
+> LAVAD (CVPR 2024) reports **0.803**. You reach **0.824**.
+
+Say *"comparable or better"*, never *"we beat LAVAD"* — they score every frame,
+you score every 16th. And add the cost point: LAVAD chains **three** big models
+(captioner + language model + refiner); you use **one** frozen CLIP pass per
+frame and one caption per video.
+
+**3. The closest competitor — AnyAnomaly — is ahead (79.7 vs 73.4 on
+ShanghaiTech).** Don't hide it. The reason is in §8.3: they are *handed the list
+of anomaly types*; you are told nothing about the anomalies.
+
+**Where it's weak — say it before they do.** Avenue (67.7) — single camera, and
+its anomalies are about *distance and motion* ("too close", "throwing"), which a
+whole-frame picture summary can't see.
+
+**The deployment argument.** At a brand-new site a trained model's accuracy
+isn't 0.728 — it's *undefined*, because it doesn't exist yet. Yours runs on day
+one, after looking at three frames.
+
+**Don't overstate it.** 0.75–0.82 is not good enough to run a building
+unsupervised. The honest framing is **cold start**: useful from day one, and good
+for cutting hours of video down to minutes worth reviewing.
+
+> **Easy way to remember:** *"Trained-baseline level on campus, LAVAD level on
+> crime, zero training, one model pass."*
 
 ## 7.2 As research: genuinely sound
 
-- A claim that could have been proven wrong
-- A test designed to prove it wrong — which partly did
-- An explanation for that failure, and a control that confirmed the explanation
-- Six failures reported next to the successes
-- Two errors of our own, found and corrected
+> **The one line:** *"I wrote down what I expected before testing, and reported
+> it when I was wrong."*
+
+- A claim that could be proven wrong — and a test designed to do it
+- **Predictions written down and committed to git before running UCF-Crime** —
+  three held, one failed, and the failure is reported
+- An explanation for a failure (Avenue), and a control that confirmed it
+- Six failed improvements reported next to the successes
+- Three errors of our own, found and corrected (pooling, a scoring script, and
+  using labels to choose caption frames)
 - Every number traceable to the exact code and machine that produced it
 
 That's the shape of real experimental work.
 
 ## 7.3 Will the number get much better?
 
-Probably not dramatically, and it's worth understanding why rather than hoping.
+> **The one line:** *"The design is limited by the same thing that makes the
+> claim testable — and I'd rather keep that."*
 
-**Your decision rule is very simple.** One arrow compared against two other
-arrows, producing one number. It cannot *reason*.
+**Your decision rule is very simple.** One picture-summary compared against two
+text arrows ("normal here" vs "abnormal"). It can't *reason* about combinations
+like "bicycle" + "footpath" = wrong.
 
-LAVAD writes a caption for each frame — *"a man riding a bicycle on a
-sidewalk"* — and hands it to a language model, which can hold "bicycle" and
-"sidewalk" as separate facts and judge the combination. No amount of tuning a
-two-arrow comparison recovers that.
-
-**Evidence you're near this design's ceiling:**
+**Evidence you're near this design's ceiling on campus data:**
 - The wording of the prompts barely matters
 - A signal with no language at all gets within 0.02
 - All six attempted improvements were absorbed
 
-**The one idea left** is scoring parts of the frame rather than the whole thing —
-the anomaly is often 1–2% of the picture. That might reach 0.78–0.82.
+**The one big idea left** is scoring *parts* of the frame (patches) rather than
+the whole frame — the anomaly is often 1–2% of the picture. That's next.
 
-Getting to 0.85 would mean adding a captioner and a language model — **which
-would destroy the thing that makes your claim measurable** (§4.4). You'd gain ten
-points and lose the contribution.
-
-> **Say it as a trade-off, not an apology:** *"The architecture is limited by the
-> same property that makes its central claim testable."*
+Adding a captioner and a language model for every frame might add points — but
+it would destroy what makes the claim measurable (§4.4): with many moving parts,
+you can no longer say *the sentence* caused the change.
 
 ## 7.4 Is it publishable?
 
-Honestly: not yet for a strong venue. You have a characterisation, a protocol,
-two findings and a measured boundary — but no new architecture, and the central
-effect holds on one of the two video benchmarks.
+> **The one line:** *"Enough for the thesis now; for a paper, I need one more
+> benchmark and patch-level scoring."*
 
-**For the thesis, it's comfortably enough.** For a paper, Phase 3 would want the
-industrial sweep and ideally the region-level scoring.
+What you now have: a characterisation (concept shift), a mechanism (one frozen
+pipeline + one sentence per camera, written automatically), a protocol with a
+falsifying control, results on **three video benchmarks**, a pre-registered test,
+and a competitive UCF-Crime number.
+
+**Still missing for a strong venue:** XD-Violence (LAVAD's second benchmark) and
+patch-level scoring for a higher number. Realistic targets: a CVPR/WACV workshop,
+or journals like Pattern Recognition Letters.
 
 ---
 
@@ -1761,9 +1822,11 @@ experiment that tells you whether the language is doing the work."*
 
 **Know this too, in case it comes up:** an earlier draft compared against LAVAD
 on ShanghaiTech. LAVAD reports on UCF-Crime and XD-Violence and on **neither**
-of our benchmarks — that comparison was wrong and has been removed. If asked
-about LAVAD now, say it isn't comparable because it doesn't evaluate on these
-datasets.
+of our *campus* benchmarks — that comparison was wrong and was removed. **Since
+Phase 3 you can compare properly:** you ran UCF-Crime, one of LAVAD's own
+benchmarks. If asked about LAVAD now: *"Not on ShanghaiTech — they don't report
+there. On UCF-Crime they report 0.803 and I get 0.824, under a slightly
+different frame sampling."* (§6.7c)
 
 
 **"How do you differ from AnyAnomaly? It is training-free, uses text at
@@ -2067,7 +2130,34 @@ Answer each **out loud**, without looking. If you can't, reread the section.
    *(§6.3)*
 10. What happened on Avenue, and how did you test *why*? *(§6.6–6.7)*
 11. Name three of the six things that didn't work. *(§6.5)*
-12. Why won't this design reach 0.85? *(§7.3)*
+12. What limits how high this design's number can go, and why don't you just
+    add more models? *(§7.3)*
 13. What can you **not** yet answer? *(§8.6)*
 
-If you can do all thirteen aloud, you know this project.
+**Phase 3 questions**
+
+14. What does the SETUP box in the diagram do, and what changed since Phase 2?
+    *(§4.1)*
+15. Why give each camera its own sentence — and what's the control that proves
+    it's the *matching* that helps? *(§6.7b)*
+16. Your first automatic run used the labels. What did it use them for, and what
+    happened when you removed them? *(§6.7b)*
+17. What does "pre-registered" mean, and why does it make UCF-Crime convincing?
+    *(§6.7c)*
+18. Which prediction failed on UCF-Crime, and how did you change your claim?
+    *(§6.7c)*
+19. How do you compare against LAVAD, and why do you say "comparable" rather
+    than "better"? *(§7.1)*
+20. Why does an accurate description do the most damage in the "both" setup —
+    in terms of *where* the arrows move? *(§5.4 update)*
+
+If you can do all twenty aloud, you know this project.
+
+> **Quick-answer key for 14–20** (check yourself *after* answering):
+> 14. LLaVA captions a new camera's first 3 frames → that camera's sentence. Before, a person typed it.
+> 15. It tells the model *which* camera it's looking at. Control: swap sentences between cameras — all 11 swaps score lower.
+> 16. To pick "normal" frames to caption. Removed → 0.755 became 0.751. Basically no change.
+> 17. Predictions written and committed to git *before* running. Can't be fitted after the fact.
+> 18. P1: "the effect grows with more scenes." It didn't (+0.096 vs +0.105). Claim narrowed: "needs" scenes, not "scales with".
+> 19. 0.824 vs 0.803 — but they score every frame, I score every 16th.
+> 20. It drags *both* arrows onto the video itself, so every frame looks the same. A wrong description pulls them away.
