@@ -1554,6 +1554,14 @@ Per view, generated, shuffled (mean / best of 11) & 0.707 / 0.722 \\
 \end{tabularx}
 \end{table}
 
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{fig_chart_per_camera}
+\caption{Table~\ref{tbl:perview} drawn. Shuffled rows show the mean over the
+eleven rotations, with a whisker to the best rotation; both per-camera sets
+exceed even the best. The axis begins at $0.68$.}\label{fig:chartperview}
+\end{figure}
+
 Both per-view sets beat every one of the eleven shuffled assignments, by
 $+0.034$ (hand-written) and $+0.043$ (generated) on average. The benefit
 therefore depends on each sentence matching its own camera, which is the scene
@@ -1628,6 +1636,16 @@ P4: shared beats mismatched & $+0.086$ & holds \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{fig_chart_ucf_crime}
+\caption{Table~\ref{tbl:ucf} drawn, primary metric. The shuffled row is the mean
+over 20 derangements, with a whisker to the best. The dashed line marks LAVAD's
+reported $80.28$ \citep{zanella2024lavad}, obtained by scoring every frame
+rather than every sixteenth, so it is a reference rather than a like-for-like
+comparison. The axis begins at $0.68$.}\label{fig:chartucf}
+\end{figure}
 
 The mechanism transfers, and more strongly than on ShanghaiTech. A video's own
 description beats descriptions taken from other videos by $0.110$, against

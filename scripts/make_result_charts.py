@@ -242,6 +242,83 @@ def within_view(csv_path, out):
     return p
 
 
+def _hbars(ax, rows, xlim):
+    """rows: (label, value, colour, best_or_None). Horizontal bars, top to bottom.
+
+    A shuffled control is drawn as its mean, with a whisker out to the best of
+    its permutations -- the comparison that matters is against that best case,
+    not only the average, so it is shown rather than left to the caption.
+    """
+    y = np.arange(len(rows))[::-1]
+    for yi, (lab, v, col, best) in zip(y, rows):
+        ax.barh(yi, v - xlim[0], left=xlim[0], height=0.62, color=col,
+                edgecolor="#5E6A6B", lw=0.6)
+        if best is not None:
+            ax.plot([v, best], [yi, yi], color=INK, lw=1.1)
+            ax.plot([best], [yi], marker="|", color=INK, ms=9, mew=1.4)
+            ax.text(best + 0.003, yi, f"best {best:.3f}", va="center",
+                    fontsize=7.4, color=MUTED)
+            ax.text(xlim[0] + 0.003, yi, f"{v:.3f}", va="center", fontsize=8.2,
+                    color=INK, fontweight="bold")
+        else:
+            ax.text(v + 0.003, yi, f"{v:.3f}", va="center", fontsize=8.4,
+                    color=INK, fontweight="bold")
+    ax.set_yticks(y); ax.set_yticklabels([r[0] for r in rows])
+    ax.set_xlim(*xlim)
+    ax.grid(axis="x", color=GRID, lw=0.5); ax.set_axisbelow(True)
+    ax.set_xlabel("frame-level AUROC")
+
+
+def per_camera(out):
+    # ShanghaiTech, all 107 clips, w=31, per-clip normalised. Generated row is
+    # the label-free run (frames chosen by position), the one the paper quotes.
+    pale, shuf = "#C9D2D1", "#DADFDF"
+    rows = [
+        ("no sentence",                         0.7067, pale,      None),
+        ("one sentence for all 12 cameras",     0.7336, "#E9B48F", None),
+        ("own sentence, written by hand",       0.7488, CTX,       None),
+        ("own sentence, written by LLaVA",      0.7507, CTX,       None),
+        ("another camera's (hand), mean of 11", 0.7146, shuf,      0.7369),
+        ("another camera's (LLaVA), mean of 11", 0.7074, shuf,     0.7224),
+    ]
+    fig, ax = plt.subplots(figsize=(6.9, 2.75))
+    _hbars(ax, rows, (0.68, 0.775))
+    ax.set_title("Per-camera sentences, ShanghaiTech — a camera's own sentence "
+                 "beats\nevery swapped assignment; LLaVA's match hand-written ones",
+                 pad=5, fontsize=9.1)
+    fig.tight_layout()
+    p = os.path.join(out, "fig_chart_per_camera.png")
+    figsave.save(fig, p); plt.close(fig)
+    return p
+
+
+def ucf_crime(out):
+    # UCF-Crime test split, 290 videos, raw pooled AUROC, w=5 (pre-registered
+    # primary metric). LAVAD 80.28 from the provenance ledger.
+    pale, shuf = "#C9D2D1", "#DADFDF"
+    rows = [
+        ("no sentence",                          0.7561, pale,      None),
+        ('"a generic scene"',                    0.7293, pale,      None),
+        ("wrong domain (factory)",               0.7271, "#E3A39B", None),
+        ("one sentence for all videos",          0.8129, "#E9B48F", None),
+        ("own sentence, written by LLaVA",       0.8235, CTX,       None),
+        ("another video's, mean of 20",          0.7133, shuf,      0.7787),
+    ]
+    fig, ax = plt.subplots(figsize=(6.9, 2.75))
+    _hbars(ax, rows, (0.68, 0.86))
+    ax.axvline(0.8028, color=VIS, lw=1.3, ls=(0, (4, 2.5)))
+    ax.text(0.8028 - 0.002, 5.42, "LAVAD 0.803", ha="right", va="center",
+            fontsize=7.9, color=VIS, fontweight="bold")
+    ax.set_ylim(-0.6, 5.75)
+    ax.set_title("UCF-Crime, 290 videos, no training — another video's sentence "
+                 "scores\nbelow none; the video's own sentence reaches 0.824",
+                 pad=5, fontsize=9.1)
+    fig.tight_layout()
+    p = os.path.join(out, "fig_chart_ucf_crime.png")
+    figsave.save(fig, p); plt.close(fig)
+    return p
+
+
 if __name__ == "__main__":
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     ap = argparse.ArgumentParser()
@@ -253,3 +330,5 @@ if __name__ == "__main__":
     print("  ", context_sweep(a.out))
     print("  ", window_and_ablation(a.out))
     print("  ", within_view(a.within_view_csv, a.out))
+    print("  ", per_camera(a.out))
+    print("  ", ucf_crime(a.out))
