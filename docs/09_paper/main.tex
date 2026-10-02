@@ -415,8 +415,9 @@ model, and refining the result via cross-modal similarity. VERA
 questions are optimised offline on source data, so the adaptation is not
 performed at test time. AnyAnomaly \citep{anyanomaly2025} lets a user define the
 anomaly of interest in text at inference time, and OVVAD \citep{wu2024ovvad}
-addresses the open-vocabulary setting using a frozen CLIP encoder with a
-lightweight trained temporal adapter.
+addresses the open-vocabulary setting using frozen CLIP encoders, a nearly
+weight-free temporal adapter, and detection and classification heads trained
+on the benchmark's training videos.
 
 \subsection{Domain adaptation: the classical view}
 Domain adaptation is the subfield of transfer learning in which the task is
@@ -583,8 +584,10 @@ absorbed. What remains is precisely the shift the literature set aside.
         Identified as an open direction by \citet{liu2022deep}, with little
         empirical evidence on which shifts a frozen VLM absorbs unaided.
   \item \textbf{Explanation quality under domain shift is unexamined.} None of
-        the six DA surveys addresses it; explainable VAD \citep{ye2025vera} is
-        evaluated in-domain only.
+        the six DA surveys addresses it. Explainable VAD \citep{ye2025vera}
+        transfers its learned questions across datasets, but reports detection
+        AUC there; whether the explanations remain correct under shift is not
+        measured.
 \end{enumerate}
 
 \wnote{Scope discipline: this work targets G1 and G2 as primary contributions,
