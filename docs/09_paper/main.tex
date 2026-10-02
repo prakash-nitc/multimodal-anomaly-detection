@@ -850,8 +850,10 @@ generated explanations.}
   together with the descriptor and produces a natural-language explanation.
   The model is loaded under 4-bit
   \textsc{NormalFloat} quantisation \citep{dettmers2023qlora}, which reduces its
-  memory footprint to roughly 5.5\,GB with negligible loss of generation
-  quality. The prompt explicitly permits the model to report that nothing
+  memory footprint by roughly a factor of four relative to 16-bit weights, so
+  that it fits beside the visual encoder on a single GPU. The effect of
+  quantisation on caption and explanation quality has not been measured
+  separately. The prompt explicitly permits the model to report that nothing
   appears wrong, which limits ungrounded assertions.
 \end{description}
 

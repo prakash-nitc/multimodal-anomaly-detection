@@ -156,6 +156,15 @@ def caption(args) -> int:
               open(os.path.expanduser("~/dazvad/work/tables/llava_captions_raw.json"), "w"),
               indent=1)
     print("\nwrote %s" % path)
+    # The paper states the pipeline fits in roughly 7 GB; this step holds CLIP
+    # ViT-L/14 and 4-bit LLaVA-1.5 at once, so its peak is the number to quote.
+    try:
+        import torch
+        if torch.cuda.is_available():
+            print("peak GPU memory (CLIP + 4-bit LLaVA): %.2f GB"
+                  % (torch.cuda.max_memory_allocated() / 1024 ** 3))
+    except Exception:  # noqa: BLE001 -- reporting only
+        pass
     return 0
 
 # ---------------------------------------------------------------- step 2
