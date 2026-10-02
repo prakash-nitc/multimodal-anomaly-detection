@@ -257,17 +257,22 @@ def build(assets: str, out: str) -> str:
     ax.text(0.79, 2.86, "current frame $f_t$", fontsize=FS_GLOSS, color=GOLD,
             ha="center", fontweight="bold")
 
-    container(ax, 0.12, 0.72, 1.34, 1.72, MUTED, "OPERATOR")
-    box(ax, 0.28, 1.34, 1.02, 0.70, "#FBFBF9", MUTED, lw=1.0)
-    ax.text(0.79, 1.86, "writes one", fontsize=FS_BODY, color=INK, ha="center",
-            va="center", zorder=5)
-    ax.text(0.79, 1.68, "sentence", fontsize=FS_BODY, color=INK, ha="center",
-            va="center", zorder=5)
-    ax.text(0.79, 1.48, "$c$", fontsize=9.6, color=CTX, ha="center",
-            va="center", fontweight="bold", zorder=5)
-    gloss(ax, 0.79, 1.12, "the only input that", fs=FS_TINY)
-    gloss(ax, 0.79, 1.00, "changes per site", fs=FS_TINY)
-    ax.text(0.79, 0.84, f"{FROZEN} = frozen", fontsize=FS_TINY,
+    # Setup, once per camera. The descriptor is no longer typed by an operator:
+    # the same frozen LLaVA used for explanation captions the camera's first
+    # three frames, chosen by position, and the consensus caption becomes c_k.
+    # (Result 6: 0.751 on ShanghaiTech with no human and no labels.)
+    container(ax, 0.12, 0.72, 1.34, 1.72, CTX, "SETUP · ONCE")
+    if have:
+        for k, dx in enumerate((-0.25, 0.0, 0.25)):
+            frame_img(ax, normal, 0.79 + dx, 2.18, 0.026, border="#7E8A8B", lw=0.7)
+    gloss(ax, 0.79, 1.99, "first 3 frames", fs=FS_TINY)
+    arrow(ax, (0.79, 1.93), (0.79, 1.80), color=RSN)
+    module(ax, 0.26, 1.36, 1.06, 0.42, "LLaVA-1.5", "M4 · same model",
+           RSN, RSN_BG, ts=8.4)
+    gloss(ax, 0.79, 1.20, "captions each frame,", fs=FS_TINY)
+    gloss(ax, 0.79, 1.08, "keeps the consensus", fs=FS_TINY)
+    gloss(ax, 0.79, 0.94, "(or an operator writes $c_k$)", MUTED, fs=6.4)
+    ax.text(0.79, 0.79, f"{FROZEN} = frozen", fontsize=FS_TINY,
             color=VIS, ha="center", fontweight="bold")
 
     # ------------------------------------------------ M1 (top branch)
@@ -283,15 +288,15 @@ def build(assets: str, out: str) -> str:
     # ------------------------------------------------ M3 (bottom branch)
     container(ax, 1.60, 0.44, 2.92, 2.10, CTX, "M3 · VERBALISED CONTEXT")
     box(ax, 1.78, 1.92, 2.56, 0.48, CTX_BG, CTX, lw=1.3)
-    ax.text(3.06, 2.26, "scene sentence  $c$", fontsize=FS_BOX, color=CTX,
-            ha="center", va="center", fontweight="bold", zorder=5)
-    ax.text(3.06, 2.06, '"a campus walkway with pedestrians"', fontsize=FS_BODY,
+    ax.text(3.06, 2.26, "scene sentence  $c_k$  for camera $k$", fontsize=FS_BOX,
+            color=CTX, ha="center", va="center", fontweight="bold", zorder=5)
+    ax.text(3.06, 2.06, 'e.g. "a park with a sidewalk and a bench"', fontsize=FS_BODY,
             color=INK, ha="center", va="center", style="italic", zorder=5)
 
     box(ax, 1.78, 1.16, 1.22, 0.52, "#FFFFFF", CTX, lw=1.15, r=0.03)
     ax.text(2.39, 1.53, "$P^{+}$ normal", fontsize=FS_BOX, color=CTX,
             ha="center", va="center", fontweight="bold", zorder=5)
-    ax.text(2.39, 1.32, "prompts $+\\, c$", fontsize=FS_BODY, color=INK,
+    ax.text(2.39, 1.32, "prompts $+\\, c_k$", fontsize=FS_BODY, color=INK,
             ha="center", va="center", zorder=5)
 
     box(ax, 3.12, 1.16, 1.22, 0.52, "#F4F2EE", CTX, lw=1.15, r=0.03)
@@ -301,7 +306,7 @@ def build(assets: str, out: str) -> str:
             ha="center", va="center", zorder=5)
 
     arrow(ax, (2.39, 1.90), (2.39, 1.72), color=CTX, lw=1.35)
-    ax.text(2.56, 1.82, "$c$ enters $P^{+}$ only", fontsize=FS_TINY, color=CTX,
+    ax.text(2.56, 1.82, "$c_k$ enters $P^{+}$ only", fontsize=FS_TINY, color=CTX,
             ha="left", va="center", zorder=6, fontweight="bold")
 
     arrow(ax, (2.39, 1.14), (2.39, 1.02), color=CTX)
@@ -367,10 +372,10 @@ def build(assets: str, out: str) -> str:
     ax.text(7.47, 1.94, '"A cyclist is\nriding through\na pedestrian\nwalkway."',
             fontsize=FS_BODY, color=INK, ha="center", va="center", style="italic",
             linespacing=1.5, zorder=5)
-    gloss(ax, 7.47, 1.14, "grounded by $c$ — the same", CTX, fs=FS_TINY)
+    gloss(ax, 7.47, 1.14, "grounded by $c_k$ — the same", CTX, fs=FS_TINY)
     gloss(ax, 7.47, 1.02, "sentence steers the words", CTX, fs=FS_TINY)
 
-    # video -> M1, operator -> M3: two separate paths, never crossing
+    # video -> M1, setup -> M3: two separate paths, never crossing
     arrow(ax, (1.46, 3.60), (1.74, 3.90), color=MUTED)
     arrow(ax, (1.46, 1.70), (1.74, 2.10), color=CTX, lw=1.35)
     # M2 -> M4, routed round the bottom so it enters at the decision rule
@@ -378,11 +383,11 @@ def build(assets: str, out: str) -> str:
     arrow(ax, (6.61, 0.68), (6.61, 4.32), color=TMP, lw=1.0)
     arrow(ax, (6.61, 4.32), (6.84, 4.32), color=TMP)
 
-    ax.text(W / 2, 0.28, "Deploying to a new site = editing $c$   ·   "
-                         "no target data   ·   no gradients   ·   every model frozen",
+    ax.text(W / 2, 0.28, "New camera = caption its first frames   ·   "
+                         "no labels   ·   no gradients   ·   every model frozen",
             fontsize=FS_BODY, color=CTX, ha="center", fontweight="bold")
-    ax.text(W / 2, 0.13, "Evaluation: scores min–max normalised per clip before "
-                         "pooling, following the benchmark protocol",
+    ax.text(W / 2, 0.13, "Evaluation: frame-level AUROC; per-clip normalised on "
+                         "ShanghaiTech and Avenue, raw pooled on UCF-Crime",
             fontsize=FS_TINY, color=INK, ha="center", fontweight="medium")
 
     check_overflow(fig, ax)

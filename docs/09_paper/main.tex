@@ -797,8 +797,11 @@ cost does not scale with the length of quiet video.
 \centering
 \includegraphics[width=\linewidth]{dazvad_architecture}
 \caption{The DA-ZVAD framework. Every model is frozen; the verbalised scene
-context (M3) is the sole adaptation mechanism, grounding both the prompt
-ensembles used for scoring and the generated explanations.}
+context (M3) is the sole adaptation mechanism. At setup, the same frozen LLaVA
+used for explanation captions a camera's first three frames, and the consensus
+caption becomes that camera's descriptor $c_k$, so no human-written text is
+required. $c_k$ enters the normal prompt ensemble only, and grounds the
+generated explanations.}
 \label{fig:arch}
 \end{figure}
 
