@@ -589,10 +589,11 @@ box(s, L, 4.5, CW, 0.35,
 rect(s, L, 5.05, CW, 1.35, ACCENT_LT)
 bignum(s, L + 0.6, 5.12, "0.49", "as reported", color=MUTED, vsize=42, w=2.2)
 box(s, L + 3.0, 5.42, 0.9, 0.6, "→", 34, bold=True, color=ACCENT)
-bignum(s, L + 4.2, 5.12, "0.71", "correctly pooled", color=ACCENT, vsize=42, w=2.4)
-box(s, L + 7.3, 5.35, 4.1, 0.9,
-    "Identical scores. Uses no labels.\nWe report both figures in the paper.",
-    14, color=INK, spacing=1.3)
+bignum(s, L + 4.2, 5.12, "0.67", "correctly pooled", color=ACCENT, vsize=42, w=2.4)
+box(s, L + 7.3, 5.25, 4.1, 1.1,
+    "Identical scores, no smoothing. Uses no labels.\n"
+    "With smoothing (w=31): 0.52 → 0.71.\nBoth figures are in the paper.",
+    13.5, color=INK, spacing=1.25)
 
 # ================================================================ 9b EVIDENCE
 figure_slide(
@@ -611,15 +612,15 @@ box(s, L, 1.9, CW, 0.35,
 
 rect(s, L, 2.45, 5.55, 1.15, SURF)
 box(s, L + 0.3, 2.62, 5.0, 0.25, "NORMAL PROMPT", 10.5, bold=True, color=ACCENT)
-box(s, L + 0.3, 2.95, 5.0, 0.6,
-    "“a campus walkway with pedestrians,\n everything is normal”",
-    13, color=INK, font=MONO, spacing=1.3)
+box(s, L + 0.3, 2.9, 5.0, 0.65,
+    "“a university campus walkway with\n pedestrians, everything is normal”",
+    12, color=INK, font=MONO, spacing=1.2)
 
 rect(s, L + 5.95, 2.45, 5.55, 1.15, SURF)
 box(s, L + 6.25, 2.62, 5.0, 0.25, "ABNORMAL PROMPT", 10.5, bold=True, color=CAUTION)
-box(s, L + 6.25, 2.95, 5.0, 0.6,
-    "“a campus walkway with pedestrians,\n but something is wrong”",
-    13, color=INK, font=MONO, spacing=1.3)
+box(s, L + 6.25, 2.9, 5.0, 0.65,
+    "“a university campus walkway with pedestrians,\n but something abnormal is happening”",
+    12, color=INK, font=MONO, spacing=1.2)
 
 bullets(s, [
     ("Shared words.", "Each prompt set is averaged into one summary vector. "
@@ -662,7 +663,7 @@ bignum(s, L + 6.4, 5.1, "0.628", "wrong description  —  a 10-point penalty",
        color=FAIL, vsize=44, w=4.9)
 
 box(s, L, 6.9, CW, 0.35,
-    "Nothing else was permitted to change, so the text caused it — slide 17 says how.",
+    "Nothing else was permitted to change, so the text caused it — page 16 says how.",
     15.5, bold=True, color=INK, align=PP_ALIGN.CENTER)
 
 # ================================================================ 11b SWEEP CHART
@@ -701,7 +702,8 @@ box(s, L + 6.35, 2.6, 4.8, 1.3,
 
 callout(s, L, 4.4, CW, 1.55, "What a second metric showed (Phase 3)",
         "Judged only by which frames rank highest INSIDE each video, the gap is "
-        "+0.006. The sentence mostly shifts each video's overall score level — "
+        "+0.006 (pooled: +0.100, same w=5). The sentence mostly shifts each "
+        "video's overall score level — "
         "telling cameras apart — and the pooled metric rewards that. It barely "
         "re-ranks frames within a video. A full audit is the next experiment.",
         tone="caution", size=15)
@@ -790,7 +792,7 @@ table(s, [
     ["CUHK Avenue (single view)", "1", "21", "+0.020"],
     ["ShanghaiTech, within a single view (mean)", "1 each", "5–34 each", "+0.033"],
     ["ShanghaiTech, pooled across views", "12", "107", "+0.105"],
-    ["UCF-Crime, own sentence per video (Phase 3)", "~290", "290", "+0.096"],
+    ["UCF-Crime, own sentence per video (raw, w=5)", "~290", "290", "+0.096"],
 ], L, 2.7, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=14, hi_rows=(2,), row_h=0.47,
     num_cols=(3,))
 
@@ -1042,7 +1044,7 @@ NOTES = [
  "The headline. Point at the none column being identical in both rows - that "
  "is the control, and it proves only the injection point changed. Then point "
  "at 0.628 and say a wrong sentence costs ten points on the benchmark metric. "
- "Do not say 'the text redefines normal' - slide 17 explains why.",
+ "Do not say 'the text redefines normal' - page 16 explains why.",
 
  "Be scrupulous. The +0.027 sits inside the spread, so we report direction "
  "only. Then the Phase 3 check, said plainly: judged only inside each video, "

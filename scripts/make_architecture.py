@@ -355,7 +355,7 @@ def build(assets: str, out: str) -> str:
     container(ax, 6.72, 0.44, 1.56, 4.14, RSN, "DETECTION · M4")
     ax.text(7.47, 4.32, r"flag if $\tilde{s}_t \geq \tau$", fontsize=FS_FORM,
             color=INK, ha="center", va="center", fontweight="bold", zorder=5)
-    gloss(ax, 7.47, 4.10, "$\\tau$ chosen on held-out clips", fs=FS_TINY)
+    gloss(ax, 7.47, 4.10, "$\\tau$ is set per site", fs=FS_TINY)
     if have:
         frame_img(ax, normal, 7.05, 3.74, 0.038, border=OUT_OK, lw=1.3)
         frame_img(ax, anom, 7.47, 3.74, 0.038, border=OUT_BAD, lw=1.9)
