@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Introductory figure: what video anomaly detection is, in one picture.
+"""Introductory figure for the deck: what video anomaly detection is.
 
-Three panels, all real data:
-  (a) an ordinary moment on ShanghaiTech camera 01 (clip 01_0014, frame 17),
-  (b) the same camera, same view, a cyclist on the pedestrian walkway
-      (clip 01_0014, frame 95) -- ShanghaiTech's textbook anomaly,
-  (c) a detector's score over one clip (04_0004, the worked example used in the
-      paper), with the true anomaly shaded.
+Three panels:
+  (a) NORMAL  -- a busy pedestrian crossing seen from above, people crossing as
+      usual ("Scramble from above, SHIBUYA SKY", Sei F, CC BY-SA 2.0),
+  (b) ANOMALY -- a collision on a crossing, also from above, like a CCTV view
+      ("Japanese car accident", Shuets Udono, CC BY-SA 2.0),
+  (c) an ILLUSTRATION of a detector's output: a score per frame that rises at
+      the unusual moment. Schematic, not measured -- the panel says so.
 
-Panels (a) and (b) are the same camera so that the only thing that differs is
-the event. Panel (c) is a different clip because it is the one whose scores are
-saved locally; its title says so.
+The two photographs come from Wikimedia Commons and are kept out of git in
+figure_assets/web/ (CREDITS.json records title, author, licence and source).
+The figure is used only in the presentation, not in the paper, and the slide
+carries the attribution both licences require.
 
 Usage:  python scripts/make_intro_figure.py
 """
@@ -41,58 +43,70 @@ plt.rcParams.update({
 })
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FR = os.path.join(ROOT, "figure_assets", "frames", "shanghaitech")
+WEB = os.path.join(ROOT, "figure_assets", "web")
 
 
-def frame_panel(ax, path, colour, head, sub):
-    im = np.asarray(Image.open(path).convert("RGB"))
-    ax.imshow(im)
+def crop_16x9(path):
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    th = int(round(w * 9 / 16))
+    if th <= h:                                   # too tall: keep the middle band
+        top = (h - th) // 2
+        im = im.crop((0, top, w, top + th))
+    else:                                         # too wide: keep the middle
+        tw = int(round(h * 16 / 9))
+        left = (w - tw) // 2
+        im = im.crop((left, 0, left + tw, h))
+    return np.asarray(im)
+
+
+def frame_panel(ax, img, colour, head, sub):
+    ax.imshow(img)
     ax.set_xticks([]); ax.set_yticks([])
     for sp in ax.spines.values():
         sp.set_edgecolor(colour); sp.set_linewidth(4)
     ax.set_title(head, fontsize=12.5, fontweight="bold", color=colour, pad=6)
     ax.text(0.5, -0.06, sub, transform=ax.transAxes, ha="center", va="top",
             fontsize=10, color=INK)
-    return im.shape
 
 
 def build(out_dir):
-    fig = plt.figure(figsize=(13.2, 4.3))
+    fig = plt.figure(figsize=(13.2, 3.95))
     gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 1.25], wspace=0.24,
-                          left=0.012, right=0.985, top=0.87, bottom=0.27)
+                          left=0.012, right=0.985, top=0.87, bottom=0.2)
 
     a = fig.add_subplot(gs[0])
-    frame_panel(a, os.path.join(FR, "01_0014_normal_00017.jpg"), OK,
-                "NORMAL", "An ordinary moment on a campus walkway")
+    frame_panel(a, crop_16x9(os.path.join(WEB, "normal_shibuya.jpg")), OK,
+                "NORMAL", "People crossing a busy junction, as usual")
 
     b = fig.add_subplot(gs[1])
-    frame_panel(b, os.path.join(FR, "01_0014_anomaly_00095.jpg"), BAD,
-                "ANOMALY", "Same camera: a cyclist on a pedestrian-only walkway")
-    # the cyclist sits at roughly (357, 135) in this 640x359 frame
-    b.add_patch(Ellipse((357, 135), 120, 110, fill=False, edgecolor=BAD, lw=2.6))
+    img = crop_16x9(os.path.join(WEB, "anomaly_collision.jpg"))
+    frame_panel(b, img, BAD, "ANOMALY", "A collision on the crossing")
+    h, w = img.shape[:2]
+    # the two cars meet near (0.53 w, 0.28 h) in this photograph
+    b.add_patch(Ellipse((0.53 * w, 0.30 * h), 0.24 * w, 0.42 * h, fill=False,
+                        edgecolor=BAD, lw=2.8))
 
     c = fig.add_subplot(gs[2])
-    z = np.load(os.path.join(ROOT, "figure_assets", "worked_example.npz"),
-                allow_pickle=True)
-    raw, lab = z["scores_matched"], z["labels"].astype(int)
-    sm = np.convolve(raw, np.ones(31) / 31, mode="same")
-    sm = (sm - sm.min()) / (sm.max() - sm.min() + 1e-12)
-    idx = np.where(lab == 1)[0]
-    if len(idx):
-        c.axvspan(idx[0], idx[-1], color=BAD, alpha=0.13, lw=0)
-        c.text((idx[0] + idx[-1]) / 2, 1.08, "true anomaly", ha="center",
-               fontsize=9.5, color=BAD, fontweight="bold")
-    c.plot(sm, color=TMP, lw=2.2)
-    c.axhline(0.45, color=MUTED, lw=1.1, ls=(0, (4, 3)))
-    c.text(len(sm) - 4, 0.47, "alarm threshold", ha="right", va="bottom",
-           fontsize=9, color=MUTED)
-    c.set_xlim(0, len(sm)); c.set_ylim(-0.04, 1.2)
-    c.set_yticks([0, 0.5, 1.0])
-    c.set_xlabel("time (frames)"); c.set_ylabel("anomaly score")
+    t = np.arange(200)
+    rng = np.random.default_rng(7)
+    score = 0.10 + 0.03 * rng.standard_normal(len(t))
+    event = (t >= 120) & (t <= 150)
+    score[event] += 0.75 * np.sin(np.linspace(0, np.pi, event.sum())) ** 0.5
+    score = np.convolve(score, np.ones(7) / 7, mode="same").clip(0, 1)
+    c.axvspan(120, 150, color=BAD, alpha=0.13, lw=0)
+    c.text(135, 1.08, "the unusual moment", ha="center", fontsize=9.5,
+           color=BAD, fontweight="bold")
+    c.plot(t, score, color=TMP, lw=2.2)
+    c.axhline(0.5, color=MUTED, lw=1.1, ls=(0, (4, 3)))
+    c.text(4, 0.52, "alarm threshold", ha="left", va="bottom", fontsize=9, color=MUTED)
+    c.set_xlim(0, len(t) - 1); c.set_ylim(-0.04, 1.2)
+    c.set_yticks([0, 0.5, 1.0]); c.set_xticks([])
+    c.set_xlabel("time  →"); c.set_ylabel("anomaly score")
     c.grid(axis="y", color=GRID, lw=0.5); c.set_axisbelow(True)
-    c.set_title("THE DETECTOR'S OUTPUT", fontsize=12.5, fontweight="bold",
+    c.set_title("WHAT A DETECTOR OUTPUTS", fontsize=12.5, fontweight="bold",
                 color=TMP, pad=6)
-    c.text(0.5, -0.24, "A score for every frame; high = unusual  (ShanghaiTech clip 04_0004)",
+    c.text(0.5, -0.17, "Illustration: one score per frame; high = unusual",
            transform=c.transAxes, ha="center", va="top", fontsize=10, color=INK)
 
     p = os.path.join(out_dir, "fig_intro_anomaly_detection.png")
@@ -102,5 +116,5 @@ def build(out_dir):
 
 
 if __name__ == "__main__":
-    out = os.path.join(ROOT, "docs", "09_paper", "figures")
+    out = os.path.join(ROOT, "docs", "06_presentations")
     print("saved:", build(out))

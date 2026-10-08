@@ -376,11 +376,12 @@ box(s, W - R - 2.2, 6.75, 2.2, 0.3, "October 2026", 12.5, color=MUTED,
 
 # ================================================================ 0b INTRO
 # Added Oct 2026 at the supervisor's request: one slide on what anomaly
-# detection is, with a picture, before the research gap. All three panels are
-# real data (scripts/make_intro_figure.py): an ordinary and an anomalous frame
-# from the same ShanghaiTech camera, and a detector's score over one clip.
+# detection is, with a picture, before the research gap. The two photographs
+# are Wikimedia Commons images (CC BY-SA 2.0, credited on the slide); the score
+# panel is a labelled illustration. See scripts/make_intro_figure.py.
 s = slide("What is video anomaly detection?", "Introduction")
-_intro = os.path.join(FIGDIR, "fig_intro_anomaly_detection.png")
+_intro = os.path.join(_here, "..", "docs", "06_presentations",
+                      "fig_intro_anomaly_detection.png")
 if not os.path.isfile(_intro):
     raise FileNotFoundError("run scripts/make_intro_figure.py first")
 with Image.open(_intro) as _im:
@@ -391,7 +392,7 @@ _ih = _iw * _ph / _pw
 _cw, _gap = (CW - 2 * 0.25) / 3, 0.25
 for _k, (_head, _body, _bg, _col) in enumerate([
         ("WHAT", "Find moments in video that do not fit what usually happens at "
-                 "that place — a cyclist on a walkway, a fight, a fall.",
+                 "that place — a collision, a fight, a fall.",
          ACCENT_LT, ACCENT),
         ("HOW", "Score every frame. When the score crosses a threshold, flag "
                 "that moment for a human to check.", SURF, INK),
@@ -404,6 +405,10 @@ for _k, (_head, _body, _bg, _col) in enumerate([
     rect(s, _x, _y, _cw, 1.2, _bg)
     box(s, _x + 0.2, _y + 0.1, _cw - 0.4, 0.25, _head, 11, bold=True, color=_col)
     box(s, _x + 0.2, _y + 0.36, _cw - 0.4, 0.8, _body, 12.5, color=INK, spacing=1.15)
+box(s, L, 1.8 + _ih + 1.36, CW - 0.8, 0.22,
+    "Photos: “Scramble from above, SHIBUYA SKY” by Sei F; “Japanese car accident” "
+    "by Shuets Udono — both CC BY-SA 2.0, via Wikimedia Commons, cropped. "
+    "Right panel: illustration.", 8.5, italic=True, color=MUTED)
 
 # ================================================================ 1 PROBLEM
 s = slide("A detector is tied to the place it learned", "The problem")
@@ -1031,10 +1036,11 @@ NOTES = [
  "detector to a new camera with one sentence the system writes itself, with nothing retrained.",
 
  "Keep it simple - this slide is for anyone on the panel who is not in this "
- "field. Left: an ordinary moment. Middle: the same camera, and a cyclist on a "
- "walkway where only people should walk - that is an anomaly. Right: what the "
- "detector produces, a score for every frame; it rises during the anomaly and "
- "crosses the alarm line. Then the three boxes, one line each.",
+ "field. Left: a busy crossing, hundreds of people, all normal. Middle: a "
+ "collision on a crossing - that is an anomaly. Right: what a detector "
+ "produces, a score for every frame that rises at the unusual moment and "
+ "crosses the alarm line; it is an illustration. Then the three boxes, one "
+ "line each. These photos are not from our data - our data starts on page 9.",
 
  "Open with the example, not the definition. Mall versus factory - the same "
  "forklift, opposite answers. Then the cost: every new customer means new "

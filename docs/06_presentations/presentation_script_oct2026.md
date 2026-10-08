@@ -90,34 +90,32 @@ the **10:30 mark** (you should be on page 15), use the cut list at the end.
 
 ## Page 1 — What is video anomaly detection? · 35 s · *clock 0:55*
 
-**On screen:** three pictures — an ordinary moment, the same camera with a
-cyclist circled, and the detector's score over time; three boxes underneath:
-What, How, Why it is hard.
+**On screen:** three pictures — a busy crossing (normal), a collision on a
+crossing (anomaly, circled), and a drawing of a detector's score over time;
+three boxes underneath: What, How, Why it is hard.
 
-![What video anomaly detection is: an ordinary moment, the same camera with a cyclist, and the detector's score over time.](../09_paper/figures/fig_intro_anomaly_detection.png)
+![What video anomaly detection is: a normal crossing, a collision, and an illustration of the detector's score.](fig_intro_anomaly_detection.png)
 
 > **Say:** "Before the research, the basic idea. **Video anomaly detection means
 > finding moments that don't fit what usually happens at that place.** On the
-> left, an ordinary moment on a campus walkway. In the middle — the same camera
-> — a cyclist riding where only people should walk. That's an anomaly. On the
-> right is what a detector produces: **a score for every frame.** It stays low,
-> rises during the anomaly — the shaded part — and crosses the alarm line."
+> left, a busy crossing — hundreds of people, all normal. In the middle, a
+> collision on a crossing. That's an anomaly. On the right is what a detector
+> produces: **a score for every frame.** It stays low, then rises at the unusual
+> moment and crosses the alarm line."
 
 > "Why is it hard? **Anomalies are rare and varied, so nobody can collect
 > examples of all of them.** So systems learn what 'normal' looks like instead,
 > and flag anything that doesn't fit."
 
-**Point at:** left picture → the red circle → the curve rising inside the
-shaded part.
+**Point at:** the busy crossing → the red circle → the peak in the curve.
 
 **If they ask:**
-- *"Are these real frames?"* — Yes. ShanghaiTech camera 01, clip 01_0014:
-  frame 17 is the normal one, frame 95 the cyclist.
-- *"Is the score curve from the same clip as the pictures?"* — No, it's clip
-  04_0004, the clip whose scores I keep saved for figures — the slide says so.
-  Same benchmark, same detector.
-- *"Which version of the detector made that curve?"* — The correct shared
-  sentence, smoothed over 31 frames, scaled to 0–1 within the clip.
+- *"Are these from your dataset?"* — No. These two are public photos from
+  Wikimedia Commons, used to explain the idea; the credit is at the bottom of
+  the slide. My own data starts on page 9.
+- *"Is the score curve real?"* — No, it's an illustration of what a detector
+  outputs; the slide labels it. Real score curves from my system are on
+  page 16.
 - *"Why is the alarm line there?"* — It's for illustration. My results use
   AUROC, which needs no threshold.
 - *"How do you measure success?"* — AUROC: pick one anomalous frame and one
