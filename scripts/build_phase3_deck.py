@@ -252,6 +252,10 @@ def refs_slide(title, eyebrow, entries):
 REFS = [
     ('wilkinghoff2026context',
      'K. Wilkinghoff, N. Madan, J. M. Valverde, K. Nasrollahi, R. T. Ionescu, R. Wisniewski, T. B. Moeslund, W. Wang, Z.-H. Tan, Out of context: Reliability in multimodal anomaly detection requires contextual inference, arXiv preprint arXiv:2604.13252 (2026).'),
+    ('anyanomaly2025',
+     'S. Ahn, Y. Jo, K. Lee, S. Kwon, I. Hong, S. Park, AnyAnomaly: Zero-shot customizable video anomaly detection with LVLM, in: Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), 2026, pp. 3026–3035.'),
+    ('zanella2024lavad',
+     'L. Zanella, W. Menapace, M. Mancini, Y. Wang, E. Ricci, Harnessing large language models for training-free video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18527–18536.'),
     ('radford2021clip',
      'A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G. Krueger, I. Sutskever, Learning transferable visual models from natural language supervision, in: Proceedings of the International Conference on Machine Learning (ICML), 2021, pp. 8748–8763.'),
     ('jeong2023winclip',
@@ -262,12 +266,8 @@ REFS = [
      'P. Bergmann, M. Fauser, D. Sattlegger, C. Steger, MVTec AD — A comprehensive real-world dataset for unsupervised anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2019, pp. 9592–9600.'),
     ('roth2022patchcore',
      'K. Roth, L. Pemula, J. Zepeda, B. Schölkopf, T. Brox, P. Gehler, Towards total recall in industrial anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2022, pp. 14318–14328.'),
-    ('zanella2024lavad',
-     'L. Zanella, W. Menapace, M. Mancini, Y. Wang, E. Ricci, Harnessing large language models for training-free video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18527–18536.'),
     ('ye2025vera',
-     'M. Ye, W. Liu, P. He, VERA: Explainable video anomaly detection via verbalized learning of vision-language models, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2025. ArXiv:2412.01095.'),
-    ('anyanomaly2025',
-     'S. Ahn, Y. Jo, K. Lee, S. Kwon, I. Hong, S. Park, AnyAnomaly: Zero-shot customizable video anomaly detection with LVLM, in: Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV), 2026, pp. 3026–3035.'),
+     'M. Ye, W. Liu, P. He, VERA: Explainable video anomaly detection via verbalized learning of vision-language models, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2025, pp. 8679–8688.'),
     ('wu2024ovvad',
      'P. Wu, X. Zhou, G. Pang, Y. Sun, J. Liu, P. Wang, Y. Zhang, Open-vocabulary video anomaly detection, in: Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 2024, pp. 18297–18307.'),
     ('patel2015visual',
@@ -448,7 +448,7 @@ callout(s, L, 5.0, CW, 1.35, "The gap we target",
         "of whether supplied context does any work.", size=14.5)
 
 # ================================================================ 4 APPROACH
-s = slide("DA-ZVAD: adapt by writing a sentence", "Proposed framework")
+s = slide("DA-ZVAD: one sentence per camera, written by the system", "Proposed framework")
 _here = os.path.dirname(os.path.abspath(__file__))
 img = next((c for c in (
     os.path.join(_here, "dazvad_architecture.png"),
@@ -491,9 +491,9 @@ bullets(s, [
 callout(s, L, 4.75, CW, 1.5, "Identifiability",
         "This is what makes the adaptation claim testable rather than asserted. "
         "You cannot run our central experiment on the competing systems — "
-        "their text is learned on source data " + cite("zhou2024anomalyclip") + ", or "
-        "entangled in an LLM prior " + cite("zanella2024lavad") + ", or accompanied by a "
-        "trained adapter " + cite("adavad2024") + ".", size=16)
+        "their text is learned on training data " + cite("ye2025vera") + ", or "
+        "entangled in an LLM prior " + cite("zanella2024lavad") + ", or paired with "
+        "trained detection heads " + cite("wu2024ovvad") + ".", size=16)
 
 box(s, L, 6.5, CW, 0.4,
     "It also means the claim can be falsified — which is the next slide.",
@@ -521,30 +521,32 @@ callout(s, L, 5.15, CW, 1.35, "Predicted signature, fixed before measurement",
 # ================================================================ 7 SETUP
 s = slide("What we ran", "Experiments  ·  setup")
 table(s, [
-    ["Benchmarks", "ShanghaiTech " + cite("liu2018shanghaitech") + " (12 views) and "
-                   "CUHK Avenue " + cite("lu2013avenue") + " (1 view)"],
-    ["Scale", "128 test clips · 28,118 frames · frame-level ground truth"],
-    ["Hardware", "NVIDIA A40, college GPU server"],
-    ["Backbone", "CLIP ViT-L/14 " + cite("radford2021clip", "dosovitskiy2021vit") + " (LAION-2B), "
-                  "frozen · PyTorch 2.3.1 / CUDA 12.1"],
-    ["Runs", "5 full experiment runs + cached-embedding analysis"],
-], L, 2.0, CW, col_w=[2.4, 9.23], size=15, header=False, row_h=0.52)
+    ["Video", "ShanghaiTech " + cite("liu2018shanghaitech") + " (12 views) · CUHK Avenue "
+              + cite("lu2013avenue") + " (1 view) · UCF-Crime " + cite("sultani2018ucfcrime")
+              + " (~290 scenes)"],
+    ["Image", "MVTec AD " + cite("bergmann2019mvtec") + " — detection baseline only"],
+    ["Scale", "418 test videos · 97,752 sampled frames · frame-level ground truth"],
+    ["Models", "CLIP ViT-L/14 " + cite("radford2021clip", "dosovitskiy2021vit") + " (LAION-2B) and "
+               "LLaVA-1.5-7B " + cite("liu2023llava") + " 4-bit — all frozen"],
+    ["Hardware", "NVIDIA A40, college GPU server · PyTorch 2.3.1 / CUDA 12.1"],
+    ["Runs", "5 full runs, cached-embedding analyses, LLaVA captioning, UCF-Crime pre-registered run"],
+], L, 1.95, CW, col_w=[1.6, 10.03], size=14, header=False, row_h=0.5)
 
-callout(s, L, 4.8, CW, 1.75, "Every run records its own conditions",
+callout(s, L, 5.25, CW, 1.6, "Every run records its own conditions",
         "Each run writes a manifest: the exact code commit, whether the working "
         "tree was clean, host, GPU, driver and library versions, full "
         "configuration, and per-dataset frame and label counts. Committed "
         "alongside the results — every figure in this deck is traceable to the "
-        "state that produced it.", size=15)
+        "state that produced it.", size=14)
 
 # ================================================================ 7b DATA
 figure_slide(
-    "What the two benchmarks actually look like", "Experiments  ·  the data",
+    "What the two campus benchmarks look like", "Experiments  ·  the data",
     "fig_dataset_samples.png",
-    "Each column is one fixed camera, so the scene, the angle and the lighting "
-    "are constant down a column and only the event changes. That is the whole "
-    "argument in a photograph: an empty walkway and the same walkway with a "
-    "cyclist look alike and are labelled opposite.")
+    "Each column is one fixed camera: the scene stays constant and only the "
+    "event changes — an empty walkway and the same walkway with a cyclist look "
+    "alike and are labelled opposite. UCF-Crime, added in Phase 3, is the "
+    "opposite case: almost every one of its 290 videos is a different place.")
 
 # ================================================================ 8 FAILURE
 s = slide("The first result was a failure", "Experiments  ·  what happened")
@@ -660,7 +662,7 @@ bignum(s, L + 6.4, 5.1, "0.628", "wrong description  —  a 10-point penalty",
        color=FAIL, vsize=44, w=4.9)
 
 box(s, L, 6.9, CW, 0.35,
-    "Nothing else in the system was permitted to change. The text caused it.",
+    "Nothing else was permitted to change, so the text caused it — slide 17 says how.",
     15.5, bold=True, color=INK, align=PP_ALIGN.CENTER)
 
 # ================================================================ 11b SWEEP CHART
@@ -693,14 +695,16 @@ box(s, L + 0.4, 2.6, 4.8, 1.3,
 rect(s, L + 5.95, 1.95, 5.55, 2.15, ACCENT_LT)
 box(s, L + 6.35, 2.2, 4.8, 0.3, "THE CLAIM WE MAKE", 11.5, bold=True, color=ACCENT)
 box(s, L + 6.35, 2.6, 4.8, 1.3,
-    "A WRONG description costs −0.105.\n\n"
-    "Unambiguous, and nothing else could have caused it.",
+    "A WRONG description lowers the benchmark score by 0.105.\n\n"
+    "Nothing else could have caused it.",
     15, color=INK, spacing=1.3)
 
-callout(s, L, 4.4, CW, 1.4, "How to read the mechanism",
-        "The description constrains a decision boundary rather than adding "
-        "information. It does not reliably lift performance when correct; it "
-        "degrades performance sharply when misdirected.", size=16)
+callout(s, L, 4.4, CW, 1.55, "What a second metric showed (Phase 3)",
+        "Judged only by which frames rank highest INSIDE each video, the gap is "
+        "+0.006. The sentence mostly shifts each video's overall score level — "
+        "telling cameras apart — and the pooled metric rewards that. It barely "
+        "re-ranks frames within a video. A full audit is the next experiment.",
+        tone="caution", size=15)
 
 box(s, L, 6.15, CW, 0.7,
     "A secondary finding, not present in the literature: WHERE the description "
@@ -768,9 +772,9 @@ box(s, L + 6.3, 4.9, 4.9, 0.8,
     15, color=INK, spacing=1.3)
 
 callout(s, L, 6.0, CW, 1.15, "Our explanation — stated as a conjecture",
-        "ShanghaiTech has 12 camera views; Avenue has one. A scene description "
-        "has work to do only when there are several environments to tell "
-        "apart. Testable: run the sweep inside a single ShanghaiTech view.",
+        "ShanghaiTech has 12 camera views; Avenue has one, so a scene description "
+        "has nothing to tell apart. Tested next inside single ShanghaiTech views, "
+        "and later on UCF-Crime's ~290 scenes.",
         tone="caution", size=14.5)
 
 # ================================================================ 15 WITHIN-VIEW
@@ -782,19 +786,20 @@ box(s, L, 1.9, CW, 0.7,
     15.5, color=INK_2, spacing=1.3)
 
 table(s, [
-    ["Evaluation", "Views", "Clips", "Gap"],
-    ["Pooled across views", "12", "107", "+0.105"],
-    ["Within a single view (mean)", "9", "5–34 each", "+0.033"],
+    ["Evaluation", "Scenes", "Clips", "Gap"],
     ["CUHK Avenue (single view)", "1", "21", "+0.020"],
-], L, 2.85, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=15, hi_rows=(2,), row_h=0.56,
+    ["ShanghaiTech, within a single view (mean)", "1 each", "5–34 each", "+0.033"],
+    ["ShanghaiTech, pooled across views", "12", "107", "+0.105"],
+    ["UCF-Crime, own sentence per video (Phase 3)", "~290", "290", "+0.096"],
+], L, 2.7, CW, col_w=[5.6, 1.9, 2.3, 1.83], size=14, hi_rows=(2,), row_h=0.47,
     num_cols=(3,))
 
-callout(s, L, 4.9, CW, 1.15, "The prediction could have failed",
-        "A within-view gap near +0.105 would have refuted the explanation "
-        "outright. It came back at a third of that, next to Avenue's figure.",
-        size=15.5)
+callout(s, L, 5.25, CW, 1.05, "The prediction could have failed",
+        "A within-view gap near +0.105 would have refuted it; it came back at a "
+        "third. But ~290 scenes gave no bigger gap than 12: it needs scenes, "
+        "it does not keep growing.", size=14)
 
-box(s, L, 6.25, CW, 0.7,
+box(s, L, 6.45, CW, 0.7,
     "What the sentence mainly supplies is WHICH scene you are in — not what "
     "counts as normal within it. Three of nine views show a negative gap, so "
     "inside one scene the effect is not reliable.",
@@ -877,31 +882,32 @@ s = slide("Where this sits against the literature", "Assessment")
 # one. The comparison that isolates our claim is zero-shot CLIP: this pipeline
 # with the sentence removed.
 table(s, [
-    ["Training-free method (no target data)", "Avenue", "ShT"],
-    ["Zero-shot CLIP " + cite("radford2021clip"), "62.3", "60.9"],
-    ["Zero-shot ImageBind " + cite("girdhar2023imagebind"), "64.5", "61.3"],
-    ["LLaVA-1.5 " + cite("liu2023llava"), "67.4", "59.6"],
-    ["Video-ChatGPT " + cite("maaz2024videochatgpt"), "76.9", "69.1"],
-    ["DA-ZVAD (ours) — one frozen encoder + a sentence", "67.7", "73.4"],
+    ["Training-free method (no target data)", "Avenue", "ShT", "UCF"],
+    ["Zero-shot CLIP " + cite("radford2021clip"), "62.3", "60.9", "53.2‡"],
+    ["Zero-shot ImageBind " + cite("girdhar2023imagebind"), "64.5", "61.3", "53.7‡"],
+    ["LLaVA-1.5 " + cite("liu2023llava"), "67.4", "59.6", "72.8‡"],
+    ["Video-ChatGPT " + cite("maaz2024videochatgpt"), "76.9", "69.1", "—"],
+    ["LAVAD " + cite("zanella2024lavad") + " — captioner + LLM + refiner", "—", "—", "80.3‡"],
+    ["DA-ZVAD (ours) — one frozen encoder + a sentence", "67.7", "73.4", "82.4"],
     ["AnyAnomaly " + cite("anyanomaly2025") + " — 3 LVLM queries per segment",
-     "87.3", "79.7"],
-], L, 1.92, CW, col_w=[7.4, 2.1, 2.13], size=14, hi_rows=(6,), row_h=0.44)
+     "87.3", "79.7", "80.7"],
+], L, 1.92, CW, col_w=[6.6, 1.6, 1.6, 1.83], size=13.5, hi_rows=(6,), row_h=0.38)
+
+box(s, L, 5.02, CW, 0.28,
+    "‡ from LAVAD " + cite("zanella2024lavad") + ", Table 1. All other figures from "
+    "AnyAnomaly " + cite("anyanomaly2025") + ", Tables 5–6.  Ours: Avenue/ShT one "
+    "shared sentence; UCF one sentence per video.", 11, italic=True, color=MUTED)
 
 bullets(s, [
     ("AnyAnomaly asks “is the thing I named happening?”  "
      "We ask “is anything happening that doesn’t belong here?”",
-     "Theirs needs the operator to list what could go wrong. Ours needs a "
-     "description of the ordinary. Their 79.7 is obtained by handing the model "
-     "the benchmark’s own anomaly classes."),
-    ("Most of our margin over the plain baselines is protocol, not language.",
-     "With no descriptor we already reach 0.707 against zero-shot CLIP’s "
-     "60.9. The sentence adds 2.7 — the evidence for it is the mismatched "
-     "condition, not this table."),
-], 4.88, size=14, gap=0.90)
+     "Theirs needs a list of what could go wrong — at evaluation it is handed "
+     "the benchmark’s own anomaly classes. Ours needs a description of the ordinary."),
+], 5.42, size=13.5, gap=0.9)
 
-callout(s, L, 6.44, CW, 0.82, "What we solve that they do not",
-        "Anomalies nobody listed in advance — and 0.824 on UCF-Crime, where "
-        "LAVAD reports 0.803.", size=14)
+callout(s, L, 6.35, CW, 0.85, "Where we lead",
+        "First of six training-free methods on UCF-Crime; behind AnyAnomaly on "
+        "the campus benchmarks.", size=13.5)
 
 # ================================================================ 17 LIMITS
 s = slide("Limitations we are stating ourselves", "Assessment")
@@ -912,13 +918,14 @@ bullets(s, [
     ("Resolution ceiling.", "Whole-frame embeddings at 224×224 cannot resolve "
      "small objects. Quadrant scoring did not close it; patch-level scoring is "
      "untested."),
-    ("The metric is scale-sensitive.", "Per-clip normalisation is affine, so a "
-     "monotone rescaling of the score changes the pooled figure even though the "
-     "ranking is identical. We found this the hard way."),
+    ("What the sentence actually does is not settled.", "Inside each video it "
+     "barely re-ranks frames (+0.006); most of the 0.105 is per-video score "
+     "shifts that the pooled metric rewards. An audit is the next experiment."),
+    ("The metrics are scale-sensitive.", "Softmax plus per-clip normalisation "
+     "changes pooled figures without changing rankings; on UCF-Crime the effect "
+     "shrinks under per-video normalisation."),
     ("Configuration selection.", "No validation split exists for these "
      "benchmarks, so we split clips and report the half never used to select."),
-    ("Metric sensitivity on UCF-Crime.", "Under per-video normalisation the "
-     "context effect shrinks sharply; we report the pre-registered raw metric."),
     ("No explanations yet.", "M4 now writes the camera sentences, but has not "
      "yet explained flagged events."),
 ], 1.95, size=14.5, gap=0.86)
@@ -927,20 +934,21 @@ bullets(s, [
 s = slide("What comes next", "Next")
 table(s, [
     ["Priority", "Work", "Why it matters"],
-    ["1", "XD-Violence, same pre-registered protocol",
-     "LAVAD's second benchmark; metric is average precision"],
-    ["2", "Patch-level scoring against spatial tokens",
-     "Most likely route to a materially higher figure"],
-    ["3", "M4 explanations under matched vs mismatched context",
-     "Completes the framework; supplies the qualitative result"],
-    ["4", "UCF-Crime with scores propagated to every frame",
-     "Comparable to LAVAD under either reading of its protocol"],
+    ["1", "Measurement audit: within-video ranking and raw scores, all benchmarks",
+     "Decides what the sentence really does: re-ranks frames or calibrates cameras"],
+    ["2", "XD-Violence (pre-registered) and UCF-Crime on every frame",
+     "LAVAD's second benchmark; makes the comparison airtight"],
+    ["3", "NWPU Campus — scene-dependent anomalies",
+     "The only benchmark where the same event flips label by scene: a direct concept-shift test"],
+    ["4", "Patch-level scoring; M4 explanations",
+     "Higher figure on small anomalies; completes the framework for the thesis"],
 ], L, 2.0, CW, col_w=[1.2, 5.5, 4.93], size=13.5, row_h=0.62, num_cols=(0,))
 
 callout(s, L, 5.2, CW, 1.5, "Done since Phase 2",
         "Within-view control with a confidence interval; prototype direction "
         "measured; per-camera sentences written by the system (0.751); "
-        "UCF-Crime under pre-registered predictions (0.824).", size=15)
+        "UCF-Crime under pre-registered predictions (0.824); every citation "
+        "checked against its source.", size=15)
 
 # ================================================================ 19 SUMMARY
 s = slide("Summary", "Phase 3")
@@ -951,7 +959,7 @@ items = [
     ("The method", "Every model frozen; adaptation carried by one sentence per "
      "camera, which the system writes itself from a few frames."),
     ("The result", "0.751 on ShanghaiTech and 0.824 on UCF-Crime with no "
-     "training; a wrong description costs 0.105 — the text is load-bearing."),
+     "training. A wrong sentence costs 0.105 — mostly by shifting scores between videos."),
     ("The finding", "Where the description is injected dominates what it says, "
      "to the point of reversing the effect. Not in the literature."),
     ("The boundary", "It needs several scenes: flat on single-camera Avenue, "
@@ -987,7 +995,7 @@ for _i, _page in enumerate(_pages, 1):
 # ================================================================ NOTES
 NOTES = [
  "Title. Introduce yourself and the one-line premise: adapting an anomaly "
- "detector to a new place by writing a sentence, with nothing retrained.",
+ "detector to a new camera with one sentence the system writes itself, with nothing retrained.",
 
  "Open with the example, not the definition. Mall versus factory - the same "
  "forklift, opposite answers. Then the cost: every new customer means new "
@@ -1001,19 +1009,23 @@ NOTES = [
  "context. Mention the 2026 position paper yourself - an independent group "
  "reached the same premise, which answers 'did you invent this problem?'",
 
- "Walk the four modules left to right in about thirty seconds. Then stop on "
- "M3 - the orange box - and say that is the only place the domain enters.",
+ "Walk the four modules left to right in about thirty seconds. Point at the "
+ "SETUP box: LLaVA captions a new camera's first frames and that caption is "
+ "the camera's sentence - no human needed. Then stop on M3, the only place the "
+ "domain enters, and its one rule: the sentence goes into the normal prompts only.",
 
  "The strongest methodological point in the deck. Say it slowly. And note that "
  "the competing systems CANNOT run our experiment - their text is learned on "
- "source data, or entangled in an LLM prior, or paired with a trained adapter.",
+ "training data (VERA), or entangled in an LLM prior (LAVAD), or paired with "
+ "trained detection heads (OVVAD).",
 
  "Emphasise that the interpretation was fixed BEFORE any measurement, and that "
  "the mismatched condition is designed to refute us. A panel will respect a "
  "test you could have failed - and later in the deck, one you partly did.",
 
  "Keep this brief - it is the credibility slide. If anyone doubts the work is "
- "yours, offer to open a manifest. Five runs, all recorded.",
+ "yours, offer to open a manifest. Three video benchmarks now, UCF-Crime added "
+ "in Phase 3; MVTec is only the image baseline.",
 
  "Do not rush past this and do not apologise for it. The first run was chance, "
  "and the key experiment came out backwards. Then pause. The next two slides "
@@ -1029,11 +1041,14 @@ NOTES = [
 
  "The headline. Point at the none column being identical in both rows - that "
  "is the control, and it proves only the injection point changed. Then point "
- "at 0.628 and say a wrong sentence costs ten points.",
+ "at 0.628 and say a wrong sentence costs ten points on the benchmark metric. "
+ "Do not say 'the text redefines normal' - slide 17 explains why.",
 
- "Be scrupulous. The +0.027 is positive at every window but sits inside the "
- "spread, so we report direction and not magnitude. The claim rests on the "
- "mismatched penalty. Understating here protects you.",
+ "Be scrupulous. The +0.027 sits inside the spread, so we report direction "
+ "only. Then the Phase 3 check, said plainly: judged only inside each video, "
+ "the gap is +0.006. The sentence mostly shifts each video's score level - it "
+ "tells cameras apart - rather than re-ranking frames. We found this ourselves "
+ "and the audit is the next experiment. Saying it first is what protects you.",
 
  "Volunteer the surprise: we expected motion to help and it does not. The "
  "pooled embedding already registers enough of it. Reporting the prediction "
@@ -1042,13 +1057,15 @@ NOTES = [
  "The most important slide in the deck. Detection transfers almost exactly; "
  "the adaptation does not. Give the honest reading - on Avenue a placeholder "
  "beats an accurate description, so that benefit cannot be domain adaptation. "
- "Then give the conjecture AND the experiment that would settle it.",
+ "Then give the conjecture AND the experiment that would settle it - the next "
+ "slide, and UCF-Crime later in the deck.",
 
  "This is the slide that shows a full cycle: we saw something odd, formed an "
  "explanation, designed a test that could have killed it, ran it, and it held. "
  "Say out loud that a gap near +0.105 here would have refuted us. Then give "
  "the caveat yourself - three of nine views are negative, so within one scene "
- "the effect is not reliable.",
+ "the effect is not reliable. The last row is Phase 3: ~290 scenes gave no "
+ "bigger gap than 12, so the claim is 'needs scenes', not 'grows with scenes'.",
 
  "Say why you are showing failures: the claim is that the minimal "
  "configuration is right, and that is only credible next to what was tried. "
@@ -1056,19 +1073,23 @@ NOTES = [
 
  "Anchor on the trained baseline: 73.4 matches the benchmark's own 2018 "
  "baseline using none of its training data. Then the reframe - AnyAnomaly is "
- "handed the class list, we are not. The LAVAD comparison lives on the "
- "UCF-Crime slide, not here.",
+ "handed the class list, we are not. Then the UCF column: first of six "
+ "training-free methods, above LAVAD and AnyAnomaly - say 'comparable or "
+ "better', since these are other papers' numbers. The ‡ rows come from LAVAD's "
+ "paper, the rest from AnyAnomaly's.",
 
- "Deliver these confidently rather than apologetically. The metric limitation "
- "is worth dwelling on - it is a real methodological point about a protocol "
- "the whole field uses, and we found it by chasing our own bug.",
+ "Deliver these confidently rather than apologetically. Dwell on the first "
+ "two: we found ourselves that the pooled metric rewards score shifts, and "
+ "that applies to every CLIP-based zero-shot VAD paper, not only ours.",
 
- "XD-Violence first: it is LAVAD's other benchmark, so it completes that "
- "comparison. Patch-level scoring is the best shot at a higher number. Point "
- "at the box at the bottom - everything listed there was the Phase 2 plan, now done.",
+ "The audit comes first because it decides how the result is described. Then "
+ "XD-Violence, LAVAD's other benchmark. NWPU Campus is the one dataset where "
+ "the same event is normal in one scene and abnormal in another - the direct "
+ "test of concept shift. Point at the box at the bottom for what is done.",
 
  "Close on the boundary, not the number. Say plainly that one registered "
- "prediction failed and the claim was narrowed because of it. Then hand over.",
+ "prediction failed and the claim was narrowed, and that the within-video "
+ "check is being audited. Then hand over.",
 ]
 # Notes for the figure and reference slides, spliced in at the deck positions
 # those slides occupy. Keys are FINAL (0-based) deck positions, so insert in
@@ -1077,8 +1098,8 @@ NOTES = [
 # order silently shifts every note after the first splice onto the wrong slide.
 EXTRA_NOTES = {
     8: "Thirty seconds, no more. Point down one column and say the scene never "
-       "changes - only the event does. If someone asks later why context "
-       "matters, come back to this slide.",
+       "changes - only the event does. Then one line on UCF-Crime: there, almost "
+       "every video is a different place, which is why each gets its own sentence.",
 
     11: "This is the proof that the diagnosis was not invented after the fact. "
         "Say clearly that neither panel uses labels. The cameras are separate "
