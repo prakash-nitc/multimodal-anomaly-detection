@@ -33,43 +33,44 @@ Three rules for tomorrow:
 | Page | Slide | Time | Clock at end |
 |---|---|---|---|
 | — | Title | 20 s | 0:20 |
-| 1 | The problem | 45 s | 1:05 |
-| 2 | Research gap 1 | 50 s | 1:55 |
-| 3 | Research gap 2 | 40 s | 2:35 |
-| 4 | The framework (diagram) | 2 min | 4:35 |
-| 5 | Why everything is frozen | 40 s | 5:15 |
-| 6 | The protocol | 40 s | 5:55 |
-| 7 | What we ran | 25 s | 6:20 |
-| 8 | What the data looks like | 20 s | 6:40 |
-| 9 | The first result failed | 30 s | 7:10 |
-| 10 | Diagnosis 1 | 45 s | 7:55 |
-| 11 | The evidence | 20 s | 8:15 |
-| 12 | Diagnosis 2 | 50 s | 9:05 |
-| 13 | After the fix | 45 s | 9:50 |
-| 14 | Same, drawn | 15 s | 10:05 |
-| 15 | One clip | 20 s | 10:25 |
-| 16 | Stating the claim precisely | 50 s | 11:15 |
-| 17 | Components | 30 s | 11:45 |
-| 18 | Window chart | 15 s | 12:00 |
-| 19 | Second dataset (Avenue) | 45 s | 12:45 |
-| 20 | Testing the explanation | 40 s | 13:25 |
-| 21 | Every camera view | 15 s | 13:40 |
-| 22 | A sentence per camera | 45 s | 14:25 |
-| 23 | UCF-Crime predictions | 60 s | 15:25 |
-| 24 | UCF-Crime drawn | 20 s | 15:45 |
-| 25 | Six things that failed | 25 s | 16:10 |
-| 26 | Against the literature | 50 s | 17:00 |
-| 27 | Limitations | 35 s | 17:35 |
-| 28 | What comes next | 25 s | 18:00 |
-| 29 | Summary | 30 s | 18:30 |
-| 30–32 | References | skip | — |
+| 1 | What is video anomaly detection? | 35 s | 0:55 |
+| 2 | The problem | 45 s | 1:40 |
+| 3 | Research gap 1 | 50 s | 2:30 |
+| 4 | Research gap 2 | 40 s | 3:10 |
+| 5 | The framework diagram | 2 min | 5:10 |
+| 6 | Why everything is frozen | 40 s | 5:50 |
+| 7 | The protocol | 40 s | 6:30 |
+| 8 | What we ran | 25 s | 6:55 |
+| 9 | What the data looks like | 20 s | 7:15 |
+| 10 | The first result failed | 30 s | 7:45 |
+| 11 | Diagnosis 1 | 45 s | 8:30 |
+| 12 | The evidence | 20 s | 8:50 |
+| 13 | Diagnosis 2 | 50 s | 9:40 |
+| 14 | After the fix | 45 s | 10:25 |
+| 15 | Same, drawn | 15 s | 10:40 |
+| 16 | One clip | 20 s | 11:00 |
+| 17 | Stating the claim precisely | 50 s | 11:50 |
+| 18 | Components | 30 s | 12:20 |
+| 19 | Window chart | 15 s | 12:35 |
+| 20 | Second dataset (Avenue) | 45 s | 13:20 |
+| 21 | Testing the explanation | 40 s | 14:00 |
+| 22 | Every camera view | 15 s | 14:15 |
+| 23 | A sentence per camera | 45 s | 15:00 |
+| 24 | UCF-Crime predictions | 60 s | 16:00 |
+| 25 | UCF-Crime drawn | 20 s | 16:20 |
+| 26 | Six things that failed | 25 s | 16:45 |
+| 27 | Against the literature | 50 s | 17:35 |
+| 28 | Limitations | 35 s | 18:10 |
+| 29 | What comes next | 25 s | 18:35 |
+| 30 | Summary | 30 s | 19:05 |
+| 31–33 | References | skip | — |
 
-That leaves **1½ minutes spare** for interruptions. If you are behind at the
-**10:00 mark** (you should be on page 14), use the cut list at the end.
+That leaves **about 1 minute spare** for interruptions. If you are behind at
+the **10:30 mark** (you should be on page 15), use the cut list at the end.
 
 ---
 
-# Part 1 — The problem (pages Title–3)
+# Part 1 — The problem (pages Title–4)
 
 ## Title · 20 s · *clock 0:20*
 
@@ -85,9 +86,48 @@ That leaves **1½ minutes spare** for interruptions. If you are behind at the
   ShanghaiTech experiments. Phase 3 added per-camera sentences, automatic
   sentence writing, and a third dataset, UCF-Crime.
 
-**→ Next:** "First, why moving a detector is hard at all."
+**→ Next:** "First, the basic idea: what anomaly detection is."
 
-## Page 1 — A detector is tied to the place it learned · 45 s · *clock 1:05*
+## Page 1 — What is video anomaly detection? · 35 s · *clock 0:55*
+
+**On screen:** three pictures — an ordinary moment, the same camera with a
+cyclist circled, and the detector's score over time; three boxes underneath:
+What, How, Why it is hard.
+
+![What video anomaly detection is: an ordinary moment, the same camera with a cyclist, and the detector's score over time.](../09_paper/figures/fig_intro_anomaly_detection.png)
+
+> **Say:** "Before the research, the basic idea. **Video anomaly detection means
+> finding moments that don't fit what usually happens at that place.** On the
+> left, an ordinary moment on a campus walkway. In the middle — the same camera
+> — a cyclist riding where only people should walk. That's an anomaly. On the
+> right is what a detector produces: **a score for every frame.** It stays low,
+> rises during the anomaly — the shaded part — and crosses the alarm line."
+
+> "Why is it hard? **Anomalies are rare and varied, so nobody can collect
+> examples of all of them.** So systems learn what 'normal' looks like instead,
+> and flag anything that doesn't fit."
+
+**Point at:** left picture → the red circle → the curve rising inside the
+shaded part.
+
+**If they ask:**
+- *"Are these real frames?"* — Yes. ShanghaiTech camera 01, clip 01_0014:
+  frame 17 is the normal one, frame 95 the cyclist.
+- *"Is the score curve from the same clip as the pictures?"* — No, it's clip
+  04_0004, the clip whose scores I keep saved for figures — the slide says so.
+  Same benchmark, same detector.
+- *"Which version of the detector made that curve?"* — The correct shared
+  sentence, smoothed over 31 frames, scaled to 0–1 within the clip.
+- *"Why is the alarm line there?"* — It's for illustration. My results use
+  AUROC, which needs no threshold.
+- *"How do you measure success?"* — AUROC: pick one anomalous frame and one
+  normal frame at random; how often does the anomalous one score higher? 0.5 is
+  guessing, 1.0 is perfect.
+
+**→ Next:** "Today, building one of these ties it to a single place. That's the
+problem."
+
+## Page 2 — A detector is tied to the place it learned · 45 s · *clock 1:40*
 
 **On screen:** the mall vs factory example — the same forklift, opposite answers.
 
@@ -101,12 +141,12 @@ That leaves **1½ minutes spare** for interruptions. If you are behind at the
 
 **If they ask:**
 - *"Is the forklift example from your data?"* — No, it's an illustration. The
-  real example from my data is on page 3: a vehicle on a walkway is an anomaly
+  real example from my data is on page 4: a vehicle on a walkway is an anomaly
   in ShanghaiTech.
 
 **→ Next:** "This kind of difference has a name in the literature."
 
-## Page 2 — The literature solves the adjacent problem · 50 s · *clock 1:55*
+## Page 3 — The literature solves the adjacent problem · 50 s · *clock 2:30*
 
 **On screen:** covariate shift vs concept shift table; the Liu quotation.
 
@@ -130,7 +170,7 @@ That leaves **1½ minutes spare** for interruptions. If you are behind at the
 
 **→ Next:** "Why that matters for anomaly detection specifically."
 
-## Page 3 — Why that matters for anomaly detection · 40 s · *clock 2:35*
+## Page 4 — Why that matters for anomaly detection · 40 s · *clock 3:10*
 
 **On screen:** three examples (running, lying down, a vehicle) — normal in one
 place, anomalous in another.
@@ -153,9 +193,9 @@ place, anomalous in another.
 
 ---
 
-# Part 2 — The method (pages 4–8)
+# Part 2 — The method (pages 5–9)
 
-## Page 4 — The framework diagram · 2 min · *clock 4:35*
+## Page 5 — DA-ZVAD: one sentence per camera (the diagram) · 2 min · *clock 5:10*
 
 **On screen:** the architecture diagram. Spend the most time here.
 
@@ -177,7 +217,7 @@ Then walk it, left to right — one breath per box:
 > **M3 · VERBALISED CONTEXT (bottom middle):** "I keep two short lists of
 > phrases — normal ones and abnormal ones. **The camera's sentence is added to
 > the normal list only.** That one rule is the most important arrow in the
-> diagram — page 12 shows what happens without it."
+> diagram — page 13 shows what happens without it."
 
 > **FRAME SCORING (middle):** "Each frame is compared with the 'normal' summary
 > and the 'abnormal' summary. The score is how much more abnormal than normal it
@@ -199,7 +239,7 @@ only", the SETUP box.
   use AUROC, which needs no threshold**, so I never had to choose one. In a real
   deployment it would be set per site.
 - *"Why w = 31?"* — From a sweep: performance rises up to 31 and falls after, so
-  it's a real optimum (page 18).
+  it's a real optimum (page 19).
 - *"What does c_k mean?"* — The sentence for camera k. Each camera has its own.
 - *"Is 'a park with a sidewalk and a bench' a real caption?"* — Yes, it's
   LLaVA's caption for camera 01 of ShanghaiTech.
@@ -216,7 +256,7 @@ only", the SETUP box.
 **→ Next:** "Freezing everything isn't about saving compute. It's what makes the
 claim testable."
 
-## Page 5 — Why freezing everything is the point · 40 s · *clock 5:15*
+## Page 6 — Why freezing everything is the point · 40 s · *clock 5:50*
 
 > **Say:** "If the system learned even a little from a new site and got better,
 > I couldn't say whether the sentence helped or the learning did. So nothing is
@@ -232,7 +272,7 @@ claim testable."
 
 **→ Next:** "And a testable claim needs a way to be proven wrong."
 
-## Page 6 — A protocol that can prove us wrong · 40 s · *clock 5:55*
+## Page 7 — A protocol that can prove us wrong · 40 s · *clock 6:30*
 
 **On screen:** the four conditions table.
 
@@ -251,7 +291,7 @@ claim testable."
 
 **→ Next:** "Here is what it ran on."
 
-## Page 7 — What we ran · 25 s · *clock 6:20*
+## Page 8 — What we ran · 25 s · *clock 6:55*
 
 **On screen:** the setup table.
 
@@ -275,7 +315,7 @@ claim testable."
 
 **→ Next:** "Thirty seconds on what the data looks like."
 
-## Page 8 — What the two campus benchmarks look like · 20 s · *clock 6:40*
+## Page 9 — What the two campus benchmarks look like · 20 s · *clock 7:15*
 
 **On screen:** grid of normal and anomalous frames, one camera per column.
 
@@ -286,15 +326,15 @@ claim testable."
 
 **If they ask:**
 - *"Why no UCF-Crime frames here?"* — This figure is about one fixed camera,
-  which UCF-Crime doesn't have; its results are on pages 23–24.
+  which UCF-Crime doesn't have; its results are on pages 24–25.
 
 **→ Next:** "Now what happened. The first result was a failure."
 
 ---
 
-# Part 3 — Failure and diagnosis (pages 9–12)
+# Part 3 — Failure and diagnosis (pages 10–13)
 
-## Page 9 — The first result was a failure · 30 s · *clock 7:10*
+## Page 10 — The first result was a failure · 30 s · *clock 7:45*
 
 **On screen:** 0.49, and the backwards table.
 
@@ -311,7 +351,7 @@ claim testable."
 
 **→ Next:** "There were two problems. The first was in how I measured."
 
-## Page 10 — Diagnosis 1: we were measuring it wrong · 45 s · *clock 7:55*
+## Page 11 — Diagnosis 1: we were measuring it wrong · 45 s · *clock 8:30*
 
 **On screen:** the 12 cameras, the error, the schools analogy, 0.49 → 0.67.
 
@@ -332,7 +372,7 @@ claim testable."
 
 **→ Next:** "That's a strong claim about my own bug, so here's the evidence."
 
-## Page 11 — The evidence for that diagnosis · 20 s · *clock 8:15*
+## Page 12 — The evidence for that diagnosis · 20 s · *clock 8:50*
 
 **On screen:** two panels — frames coloured by camera; similarity per camera.
 
@@ -347,7 +387,7 @@ claim testable."
 **→ Next:** "That fixed the number but not the backwards result. That was a
 second problem — the interesting one."
 
-## Page 12 — Diagnosis 2: the description cancelled itself out · 50 s · *clock 9:05*
+## Page 13 — Diagnosis 2: the description cancelled itself out · 50 s · *clock 9:40*
 
 **On screen:** the normal prompt and the abnormal prompt, both containing the
 same scene sentence.
@@ -376,9 +416,9 @@ in both boxes.
 
 ---
 
-# Part 4 — The central result (pages 13–18)
+# Part 4 — The central result (pages 14–19)
 
-## Page 13 — After the fix: the predicted signature · 45 s · *clock 9:50*
+## Page 14 — After the fix: the predicted signature · 45 s · *clock 10:25*
 
 **On screen:** the two-row table; 0.734 and 0.628.
 
@@ -387,7 +427,7 @@ in both boxes.
 > identical, because with no sentence there's nothing to place. That's my
 > control. Now the bottom row: the correct sentence 0.734, the wrong one
 > **0.628 — a 10-point drop.** Nothing else could change, so the text caused
-> it. *How* it caused it is page 16."
+> it. *How* it caused it is page 17."
 
 **If they ask:**
 - *"Which setting are these numbers?"* — ShanghaiTech, all 107 clips, window
@@ -397,7 +437,7 @@ in both boxes.
 
 **→ Next:** "Same numbers, drawn."
 
-## Page 14 — The same experiment, drawn · 15 s · *clock 10:05*
+## Page 15 — The same experiment, drawn · 15 s · *clock 10:40*
 
 > **Say:** "**The number that matters is the arrow** — the distance between
 > correct and wrong. Grey, sentence in both lists: −0.029. Orange, normal list
@@ -405,7 +445,7 @@ in both boxes.
 
 **→ Next:** "Here it is on a single clip."
 
-## Page 15 — One clip, two sentences · 20 s · *clock 10:25*
+## Page 16 — One clip, two sentences · 20 s · *clock 11:00*
 
 > **Say:** "One clip, same frozen models, same frames. Only the sentence
 > differs — campus or factory. **The two lines match outside the event and
@@ -413,11 +453,11 @@ in both boxes.
 
 **If they ask:**
 - *"Which clip?"* — ShanghaiTech clip 04_0004. It's one example; the averages are
-  on pages 13–14.
+  on pages 14–15.
 
 **→ Next:** "Now let me be precise about what this does and doesn't show."
 
-## Page 16 — Stating the claim precisely · 50 s · *clock 11:15*
+## Page 17 — Stating the claim precisely · 50 s · *clock 11:50*
 
 **This is the slide your professor is most likely to push on. Go slowly.**
 
@@ -443,11 +483,11 @@ in both boxes.
   w=31 is the first step of the audit. I also have a second check at w=31: using
   the raw similarity instead of CLIP's softmax, the pooled gap is +0.017.
 - *"What is the ±0.036?"* — The spread of results when I split the clips into
-  different halves five times (page 17).
+  different halves five times (page 18).
 
 **→ Next:** "Next question: does every part of the system earn its place?"
 
-## Page 17 — Which components earn their place · 30 s · *clock 11:45*
+## Page 18 — Which components earn their place · 30 s · *clock 12:20*
 
 > **Say:** "I tried other ways to score frames — by motion, by distance from the
 > clip's own average, and combinations. **Language alone is best.** And one
@@ -462,7 +502,7 @@ in both boxes.
 
 **→ Next:** "Two of these are easier to see as charts."
 
-## Page 18 — Window length, and what each component adds · 15 s · *clock 12:00*
+## Page 19 — Window length, and what each component adds · 15 s · *clock 12:35*
 
 > **Say:** "Left: smoothing helps up to 31 frames, then hurts — **a real best
 > setting**, not just more blur. Right: the error bars overlap, so I say
@@ -472,9 +512,9 @@ in both boxes.
 
 ---
 
-# Part 5 — Other datasets and Phase 3 (pages 19–25)
+# Part 5 — Other datasets and Phase 3 (pages 20–26)
 
-## Page 19 — A second domain: the replication test · 45 s · *clock 12:45*
+## Page 20 — A second domain: the replication test · 45 s · *clock 13:20*
 
 **On screen:** ShanghaiTech vs Avenue table.
 
@@ -493,7 +533,7 @@ in both boxes.
 
 **→ Next:** "That's a convenient explanation, so I tested it."
 
-## Page 20 — We tested that explanation, and it held · 40 s · *clock 13:25*
+## Page 21 — We tested that explanation, and it held · 40 s · *clock 14:00*
 
 **On screen:** gap vs number of scenes, four rows.
 
@@ -516,7 +556,7 @@ in both boxes.
 
 **→ Next:** "Here are those nine views one by one."
 
-## Page 21 — Every camera view, one at a time · 15 s · *clock 13:40*
+## Page 22 — Every camera view, one at a time · 15 s · *clock 14:15*
 
 > **Say:** "Each bar is one camera. **Most are well below the pooled line, three
 > are negative**, and views 03 and 07 nearly reach it. It's a shift in the
@@ -528,7 +568,7 @@ in both boxes.
 **→ Next:** "If the sentence tells cameras apart, twelve cameras shouldn't share
 one sentence. That's where Phase 3 starts."
 
-## Page 22 — A sentence per camera, written by the system · 45 s · *clock 14:25*
+## Page 23 — A sentence per camera, written by the system · 45 s · *clock 15:00*
 
 **On screen:** per-camera chart.
 
@@ -552,7 +592,7 @@ one sentence. That's where Phase 3 starts."
 **→ Next:** "That's twelve campus cameras. The real test is somewhere new — so I
 wrote my predictions down first."
 
-## Page 23 — UCF-Crime: predictions written down first · 60 s · *clock 15:25*
+## Page 24 — UCF-Crime: predictions written down first · 60 s · *clock 16:00*
 
 **On screen:** 0.824 and the four-prediction table.
 
@@ -583,7 +623,7 @@ wrote my predictions down first."
 **→ Next:** "Here is the picture — one bar in it is the most convincing thing in
 Phase 3."
 
-## Page 24 — UCF-Crime, drawn · 20 s · *clock 15:45*
+## Page 25 — UCF-Crime, drawn · 20 s · *clock 16:20*
 
 > **Say:** "**Look at the bottom bar: another video's sentence scores 0.713 —
 > below having no sentence at all, 0.756.** A description of the wrong place
@@ -596,12 +636,12 @@ Phase 3."
 
 **→ Next:** "Before the comparison, everything I tried that didn't work."
 
-## Page 25 — Six things that did not work · 25 s · *clock 16:10*
+## Page 26 — Six things that did not work · 25 s · *clock 16:45*
 
 > **Say:** "My claim is that the simplest version is the right one. That's only
 > believable next to what I tried. **Six attempts, none helped.** For example,
 > prompts naming bicycles and vehicles made it much *worse* — 0.486 — because
-> the shared words caused the same cancelling problem as page 12."
+> the shared words caused the same cancelling problem as page 13."
 
 **If they ask:**
 - *"Why did quadrant scoring fail?"* — Averaging quarters beat taking the
@@ -612,9 +652,9 @@ Phase 3."
 
 ---
 
-# Part 6 — Assessment and close (pages 26–29)
+# Part 6 — Assessment and close (pages 27–30)
 
-## Page 26 — Where this sits against the literature · 50 s · *clock 17:00*
+## Page 27 — Where this sits against the literature · 50 s · *clock 17:35*
 
 **On screen:** training-free methods on Avenue, ShanghaiTech and UCF-Crime.
 
@@ -632,7 +672,7 @@ Phase 3."
 - *"What does ‡ mean?"* — Those UCF-Crime numbers come from LAVAD's paper,
   Table 1. All other numbers come from AnyAnomaly's paper, Tables 5–6. I checked
   each one in the original PDF.
-- *"Why is your Avenue number 67.7 here but 0.706 on page 19?"* — Here I use the
+- *"Why is your Avenue number 67.7 here but 0.706 on page 20?"* — Here I use the
   same setting on both datasets — the correct shared sentence. 0.706 is 'no
   sentence'. Picking the best setting per dataset would flatter the table.
 - *"Why does UCF use a different setting from Avenue/ShT?"* — The footnote says
@@ -646,7 +686,7 @@ Phase 3."
 
 **→ Next:** "In the same spirit, the limitations — stated by me."
 
-## Page 27 — Limitations we are stating ourselves · 35 s · *clock 17:35*
+## Page 28 — Limitations we are stating ourselves · 35 s · *clock 18:10*
 
 > **Say:** "Six limitations, briefly. **It only works where there are several
 > scenes.** It can't see very small objects in a whole-frame summary. **I
@@ -662,7 +702,7 @@ Phase 3."
 
 **→ Next:** "Each limitation maps to a next step."
 
-## Page 28 — What comes next · 25 s · *clock 18:00*
+## Page 29 — What comes next · 25 s · *clock 18:35*
 
 > **Say:** "**First, a measurement audit** — it decides what the sentence really
 > does. Then XD-Violence, LAVAD's second benchmark. Then **NWPU Campus — the
@@ -678,7 +718,7 @@ Phase 3."
 
 **→ Next:** "To summarise."
 
-## Page 29 — Summary · 30 s · *clock 18:30*
+## Page 30 — Summary · 30 s · *clock 19:05*
 
 **Say — one line each, then stop:**
 
@@ -695,7 +735,7 @@ Phase 3."
 **Do not:** add a long thank-you, or start explaining again. Stop and wait for
 questions.
 
-## Pages 30–32 — References
+## Pages 31–33 — References
 
 Skip. If asked: *"Which survey has the concept-shift quote?"* — **Liu et al.
 2022, reference [14].**
@@ -731,15 +771,15 @@ Skip. If asked: *"Which survey has the concept-shift quote?"* — **Liu et al.
 
 Cut in this order (move through the slide in one sentence, don't skip it):
 
-1. Page 14 (drawn version of 13) — say "same numbers, as bars".
-2. Page 18 (window chart).
-3. Page 21 (per-view bars) — say "three of nine are negative" on page 20.
-4. Page 24 (UCF chart) — say "another video's sentence is worse than none" on 23.
-5. Page 11 (evidence) — keep only if asked.
-6. Page 4: shorten to the one-line version plus the SETUP box and the "normal
+1. Page 15 (drawn version of 14) — say "same numbers, as bars".
+2. Page 19 (window chart).
+3. Page 22 (per-view bars) — say "three of nine are negative" on page 21.
+4. Page 25 (UCF chart) — say "another video's sentence is worse than none" on 24.
+5. Page 12 (evidence) — keep only if asked.
+6. Page 5: shorten to the one-line version plus the SETUP box and the "normal
    only" arrow.
 
-**Never cut:** pages 4, 6, 12, 13, 16, 19, 22, 23, 26.
+**Never cut:** pages 1, 5, 7, 13, 14, 17, 20, 23, 24, 27.
 
 # Appendix C — Five lines to know cold
 

@@ -374,6 +374,37 @@ box(s, 1.5, 6.75, 7.0, 0.3, "National Institute of Technology Calicut", 12.5,
 box(s, W - R - 2.2, 6.75, 2.2, 0.3, "October 2026", 12.5, color=MUTED,
     align=PP_ALIGN.RIGHT)
 
+# ================================================================ 0b INTRO
+# Added Oct 2026 at the supervisor's request: one slide on what anomaly
+# detection is, with a picture, before the research gap. All three panels are
+# real data (scripts/make_intro_figure.py): an ordinary and an anomalous frame
+# from the same ShanghaiTech camera, and a detector's score over one clip.
+s = slide("What is video anomaly detection?", "Introduction")
+_intro = os.path.join(FIGDIR, "fig_intro_anomaly_detection.png")
+if not os.path.isfile(_intro):
+    raise FileNotFoundError("run scripts/make_intro_figure.py first")
+with Image.open(_intro) as _im:
+    _pw, _ph = _im.size
+_iw = 11.2
+s.shapes.add_picture(_intro, Inches(L + (CW - _iw) / 2), Inches(1.8), Inches(_iw))
+_ih = _iw * _ph / _pw
+_cw, _gap = (CW - 2 * 0.25) / 3, 0.25
+for _k, (_head, _body, _bg, _col) in enumerate([
+        ("WHAT", "Find moments in video that do not fit what usually happens at "
+                 "that place — a cyclist on a walkway, a fight, a fall.",
+         ACCENT_LT, ACCENT),
+        ("HOW", "Score every frame. When the score crosses a threshold, flag "
+                "that moment for a human to check.", SURF, INK),
+        ("WHY IT IS HARD", "Anomalies are rare and varied, so no one can collect "
+                           "examples of them all. Systems learn “normal” instead.",
+         CAUTION_LT, CAUTION),
+]):
+    _x = L + _k * (_cw + _gap)
+    _y = 1.8 + _ih + 0.12
+    rect(s, _x, _y, _cw, 1.2, _bg)
+    box(s, _x + 0.2, _y + 0.1, _cw - 0.4, 0.25, _head, 11, bold=True, color=_col)
+    box(s, _x + 0.2, _y + 0.36, _cw - 0.4, 0.8, _body, 12.5, color=INK, spacing=1.15)
+
 # ================================================================ 1 PROBLEM
 s = slide("A detector is tied to the place it learned", "The problem")
 bullets(s, [
@@ -663,7 +694,7 @@ bignum(s, L + 6.4, 5.1, "0.628", "wrong description  —  a 10-point penalty",
        color=FAIL, vsize=44, w=4.9)
 
 box(s, L, 6.9, CW, 0.35,
-    "Nothing else was permitted to change, so the text caused it — page 16 says how.",
+    "Nothing else was permitted to change, so the text caused it — page 17 says how.",
     15.5, bold=True, color=INK, align=PP_ALIGN.CENTER)
 
 # ================================================================ 11b SWEEP CHART
@@ -999,6 +1030,12 @@ NOTES = [
  "Title. Introduce yourself and the one-line premise: adapting an anomaly "
  "detector to a new camera with one sentence the system writes itself, with nothing retrained.",
 
+ "Keep it simple - this slide is for anyone on the panel who is not in this "
+ "field. Left: an ordinary moment. Middle: the same camera, and a cyclist on a "
+ "walkway where only people should walk - that is an anomaly. Right: what the "
+ "detector produces, a score for every frame; it rises during the anomaly and "
+ "crosses the alarm line. Then the three boxes, one line each.",
+
  "Open with the example, not the definition. Mall versus factory - the same "
  "forklift, opposite answers. Then the cost: every new customer means new "
  "footage and a retraining cycle. That cost is what we are removing.",
@@ -1044,7 +1081,7 @@ NOTES = [
  "The headline. Point at the none column being identical in both rows - that "
  "is the control, and it proves only the injection point changed. Then point "
  "at 0.628 and say a wrong sentence costs ten points on the benchmark metric. "
- "Do not say 'the text redefines normal' - page 16 explains why.",
+ "Do not say 'the text redefines normal' - page 17 explains why.",
 
  "Be scrupulous. The +0.027 sits inside the spread, so we report direction "
  "only. Then the Phase 3 check, said plainly: judged only inside each video, "
@@ -1099,63 +1136,63 @@ NOTES = [
 # already in place and index k is the slot the note belongs in. Descending
 # order silently shifts every note after the first splice onto the wrong slide.
 EXTRA_NOTES = {
-    8: "Thirty seconds, no more. Point down one column and say the scene never "
+    9: "Thirty seconds, no more. Point down one column and say the scene never "
        "changes - only the event does. Then one line on UCF-Crime: there, almost "
        "every video is a different place, which is why each gets its own sentence.",
 
-    11: "This is the proof that the diagnosis was not invented after the fact. "
+    12: "This is the proof that the diagnosis was not invented after the fact. "
         "Say clearly that neither panel uses labels. The cameras are separate "
         "regions of the space and sit at different similarity levels, which is "
         "exactly why pooling raw scores destroyed the ordering.",
 
-    14: "The picture of the previous table. Trace the two arrows with a finger. "
+    15: "The picture of the previous table. Trace the two arrows with a finger. "
         "The grey arrow points the wrong way and the orange one points the "
         "right way, and the only thing separating them is where the sentence "
         "was attached.",
 
-    15: "The most persuasive slide in the deck for a sceptical panel, because "
+    16: "The most persuasive slide in the deck for a sceptical panel, because "
         "there is no aggregation to argue with - two runs over identical "
         "frames with identical frozen weights. Say that the curves coincide "
         "outside the event on purpose: that is the control.",
 
-    18: "Volunteer the weakness before anyone asks. The error bars overlap, so "
+    19: "Volunteer the weakness before anyone asks. The error bars overlap, so "
         "the top three are statistically tied. The claim is that nothing we "
         "added beat plain language, which is a negative result about our own "
         "elaborations, not a win over the alternatives.",
 
-    21: "Show the spread yourself. Three views are negative and two nearly "
+    22: "Show the spread yourself. Three views are negative and two nearly "
         "reach the pooled figure, so the result is a shift in the mean rather "
         "than a collapse everywhere. Saying this before the panel spots it is "
         "the difference between a caveat and a hole.",
 
-    22: "Phase 3 starts here. Say what changed: each camera gets its own "
+    23: "Phase 3 starts here. Say what changed: each camera gets its own "
         "sentence, and LLaVA writes it from the first three frames - no human, "
         "no labels. Point at the swapped bars: even the best swap loses, so the "
         "sentence works by matching its camera. Do not claim LLaVA beats a "
         "human; 0.751 against 0.749 is noise.",
 
-    23: "The strongest slide for credibility. The predictions were committed "
+    24: "The strongest slide for credibility. The predictions were committed "
         "to git before any score existed. Say P1 failed before anyone asks, "
         "and that the claim was narrowed because of it. On LAVAD: 'comparable "
         "or better'. LAVAD samples every 16th frame too, but other papers' "
         "numbers can differ by small protocol details. AnyAnomaly gets 0.807 "
         "here - below us, unlike on the campus benchmarks.",
 
-    24: "Point at the borrowed-sentence bar first: worse than no sentence at "
+    25: "Point at the borrowed-sentence bar first: worse than no sentence at "
         "all. That is the clearest evidence that the sentence tells the model "
         "where it is. Then the dashed LAVAD line, with the protocol caveat.",
 
-    30: "Do not read these out. They are here because they are the evidence "
+    31: "Do not read these out. They are here because they are the evidence "
         "base for the gap: the six surveys are what let us say the field "
         "scopes concept shift out. Be ready to say which one contains the "
         "quote - it is Liu et al. 2022.",
 
-    31: "Also not read aloud. If asked how the work is positioned, this slide "
+    32: "Also not read aloud. If asked how the work is positioned, this slide "
         "is the answer: the frozen models are all off-the-shelf, the "
         "benchmarks and metrics are the standard ones, and every method we "
         "compare against is here.",
 
-    32: "The third reference slide exists because the comparative analysis "
+    33: "The third reference slide exists because the comparative analysis "
         "added seven entries. If asked which of these you actually read "
         "rather than cited from a table: the six DA surveys, AnyAnomaly, "
         "LAVAD and WinCLIP. The one-class figures are as tabulated by "
