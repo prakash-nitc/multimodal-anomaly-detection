@@ -1,0 +1,21 @@
+# DA-ZVAD on the GPU server: core requirements plus M4 (LLaVA, 4-bit) and the
+# UCF-Crime downloader.
+#
+# Tested on an NVIDIA A40 with Python 3.10.7 and torch 2.3.1+cu121. Install the
+# CUDA build of torch first, from the PyTorch index for your CUDA version, e.g.
+#   pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+# then:
+#   pip install -r requirements-server.txt
+
+-r requirements.txt
+
+# M4: LLaVA-1.5-7B in 4-bit. These exact versions work together; newer
+# transformers/tokenizers combinations failed to load the LLaVA tokenizer.
+transformers==4.46.3
+tokenizers<0.21
+accelerate==0.33.0
+bitsandbytes==0.43.3
+
+# UCF-Crime: read only the 290 test videos out of the remote archive
+remotezip>=0.12
+urllib3>=1.26

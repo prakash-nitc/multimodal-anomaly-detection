@@ -114,9 +114,14 @@ python -m da_zvad.demo
 ```
 
 **Real experiments** need a GPU. The results above were produced on an NVIDIA
-A40 with PyTorch 2.3.1 / CUDA 12.1. LLaVA in 4-bit was tested with
-`transformers==4.46.3`, `tokenizers<0.21`, `bitsandbytes==0.43.3`,
-`accelerate==0.33.0`.
+A40 with Python 3.10 and PyTorch 2.3.1 / CUDA 12.1. On the server, install the
+CUDA build of torch first, then the server requirements. These add LLaVA's 4-bit
+stack, pinned to the versions that work together, and the UCF-Crime downloader:
+
+```bash
+pip install torch==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+pip install -r requirements-server.txt
+```
 
 The expensive step, encoding frames with CLIP, is done once and cached, so
 every scoring variant afterwards runs in seconds.
@@ -133,7 +138,6 @@ python notebooks/run_experiments_server.py --shanghaitech ~/dazvad/data/shanghai
 python notebooks/within_view_control.py --raw ~/dazvad/work/raw --window 31
 
 # UCF-Crime: fetch only the 290 test videos (~8 GB of the 103 GB archive), then score
-pip install remotezip
 python notebooks/fetch_ucf_crime_test.py
 python notebooks/cache_embeddings.py --dataset ucf_crime --root ~/dazvad/data/ucf_crime \
        --frame-step 16 --crops 1

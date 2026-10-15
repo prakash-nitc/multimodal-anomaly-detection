@@ -1,32 +1,21 @@
-# Core ML
-torch>=2.0.0
-torchvision>=0.15.0
-numpy>=1.24.0
-scipy>=1.10.0
-scikit-learn>=1.2.0
+# DA-ZVAD core requirements: the pipeline, CLIP scoring, analyses and figures.
+# Runs on any machine (CPU is enough for `python -m da_zvad.demo`).
+# On the GPU server, install requirements-server.txt instead (it includes this file).
 
-# Vision-Language Models
-open-clip-torch>=2.20.0
-transformers>=4.35.0
+# Pipeline
+torch>=2.0
+open-clip-torch>=2.20         # M1: CLIP ViT-L/14 (LAION-2B)
+numpy>=1.24
+scipy>=1.10                   # Avenue ground truth (.mat)
+scikit-learn>=1.2             # AUROC / AP
+Pillow>=9.5
+opencv-python-headless>=4.7   # video decoding (Avenue, UCF-Crime)
 
-# Anomaly Detection
-anomalib>=1.0.0
+# Analyses and figures
+matplotlib>=3.7
+pandas>=2.0
+tqdm>=4.65
 
-# Data & Visualization
-matplotlib>=3.7.0
-seaborn>=0.12.0
-pandas>=2.0.0
-Pillow>=9.5.0
-opencv-python>=4.7.0
-
-# Notebooks
-jupyter>=1.0.0
-ipywidgets>=8.0.0
-
-# Utilities
-tqdm>=4.65.0
-pyyaml>=6.0
-omegaconf>=2.3.0
-
-# Evaluation
-torchmetrics>=1.0.0
+# Slide deck and Word documents (scripts/build_phase3_deck.py, scripts/md_to_docx.py)
+python-pptx>=1.0
+python-docx>=1.1
