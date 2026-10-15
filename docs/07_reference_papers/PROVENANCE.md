@@ -35,6 +35,7 @@ unverified. Run it before every upload to Overleaf.
 | `ucfcrime` | `Sultani et al. 2018, UCF-Crime (CVPR 2018).pdf` | dataset description; Result 7 |
 | `ovvad` | `Wu et al. 2024, OVVAD (CVPR)-….pdf` | literature review |
 | `zxvad` | `Aich et al. 2023, zxVAD (WACV)-….pdf` | literature review; also the secondary source for Lu et al. 2020 |
+| `xdviolence` | `Wu et al., ECCV 2020.pdf` | XD-Violence dataset description and metric; PREREG_xd_violence.md |
 | — | (none — paywalled) | Ada-VAD verified from the publisher's abstract page. The file once saved under that name was a different paper (Zhu et al., TKDD 2024) and was removed |
 
 ---
@@ -75,6 +76,11 @@ weaker evidence and must be either confirmed or removed.
 | 78.5 | UCF AUROC | MULDE | `anyanomaly` | Table 5, p.8, row MULDE[24], UCF column | verified |
 | 80.7 | UCF AUROC | AnyAnomaly | `anyanomaly` | Table 5, p.8, row AnyAnomaly, UCF column (77.8 without context) | verified |
 | 62.01 | XD-Violence AP | LAVAD | `lavad` | Table 2, p.6, row LAVAD (AUC there is 85.36) | verified |
+| 85.36 | XD-Violence AUC | LAVAD | `lavad` | Table 2, p.6, row LAVAD | verified |
+| 50.26 | XD-Violence AP | LLaVA-1.5 | `lavad` | Table 2, p.6, row LLAVA-1.5[17] (AUC 79.62) | verified |
+| 17.83 | XD-Violence AP | Zero-shot CLIP | `lavad` | Table 2, p.6, row ZS CLIP[22] (AUC 38.21) | verified |
+| 27.25 | XD-Violence AP | Zero-shot ImageBind | `lavad` | Table 2, p.6, row ZS IMAGEBIND (IMAGE)[6] (AUC 58.81); the video variant is 25.36 / 55.06 | verified |
+| 88.26 | XD-Violence AUC | VERA | `vera` | Table 3, p.8684, row VERA; VERA learns its questions on training data and reports AUC only | verified |
 
 **Our own rows** — Avenue 67.7 and ShanghaiTech 73.4 — are not in this ledger.
 They are measurements, and their provenance is the run manifests under
@@ -111,6 +117,10 @@ close paraphrases the argument leans on, and they carry the same rule.
 | zxVAD: no target-domain adaptation; an untrained CNN synthesises pseudo-abnormal frames; future-frame prediction | `zxvad` | p.1 Abstract; p.2 contributions | verified |
 | Lu et al. 2020: meta-learned scene adaptation from few frames, future-frame prediction | `zxvad` (secondary) | zxVAD p.3 and ref. [1]: "use meta-learning approaches and adapt to the target domain with few scenes" | verified (secondary source) |
 | UCF-Crime: 1,900 videos, 13 anomaly classes; test split 150 normal + 140 anomalous | `ucfcrime` | p.1 Abstract; p.5 "Training and testing sets" | verified |
+| XD-Violence: 4,754 untrimmed videos, 217 h; test set 800 = 500 violent + 300 non-violent; six classes (Abuse, Car Accident, Explosion, Fighting, Riot, Shooting); sources include movies, cartoons, sports, games, news, CCTV, hand-held and car cameras | `xdviolence` | p.1 Abstract; §3.1–3.3 | verified |
+| XD-Violence is evaluated by frame-level AP (precision–recall), not AUC, "since AUC usually shows an optimistic result when dealing with class-imbalanced data"; videos fixed at 24 fps, 16-frame snippets | `xdviolence` | §5.1–5.2 | verified |
+| Official AP = sklearn `auc(recall, precision)` over snippet scores repeated ×16; ground truth `gt[start:end] = 1` (0-based, end exclusive), each video cut to frame-count − 1 and then to a multiple of 16 | authors' code, github.com/Roc-Ng/XDVioDet: `test.py`, `list/make_gt.py` | read 16 Oct 2026; our `snippet_gt` matches a literal port of `make_gt.py` on all 800 videos × 3 random lengths | verified |
+| XD-Violence label codes: B1 Fighting, B2 Shooting, B4 Riot, B5 Abuse, B6 Car accident, G Explosion; A = normal | dataset ReadMe, roc-ng.github.io/XD-Violence/images/ReadMe.md | read 16 Oct 2026 | verified |
 | Page ranges: UCF-Crime 6479–6488, VERA 8679–8688, OVVAD 18297–18307, zxVAD 2578–2590, Lu 2020 125–141 | PDFs | running page numbers; Lu 2020 via zxVAD ref. [1] | verified |
 | Ada-VAD: synthesised abnormal samples, then adversarial adaptation to a few target frames | publisher abstract | SIAM SDM 2024 abstract page (doi:10.1137/1.9781611978032.73): "we synthesize abnormal samples … pretrain a domain invariant model … adapt the pre-trained model to target domain with few-shot samples … with an adversarial training approach"; authors Guo, Fu, Li; pp. 634–642 | verified (abstract; full text paywalled) |
 | LAVAD samples each video every 16 frames — the same as our UCF-Crime protocol | `lavad` | §4, Implementation Details: "We sample each video every 16 frames for computational efficiency" | verified |

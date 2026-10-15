@@ -19,6 +19,8 @@ Usage:
         --shanghaitech ~/dazvad/data/shanghaitech --crops 5
     python notebooks/cache_embeddings.py \
         --dataset ucf_crime --root ~/dazvad/data/ucf_crime --frame-step 16 --crops 1
+    python notebooks/cache_embeddings.py \
+        --dataset xd_violence --root ~/dazvad/data/xd_violence --frame-step 16 --crops 1
 """
 from __future__ import annotations
 
@@ -39,7 +41,7 @@ def main() -> int:
     p.add_argument("--shanghaitech", default=None,
                    help="shorthand for --dataset shanghaitech --root PATH")
     p.add_argument("--dataset", default="shanghaitech",
-                   choices=["shanghaitech", "avenue", "ucf_crime"])
+                   choices=["shanghaitech", "avenue", "ucf_crime", "xd_violence"])
     p.add_argument("--root", default=None)
     p.add_argument("--out", default=os.path.expanduser("~/dazvad/work/embeddings"))
     p.add_argument("--frame-step", type=int, default=2)

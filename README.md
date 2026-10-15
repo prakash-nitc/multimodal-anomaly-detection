@@ -143,6 +143,17 @@ python notebooks/cache_embeddings.py --dataset ucf_crime --root ~/dazvad/data/uc
        --frame-step 16 --crops 1
 python notebooks/ucf_crime_sweep.py caption
 python notebooks/ucf_crime_sweep.py run
+
+# XD-Violence (pre-registered in docs/10_phase3/PREREG_xd_violence.md): 800 test videos, 10.8 GB
+python notebooks/fetch_xd_violence_test.py
+python notebooks/cache_embeddings.py --dataset xd_violence --root ~/dazvad/data/xd_violence \
+       --frame-step 16 --crops 1
+python notebooks/xd_violence_sweep.py caption
+python notebooks/xd_violence_sweep.py run
+
+# Measurement audit: does the sentence re-rank frames or calibrate videos? (CPU only)
+python notebooks/measurement_audit.py --selftest
+python notebooks/measurement_audit.py
 ```
 
 Datasets are not included. Obtain them from their official sources:
