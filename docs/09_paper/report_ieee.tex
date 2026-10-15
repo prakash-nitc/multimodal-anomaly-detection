@@ -365,9 +365,10 @@ scoring and a prompt ensemble naming the benchmark's anomaly classes (0.486),
 which re-creates the dilution above through shared vocabulary.
 
 \subsection{Scene diversity bounds the effect}
-Applied unchanged to Avenue, detection transfers (0.706 against 0.707 with no
-descriptor) but the context gap falls to $+0.020$. Avenue has one camera, so
-the descriptor has nothing to distinguish. Evaluating the sweep inside each
+Applied unchanged to Avenue, detection transfers: with no descriptor Avenue
+gives 0.706 and ShanghaiTech 0.707. The context gap, however, falls to
+$+0.020$, and an accurate descriptor scores below none (0.677). Avenue has one
+camera, so the descriptor has nothing to distinguish. Evaluating the sweep inside each
 ShanghaiTech camera separately reproduces this (Table~\ref{tab:scenes},
 Fig.~\ref{fig:within}): the mean within-view gap is $+0.033$, with a bootstrap
 95\% interval of $[-0.005, +0.070]$ that excludes the pooled $+0.105$. Three of

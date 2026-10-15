@@ -54,7 +54,7 @@ Frame-level AUROC, with no training on any dataset.
 |---|---|---|---|
 | **UCF-Crime** (290 test videos) | ~290 | **0.824** with per-video sentences by LLaVA | LAVAD 80.3, AnyAnomaly 80.7 (both training-free) |
 | **ShanghaiTech** (107 clips) | 12 | **0.751** with per-camera sentences by LLaVA | 0.707 with no sentence, 0.734 with one shared sentence |
-| **CUHK Avenue** (21 clips) | 1 | 0.706 | 0.707 with no sentence; one camera leaves nothing to adapt |
+| **CUHK Avenue** (21 clips) | 1 | 0.706 with no sentence | Same as ShanghaiTech with no sentence (0.707), so detection transfers; with one camera a sentence doesn't help (0.677) |
 | **MVTec AD** (images, baseline only) | n/a | 88.5% image AUROC | One-Class SVM *trained* on the same features: 92.4% |
 
 ![UCF-Crime results](docs/09_paper/figures/fig_chart_ucf_crime.png)
