@@ -36,6 +36,8 @@ unverified. Run it before every upload to Overleaf.
 | `ovvad` | `Wu et al. 2024, OVVAD (CVPR)-….pdf` | literature review |
 | `zxvad` | `Aich et al. 2023, zxVAD (WACV)-….pdf` | literature review; also the secondary source for Lu et al. 2020 |
 | `xdviolence` | `Wu et al., ECCV 2020.pdf` | XD-Violence dataset description and metric; PREREG_xd_violence.md |
+| `nwpu` | `Cao et al. 2023, NWPU Campus (CVPR).pdf` | NWPU Campus description, metric, comparison figures; PREREG_nwpu_campus.md |
+| `nwpusupp` | `Cao et al. 2023, NWPU Campus (CVPR) supplementary.pdf` | anomaly classes per scene; definition of scene-dependent anomalies |
 | — | (none — paywalled) | Ada-VAD verified from the publisher's abstract page. The file once saved under that name was a different paper (Zhu et al., TKDD 2024) and was removed |
 
 ---
@@ -81,6 +83,14 @@ weaker evidence and must be either confirmed or removed.
 | 17.83 | XD-Violence AP | Zero-shot CLIP | `lavad` | Table 2, p.6, row ZS CLIP[22] (AUC 38.21) | verified |
 | 27.25 | XD-Violence AP | Zero-shot ImageBind | `lavad` | Table 2, p.6, row ZS IMAGEBIND (IMAGE)[6] (AUC 58.81); the video variant is 25.36 / 55.06 | verified |
 | 88.26 | XD-Violence AUC | VERA | `vera` | Table 3, p.8684, row VERA; VERA learns its questions on training data and reports AUC only | verified |
+| 61.9 | NWPU Campus AUC | MemAE | `nwpu` | Table 4, p.8 (also Table 3, p.7, column Cam) | verified |
+| 62.5 | NWPU Campus AUC | MNAD | `nwpu` | Table 4, p.8 | verified |
+| 62.5 | NWPU Campus AUC | OG-Net | `nwpu` | Table 4, p.8 | verified |
+| 63.7 | NWPU Campus AUC | HF2-VAD | `nwpu` | Table 4, p.8 | verified |
+| 64.4 | NWPU Campus AUC | MPN | `nwpu` | Table 4, p.8 | verified |
+| 64.5 | NWPU Campus AUC | AMMC-Net | `nwpu` | Table 4, p.8 | verified |
+| 65.8 | NWPU Campus AUC | Cao et al. (γ=0, no scene conditioning) | `nwpu` | Table 4, p.8 | verified |
+| 68.2 | NWPU Campus AUC | Cao et al. (γ=1, scene-conditioned) | `nwpu` | Table 4, p.8 | verified |
 
 **Our own rows** — Avenue 67.7 and ShanghaiTech 73.4 — are not in this ledger.
 They are measurements, and their provenance is the run manifests under
@@ -121,6 +131,11 @@ close paraphrases the argument leans on, and they carry the same rule.
 | XD-Violence is evaluated by frame-level AP (precision–recall), not AUC, "since AUC usually shows an optimistic result when dealing with class-imbalanced data"; videos fixed at 24 fps, 16-frame snippets | `xdviolence` | §5.1–5.2 | verified |
 | Official AP = sklearn `auc(recall, precision)` over snippet scores repeated ×16; ground truth `gt[start:end] = 1` (0-based, end exclusive), each video cut to frame-count − 1 and then to a multiple of 16 | authors' code, github.com/Roc-Ng/XDVioDet: `test.py`, `list/make_gt.py` | read 16 Oct 2026; our `snippet_gt` matches a literal port of `make_gt.py` on all 800 videos × 3 random lengths | verified |
 | XD-Violence label codes: B1 Fighting, B2 Shooting, B4 Riot, B5 Abuse, B6 Car accident, G Explosion; A = normal | dataset ReadMe, roc-ng.github.io/XD-Violence/images/ReadMe.md | read 16 Oct 2026 | verified |
+| NWPU Campus: 43 scenes, 28 anomaly classes, 25 fps; 305 training (normal only) + 242 test videos; test 384,059 frames, 65,266 anomalous, 124 videos with anomalies; frame labels carry no class | `nwpu` | Abstract; §3.1; Table 2; also matches the released ground-truth file | verified |
+| NWPU Campus metric: "we concatenate all the frames in a dataset and then compute the overall frame-level AUC" | `nwpu` | §5.1, Evaluation Metric | verified |
+| Scene dependency: "an event is normal in one scene but abnormal in another" | `nwpu` | §1 | verified |
+| Scene-dependent classes: cycling on footpath, wrong turn, trucks, photographing in restricted area; defined by the scene's training footage (photographing absent from D036/D038 training videos, present in D055) | `nwpusupp` | §1; Table 2 | verified |
+| Scenes with a scene-dependent class: D003 (Trucks), D036 and D038 (Photographing), D129 (Cycling on footpath); "Wrong turn" appears in no scene of Table 1 | `nwpusupp` | Table 1 | verified |
 | Page ranges: UCF-Crime 6479–6488, VERA 8679–8688, OVVAD 18297–18307, zxVAD 2578–2590, Lu 2020 125–141 | PDFs | running page numbers; Lu 2020 via zxVAD ref. [1] | verified |
 | Ada-VAD: synthesised abnormal samples, then adversarial adaptation to a few target frames | publisher abstract | SIAM SDM 2024 abstract page (doi:10.1137/1.9781611978032.73): "we synthesize abnormal samples … pretrain a domain invariant model … adapt the pre-trained model to target domain with few-shot samples … with an adversarial training approach"; authors Guo, Fu, Li; pp. 634–642 | verified (abstract; full text paywalled) |
 | LAVAD samples each video every 16 frames — the same as our UCF-Crime protocol | `lavad` | §4, Implementation Details: "We sample each video every 16 frames for computational efficiency" | verified |

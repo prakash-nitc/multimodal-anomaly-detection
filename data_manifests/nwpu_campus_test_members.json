@@ -1,0 +1,1814 @@
+{
+"archive_bytes": 77484127279,
+"volume_bytes": 734003200,
+"n_volumes": 106,
+"members": [
+{
+"name": "D001_01.avi",
+"offset": 9019,
+"packed": 51042979,
+"size": 54441094,
+"crc32": 1306770967
+},
+{
+"name": "D001_02.avi",
+"offset": 51051998,
+"packed": 25745273,
+"size": 27352402,
+"crc32": 2808489455
+},
+{
+"name": "D001_03.avi",
+"offset": 76797271,
+"packed": 23501519,
+"size": 24948922,
+"crc32": 457496796
+},
+{
+"name": "D001_04.avi",
+"offset": 100298790,
+"packed": 22996428,
+"size": 24764476,
+"crc32": 2051283772
+},
+{
+"name": "D002_01.avi",
+"offset": 123295218,
+"packed": 10354667,
+"size": 11351450,
+"crc32": 1494463280
+},
+{
+"name": "D002_02.avi",
+"offset": 133649885,
+"packed": 15485584,
+"size": 17203428,
+"crc32": 1840572420
+},
+{
+"name": "D003_01.avi",
+"offset": 149135469,
+"packed": 61815974,
+"size": 62941318,
+"crc32": 1874806269
+},
+{
+"name": "D003_02.avi",
+"offset": 210951443,
+"packed": 27167668,
+"size": 27676336,
+"crc32": 2107657799
+},
+{
+"name": "D003_03.avi",
+"offset": 238119111,
+"packed": 29239821,
+"size": 29966184,
+"crc32": 3944439410
+},
+{
+"name": "D003_04.avi",
+"offset": 267358932,
+"packed": 82132308,
+"size": 83546808,
+"crc32": 751152315
+},
+{
+"name": "D003_05.avi",
+"offset": 349491240,
+"packed": 126671816,
+"size": 129151092,
+"crc32": 2537741539
+},
+{
+"name": "D013_01.avi",
+"offset": 476163056,
+"packed": 183272291,
+"size": 188168752,
+"crc32": 130038502
+},
+{
+"name": "D013_02.avi",
+"offset": 659435347,
+"packed": 160493658,
+"size": 163834220,
+"crc32": 1470361429
+},
+{
+"name": "D013_03.avi",
+"offset": 819929005,
+"packed": 105154699,
+"size": 107133038,
+"crc32": 2310387867
+},
+{
+"name": "D013_04.avi",
+"offset": 925083704,
+"packed": 63953555,
+"size": 65473282,
+"crc32": 3540802155
+},
+{
+"name": "D014_01.avi",
+"offset": 989037259,
+"packed": 23773282,
+"size": 24498936,
+"crc32": 392083959
+},
+{
+"name": "D014_02.avi",
+"offset": 1012810541,
+"packed": 15857273,
+"size": 16269070,
+"crc32": 1121967831
+},
+{
+"name": "D014_03.avi",
+"offset": 1028667814,
+"packed": 23257783,
+"size": 23937678,
+"crc32": 2311638385
+},
+{
+"name": "D014_04.avi",
+"offset": 1051925597,
+"packed": 21670739,
+"size": 22345396,
+"crc32": 4281252063
+},
+{
+"name": "D029_01.avi",
+"offset": 1073596336,
+"packed": 115207227,
+"size": 120769692,
+"crc32": 1201531588
+},
+{
+"name": "D029_02.avi",
+"offset": 1188803563,
+"packed": 70144758,
+"size": 72934596,
+"crc32": 600630080
+},
+{
+"name": "D031_01.avi",
+"offset": 1258948321,
+"packed": 59389036,
+"size": 62476348,
+"crc32": 2581179565
+},
+{
+"name": "D031_02.avi",
+"offset": 1318337357,
+"packed": 17517465,
+"size": 18311886,
+"crc32": 777630220
+},
+{
+"name": "D031_03.avi",
+"offset": 1335854822,
+"packed": 99100675,
+"size": 103261470,
+"crc32": 3276897996
+},
+{
+"name": "D031_04.avi",
+"offset": 1434955497,
+"packed": 55320744,
+"size": 57088184,
+"crc32": 768235379
+},
+{
+"name": "D031_05.avi",
+"offset": 1490276241,
+"packed": 82205603,
+"size": 85177008,
+"crc32": 1257175845
+},
+{
+"name": "D031_06.avi",
+"offset": 1572481844,
+"packed": 34000497,
+"size": 35139708,
+"crc32": 2388199248
+},
+{
+"name": "D031_07.avi",
+"offset": 1606482341,
+"packed": 19534015,
+"size": 20676626,
+"crc32": 2200373049
+},
+{
+"name": "D031_08.avi",
+"offset": 1626016356,
+"packed": 53873613,
+"size": 55921760,
+"crc32": 2369734045
+},
+{
+"name": "D031_09.avi",
+"offset": 1679889969,
+"packed": 21319245,
+"size": 22122582,
+"crc32": 182666909
+},
+{
+"name": "D035_01.avi",
+"offset": 1701209214,
+"packed": 334956991,
+"size": 343714344,
+"crc32": 579869902
+},
+{
+"name": "D035_02.avi",
+"offset": 2036166205,
+"packed": 115756925,
+"size": 118804252,
+"crc32": 2509889275
+},
+{
+"name": "D035_03.avi",
+"offset": 2151923130,
+"packed": 31644703,
+"size": 32515744,
+"crc32": 3234554860
+},
+{
+"name": "D036_01.avi",
+"offset": 2183567833,
+"packed": 38657049,
+"size": 39708526,
+"crc32": 4027665952
+},
+{
+"name": "D036_02.avi",
+"offset": 2222224882,
+"packed": 62364557,
+"size": 64014618,
+"crc32": 684859523
+},
+{
+"name": "D036_03.avi",
+"offset": 2284589439,
+"packed": 158703958,
+"size": 162783312,
+"crc32": 322656505
+},
+{
+"name": "D036_04.avi",
+"offset": 2443293397,
+"packed": 60242675,
+"size": 64388334,
+"crc32": 2928832680
+},
+{
+"name": "D036_05.avi",
+"offset": 2503536072,
+"packed": 64337545,
+"size": 65857282,
+"crc32": 295212647
+},
+{
+"name": "D036_06.avi",
+"offset": 2567873617,
+"packed": 95566339,
+"size": 98093502,
+"crc32": 3344693963
+},
+{
+"name": "D036_07.avi",
+"offset": 2663439956,
+"packed": 117627063,
+"size": 121290302,
+"crc32": 3859019548
+},
+{
+"name": "D036_08.avi",
+"offset": 2781067019,
+"packed": 62609702,
+"size": 67466238,
+"crc32": 3366510065
+},
+{
+"name": "D038_01.avi",
+"offset": 2843676721,
+"packed": 10971792,
+"size": 11845136,
+"crc32": 2152561382
+},
+{
+"name": "D038_02.avi",
+"offset": 2854648513,
+"packed": 33474742,
+"size": 35785878,
+"crc32": 217841267
+},
+{
+"name": "D038_03.avi",
+"offset": 2888123255,
+"packed": 98321251,
+"size": 106143226,
+"crc32": 3824043461
+},
+{
+"name": "D038_04.avi",
+"offset": 2986444506,
+"packed": 11658820,
+"size": 12766208,
+"crc32": 3302082630
+},
+{
+"name": "D038_05.avi",
+"offset": 2998103326,
+"packed": 39281421,
+"size": 41552394,
+"crc32": 735723041
+},
+{
+"name": "D038_06.avi",
+"offset": 3037384747,
+"packed": 46144199,
+"size": 49429902,
+"crc32": 1532214643
+},
+{
+"name": "D042_01.avi",
+"offset": 3083528946,
+"packed": 34916129,
+"size": 36578930,
+"crc32": 1396075699
+},
+{
+"name": "D042_02.avi",
+"offset": 3118445075,
+"packed": 21389249,
+"size": 21678082,
+"crc32": 686220322
+},
+{
+"name": "D042_03.avi",
+"offset": 3139834324,
+"packed": 10639170,
+"size": 10751890,
+"crc32": 1953193536
+},
+{
+"name": "D042_04.avi",
+"offset": 3150473494,
+"packed": 135435312,
+"size": 136795598,
+"crc32": 2879432683
+},
+{
+"name": "D042_05.avi",
+"offset": 3285908806,
+"packed": 54894254,
+"size": 57781000,
+"crc32": 3534347524
+},
+{
+"name": "D043_01.avi",
+"offset": 3340803060,
+"packed": 97294405,
+"size": 102848250,
+"crc32": 3505235256
+},
+{
+"name": "D043_02.avi",
+"offset": 3438097465,
+"packed": 23423558,
+"size": 23629052,
+"crc32": 1659640754
+},
+{
+"name": "D043_03.avi",
+"offset": 3461521023,
+"packed": 16738974,
+"size": 16900476,
+"crc32": 1168715696
+},
+{
+"name": "D043_04.avi",
+"offset": 3478259997,
+"packed": 8174616,
+"size": 8253664,
+"crc32": 2331701400
+},
+{
+"name": "D043_05.avi",
+"offset": 3486434613,
+"packed": 31060625,
+"size": 31363594,
+"crc32": 1112396785
+},
+{
+"name": "D047_01.avi",
+"offset": 3517495238,
+"packed": 541490169,
+"size": 562457646,
+"crc32": 3419305467
+},
+{
+"name": "D047_02.avi",
+"offset": 4058985407,
+"packed": 67145931,
+"size": 69856258,
+"crc32": 2752394174
+},
+{
+"name": "D047_03.avi",
+"offset": 4126131338,
+"packed": 54003666,
+"size": 55957248,
+"crc32": 852897237
+},
+{
+"name": "D047_04.avi",
+"offset": 4180135004,
+"packed": 26228182,
+"size": 27329520,
+"crc32": 786891406
+},
+{
+"name": "D047_05.avi",
+"offset": 4206363186,
+"packed": 33045663,
+"size": 34436880,
+"crc32": 225743352
+},
+{
+"name": "D047_06.avi",
+"offset": 4239408849,
+"packed": 41127021,
+"size": 42292432,
+"crc32": 51582641
+},
+{
+"name": "D047_07.avi",
+"offset": 4280535870,
+"packed": 44143710,
+"size": 45710802,
+"crc32": 4173088081
+},
+{
+"name": "D047_08.avi",
+"offset": 4324679580,
+"packed": 49801528,
+"size": 51362666,
+"crc32": 3100276234
+},
+{
+"name": "D048_01.avi",
+"offset": 4374481108,
+"packed": 122886997,
+"size": 136653000,
+"crc32": 1014693058
+},
+{
+"name": "D048_02.avi",
+"offset": 4497368105,
+"packed": 168743498,
+"size": 185079088,
+"crc32": 2294062627
+},
+{
+"name": "D048_03.avi",
+"offset": 4666111603,
+"packed": 58079252,
+"size": 64813036,
+"crc32": 3992878070
+},
+{
+"name": "D048_04.avi",
+"offset": 4724190855,
+"packed": 70297285,
+"size": 76841470,
+"crc32": 667982338
+},
+{
+"name": "D048_05.avi",
+"offset": 4794488140,
+"packed": 67828256,
+"size": 74640810,
+"crc32": 3994682639
+},
+{
+"name": "D048_06.avi",
+"offset": 4862316396,
+"packed": 144931810,
+"size": 161550250,
+"crc32": 1244062722
+},
+{
+"name": "D054_01.avi",
+"offset": 5007248206,
+"packed": 63892798,
+"size": 66367360,
+"crc32": 321553897
+},
+{
+"name": "D054_02.avi",
+"offset": 5071141004,
+"packed": 94293683,
+"size": 98725180,
+"crc32": 2495485764
+},
+{
+"name": "D054_03.avi",
+"offset": 5165434687,
+"packed": 55351837,
+"size": 57906302,
+"crc32": 3898123026
+},
+{
+"name": "D054_04.avi",
+"offset": 5220786524,
+"packed": 129911942,
+"size": 135098060,
+"crc32": 3876063886
+},
+{
+"name": "D055_01.avi",
+"offset": 5350698466,
+"packed": 14778749,
+"size": 15564556,
+"crc32": 204885648
+},
+{
+"name": "D055_02.avi",
+"offset": 5365477215,
+"packed": 107831978,
+"size": 114705890,
+"crc32": 2684518834
+},
+{
+"name": "D055_03.avi",
+"offset": 5473309193,
+"packed": 35179773,
+"size": 37900956,
+"crc32": 1151029661
+},
+{
+"name": "D055_04.avi",
+"offset": 5508488966,
+"packed": 78336518,
+"size": 82547320,
+"crc32": 1207933699
+},
+{
+"name": "D055_05.avi",
+"offset": 5586825484,
+"packed": 121283424,
+"size": 128354280,
+"crc32": 111124280
+},
+{
+"name": "D055_06.avi",
+"offset": 5708108908,
+"packed": 33725936,
+"size": 35516964,
+"crc32": 1571801236
+},
+{
+"name": "D055_07.avi",
+"offset": 5741834844,
+"packed": 16757074,
+"size": 17609000,
+"crc32": 2695600536
+},
+{
+"name": "D055_08.avi",
+"offset": 5758591918,
+"packed": 118733813,
+"size": 123858838,
+"crc32": 71948989
+},
+{
+"name": "D068_01.avi",
+"offset": 5877325731,
+"packed": 39889043,
+"size": 44590492,
+"crc32": 341607872
+},
+{
+"name": "D068_02.avi",
+"offset": 5917214774,
+"packed": 14504494,
+"size": 16202894,
+"crc32": 93193356
+},
+{
+"name": "D068_03.avi",
+"offset": 5931719268,
+"packed": 39723079,
+"size": 44218600,
+"crc32": 2649641668
+},
+{
+"name": "D068_04.avi",
+"offset": 5971442347,
+"packed": 9319529,
+"size": 10459598,
+"crc32": 3302784242
+},
+{
+"name": "D068_05.avi",
+"offset": 5980761876,
+"packed": 53193516,
+"size": 58725436,
+"crc32": 209830067
+},
+{
+"name": "D068_06.avi",
+"offset": 6033955392,
+"packed": 39199293,
+"size": 43404114,
+"crc32": 2096897818
+},
+{
+"name": "D068_07.avi",
+"offset": 6073154685,
+"packed": 61457284,
+"size": 67620930,
+"crc32": 4153993328
+},
+{
+"name": "D068_08.avi",
+"offset": 6134611969,
+"packed": 121024508,
+"size": 133495276,
+"crc32": 1813693503
+},
+{
+"name": "D068_09.avi",
+"offset": 6255636477,
+"packed": 46121888,
+"size": 51966514,
+"crc32": 3954521784
+},
+{
+"name": "D068_10.avi",
+"offset": 6301758365,
+"packed": 39739593,
+"size": 44368090,
+"crc32": 978200987
+},
+{
+"name": "D076_01.avi",
+"offset": 6341497958,
+"packed": 80593504,
+"size": 88617230,
+"crc32": 1237474586
+},
+{
+"name": "D076_02.avi",
+"offset": 6422091462,
+"packed": 99579669,
+"size": 108893746,
+"crc32": 1731563898
+},
+{
+"name": "D076_03.avi",
+"offset": 6521671131,
+"packed": 117644219,
+"size": 126022108,
+"crc32": 388840000
+},
+{
+"name": "D076_04.avi",
+"offset": 6639315350,
+"packed": 140975573,
+"size": 152155322,
+"crc32": 3299279870
+},
+{
+"name": "D076_05.avi",
+"offset": 6780290923,
+"packed": 120558608,
+"size": 128957648,
+"crc32": 3177574220
+},
+{
+"name": "D077_01.avi",
+"offset": 6900849531,
+"packed": 107473515,
+"size": 120258224,
+"crc32": 3820438328
+},
+{
+"name": "D077_02.avi",
+"offset": 7008323046,
+"packed": 114646574,
+"size": 130236082,
+"crc32": 2522111963
+},
+{
+"name": "D077_03.avi",
+"offset": 7122969620,
+"packed": 142791755,
+"size": 156120570,
+"crc32": 1963633647
+},
+{
+"name": "D077_04.avi",
+"offset": 7265761375,
+"packed": 169007546,
+"size": 185650992,
+"crc32": 1901692041
+},
+{
+"name": "D077_05.avi",
+"offset": 7434768921,
+"packed": 218382386,
+"size": 241826106,
+"crc32": 2884031462
+},
+{
+"name": "D077_06.avi",
+"offset": 7653151307,
+"packed": 166998287,
+"size": 187068262,
+"crc32": 2351298207
+},
+{
+"name": "D092_01.avi",
+"offset": 7820149594,
+"packed": 34017122,
+"size": 37732794,
+"crc32": 1419278547
+},
+{
+"name": "D092_02.avi",
+"offset": 7854166716,
+"packed": 65007970,
+"size": 73611044,
+"crc32": 4053571668
+},
+{
+"name": "D092_03.avi",
+"offset": 7919174686,
+"packed": 138342482,
+"size": 151040178,
+"crc32": 2978454610
+},
+{
+"name": "D092_04.avi",
+"offset": 8057517168,
+"packed": 91859038,
+"size": 98017448,
+"crc32": 3032884688
+},
+{
+"name": "D092_05.avi",
+"offset": 8149376206,
+"packed": 100715002,
+"size": 110830882,
+"crc32": 336599532
+},
+{
+"name": "D092_06.avi",
+"offset": 8250091208,
+"packed": 163087001,
+"size": 176777222,
+"crc32": 3021510948
+},
+{
+"name": "D092_07.avi",
+"offset": 8413178209,
+"packed": 130074562,
+"size": 144992882,
+"crc32": 3756175356
+},
+{
+"name": "D094_01.avi",
+"offset": 8543252771,
+"packed": 22152113,
+"size": 24483006,
+"crc32": 2498909304
+},
+{
+"name": "D099_01.avi",
+"offset": 8565404884,
+"packed": 13308943,
+"size": 13525228,
+"crc32": 4144999672
+},
+{
+"name": "D099_02.avi",
+"offset": 8578713827,
+"packed": 67574313,
+"size": 68847488,
+"crc32": 732659147
+},
+{
+"name": "D099_03.avi",
+"offset": 8646288140,
+"packed": 36132740,
+"size": 36861726,
+"crc32": 2130729079
+},
+{
+"name": "D099_04.avi",
+"offset": 8682420880,
+"packed": 44904415,
+"size": 45804962,
+"crc32": 767181851
+},
+{
+"name": "D099_05.avi",
+"offset": 8727325295,
+"packed": 42711335,
+"size": 43610318,
+"crc32": 160139306
+},
+{
+"name": "D099_06.avi",
+"offset": 8770036630,
+"packed": 36676217,
+"size": 37407596,
+"crc32": 3508430670
+},
+{
+"name": "D109_01.avi",
+"offset": 8806712847,
+"packed": 66946227,
+"size": 69615746,
+"crc32": 1235636157
+},
+{
+"name": "D109_02.avi",
+"offset": 8873659074,
+"packed": 78720693,
+"size": 82953200,
+"crc32": 2831069959
+},
+{
+"name": "D109_03.avi",
+"offset": 8952379767,
+"packed": 12934585,
+"size": 13638286,
+"crc32": 3057265787
+},
+{
+"name": "D109_04.avi",
+"offset": 8965314352,
+"packed": 68745183,
+"size": 72468804,
+"crc32": 59394399
+},
+{
+"name": "D109_05.avi",
+"offset": 9034059535,
+"packed": 15764513,
+"size": 16585764,
+"crc32": 263678415
+},
+{
+"name": "D109_06.avi",
+"offset": 9049824048,
+"packed": 42799985,
+"size": 44457634,
+"crc32": 1043612204
+},
+{
+"name": "D109_07.avi",
+"offset": 9092624033,
+"packed": 259069742,
+"size": 273518800,
+"crc32": 3806910571
+},
+{
+"name": "D109_08.avi",
+"offset": 9351693775,
+"packed": 93727569,
+"size": 99196362,
+"crc32": 778206274
+},
+{
+"name": "D109_09.avi",
+"offset": 9445421344,
+"packed": 67483330,
+"size": 71377674,
+"crc32": 1255805752
+},
+{
+"name": "D109_10.avi",
+"offset": 9512904674,
+"packed": 98097394,
+"size": 104142118,
+"crc32": 2195121212
+},
+{
+"name": "D111_01.avi",
+"offset": 9611002068,
+"packed": 92878747,
+"size": 97184326,
+"crc32": 3000537606
+},
+{
+"name": "D111_02.avi",
+"offset": 9703880815,
+"packed": 87617738,
+"size": 91717114,
+"crc32": 1703084589
+},
+{
+"name": "D111_03.avi",
+"offset": 9791498553,
+"packed": 66303798,
+"size": 68974322,
+"crc32": 2356958663
+},
+{
+"name": "D111_04.avi",
+"offset": 9857802351,
+"packed": 48237088,
+"size": 50105862,
+"crc32": 828763425
+},
+{
+"name": "D121_01.avi",
+"offset": 9906039439,
+"packed": 97703253,
+"size": 101029396,
+"crc32": 3163729213
+},
+{
+"name": "D121_02.avi",
+"offset": 10003742692,
+"packed": 108910918,
+"size": 112283362,
+"crc32": 166241910
+},
+{
+"name": "D121_03.avi",
+"offset": 10112653610,
+"packed": 72047538,
+"size": 74057118,
+"crc32": 2423159202
+},
+{
+"name": "D121_04.avi",
+"offset": 10184701148,
+"packed": 87280517,
+"size": 90032186,
+"crc32": 650158735
+},
+{
+"name": "D122_01.avi",
+"offset": 10271981665,
+"packed": 98320791,
+"size": 103149618,
+"crc32": 3542468777
+},
+{
+"name": "D122_02.avi",
+"offset": 10370302456,
+"packed": 599690467,
+"size": 630267102,
+"crc32": 2950024089
+},
+{
+"name": "D122_03.avi",
+"offset": 10969992923,
+"packed": 164960641,
+"size": 171735526,
+"crc32": 1699057930
+},
+{
+"name": "D122_04.avi",
+"offset": 11134953564,
+"packed": 134354536,
+"size": 140963296,
+"crc32": 4140320924
+},
+{
+"name": "D122_05.avi",
+"offset": 11269308100,
+"packed": 116652239,
+"size": 122422492,
+"crc32": 1043207100
+},
+{
+"name": "D122_06.avi",
+"offset": 11385960339,
+"packed": 132309017,
+"size": 138730248,
+"crc32": 2974042417
+},
+{
+"name": "D122_07.avi",
+"offset": 11518269356,
+"packed": 112261882,
+"size": 117228044,
+"crc32": 3160446396
+},
+{
+"name": "D122_08.avi",
+"offset": 11630531238,
+"packed": 113896035,
+"size": 118706326,
+"crc32": 1950684015
+},
+{
+"name": "D124_01.avi",
+"offset": 11744427273,
+"packed": 209452662,
+"size": 221252542,
+"crc32": 2370100020
+},
+{
+"name": "D124_02.avi",
+"offset": 11953879935,
+"packed": 278405906,
+"size": 292870646,
+"crc32": 2918177986
+},
+{
+"name": "D124_03.avi",
+"offset": 12232285841,
+"packed": 648526517,
+"size": 686305660,
+"crc32": 3004496564
+},
+{
+"name": "D124_04.avi",
+"offset": 12880812358,
+"packed": 281479423,
+"size": 296259686,
+"crc32": 2945124726
+},
+{
+"name": "D124_05.avi",
+"offset": 13162291781,
+"packed": 192141843,
+"size": 200834438,
+"crc32": 1731300413
+},
+{
+"name": "D124_06.avi",
+"offset": 13354433624,
+"packed": 173041320,
+"size": 181770716,
+"crc32": 1628086552
+},
+{
+"name": "D124_07.avi",
+"offset": 13527474944,
+"packed": 169537819,
+"size": 178445678,
+"crc32": 3795205524
+},
+{
+"name": "D127_01.avi",
+"offset": 13697012763,
+"packed": 39069401,
+"size": 40759564,
+"crc32": 3728784144
+},
+{
+"name": "D127_02.avi",
+"offset": 13736082164,
+"packed": 35625109,
+"size": 37067658,
+"crc32": 874776486
+},
+{
+"name": "D127_03.avi",
+"offset": 13771707273,
+"packed": 15844045,
+"size": 16473268,
+"crc32": 681089037
+},
+{
+"name": "D127_04.avi",
+"offset": 13787551318,
+"packed": 38032967,
+"size": 39558356,
+"crc32": 1524323250
+},
+{
+"name": "D127_05.avi",
+"offset": 13825584285,
+"packed": 20929784,
+"size": 21734668,
+"crc32": 3908047475
+},
+{
+"name": "D129_01.avi",
+"offset": 13846514069,
+"packed": 185688919,
+"size": 198195246,
+"crc32": 526893453
+},
+{
+"name": "D129_02.avi",
+"offset": 14032202988,
+"packed": 182518579,
+"size": 192258366,
+"crc32": 4129779946
+},
+{
+"name": "D129_03.avi",
+"offset": 14214721567,
+"packed": 101885361,
+"size": 109811376,
+"crc32": 2448004332
+},
+{
+"name": "D129_04.avi",
+"offset": 14316606928,
+"packed": 155744545,
+"size": 166519372,
+"crc32": 2799694207
+},
+{
+"name": "D129_05.avi",
+"offset": 14472351473,
+"packed": 250655774,
+"size": 266902600,
+"crc32": 4120057134
+},
+{
+"name": "D148_01.avi",
+"offset": 14723007247,
+"packed": 131439549,
+"size": 137280136,
+"crc32": 2174915667
+},
+{
+"name": "D148_02.avi",
+"offset": 14854446796,
+"packed": 93838160,
+"size": 97449146,
+"crc32": 2373219307
+},
+{
+"name": "D148_03.avi",
+"offset": 14948284956,
+"packed": 115937088,
+"size": 120359412,
+"crc32": 2988942104
+},
+{
+"name": "D148_04.avi",
+"offset": 15064222044,
+"packed": 94873079,
+"size": 98247180,
+"crc32": 1277025978
+},
+{
+"name": "D149_01.avi",
+"offset": 15159095123,
+"packed": 53734280,
+"size": 62282550,
+"crc32": 2690790824
+},
+{
+"name": "D149_02.avi",
+"offset": 15212829403,
+"packed": 38209708,
+"size": 43977948,
+"crc32": 3949174914
+},
+{
+"name": "D149_03.avi",
+"offset": 15251039111,
+"packed": 38247783,
+"size": 43880004,
+"crc32": 3320131301
+},
+{
+"name": "D149_04.avi",
+"offset": 15289286894,
+"packed": 36696912,
+"size": 41935812,
+"crc32": 3465851584
+},
+{
+"name": "D149_05.avi",
+"offset": 15325983806,
+"packed": 17262097,
+"size": 19676534,
+"crc32": 3509910331
+},
+{
+"name": "D149_06.avi",
+"offset": 15343245903,
+"packed": 17994602,
+"size": 20481880,
+"crc32": 1776552026
+},
+{
+"name": "D149_07.avi",
+"offset": 15361240505,
+"packed": 22777094,
+"size": 26157926,
+"crc32": 4043467750
+},
+{
+"name": "D150_01.avi",
+"offset": 15384017599,
+"packed": 91902679,
+"size": 97119854,
+"crc32": 795656789
+},
+{
+"name": "D150_02.avi",
+"offset": 15475920278,
+"packed": 70957714,
+"size": 74774938,
+"crc32": 488487460
+},
+{
+"name": "D150_03.avi",
+"offset": 15546877992,
+"packed": 90637239,
+"size": 96056936,
+"crc32": 1895544490
+},
+{
+"name": "D150_04.avi",
+"offset": 15637515231,
+"packed": 78243563,
+"size": 82987752,
+"crc32": 1305743146
+},
+{
+"name": "D150_05.avi",
+"offset": 15715758794,
+"packed": 66516737,
+"size": 70296040,
+"crc32": 2597762950
+},
+{
+"name": "D150_06.avi",
+"offset": 15782275531,
+"packed": 57263525,
+"size": 60837844,
+"crc32": 963647888
+},
+{
+"name": "D150_07.avi",
+"offset": 15839539056,
+"packed": 57704551,
+"size": 61347494,
+"crc32": 4087305858
+},
+{
+"name": "D151_01.avi",
+"offset": 15897243607,
+"packed": 42258175,
+"size": 46962692,
+"crc32": 1091768815
+},
+{
+"name": "D151_02.avi",
+"offset": 15939501782,
+"packed": 32552633,
+"size": 36232952,
+"crc32": 4160686654
+},
+{
+"name": "D151_03.avi",
+"offset": 15972054415,
+"packed": 38665447,
+"size": 43180734,
+"crc32": 43643809
+},
+{
+"name": "D151_04.avi",
+"offset": 16010719862,
+"packed": 32913629,
+"size": 36750346,
+"crc32": 2590043278
+},
+{
+"name": "D151_05.avi",
+"offset": 16043633491,
+"packed": 31584568,
+"size": 35087938,
+"crc32": 2156820375
+},
+{
+"name": "D151_06.avi",
+"offset": 16075218059,
+"packed": 15935143,
+"size": 17562342,
+"crc32": 1428719734
+},
+{
+"name": "D151_07.avi",
+"offset": 16091153202,
+"packed": 28657071,
+"size": 32251340,
+"crc32": 3951231042
+},
+{
+"name": "D151_08.avi",
+"offset": 16119810273,
+"packed": 25083536,
+"size": 28039026,
+"crc32": 3786608349
+},
+{
+"name": "D154_01.avi",
+"offset": 16144893809,
+"packed": 166794450,
+"size": 174410426,
+"crc32": 3438746023
+},
+{
+"name": "D154_02.avi",
+"offset": 16311688259,
+"packed": 55799010,
+"size": 58550990,
+"crc32": 2319305192
+},
+{
+"name": "D154_03.avi",
+"offset": 16367487269,
+"packed": 69764693,
+"size": 72521814,
+"crc32": 3842613517
+},
+{
+"name": "D154_04.avi",
+"offset": 16437251962,
+"packed": 122324011,
+"size": 129510150,
+"crc32": 3965508120
+},
+{
+"name": "D155_01.avi",
+"offset": 16559575973,
+"packed": 210241363,
+"size": 218797508,
+"crc32": 1193516554
+},
+{
+"name": "D155_02.avi",
+"offset": 16769817336,
+"packed": 330427913,
+"size": 341843802,
+"crc32": 4220301734
+},
+{
+"name": "D158_01.avi",
+"offset": 17100245249,
+"packed": 57944702,
+"size": 61901336,
+"crc32": 589245397
+},
+{
+"name": "D158_02.avi",
+"offset": 17158189951,
+"packed": 17878862,
+"size": 19229710,
+"crc32": 2076225353
+},
+{
+"name": "D158_03.avi",
+"offset": 17176068813,
+"packed": 142640260,
+"size": 153320612,
+"crc32": 3703317731
+},
+{
+"name": "D158_04.avi",
+"offset": 17318709073,
+"packed": 164230613,
+"size": 179909682,
+"crc32": 383057679
+},
+{
+"name": "D158_05.avi",
+"offset": 17482939686,
+"packed": 26949918,
+"size": 28868388,
+"crc32": 245159743
+},
+{
+"name": "D158_06.avi",
+"offset": 17509889604,
+"packed": 54250352,
+"size": 59548712,
+"crc32": 781923698
+},
+{
+"name": "D158_07.avi",
+"offset": 17564139956,
+"packed": 170770767,
+"size": 185455414,
+"crc32": 3967225298
+},
+{
+"name": "D158_08.avi",
+"offset": 17734910723,
+"packed": 90114543,
+"size": 98348084,
+"crc32": 3922505426
+},
+{
+"name": "D158_09.avi",
+"offset": 17825025266,
+"packed": 119930233,
+"size": 130155956,
+"crc32": 2971966653
+},
+{
+"name": "D158_10.avi",
+"offset": 17944955499,
+"packed": 42012677,
+"size": 44985352,
+"crc32": 850106401
+},
+{
+"name": "D158_11.avi",
+"offset": 17986968176,
+"packed": 44257797,
+"size": 47463412,
+"crc32": 3758519536
+},
+{
+"name": "D158_12.avi",
+"offset": 18031225973,
+"packed": 96651255,
+"size": 104138056,
+"crc32": 2085390715
+},
+{
+"name": "D158_13.avi",
+"offset": 18127877228,
+"packed": 34123912,
+"size": 36644822,
+"crc32": 753829486
+},
+{
+"name": "D158_14.avi",
+"offset": 18162001140,
+"packed": 21300282,
+"size": 22710598,
+"crc32": 262447893
+},
+{
+"name": "D158_15.avi",
+"offset": 18183301422,
+"packed": 255877410,
+"size": 276416346,
+"crc32": 2016761076
+},
+{
+"name": "D158_16.avi",
+"offset": 18439178832,
+"packed": 27026447,
+"size": 29001606,
+"crc32": 3447425032
+},
+{
+"name": "D158_17.avi",
+"offset": 18466205279,
+"packed": 68868010,
+"size": 74148218,
+"crc32": 3001924970
+},
+{
+"name": "D164_01.avi",
+"offset": 18535073289,
+"packed": 147682742,
+"size": 161583904,
+"crc32": 1995921332
+},
+{
+"name": "D164_02.avi",
+"offset": 18682756031,
+"packed": 56614490,
+"size": 61105512,
+"crc32": 3176906712
+},
+{
+"name": "D164_03.avi",
+"offset": 18739370521,
+"packed": 56557706,
+"size": 61260692,
+"crc32": 2518156757
+},
+{
+"name": "D164_04.avi",
+"offset": 18795928227,
+"packed": 50844592,
+"size": 56022054,
+"crc32": 2838888044
+},
+{
+"name": "D235_01.avi",
+"offset": 18846772819,
+"packed": 71887462,
+"size": 78050720,
+"crc32": 994868715
+},
+{
+"name": "D235_02.avi",
+"offset": 18918660281,
+"packed": 65531663,
+"size": 70724852,
+"crc32": 1943562777
+},
+{
+"name": "D235_03.avi",
+"offset": 18984191944,
+"packed": 99298155,
+"size": 107367526,
+"crc32": 66103882
+},
+{
+"name": "D235_04.avi",
+"offset": 19083490099,
+"packed": 92421854,
+"size": 100307420,
+"crc32": 3733889189
+},
+{
+"name": "D235_05.avi",
+"offset": 19175911953,
+"packed": 95301709,
+"size": 103179268,
+"crc32": 195872283
+},
+{
+"name": "D235_06.avi",
+"offset": 19271213662,
+"packed": 77992082,
+"size": 84840788,
+"crc32": 3066559451
+},
+{
+"name": "D235_07.avi",
+"offset": 19349205744,
+"packed": 111516090,
+"size": 121761582,
+"crc32": 1409820463
+},
+{
+"name": "D236_01.avi",
+"offset": 19460721834,
+"packed": 206072041,
+"size": 215904796,
+"crc32": 1365257136
+},
+{
+"name": "D236_02.avi",
+"offset": 19666793875,
+"packed": 43254840,
+"size": 44964844,
+"crc32": 2737388494
+},
+{
+"name": "D248_01.avi",
+"offset": 19710048715,
+"packed": 57770235,
+"size": 60192186,
+"crc32": 958080736
+},
+{
+"name": "D248_02.avi",
+"offset": 19767818950,
+"packed": 111944254,
+"size": 115975518,
+"crc32": 1142456830
+},
+{
+"name": "D248_03.avi",
+"offset": 19879763204,
+"packed": 108939550,
+"size": 112122728,
+"crc32": 2120626523
+},
+{
+"name": "D248_04.avi",
+"offset": 19988702754,
+"packed": 151021253,
+"size": 157904964,
+"crc32": 220379898
+},
+{
+"name": "D248_05.avi",
+"offset": 20139724007,
+"packed": 173012112,
+"size": 178972516,
+"crc32": 177631431
+},
+{
+"name": "D248_06.avi",
+"offset": 20312736119,
+"packed": 306386262,
+"size": 317315524,
+"crc32": 1677551107
+},
+{
+"name": "D268_01.avi",
+"offset": 20619122381,
+"packed": 31807721,
+"size": 33600616,
+"crc32": 642663505
+},
+{
+"name": "D268_02.avi",
+"offset": 20650930102,
+"packed": 42392356,
+"size": 44765612,
+"crc32": 4053142571
+},
+{
+"name": "D268_03.avi",
+"offset": 20693322458,
+"packed": 42150087,
+"size": 44939796,
+"crc32": 1758129195
+},
+{
+"name": "D268_04.avi",
+"offset": 20735472545,
+"packed": 45454400,
+"size": 48059090,
+"crc32": 4041529061
+},
+{
+"name": "D268_05.avi",
+"offset": 20780926945,
+"packed": 36811393,
+"size": 39025592,
+"crc32": 2173321352
+},
+{
+"name": "D268_06.avi",
+"offset": 20817738338,
+"packed": 57921105,
+"size": 61008464,
+"crc32": 2384354213
+},
+{
+"name": "D273_01.avi",
+"offset": 20875659443,
+"packed": 34327563,
+"size": 36935290,
+"crc32": 2451109049
+},
+{
+"name": "D273_02.avi",
+"offset": 20909987006,
+"packed": 28558092,
+"size": 30649984,
+"crc32": 3681325270
+},
+{
+"name": "D273_03.avi",
+"offset": 20938545098,
+"packed": 38472936,
+"size": 41166334,
+"crc32": 4145000611
+},
+{
+"name": "D282_01.avi",
+"offset": 20977018034,
+"packed": 62566128,
+"size": 67167370,
+"crc32": 2248304919
+},
+{
+"name": "D282_02.avi",
+"offset": 21039584162,
+"packed": 46178017,
+"size": 49480576,
+"crc32": 1608648457
+},
+{
+"name": "D282_03.avi",
+"offset": 21085762179,
+"packed": 30321899,
+"size": 32662346,
+"crc32": 2931693035
+},
+{
+"name": "D282_04.avi",
+"offset": 21116084078,
+"packed": 24654893,
+"size": 26251910,
+"crc32": 3062718502
+}
+],
+"volume_ids": [
+"1_jaF0dSAyFfCAOhpiEA9AdBtl1DAdDud",
+"1-E1OMMNdzK1WnTA9DjYhz2YfUhx9FFva",
+"1xtoOoKq0rcSmUYQWufwClWFPMts2ePIY",
+"1kcX51ahwShukVEnognATxwJ-iUMOQaLx",
+"1-UNYdxaAGrGqwuIyu4ibwiHsV3IbmCtj",
+"19HhAkCtd-_yp5VlVcvWEuoyPZxr4VXWZ",
+"1DVH85SJd_DrOz3YMAGwBC-1qexkJvxkZ",
+"1H2buYOuJDhI1KMaqDaGhg9ICoDVTbdes",
+"1mwtYZdvpqUfA4f9PR2x6CQdg1eJQT4O9",
+"1auDfJD2LwYiPbuErE_yEYwWOZpsqQviR",
+"175Q6rAObx0ZvRQVOQq3Tf-8ompDMxyVi",
+"1MRQ4xTGzdaIeY6whFD9hrtlj_fZ1kat7",
+"1eoRPmHHXD2Z2rCTrTdSSRf5cR7xa8Mt_",
+"1z6Ot2M_FfmplQhSayx2XKOTfK38mhIwF",
+"1zOQqqloFOplhISWObrsz-EYdBnEgJOjF",
+"1NfWZFL5oLdfm5wniUndfu8QlNN6wlYMf",
+"1yD99BAF-OrxzxOacVmURaawEyN6j9mdt",
+"1Knid7c5hcQHixEiTmJHiTV6NrOHqHFR5",
+"11D_OW5mao7j8AyGPXYi76-wxNNYWn9uI",
+"1vypY63e6fwW_BqCcfI5hC0LYZ-dJ-SIs",
+"1W9xhzlJUj0hUEPn8Z9-3KVmC48CzfGQl",
+"1HRbUHxrwQr2-ahrRYYh5eCGUv7lgcds6",
+"1VdFmE7xyNXNYRhnFvv4ihSLiUf1n9sKZ",
+"1iuzDoLX1dAn_mxblXWdwOVxkSKCyPx_7",
+"1stO5vN4n9eJw-64uK8x1ARj1sD7SeiNz",
+"1a31Qc1lovvhw7LVjS0gAHJ0KLE9HNOEU",
+"1p9QRWceKyBZQXg2CU68jWz52yX07smWJ",
+"1MuQV7VPmEDs5rfHzFdTzOFUNN2ehlhwn",
+"1nO42ouPHTPEzhIfoJpGKZ4Mv8S1BJEI5",
+"1FiKsAMOCb0_Av0L0fPRjtUUz5BTcLXVD",
+"1OZuGkubuJ-E81KQA9XVtF3jWLSDJzgPG",
+"1q_mYFPkyOKNlUJCPgUq7UsxH73lQy6q2",
+"1UmxIzYyZUxHxqpmp0PbG7-45y3klqO8y",
+"1sPobfJdBdq3I798YzQ9-463k1tkGIjuO",
+"1eJUfiRZBmLAyAjpiQMCl7eMNcvH4c2HX",
+"1AEh44CTC5DW_mxInuDDdtL6NQx2f251t",
+"12oTOd2XZndr9NjeCcCPOYtZnmpRnxZq0",
+"1wL4vH1wLjiQ-Ds24quUY2cX1rhGoPRvF",
+"1Gtlh98YAWSNDGI_JEmkalIxzTi9wRXRd",
+"1W-BMlh7R6UVqD5qcnHf-2T0W_llTytA_",
+"106Ji6uAMhVC5WNHeIZqxKzEA6QJKlMXf",
+"1XMVEnl068-M4C3Gfuw08Verqg1X9LzQ6",
+"1g59RVgafl2OhF0ly37D4kGGfrd7MUDSR",
+"1x2P6b6XBzMyIIk0hxDbAakPTB6sWpBii",
+"1iQrc7ruZU899N9D_gu2TeJVLDHQA775u",
+"1QS2rVMTGfC1s_RQwfe_bG8SPG0rKNHlY",
+"1cakOe9hJ3Nw96wI8rCsK16Zwl931ylPa",
+"1l2gfkxmBeRTDdMydgajEB_oOK7-sPAmT",
+"1mZdv0rY68e0h8PpuDskxeKdrMqe5Jfz7",
+"1TvqVIkWhYCPUHvw570psr8cMqQ60M4zm",
+"1klOsw9dSd2PTYPXUHX1p2STsin6vZe1c",
+"1zXnJhcRu1iTAwdJ9m9DIUMwzI7kmaQ1V",
+"1--tVKfpG3zJJMgjRWj4IP5UOL3EKddjg",
+"1tt4al4Y9MA--DoGOD8cFS9Udv2Op0orr",
+"1WwldN7TFksPBXZvNrRfuqAJGM1_tianV",
+"15z8RxgT2lFZUGm4iVjE0AC6WtTWU5UP6",
+"1FxMf0Nv8HJzule9xJhsvsiwjX07IL3L4",
+"1KxVa8ymB8m3I84TVvMpqnOHVQXjwL0ob",
+"1252fb2-2vspjI-a9mVf6YLLrLdCRiaYZ",
+"19Ut3849EFWpK65PpDlMwE_DCRW056on9",
+"1KTtKFHSAKllYshrE_Ant3GHmx2-2vLQI",
+"1yP7kYiK6pqweePwHLIcoHjROENa519B_",
+"1Xka9Q0kOfFMrCWD3NvAJ4G62XpRs78KD",
+"1wyDsFU8GipnfLfmStRqMEE73KRkFNt_A",
+"1sk92Le-k-ZhocvN6FBsh4z7ms9aeW-Sw",
+"1184fPjYgDJWX81fuZgItdBtYvbU19wsT",
+"1nsXycvhH2_ghruW8Cy6x_gzxNJX95WBn",
+"1NCTVh-kHTbKqecycOdJT87AGfinogKHg",
+"11xRu15U72Sd2TUWeKgZsmmFd3NQ7TFSQ",
+"1BbIJqTKvPeoafswqGYgijYC9RxTQueS3",
+"1ZnYOGzP0ZGjCF37FDFctBCQdT0BUOTXx",
+"1XdPi1xF14G3LjLDyuQkGifaaEMbboB3D",
+"1JvG1jJm2ZvL5n3hXHjcH3bSXfIR-Nsg_",
+"1J5xRGGDZqX142uPGuMD8efmBgppRSieW",
+"14LQEgY5XsnMni9m-ezzLrdrjVZh3f49U",
+"1wWuatXWNo2XvhUoWu9n2iz1JJQzxSKzI",
+"144IY2lefntL0SotmhSmtLUVFZMFsGOP2",
+"1vNzxsvzV9lNn_ZXS_yLjQ8HkdGr9olF0",
+"10WU1LOsu55d1aUV4UyHtT_zaex11u9F_",
+"1Qh6NgForXHqV0vDSKp3tT88SEGAP_C1o",
+"1t8Hk7b5MnxU6Whj80tyl1qqvXP9AggAV",
+"1YIW5SYpDfQkt7zqx8YyQMbn4kckGV_vW",
+"15jaIptB9_2zyO5psF824j2c4SK3mK7k7",
+"1H5Gd_EJxEFU3g9lUtmoXDLytd1R7v9cp",
+"1pvn0w1GjmEmG_Me3umphFYKY1zptYZuy",
+"18oiInKucRyG0Z_CdnGfMoMmx9X6mQbyW",
+"12hVrLUwa0XOU4d-j49LCHQakwB6lr4sG",
+"17vxNAmYKFxUnz652hFtARe1xajiomugG",
+"1JMGJZ_SCAjvMmr4Z7vEQTsP_AsVr0499",
+"1eJ-2iDCOfKJpuGWXMdAZH7skYASp2Lkp",
+"1oR28KPOTQC3SsTnZ45NwJYHbU7d9Fh7C",
+"1YCj9BgvkdqVAk2YmGkSuGHnME5i5f57H",
+"19L75PKxUSCYnZ6_P7tFHmdwVLxTbLqAl",
+"1FVTXB3nnS2vniPOJwhX9GoazJKkt8oD7",
+"1Hm1CXkLur5l9M94-F8JC38-bGQ0imY0M",
+"1breRDDZTa1nGCSY4w1cdrXl6uocAOKqw",
+"1IiGH5V23UYkGMk_RY2hTUDHzGGjP9SeG",
+"1DsxG0INcSlxlVtsQN0Hl3gbzW9ddxgXx",
+"1HH-3xW25zPz6phVcha9z8zY0yJ5W5TkU",
+"1z96CYwRd3gmHVJmhUByDGsqL4_fNadvH",
+"1WiNOjpO8KffVQGKABkhp0T9CokrfcB_R",
+"1iY5W_LEJFAhT_RPSSprRtkBd3_mWWHfg",
+"1-weGVll6656y88yrWbjQSYcSW4GYTmbv",
+"1s6eLOGWKnTHzC0GOKIGB6Q0BD7NtZwv5",
+"1sEzVanrY6ecvftqw1gUjijM618p5B1Da",
+"1s_RXa5nr2Xij7wq4CQ6XQYCZ1NSyhc9d"
+],
+"drive_folder": "1_EztmkNpTPyVb4lM0m4rLTXgXo_LzgF1",
+"gt_file_id": "1-gLI2cMZ_PEkWM0uIdQkjrB_y8Fwp-oL",
+"gt_sha256": "363681fce16241136dc89c5a1d9dcc517bc715a343798393bab540af761dc03d",
+"lzma2_dict_size": 8388608,
+"read_on": "2026-10-16, from the archive's own 7z header (non-solid, one LZMA2 block per file)"
+}

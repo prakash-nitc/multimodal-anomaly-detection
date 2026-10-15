@@ -151,6 +151,14 @@ python notebooks/cache_embeddings.py --dataset xd_violence --root ~/dazvad/data/
 python notebooks/xd_violence_sweep.py caption
 python notebooks/xd_violence_sweep.py run
 
+# NWPU Campus (pre-registered in docs/10_phase3/PREREG_nwpu_campus.md): reads only the
+# 242 test videos (21 GB) out of the authors' 82 GB split archive, CRC-checked
+python notebooks/fetch_nwpu_campus_test.py
+python notebooks/cache_embeddings.py --dataset nwpu_campus --root ~/dazvad/data/nwpu_campus \
+       --frame-step 16 --crops 1
+python notebooks/nwpu_campus_sweep.py caption
+python notebooks/nwpu_campus_sweep.py run
+
 # Measurement audit: does the sentence re-rank frames or calibrate videos? (CPU only)
 python notebooks/measurement_audit.py --selftest
 python notebooks/measurement_audit.py
