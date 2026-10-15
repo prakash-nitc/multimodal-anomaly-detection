@@ -19,7 +19,7 @@ ablation study** by configuration alone.
 | M2 — Temporal aggregation | `temporal/aggregation.py` | ✅ implemented (training-free smoothing) |
 | M3 — Verbalized context | `context/verbalized.py` | ✅ implemented |
 | M4 — LLM reasoning | `reasoning/llava_reasoner.py` | ✅ implemented (LLaVA-1.5, 4-bit, needs GPU; CPU runs use the stub). One explanation per flagged *event* (peak frame), budget-capped |
-| Datasets | `datasets/` | ✅ MVTec · ✅ ShanghaiTech (frame folders + .npy GT) · ✅ Avenue (.avi + .mat GT) |
+| Datasets | `datasets/` | ✅ MVTec · ✅ ShanghaiTech (frame folders + .npy GT) · ✅ Avenue (.avi + .mat GT) · ✅ UCF-Crime (test split, interval annotations) |
 | Evaluation | `evaluation/metrics.py` | ✅ frame-level AUROC / AP / F1 |
 | Grid engine | `grid.py` + `scripts/run_grid.py` | ✅ dataset × context × window grid; raw-score caching = resumable + one M1 pass serves all windows |
 
@@ -43,7 +43,7 @@ The smoke test exercises the whole pipeline on synthetic scores and saves a scor
 timeline to `results/figures/da_zvad_demo.png`. It is a **plumbing test, not a
 research result** — real numbers come from the GPU runs above.
 
-## What's next
-1. Run the ShanghaiTech probe / grid on a GPU (Kaggle or college) → first real frame-level AUROC.
-2. Generate the first explanation gallery with the LLaVA reasoner on flagged events.
-3. Extend the grid outputs into the September review tables and figures.
+## Results and next steps
+
+See the [project README](../README.md) for results, the experiment
+commands used on the GPU server, and what comes next.
