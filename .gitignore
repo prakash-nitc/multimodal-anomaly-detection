@@ -58,3 +58,10 @@ SurveyPapersStudy/
 # Secrets
 .env
 *.key
+
+# Reference papers: kept locally, never committed (publisher copies; repo is public)
+docs/07_reference_papers/*.pdf
+SurveyPapersStudy/*.pdf
+
+# third-party images for the intro slide (kept local; credited on the slide)
+figure_assets/web/

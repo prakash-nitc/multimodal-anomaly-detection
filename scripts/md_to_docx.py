@@ -255,19 +255,35 @@ def convert(md_path: str, out_path: str) -> None:
             continue
 
         # --- lists ---------------------------------------------------
+        # A list item may wrap onto indented continuation lines. Those belong
+        # to the same item: taking only the first line split every wrapped
+        # bullet into a bullet plus a stray paragraph, and broke any **bold**
+        # span that crossed the line break.
+        def _item_text(first: str) -> str:
+            nonlocal i
+            parts = [first]
+            i += 1
+            while i < len(lines):
+                raw = lines[i]
+                nxt = raw.strip()
+                if (not nxt or not raw.startswith((" ", "\t"))
+                        or re.match(r"[-*]\s+", nxt) or re.match(r"\d+\.\s+", nxt)):
+                    break
+                parts.append(nxt)
+                i += 1
+            return " ".join(parts)
+
         m = re.match(r"[-*]\s+(.*)", s)
         if m:
             p = doc.add_paragraph(style="List Bullet")
             p.paragraph_format.space_after = Pt(3)
-            add_runs(p, m.group(1), 10.5)
-            i += 1
+            add_runs(p, _item_text(m.group(1)), 10.5)
             continue
         m = re.match(r"(\d+)\.\s+(.*)", s)
         if m:
             p = doc.add_paragraph(style="List Number")
             p.paragraph_format.space_after = Pt(3)
-            add_runs(p, m.group(2), 10.5)
-            i += 1
+            add_runs(p, _item_text(m.group(2)), 10.5)
             continue
 
         # --- italic-only line (the dateline) -------------------------
