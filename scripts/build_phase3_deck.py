@@ -972,8 +972,8 @@ bullets(s, [
 s = slide("What comes next", "Next")
 table(s, [
     ["Priority", "Work", "Why it matters"],
-    ["1", "Measurement audit: within-video ranking and raw scores, all benchmarks",
-     "Decides what the sentence really does: re-ranks frames or calibrates cameras"],
+    ["1", "Re-check how the scene sentence helps, on all datasets",
+     "Does it spot anomalies better, or mainly put all cameras on the same scale?"],
     ["2", "XD-Violence (pre-registered) and UCF-Crime on every frame",
      "LAVAD's second benchmark; makes the comparison airtight"],
     ["3", "NWPU Campus — scene-dependent anomalies",
@@ -1127,7 +1127,7 @@ NOTES = [
  "two: we found ourselves that the pooled metric rewards score shifts, and "
  "that applies to every CLIP-based zero-shot VAD paper, not only ours.",
 
- "The audit comes first because it decides how the result is described. Then "
+ "The re-check comes first because it decides how the result is described. Then "
  "XD-Violence, LAVAD's other benchmark. NWPU Campus is the one dataset where "
  "the same event is normal in one scene and abnormal in another - the direct "
  "test of concept shift. Point at the box at the bottom for what is done.",

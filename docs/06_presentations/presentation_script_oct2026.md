@@ -702,8 +702,8 @@ Phase 3."
 
 ## Page 29 — What comes next · 25 s · *clock 18:35*
 
-> **Say:** "**First, a measurement audit** — it decides what the sentence really
-> does. Then XD-Violence, LAVAD's second benchmark. Then **NWPU Campus — the
+> **Say:** "**First, I re-check how the scene sentence helps** — does it spot
+> anomalies better, or mainly put all cameras on the same scale? Then XD-Violence, LAVAD's second benchmark. Then **NWPU Campus — the
 > only dataset where the same event is normal in one scene and abnormal in
 > another**: a direct test of concept shift. Then patch-level scoring and the
 > explanations."
