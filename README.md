@@ -52,7 +52,7 @@ Frame-level AUROC, with no training on any dataset.
 
 | Dataset | Scenes | Result | For reference |
 |---|---|---|---|
-| **UCF-Crime** (290 test videos) | ~290 | **0.824** with per-video sentences by LLaVA | LAVAD 80.3, AnyAnomaly 80.7 (both training-free) |
+| **UCF-Crime** (290 test videos) | ~290 | **0.824** with per-video sentences by LLaVA (95% CI 0.756–0.877) | Level with LAVAD 80.3 and AnyAnomaly 80.7 (both training-free) |
 | **ShanghaiTech** (107 clips) | 12 | **0.751** with per-camera sentences by LLaVA | 0.707 with no sentence, 0.734 with one shared sentence |
 | **CUHK Avenue** (21 clips) | 1 | 0.706 with no sentence | Same as ShanghaiTech with no sentence (0.707), so detection transfers; with one camera a sentence doesn't help (0.677) |
 | **MVTec AD** (images, baseline only) | n/a | 88.5% image AUROC | One-Class SVM *trained* on the same features: 92.4% |
@@ -77,10 +77,18 @@ Frame-level AUROC, with no training on any dataset.
    ([PREREG_ucf_crime.md](docs/10_phase3/PREREG_ucf_crime.md)). Three held.
    One, that the effect would grow with more scenes, was refuted, and the
    claim was narrowed accordingly.
-5. **How it helps is being checked.** Judged only by how frames rank *within*
-   each video, the sentence changes little (+0.006). Most of the gain comes from
-   putting different cameras on the same score scale. A full check across all
-   datasets is the next experiment.
+5. **It works mainly by putting cameras on one scale.** A measurement audit,
+   with its decision rule committed before any number existed
+   ([measurement_audit.py](notebooks/measurement_audit.py)), found that 82–87%
+   of the headline gains come from shifting each video's score level. Ranking
+   *within* a video improves by at most +0.024. On ShanghaiTech, CLIP's softmax
+   scale amplifies the shift (+0.017 without it, +0.105 with it). Per-camera
+   sentences are a partial exception, and a simple per-video centring rule does
+   not reproduce the effect.
+6. **How certain the UCF-Crime result is.** Resampling the 290 videos 1,000
+   times: 0.824 lies in [0.756, 0.877], so it is level with the best
+   training-free methods, not above them. A video's own sentence beats another
+   video's by +0.110 [+0.069, +0.157], the most secure result.
 
 ## Repository layout
 
@@ -188,7 +196,8 @@ Datasets are not included. Obtain them from their official sources:
 | 1 | Literature study (six domain-adaptation surveys); concept-shift framing; frozen framework built | Done |
 | 2 | ShanghaiTech and Avenue; context sweep; prompt-injection finding; within-camera control | Done |
 | 3 | Per-camera sentences written by LLaVA; UCF-Crime under pre-registered predictions; citation check | Done |
-| Next | Check of how the sentence helps; XD-Violence; NWPU Campus; patch-level scoring; M4 explanations | In progress |
+| After Phase 3 | Measurement audit and UCF-Crime bootstrap run; XD-Violence and NWPU Campus pre-registered | Done |
+| Next | XD-Violence; NWPU Campus; patch-level scoring; M4 explanations | In progress |
 
 ## Key references
 

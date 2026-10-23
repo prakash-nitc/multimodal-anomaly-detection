@@ -130,3 +130,28 @@ rotations. The conclusion is unchanged; 0.751 replaces 0.755 in the paper.
 
 Also added for comparison (verified in the source PDFs, see PROVENANCE.md):
 AnyAnomaly reports 80.7 on UCF-Crime (AnyAnomaly Table 5).
+
+### Addendum 4 — 23 Oct 2026, uncertainty and mechanism (nothing above was edited)
+
+**Bootstrap.** Paired video-level bootstrap, 1,000 resamples of the 290 videos
+(seed 20261023, `notebooks/measurement_audit.py`; output with its run manifest
+in `results/runs/analysis/measurement_audit.json`). Raw pooled AUROC, w = 5.
+
+| Quantity | Estimate | 95% interval | Resamples > 0 |
+|---|---|---|---|
+| per-video AUROC | 0.8235 | [0.756, 0.877] | — |
+| per-video − none | +0.067 | [−0.002, +0.153] | 96.6% |
+| per-video − shared (P3) | +0.011 | [−0.047, +0.080] | 55.3% |
+| per-video − shuffled mean of 20 (P2) | +0.110 | [+0.069, +0.157] | 100% |
+
+0.824 exceeds LAVAD's 0.803 in 72.8% of resamples and AnyAnomaly's 0.807 in
+67.3%. **Addendum 1's note that 0.824 "is above LAVAD's reported 80.28" is
+therefore withdrawn as a claim**: the figures are level within this result's own
+uncertainty. P2 is the only prediction whose interval excludes zero; P3 stays a
+direction.
+
+**Mechanism.** Under the audit's decision rule (committed before it was run),
+per-video − none and per-video − shuffled are both calibration-dominated: 83%
+and 87% of each gap is a per-video level shift, and within-video ranking changes
+by +0.001 and +0.024. On this benchmark the gap barely depends on CLIP's softmax
+scale (+0.057 at λ = 1, +0.067 at λ = 100).

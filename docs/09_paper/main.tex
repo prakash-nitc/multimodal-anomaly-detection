@@ -191,6 +191,13 @@ any score was computed, per-video generated descriptors reach $0.824$
 frame-level AUROC, against $0.756$ with none and $0.713$ when each video is given
 another video's description; the prediction that the context effect would grow
 with scene diversity is refuted, the effect being comparable to ShanghaiTech's.
+A video-level bootstrap places that figure in $[0.756, 0.877]$, level with the
+best published training-free results rather than above them, while the
+advantage of a video's own description over another video's, $+0.110$, has an
+interval of $[+0.069, +0.157]$. A measurement audit, its decision rule fixed
+before any number was computed, finds that $82$--$87\%$ of the headline context
+gaps come from shifting each video's score level---calibrating cameras against
+one another---and almost none from re-ranking frames within a video.
 \end{abstract}
 
 % ---------- keywords ----------
@@ -228,7 +235,7 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
 4   & Contribution points              & \done       & 5 contributions stated \\
 5   & Problem formulation, objectives  & \done       & --- \\
 6   & Proposed methodology             & \done       & Framework detailed; algorithms cited \\
-7   & Results and analysis             & \inprog     & Results 1--7 complete; Result 8 (explanations) pending \\
+7   & Results and analysis             & \inprog     & Results 1--7 and the measurement audit complete; Result 8 (explanations) pending \\
 8   & Conclusion and discussion        & \done       & Rewritten against measured outcomes \\
 --- & References                       & \inprog     & Grows with the document \\
 \bottomrule
@@ -312,6 +319,15 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          samples every sixteenth frame, as we do; earlier text said it scored
          every frame. The weaker context effect under per-video normalisation
          on UCF-Crime is now stated. \\
+23 Oct 2026 & Measurement audit run (Section~\ref{sec:res-audit}; decision rule
+         committed before any audit number existed; all 52 reproduction gates
+         pass). The headline context gaps are calibration-dominated: $82$--$87\%$
+         of each is a per-video level shift, and within-video ranking changes by
+         at most $+0.024$. Per-camera descriptors are mixed. UCF-Crime
+         bootstrapped by video: $0.824$ lies in $[0.756, 0.877]$, so the
+         comparison with LAVAD and AnyAnomaly is restated as comparable, not
+         above; ``first of six'' withdrawn. Abstract, Result~7, the comparison
+         and the conclusion updated. No earlier number changed. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
@@ -1705,17 +1721,131 @@ are reported on it; but on the secondary metric the context effect on UCF-Crime
 is markedly weaker, and the claim that it is robust to the evaluation protocol
 is not made.
 
+\emph{How certain these figures are.} The 290 test videos were resampled with
+replacement 1{,}000 times (seed fixed in the audit script) and every
+configuration was scored on the same resamples, so that gaps are measured on
+identical data (Table~\ref{tbl:ucfboot}). Resampling videos rather than frames
+matters: frames within a video are strongly correlated, and a frame-level
+bootstrap would give intervals far narrower than the evidence supports. Only the
+comparison with other videos' descriptions has an interval clear of zero. The
+gain over no descriptor is positive in $96.6\%$ of resamples but its interval
+touches zero, and the gain over the shared sentence is not distinguishable from
+zero, as already reported.
+
+\begin{table}[width=\linewidth,cols=4,pos=h]
+\caption{UCF-Crime, paired video-level bootstrap (1{,}000 resamples of the 290
+test videos). Raw pooled AUROC, $w{=}5$. LAVAD and AnyAnomaly are fixed
+published figures; their own uncertainty is not available, so only this work's
+side is resampled.}
+\label{tbl:ucfboot}
+\begin{tabularx}{\linewidth}{@{}Z l l l@{}}
+\toprule
+\textbf{Quantity} & \textbf{Estimate} & \textbf{95\% interval} & \textbf{Resamples $>0$} \\
+\midrule
+Per-video descriptors, AUROC & $0.824$ & $[0.756, 0.877]$ & --- \\
+Per-video $-$ none & $+0.067$ & $[-0.002, +0.153]$ & $96.6\%$ \\
+Per-video $-$ shared sentence & $+0.011$ & $[-0.047, +0.080]$ & $55.3\%$ \\
+Per-video $-$ other videos' (mean of 20) & $+0.110$ & $[+0.069, +0.157]$ & $100\%$ \\
+\midrule
+AUROC above LAVAD's $0.803$ & \multicolumn{3}{l}{in $72.8\%$ of resamples} \\
+AUROC above AnyAnomaly's $0.807$ & \multicolumn{3}{l}{in $67.3\%$ of resamples} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \emph{Relation to LAVAD.} LAVAD \citep{zanella2024lavad}, the closest
-training-free pipeline, reports $80.28$ AUROC on this benchmark. The per-video
-figure of $82.4$ is above it, and above AnyAnomaly's $80.7$ on the same
-benchmark \citep{anyanomaly2025}. The sampling matches: LAVAD also samples each
+training-free pipeline, reports $80.28$ AUROC on this benchmark, and AnyAnomaly
+reports $80.7$ \citep{anyanomaly2025}. The per-video figure of $82.4$ is
+numerically above both, but the bootstrap places it above them in only about
+seven resamples in ten (Table~\ref{tbl:ucfboot}): the difference is inside this
+work's own uncertainty, before any cross-paper protocol difference is
+considered. The sampling matches: LAVAD also samples each
 video every sixteen frames. Two differences remain. LAVAD does not state whether
 its frame-level AUROC is computed over the sampled frames, as here, or with
 scores propagated to every frame; and its pipeline chains a captioner, a large
 language model and a cross-modal refinement stage, where this one uses a single
 frozen encoder pass per sampled frame and one caption per video. A margin of two
-points across papers is within what such protocol details can move, so we report
-the comparison as comparable-or-better rather than as a win.
+points across papers is within what such protocol details can move, and within
+the bootstrap interval, so we report the comparison as comparable, not as a win.
+
+\subsection{What the descriptor changes: a measurement audit}
+\label{sec:res-audit}
+Every context gap above is a difference in pooled AUROC, which ranks the frames
+of all videos against one another. A descriptor can raise that figure in two
+different ways: by \emph{re-ranking} frames inside a video, so that its
+anomalous frames move above its normal ones, or by \emph{calibration}---moving
+each video's scores up or down as a block, so that frames from different cameras
+become comparable while the order inside every video stays the same. Two earlier
+observations pointed to calibration: on ShanghaiTech at $w{=}5$ the
+matched--mismatched gap is $+0.100$ pooled but $+0.006$ when AUROC is computed
+within each video, and scoring the raw cosine margin instead of the softmax cuts
+the pooled gap at $w{=}31$ to $+0.017$.
+
+The audit measures the question directly. For each pair of conditions it splits
+the pooled gap exactly into a \emph{level} part---what the reference condition
+gains when each of its videos is shifted by the mean change in that video's
+margin, its within-video pattern kept---and the remainder, averaged over both
+orders so that the split does not depend on which condition comes first. Within-
+video ranking is measured on the smoothed margin, which a per-video shift cannot
+change. The decision rule was committed with the script before any audit number
+existed: a gap is \emph{calibration-dominated} if its level share is at least
+$2/3$ and the within-video change is at most a third of the gap, and
+\emph{re-ranking-dominated} if the level share is at most $1/3$. Before
+reporting anything, the script reproduced the published figures of every
+condition on all three benchmarks (52 checks, all passed).
+
+\begin{table}[width=\linewidth,cols=6,pos=h]
+\caption{Measurement audit. Level: the part of the pooled gap reproduced by a
+per-video score shift alone. Within: change in mean within-video AUROC of the
+smoothed margin. ShanghaiTech per-clip normalised, $w{=}31$; UCF-Crime raw,
+$w{=}5$. Shuffled rows average 11 (ShanghaiTech) and 20 (UCF-Crime) controls.}
+\label{tbl:audit}
+\begin{tabularx}{\linewidth}{@{}Z l l l l l@{}}
+\toprule
+\textbf{Comparison} & \textbf{Gap} & \textbf{Level} & \textbf{Share} & \textbf{Within} & \textbf{Verdict} \\
+\midrule
+ShanghaiTech, matched $-$ mismatched & $+0.105$ & $+0.086$ & $0.82$ & $+0.006$ & calibration \\
+ShanghaiTech, per-camera $-$ shuffled & $+0.043$ & $+0.015$ & $0.34$ & $+0.010$ & mixed \\
+UCF-Crime, per-video $-$ none & $+0.067$ & $+0.056$ & $0.83$ & $+0.001$ & calibration \\
+UCF-Crime, per-video $-$ shuffled & $+0.110$ & $+0.096$ & $0.87$ & $+0.024$ & calibration \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tbl:audit} gives the result. The three headline gaps are
+calibration-dominated: $82$--$87\%$ of each is a per-video level shift, and the
+within-video ranking moves by at most $+0.024$. On ShanghaiTech, CLIP's logit
+scale amplifies that shift: recomputed with the softmax temperature at
+$\lambda{=}1$, $10$, $30$, $100$ and $300$, the matched--mismatched gap is
+$+0.017$, $+0.022$, $+0.047$, $+0.105$ and $+0.133$. On UCF-Crime, scored raw,
+it barely depends on $\lambda$ ($+0.057$ at $\lambda{=}1$, $+0.067$ at $100$):
+there the calibration acts directly on the pooled ranking rather than through
+the softmax.
+
+Per-camera descriptors on ShanghaiTech are the exception. Only a third of their
+advantage over swapped descriptors is a level shift; the remainder survives
+removing each video's level and scale (the per-clip-normalised raw margin keeps
+$+0.025$), although within-video ranking improves by only $+0.010$. A camera's
+own sentence therefore changes the shape of its videos' scores, not merely their
+level, without much reordering of frames inside a video.
+
+Calibration is not something a trivial rule recovers. Subtracting each video's
+own mean margin before scoring---a label-free, sentence-free per-video
+calibration---gives $0.657$ on ShanghaiTech and $0.702$ on UCF-Crime, below no
+descriptor at all ($0.707$, $0.756$) and well below the per-camera and
+per-video descriptors ($0.751$, $0.824$). The descriptor places each camera on a
+common scale in a way that removing its offset does not.
+
+This changes what the earlier results mean, not what they measured. The
+descriptor does not chiefly redefine what is normal inside a scene; it tells the
+scorer which scene it is looking at, and in doing so puts different cameras on
+one scale. That is what a deployment with a single alarm threshold across many
+cameras requires, and it is consistent with every result above: no effect on a
+single camera (Avenue), a small effect within one view, gains from per-camera
+sentences and harm from swapped ones. It also bears on the metric. A gap of
+$+0.105$ under the softmax is $+0.017$ under the margin beneath it, so pooled
+AUROC from CLIP softmax scores can report large differences that within-video
+ranking does not show---a caution for any CLIP-based detector evaluated this way.
 
 \subsection{Comparison with published methods on the same benchmarks}
 \label{sec:res-comparison}
@@ -1775,9 +1905,11 @@ AnyAnomaly \citep{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} & 80.7 \\
 \end{table}
 
 \subsubsection{Where the present work sits}
-Among the training-free entries reporting each benchmark, this work ranks first
-of six on UCF-Crime, second of six on ShanghaiTech behind AnyAnomaly, and third
-of six on Avenue. The ordering follows scene diversity: UCF-Crime spans several
+Among the training-free entries reporting each benchmark, this work has the
+highest UCF-Crime figure of six---a lead inside its own bootstrap interval, so
+level with LAVAD and AnyAnomaly rather than ahead of them
+(Table~\ref{tbl:ucfboot})---is second of six on ShanghaiTech behind AnyAnomaly,
+and third of six on Avenue. The ordering follows scene diversity: UCF-Crime spans several
 hundred scenes, ShanghaiTech twelve and Avenue one, which is the same asymmetry
 Sections~\ref{sec:res-avenue} and~\ref{sec:res-ucf} report internally. On
 UCF-Crime the figure also exceeds the two one-class methods that report it
@@ -2028,7 +2160,7 @@ follow them.
         parameters updated, an effect can be attributed to the supplied text.
 \end{itemize}
 
-Six empirical findings follow from the experiments completed to date.
+Seven empirical findings follow from the experiments completed to date.
 
 \emph{Verbalized context is load-bearing, and the evidence is the falsifying
 control rather than the positive one.} Supplying a descriptor of the wrong
@@ -2092,7 +2224,23 @@ $0.110$ and reaches $0.824$, while descriptions of other scenes score below none
 The prediction that the effect would grow with scene diversity beyond
 ShanghaiTech's was refuted: the gap is $+0.096$ against $+0.105$. The claim is
 accordingly narrowed from ``the benefit scales with scene diversity'' to ``the
-benefit requires it''.
+benefit requires it''. Bootstrapped by video, the $0.824$ lies in
+$[0.756, 0.877]$: level with the best published training-free figures, not above
+them. The own-versus-other advantage of $+0.110$ has an interval of
+$[+0.069, +0.157]$ and is the most secure result on this benchmark.
+
+\emph{What the descriptor supplies is mainly calibration across cameras.} A
+measurement audit with a decision rule fixed in advance
+(Section~\ref{sec:res-audit}) attributes $82$--$87\%$ of the headline context
+gaps to a shift in each video's score level, and almost none to re-ranking frames
+inside a video. On ShanghaiTech CLIP's logit scale amplifies that shift: the
+same gap is $+0.017$ under the cosine margin and $+0.105$ under the softmax. The
+descriptor tells the scorer which scene it is looking at and so places cameras on
+a common scale---something a label-free per-video centring rule does not
+reproduce. Per-camera descriptors are the partial exception: part of their gain
+is a change in the shape of each video's scores rather than its level. The
+statement this supports is narrower than ``the text redefines normality'' and is
+measured: language calibrates a frozen detector across cameras without training.
 
 Result~8 remains outstanding and the corresponding claim is not made: the
 explanation module has not been run on flagged events, so no assertion is
@@ -2130,7 +2278,8 @@ offered about explanation quality under domain shift.
         LAVAD \citep{zanella2024lavad}, the other training-free pipeline
         discussed here, reports on neither ShanghaiTech nor Avenue; it is
         compared on UCF-Crime in Section~\ref{sec:res-ucf}, where it reports
-        $80.28$ against $82.4$ here. Both sample every sixteenth frame, but
+        $80.28$ against $82.4$ here---a difference inside this work's bootstrap
+        interval of $[0.756, 0.877]$. Both sample every sixteenth frame, but
         whether LAVAD computes AUROC over the sampled frames is not stated.
   \item On UCF-Crime AUROC is computed over the sampled frames only, and each
         video's descriptor is generated from its first second of
@@ -2151,7 +2300,15 @@ offered about explanation quality under domain shift.
         yield pooled figures differing by up to $0.05$. Reported values
         therefore depend in part on the backbone's learned logit scale, which is
         a training temperature rather than a choice made for this task. This
-        affects the protocol generally, not only the present work.
+        affects the protocol generally, not only the present work. The audit
+        quantifies it here: the ShanghaiTech context gap is $+0.017$ at
+        $\lambda{=}1$ and $+0.105$ at CLIP's $\lambda{=}100$
+        (Section~\ref{sec:res-audit}).
+  \item The context effect is mainly calibration across cameras rather than
+        better ranking within a video (Section~\ref{sec:res-audit}); claims about
+        the descriptor are scoped accordingly. Bootstrap intervals are computed
+        for UCF-Crime only; the ShanghaiTech figures carry the partition spread
+        and the within-view interval reported with them.
   \item Configuration selection used development partitions of the same test
         set, there being no separate validation split defined for these
         benchmarks. Held-out figures are reported as means over five clip-level

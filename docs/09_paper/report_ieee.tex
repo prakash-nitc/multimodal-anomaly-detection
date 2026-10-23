@@ -48,12 +48,15 @@ changes, any effect is attributable to the text, and a deliberately wrong
 description serves as a falsifying control. On ShanghaiTech the frozen scorer
 reaches 0.734 frame-level AUROC with one shared sentence and 0.751 with
 automatically generated per-camera sentences; on UCF-Crime, under predictions
-registered before measurement, it reaches 0.824, above the published
-training-free LAVAD (80.3) and AnyAnomaly (80.7). Where the sentence enters the
-prompts dominates what it says: injected into both prompt sets it reverses the
-effect. The benefit requires several scenes and is absent on single-camera
-Avenue, and a within-video analysis indicates that the sentence acts mainly by
-calibrating scores across cameras rather than by re-ranking frames within one.
+registered before measurement, it reaches 0.824 (bootstrap 95\% interval
+0.756--0.877), level with the published training-free LAVAD (80.3) and
+AnyAnomaly (80.7). A video's own sentence beats another video's by $+0.110$
+(interval $+0.069$ to $+0.157$). Where the sentence enters the prompts dominates
+what it says: injected into both prompt sets it reverses the effect. The benefit
+requires several scenes and is absent on single-camera Avenue, and a measurement
+audit with its decision rule fixed in advance shows that 82--87\% of the
+headline gains come from calibrating scores across cameras rather than from
+re-ranking frames within a video.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -481,36 +484,93 @@ The axis begins at 0.68.}
 \label{fig:ucf}
 \end{figure*}
 
-\subsection{What the descriptor changes}
+\subsection{How certain the UCF-Crime figures are}
+The 290 test videos were resampled with replacement 1{,}000 times, every
+configuration scored on the same resamples (Table~\ref{tab:ucfboot}). Videos,
+not frames, are resampled, because frames within a video are strongly
+correlated. Only the comparison with other videos' sentences has an interval
+clear of zero, and 0.824 exceeds LAVAD's and AnyAnomaly's published figures in
+only about seven resamples in ten.
+
+\begin{table}[t]
+\caption{UCF-Crime, paired video-level bootstrap (1{,}000 resamples), raw
+pooled AUROC, $w{=}5$. Published figures are fixed; only our side is resampled.}
+\label{tab:ucfboot}
+\centering\footnotesize
+\begin{tabular}{@{}p{3.3cm}cc@{}}
+\toprule
+\textbf{Quantity} & \textbf{Estimate} & \textbf{95\% interval} \\
+\midrule
+Per-video AUROC & 0.824 & $[0.756, 0.877]$ \\
+Per-video $-$ none & $+0.067$ & $[-0.002, +0.153]$ \\
+Per-video $-$ shared & $+0.011$ & $[-0.047, +0.080]$ \\
+Per-video $-$ other videos' & $+0.110$ & $[+0.069, +0.157]$ \\
+\midrule
+Above LAVAD (0.803) & \multicolumn{2}{c}{72.8\% of resamples} \\
+Above AnyAnomaly (0.807) & \multicolumn{2}{c}{67.3\% of resamples} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What the descriptor changes: a measurement audit}
 \label{sec:res-within}
-The gaps above are measured with pooled AUROC, which compares frames across
-videos. Judged instead only by how frames rank \emph{within} each video
-(macro AUROC, invariant to any rescaling inside a clip), the ShanghaiTech
-matched--mismatched gap at $w{=}5$ is $+0.006$, against $+0.100$ pooled at the
-same setting. Scoring with the raw cosine margin instead of the softmax of
-Eq.~\eqref{eq:frame}, which ranks frames identically within a clip, reduces the
-pooled gap at $w{=}31$ to $+0.017$. The descriptor therefore acts mainly as a
-near-constant shift of each video's score level --- identifying the scene and
-calibrating cameras against one another --- and only weakly re-ranks frames
-within a video; CLIP's large logit scale and per-clip normalisation turn that
-shift into pooled-AUROC differences. This is consistent with every result above:
-no effect on one camera, a smaller effect within a view, gains from per-camera
-sentences, and harm from swapped ones. A full audit across all benchmarks is the
-next experiment.
+The gaps above are pooled AUROC, which compares frames across videos. A
+sentence can raise it by \emph{re-ranking} frames within a video or by
+\emph{calibration}: shifting each video's scores as a block so that cameras
+become comparable. The audit splits each pooled gap exactly into a level part,
+reproduced by shifting every video of the reference condition by its mean margin
+change, and the remainder; within-video ranking is measured on the smoothed
+margin, which no per-video shift can change. The decision rule was fixed before
+any number was computed: calibration-dominated if the level share is at least
+2/3 and the within-video change at most a third of the gap. The script first
+reproduced every published figure (52 checks, all passed).
+
+\begin{table}[t]
+\caption{Measurement audit. Share: fraction of the gap reproduced by a
+per-video level shift. Within: change in within-video AUROC.}
+\label{tab:audit}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{3.2cm}cccc@{}}
+\toprule
+\textbf{Comparison} & \textbf{Gap} & \textbf{Share} & \textbf{Within} & \textbf{Verdict} \\
+\midrule
+ShT matched $-$ mismatched & $+0.105$ & 0.82 & $+0.006$ & calibr. \\
+ShT per-camera $-$ shuffled & $+0.043$ & 0.34 & $+0.010$ & mixed \\
+UCF per-video $-$ none & $+0.067$ & 0.83 & $+0.001$ & calibr. \\
+UCF per-video $-$ shuffled & $+0.110$ & 0.87 & $+0.024$ & calibr. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The headline gaps are calibration-dominated (Table~\ref{tab:audit}). On
+ShanghaiTech CLIP's logit scale amplifies the shift: the matched--mismatched gap
+is $+0.017$ with the temperature $\lambda$ of Eq.~\eqref{eq:frame} set to 1 and
+$+0.105$ at CLIP's 100. On UCF-Crime, scored raw, it hardly depends on $\lambda$
+($+0.057$ to $+0.067$). Per-camera sentences are the exception: part of their
+gain survives removing each video's level and scale ($+0.025$), although
+within-video ranking improves by only $+0.010$. A label-free rule that centres
+each video's scores does not reproduce the effect (0.657 on ShanghaiTech, 0.702
+on UCF-Crime, both below no sentence). The sentence therefore tells the scorer
+which scene it is looking at and so places cameras on a common scale --- what a
+single alarm threshold across many cameras requires. It does not chiefly
+redefine normality inside a scene.
 
 \subsection{Comparison with published methods}
 Table~\ref{tab:sota} compares training-free methods; figures are as published
 in AnyAnomaly~\cite{anyanomaly2025} (Tables~5--6), except the UCF-Crime rows
 marked $^\ddagger$, from LAVAD~\cite{zanella2024lavad} (Table~1). On UCF-Crime,
-the most diverse benchmark, DA-ZVAD is first of six; on the two campus
-benchmarks AnyAnomaly leads. AnyAnomaly is given the benchmark's anomaly classes
+the most diverse benchmark, DA-ZVAD has the highest figure, but inside its own
+bootstrap interval, so it is level with LAVAD and AnyAnomaly rather than ahead
+(Table~\ref{tab:ucfboot}); on the two campus benchmarks AnyAnomaly leads. AnyAnomaly is given the benchmark's anomaly classes
 as its query at evaluation, whereas DA-ZVAD receives a scene description and no
 information about the anomalies. LAVAD samples every 16th frame, as here, but
 cross-paper figures can differ through protocol details, so the comparison is
-reported as comparable-or-better rather than as a margin.
+reported as comparable rather than as a margin.
 
 \begin{table}[t]
-\caption{Training-free methods, frame-level AUROC (\%).}
+\caption{Training-free methods, frame-level AUROC (\%). $^\ast$95\% bootstrap
+interval 75.6--87.7 (Table~\ref{tab:ucfboot}): level with LAVAD and AnyAnomaly.}
 \label{tab:sota}
 \centering\footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -523,7 +583,7 @@ Zero-shot ImageBind~\cite{girdhar2023imagebind} & 64.5 & 61.3 & 53.7$^\ddagger$ 
 LLaVA-1.5~\cite{liu2023llava} & 67.4 & 59.6 & 72.8$^\ddagger$ \\
 Video-ChatGPT~\cite{maaz2024videochatgpt} & 76.9 & 69.1 & --- \\
 LAVAD~\cite{zanella2024lavad} & --- & --- & 80.3$^\ddagger$ \\
-\textbf{DA-ZVAD (ours)} & 67.7 & 73.4 & \textbf{82.4} \\
+\textbf{DA-ZVAD (ours)} & 67.7 & 73.4 & 82.4$^\ast$ \\
 AnyAnomaly~\cite{anyanomaly2025} & \textbf{87.3} & \textbf{79.7} & 80.7 \\
 \bottomrule
 \end{tabular}
@@ -553,7 +613,8 @@ embeddings do not capture.
   \item No validation split exists for these benchmarks; settings were chosen on
         held-out clip partitions of the test set.
   \item On UCF-Crime AUROC is computed over sampled frames, and descriptors come
-        from each video's first second.
+        from each video's first second. Its 95\% interval spans 0.756--0.877,
+        so no ranking against other methods is claimed.
   \item The explanation role of M4 has not been evaluated on video.
 \end{itemize}
 
@@ -566,12 +627,14 @@ the pooling error and the injection-point inversion, and ran the within-view
 control. Phase~3 added per-camera descriptors generated by the system, the
 pre-registered UCF-Crime evaluation, the prototype-direction measurement, the
 within-video analysis, and a check of every cited figure against its source.
+After Phase~3 the measurement audit and the UCF-Crime bootstrap were run, and
+XD-Violence and NWPU Campus were pre-registered, each with a prediction that
+tests the calibration reading on new data.
 
-Next steps, in order: (i) a measurement audit of within-video ranking and raw
-scores on all three benchmarks; (ii) XD-Violence under the same pre-registered
-protocol, and UCF-Crime with scores propagated to every frame; (iii) the NWPU
-Campus benchmark, whose scene-dependent anomalies directly test concept shift;
-(iv) patch-level scoring and evaluation of M4's explanations.
+Next steps, in order: (i) XD-Violence under its pre-registered protocol, and
+UCF-Crime with scores propagated to every frame; (ii) the NWPU Campus benchmark,
+whose scene-dependent anomalies test the method's boundary; (iii) patch-level
+scoring and evaluation of M4's explanations.
 
 % ---------------------------------------------------------------------
 \section{Conclusion}
@@ -581,8 +644,9 @@ literature sets aside. A fully frozen pipeline in which one sentence per camera
 carries the adaptation makes that adaptation measurable, and a deliberately
 wrong sentence provides a falsifying control. The sentence can be written by the
 system itself, and with it the pipeline reaches 0.824 AUROC on UCF-Crime with no
-training. Where the sentence enters matters more than what it says; the benefit
-requires several scenes; and the effect operates mainly by putting different
+training, level with the best training-free methods. Where the sentence enters
+matters more than what it says; the benefit requires several scenes; and, as a
+pre-specified audit measured, the effect operates mainly by putting different
 cameras on a common scale. Each of these was established by an experiment that
 could have failed, and one registered prediction did.
 
