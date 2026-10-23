@@ -605,7 +605,73 @@ def audit_ucf(cache, caps_path, gates, boot, report, pool):
         sec["conditions"]["w%d" % w], sec["pairs"]["w%d" % w] = rows, pairs
     report["headline"]["UCF-Crime per-video vs none (raw, w=5)"] = sec["pairs"]["w5"]["per-video vs none"]
     report["headline"]["UCF-Crime per-video vs shuffled (raw, w=5)"] = sec["pairs"]["w5"]["per-video vs shuffled"]
+    if boot:
+        sec["paired_bootstrap"] = ucf_paired_bootstrap(M, shuffled, labels, boot)
     return sec
+
+
+UCF_BOOT_SEED = 20261023
+PUBLISHED_UCF = {"LAVAD": 0.803, "AnyAnomaly": 0.807}     # fixed published figures
+
+
+def paired_bootstrap(P, labels, B, seed, thresholds=None):
+    """Video-level PAIRED bootstrap of pooled AUROC.
+
+    P maps a configuration to its per-video score arrays (already smoothed, as
+    the metric sees them); a value may be a LIST of such configurations, whose
+    AUROCs are averaged (the shuffled control). Each iteration resamples VIDEOS
+    with replacement, pools their frames and scores every configuration on the
+    same resample, so gaps are measured on identical data.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(labels)
+    draws = {k: [] for k in P}
+    for _ in range(B):
+        idx = rng.integers(0, n, n)
+        lab = np.concatenate([labels[i] for i in idx])
+        if lab.min() == lab.max():
+            continue
+        for k, v in P.items():
+            group = v if isinstance(v[0], list) else [v]
+            draws[k].append(float(np.mean([
+                evaluation.frame_auroc(np.concatenate([g[i] for i in idx]), lab) for g in group])))
+    return {k: np.asarray(d) for k, d in draws.items()}
+
+
+def ucf_paired_bootstrap(M, shuffled, labels, B):
+    """95% percentile CIs for UCF-Crime's 0.824 and its pre-registered gaps."""
+    P = {"per_video": processed(M["per_video"], 5, False),
+         "none": processed(M["none"], 5, False),
+         "shared": processed(M["shared"], 5, False),
+         "shuffled_mean20": [processed(m, 5, False) for m in shuffled]}
+    point = {k: (float(np.mean([auc(g, labels) for g in v])) if isinstance(v[0], list)
+                 else auc(v, labels)) for k, v in P.items()}
+    print("\nUCF-Crime paired video-level bootstrap: %d resamples of %d videos, seed %d"
+          % (B, len(labels), UCF_BOOT_SEED))
+    d = paired_bootstrap(P, labels, B, UCF_BOOT_SEED)
+    ci = lambda x: [float(np.percentile(x, 2.5)), float(np.percentile(x, 97.5))]  # noqa: E731
+    out = {"n_resamples": int(len(d["per_video"])), "n_videos": len(labels),
+           "seed": UCF_BOOT_SEED, "metric": "raw pooled frame AUROC, w=5, step 16",
+           "per_video": {"point": point["per_video"], "ci95": ci(d["per_video"])}}
+    for ref in ("none", "shared", "shuffled_mean20"):
+        g = d["per_video"] - d[ref]
+        out["per_video_minus_" + ref] = {"point": point["per_video"] - point[ref],
+                                         "ci95": ci(g), "frac_positive": float(np.mean(g > 0))}
+    out["frac_above_published"] = {name: float(np.mean(d["per_video"] > v))
+                                   for name, v in PUBLISHED_UCF.items()}
+    out["note"] = ("Published figures are fixed points; their own uncertainty is not "
+                   "available, so only our side is resampled.")
+    print("  per-video AUROC            %.4f   95%% CI [%.4f, %.4f]"
+          % (out["per_video"]["point"], *out["per_video"]["ci95"]))
+    for ref in ("none", "shared", "shuffled_mean20"):
+        r = out["per_video_minus_" + ref]
+        print("  per-video - %-15s %+.4f   95%% CI [%+.4f, %+.4f]   >0 in %.1f%%"
+              % (ref, r["point"], *r["ci95"], 100 * r["frac_positive"]))
+    for name, v in PUBLISHED_UCF.items():
+        print("  P(AUROC > %.3f, %s)       %.1f%% of resamples"
+              % (v, name, 100 * out["frac_above_published"][name]))
+    print("  (published figures are fixed; their uncertainty cannot be resampled)")
+    return out
 
 
 # ======================================================================
@@ -737,11 +803,44 @@ def selftest() -> int:
     expect(np.isfinite(r["gap"]), "averaged split runs")
     perms = derangements(10, 1, 3)
     expect(all(not np.any(p == np.arange(10)) for p in perms), "derangements fix no video")
+    print("\npaired video-level bootstrap")
+    Pa, Pb = processed(B, 5, False), processed(A_shape, 5, False)
+    d = paired_bootstrap({"a": Pa, "a2": [p.copy() for p in Pa], "b": Pb,
+                          "ab": [Pa, Pb]}, labels, 200, 7)
+    expect(np.all(d["a"] == d["a2"]), "identical configurations differ by exactly 0 in every draw")
+    expect(np.allclose(d["ab"], (d["a"] + d["b"]) / 2), "a list of configurations is averaged")
+    lo, hi = np.percentile(d["b"] - d["a"], [2.5, 97.5])
+    full = auc(Pb, labels) - auc(Pa, labels)
+    expect(lo <= full <= hi, "the full-data gap lies inside its 95%% interval (%+.3f)" % full)
+    d2 = paired_bootstrap({"a": Pa}, labels, 50, 7)
+    expect(np.array_equal(d2["a"], d["a"][:50]), "a fixed seed gives the same resamples")
+
     print("\n%s" % ("SELF-TEST PASSED" if not fails else "SELF-TEST FAILED: %s" % fails))
     return 1 if fails else 0
 
 
 # ======================================================================
+def run_manifest(args):
+    """What produced this file: code commit, machine, library versions, settings."""
+    import datetime
+    import platform
+    import subprocess
+    import sklearn
+
+    def git(*a):
+        try:
+            return subprocess.run(["git", "-C", REPO, *a], capture_output=True,
+                                  text=True, timeout=30).stdout.strip()
+        except Exception:                        # noqa: BLE001
+            return "unknown"
+    return {"started_utc": datetime.datetime.utcnow().isoformat(timespec="seconds"),
+            "git_commit": git("rev-parse", "HEAD"),
+            "working_tree": "clean" if not git("status", "--porcelain") else "DIRTY",
+            "host": platform.node(), "python": platform.python_version(),
+            "numpy": np.__version__, "sklearn": sklearn.__version__,
+            "args": vars(args), "boot_seed": BOOT_SEED, "ucf_boot_seed": UCF_BOOT_SEED}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--selftest", action="store_true")
@@ -790,7 +889,8 @@ def main() -> int:
             r["verdict"] = verdict(r)
 
     report.pop("_driver_margins")
-    out = {"gates": gates.rows, "gates_passed": not gates.failed,
+    out = {"manifest": run_manifest(args), "gates": gates.rows,
+           "gates_passed": not gates.failed,
            "headline": report["headline"], "sections": sections}
     os.makedirs(os.path.dirname(os.path.expanduser(args.out)), exist_ok=True)
     with open(os.path.expanduser(args.out), "w") as f:
