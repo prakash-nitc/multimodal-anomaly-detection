@@ -1281,13 +1281,17 @@ A panel hears that as a researcher who tests their own ideas. Don't apologise
 for it and don't bury it.
 
 **Against LAVAD — be precise.** LAVAD reports **80.28**; you get **82.4**. Say
-*"comparable or better"*, not *"we beat LAVAD"*, because:
+*"comparable"* — not *"better"*, and never *"we beat LAVAD"* — because:
+- **You measured your own uncertainty (23 Oct).** Resampling the 290 videos
+  1,000 times puts 0.824 anywhere from **0.756 to 0.877**. You come out above
+  LAVAD in only **73%** of resamples, and above AnyAnomaly (0.807) in **67%**.
+  That's "level with", not "ahead of".
 - Both sample every 16th frame — but these are numbers from different papers,
-  and small protocol details (e.g. how sampled scores are spread to every frame
-  for the AUROC) can move them by a point or two.
-- **Bonus fact:** AnyAnomaly, which beats you on both campus benchmarks, gets
-  **0.807** on UCF-Crime — *below* you. On the most diverse benchmark you're
-  first among training-free methods.
+  and small protocol details can move them by a point or two as well.
+
+> **If asked "so did you beat them?":** *"Numerically yes, statistically no.
+> I bootstrapped my result; their figures sit inside my 95% interval. So I say
+> comparable — with one frozen model pass instead of three large models."*
 
 > **Correction you should know about:** an earlier version of these notes said
 > "LAVAD scores every frame". That was wrong — LAVAD's paper says it samples
@@ -1313,7 +1317,66 @@ lower, as predicted. Both are in the paper.
   the crime has already started then — we kept those, because removing them
   would need the answer key.
 - The shared sentence already gives most of the gain here (0.813). Per-video
-  adds a little on top.
+  adds a little on top — and the bootstrap says that "little" (+0.011) could
+  be zero.
+
+## 6.7d How the sentence actually helps — the measurement audit (23 Oct 2026)
+
+**The question.** Every gain so far is measured with *pooled* AUROC: all
+frames from all videos ranked together. A sentence could raise that in two
+ways:
+
+| Way | What it means | Analogy |
+|---|---|---|
+| **Re-ranking** | Inside one video, the anomalous frames move above the normal ones | The teacher marks the answers more accurately |
+| **Calibration** | Each video's scores move up or down as a block; order inside the video unchanged | Correcting for a strict vs a lenient teacher before merging the classes into one merit list |
+
+**What we did.** A script splits every gain exactly into a "shift the whole
+video" part and the rest, and measures re-ranking separately. **The rule for
+calling the result was written into the script and committed before running
+it**, so nobody can say we chose the rule after seeing the answer. Before
+measuring anything new, it had to reproduce every published number (52
+checks — all passed).
+
+**The answer.**
+
+| Comparison | Gain | From shifting whole videos | Verdict |
+|---|---|---|---|
+| ShanghaiTech, right vs wrong sentence | +0.105 | 82% | calibration |
+| UCF-Crime, own sentence vs none | +0.067 | 83% | calibration |
+| UCF-Crime, own vs another video's | +0.110 | 87% | calibration |
+| ShanghaiTech, per-camera vs swapped | +0.043 | 34% | mixed |
+
+**Three things to remember:**
+1. **The sentence mainly puts cameras on one scale.** Re-ranking inside a video
+   is tiny everywhere (at most +0.024).
+2. **On ShanghaiTech, CLIP's softmax inflates it.** Same comparison, gentle
+   softmax: +0.017. CLIP's own (×100): +0.105. That's a warning for every
+   paper that scores this way, not just ours.
+3. **It isn't a trick a one-liner can copy.** Simply centring each video's
+   scores (no sentence) scores 0.657 / 0.702 — *below* no sentence at all.
+
+**Per-camera sentences are the partial exception.** Part of their gain isn't a
+simple shift — it survives removing each video's level and scale — though they
+still barely reorder frames inside a video.
+
+**Is this bad news? No.** A real system with 50 cameras uses **one** alarm
+threshold. That only works if all cameras are on the same scale — which is
+exactly what the sentence does, with no training.
+
+> **Say it like this (viva or interview):** *"I tested my own result the way a
+> reviewer would. The language effect is real — a video's own sentence beats
+> another video's by 0.11, and the 95% interval is 0.07 to 0.16. And I now know
+> how it works: mostly by putting different cameras on a common scale, which is
+> what a multi-camera deployment needs."*
+
+> **If asked "so the sentence doesn't redefine normal?":** *"Not inside a
+> scene — it tells the model which scene it's looking at. That's a narrower
+> claim than I started with, but it's measured, and the rule for deciding it
+> was fixed before I looked."*
+
+**Memory hook — "Scale, not sort":** the sentence fixes the *scale* across
+cameras, it doesn't *sort* frames within a video.
 
 ## 6.8 Everything in one place
 
@@ -1326,7 +1389,9 @@ lower, as predicted. Both are in the paper.
 | Boundary | Effect nearly vanishes on a single-camera benchmark |
 | Why | The sentence identifies *which* scene — measured |
 | Per camera | **0.751** with sentences written automatically by M4 — no human, no labels |
-| UCF-Crime | **0.824**, 290 videos, no training; LAVAD reports 80.28 |
+| UCF-Crime | **0.824** (95% CI 0.756–0.877), 290 videos, no training; level with LAVAD 80.28 |
+| Strongest result | Own sentence beats another video's by **+0.110** (CI +0.069 to +0.157) |
+| How it works | Mostly **calibration**: 82–87% of the gain is a per-video shift — "scale, not sort" |
 | Failed attempts | Six, all reported |
 
 ## 6.9 The five sentences to memorise
@@ -1342,9 +1407,9 @@ question.
    training at all — and a wrong sentence costs ten points."*
 4. **The surprise.** *"Where you put the sentence matters more than what it
    says; put it in the wrong place and the result flips."*
-5. **The honest boundary.** *"It needs several scenes to work. I predicted it
-   would keep growing with more scenes; the test said no, so I narrowed the
-   claim."*
+5. **The honest boundary.** *"It needs several scenes to work, and it works
+   mainly by putting cameras on one scale — I measured that with a rule fixed
+   in advance."*
 
 > **Memory trick — P, G, N, S, B:** Problem, Gap, Numbers, Surprise, Boundary.
 
@@ -1370,11 +1435,12 @@ question.
 
 **2. UCF-Crime — against the best training-free system.**
 
-> LAVAD (CVPR 2024) reports **0.803**. You reach **0.824**.
+> LAVAD (CVPR 2024) reports **0.803**. You reach **0.824** (95% interval
+> 0.756–0.877).
 
-Say *"comparable or better"*, never *"we beat LAVAD"* — it's a cross-paper
-comparison, and two points is within what protocol details can move. **AnyAnomaly
-gets 0.807 here — also below you.** And add the cost point: LAVAD chains **three** big models
+Say *"comparable"*, never *"better"* or *"we beat LAVAD"*: their figure — and
+AnyAnomaly's 0.807 — sits inside your own bootstrap interval (§6.7c). And add
+the cost point: LAVAD chains **three** big models
 (captioner + language model + refiner); you use **one** frozen CLIP pass per
 frame and one caption per video.
 
@@ -1839,8 +1905,8 @@ on ShanghaiTech. LAVAD reports on UCF-Crime and XD-Violence and on **neither**
 of our *campus* benchmarks — that comparison was wrong and was removed. **Since
 Phase 3 you can compare properly:** you ran UCF-Crime, one of LAVAD's own
 benchmarks. If asked about LAVAD now: *"Not on ShanghaiTech — they don't report
-there. On UCF-Crime they report 0.803 and I get 0.824, under a slightly
-different frame sampling."* (§6.7c)
+there. On UCF-Crime they report 0.803 and I get 0.824 — level with them, since
+their figure sits inside my bootstrap interval of 0.756–0.877."* (§6.7c)
 
 
 **"How do you differ from AnyAnomaly? It is training-free, uses text at
@@ -2039,7 +2105,9 @@ If a question goes somewhere you didn't prepare, return to these.
 | covered | Swap descriptions between the two video datasets | The per-camera shuffled control already tests wrong-but-realistic text |
 | next | Region-level scoring | The best remaining shot at a higher number |
 | ✅ done | UCF-Crime | 0.824; mechanism holds, "grows with scenes" refuted — §6.7c |
-| next | XD-Violence | Second LAVAD benchmark; metric is AP |
+| ✅ done | How the sentence helps (measurement audit) + UCF-Crime error bars | Mostly calibration; 0.824 in [0.756, 0.877] — §6.7d |
+| ✅ pre-registered | XD-Violence | Second LAVAD benchmark; metric is AP; run on the server next |
+| ✅ pre-registered | NWPU Campus | The benchmark with scene-dependent anomalies |
 | later | M4 explanations of flagged events | Result 6, still pending |
 
 ## 9.2 Phase 4
@@ -2164,14 +2232,19 @@ Answer each **out loud**, without looking. If you can't, reread the section.
     than "better"? *(§7.1)*
 20. Why does an accurate description do the most damage in the "both" setup —
     in terms of *where* the arrows move? *(§5.4 update)*
+21. Re-ranking vs calibration: which one does the sentence mostly do, and how
+    do you know you didn't pick the rule after seeing the answer? *(§6.7d)*
+22. Why resample videos rather than frames for the error bars? *(§6.7d)*
 
-If you can do all twenty aloud, you know this project.
+If you can do all twenty-two aloud, you know this project.
 
-> **Quick-answer key for 14–20** (check yourself *after* answering):
+> **Quick-answer key for 14–22** (check yourself *after* answering):
 > 14. LLaVA captions a new camera's first 3 frames → that camera's sentence. Before, a person typed it.
 > 15. It tells the model *which* camera it's looking at. Control: swap sentences between cameras — all 11 swaps score lower.
 > 16. To pick "normal" frames to caption. Removed → 0.755 became 0.751. Basically no change.
 > 17. Predictions written and committed to git *before* running. Can't be fitted after the fact.
 > 18. P1: "the effect grows with more scenes." It didn't (+0.096 vs +0.105). Claim narrowed: "needs" scenes, not "scales with".
-> 19. 0.824 vs 0.803 (AnyAnomaly 0.807). "Comparable" because these are other papers' numbers — both sample every 16th frame, but details can differ.
+> 19. 0.824 vs 0.803 (AnyAnomaly 0.807). "Comparable" because both sit inside my bootstrap interval (0.756–0.877; I'm above LAVAD in only 73% of resamples) — and they are other papers' numbers.
 > 20. It drags *both* arrows onto the video itself, so every frame looks the same. A wrong description pulls them away.
+> 21. Calibration — 82–87% of the gain is shifting whole videos ("scale, not sort"). The decision rule was committed in the script before it ran.
+> 22. Frames in one video are near-copies of each other; resampling frames would pretend you have far more independent evidence, so the interval would be too narrow.

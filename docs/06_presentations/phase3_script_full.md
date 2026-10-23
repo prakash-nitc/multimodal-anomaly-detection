@@ -1005,9 +1005,10 @@ down and committed them before computing a single score. So nothing here is expl
 after the fact."
 
 Then the number: **0.824**. LAVAD, the leading training-free method, reports 0.803 here.
-**SAY** — "That's comparable or better, not a clean win — these are other papers'
-numbers, and small protocol details can move them. For context, AnyAnomaly gets 0.807
-here — so on the most diverse benchmark, we're ahead of both."
+**SAY** — "That's comparable, not a win. I resampled my 290 videos 1,000 times and
+0.824 ranges from 0.756 to 0.877 — LAVAD's 0.803 and AnyAnomaly's 0.807 both sit
+inside that range. So on the most diverse benchmark we're level with the best
+training-free methods, with no training."
 
 **Then P1, before anyone asks.** **SAY** — "P1 failed. I predicted the effect would grow
 with the number of scenes — 290 scenes instead of 12. It didn't; it came out the same. So

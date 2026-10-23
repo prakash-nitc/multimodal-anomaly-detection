@@ -468,7 +468,9 @@ in both boxes.
 > rank highest *inside each video*, the gap is just **+0.006**. So **the
 > sentence mostly shifts each video's overall score level — it tells cameras
 > apart — and the pooled score rewards that. It barely changes which moments
-> inside a video look abnormal.** I'm auditing this properly next."
+> inside a video look abnormal.** I then measured it properly, with the rule
+> for deciding written down before I ran it: **82% of this 0.105 is that
+> shift.** Scale, not sort."
 
 **If they ask:**
 - *"So is your main result wrong?"* — The number is right — it's what the
@@ -476,10 +478,14 @@ in both boxes.
   putting different cameras on a common scale, not by changing what counts as
   normal inside a video. That fits all my results — no effect on one-camera
   Avenue, a shrinking gap inside one view, and per-camera sentences helping.
-- *"Why +0.006 at w=5 and not w=31?"* — My records of the within-video metric
-  are at w=5; at that same setting the pooled gap is +0.100. Re-measuring at
-  w=31 is the first step of the audit. I also have a second check at w=31: using
-  the raw similarity instead of CLIP's softmax, the pooled gap is +0.017.
+- *"Why +0.006 at w=5 and not w=31?"* — That was the first sign, at w=5. The
+  audit then measured it at w=31: within-video change +0.006 again, and 82% of
+  the 0.105 is a per-video shift. Without CLIP's softmax the same gap is only
+  +0.017 — the softmax scale amplifies the shift.
+- *"How did you decide 'calibration' — after looking?"* — No. The rule (at
+  least two-thirds from the shift, and the within-video change at most a third
+  of the gap) was committed in the script before it ran, and the script first
+  had to reproduce all my published numbers — 52 checks.
 - *"What is the ±0.036?"* — The spread of results when I split the clips into
   different halves five times (page 18).
 
@@ -603,8 +609,11 @@ wrote my predictions down first."
 > sentence beats other videos' sentences by 0.110."
 
 **If they ask:**
-- *"Did you beat LAVAD?"* — Comparable or better. Same benchmark, and LAVAD also
-  samples every 16th frame, but these are numbers from different papers.
+- *"Did you beat LAVAD?"* — Numerically yes, statistically no. I resampled my
+  290 videos 1,000 times: 0.824 ranges from 0.756 to 0.877, and I'm above
+  LAVAD in only 73% of resamples. So: comparable.
+- *"Is the own-sentence result solid?"* — Yes: +0.110, and its 95% interval is
+  +0.069 to +0.157 — above zero in every resample.
 - *"How does CLIP alone reach 0.824?"* — Not alone: LLaVA writes each video's
   sentence from its first three sampled frames, and that conditions CLIP. With
   no sentence it's 0.756.
@@ -657,8 +666,9 @@ Phase 3."
 **On screen:** training-free methods on Avenue, ShanghaiTech and UCF-Crime.
 
 > **Say:** "These are training-free methods. **On UCF-Crime, the most diverse
-> benchmark, mine is first of six: 82.4, above LAVAD's 80.3 and AnyAnomaly's
-> 80.7.** On the two campus benchmarks, AnyAnomaly is ahead. But there's a
+> benchmark, I'm level with the best: 82.4 against LAVAD's 80.3 and
+> AnyAnomaly's 80.7 — both inside my own 95% interval.** On the two campus
+> benchmarks, AnyAnomaly is ahead. But there's a
 > difference: **AnyAnomaly asks 'is the thing I named happening?' — and in its
 > evaluation it's given the benchmark's list of anomaly types. I ask 'is
 > anything happening that doesn't belong here?' — I'm told nothing about the
@@ -687,9 +697,9 @@ Phase 3."
 ## Page 28 — Limitations we are stating ourselves · 35 s · *clock 18:10*
 
 > **Say:** "Six limitations, briefly. **It only works where there are several
-> scenes.** It can't see very small objects in a whole-frame summary. **I
-> haven't settled what the sentence actually does — inside a video it barely
-> re-ranks frames.** The standard metrics can change without the ranking
+> scenes.** It can't see very small objects in a whole-frame summary. **The
+> sentence mainly calibrates cameras — I measured that it barely re-ranks frames
+> inside a video.** The standard metrics can change without the ranking
 > changing — that affects the whole field, not just me. There's no validation
 > split for these benchmarks. And M4 doesn't explain events yet."
 
@@ -702,17 +712,18 @@ Phase 3."
 
 ## Page 29 — What comes next · 25 s · *clock 18:35*
 
-> **Say:** "**First, I re-check how the scene sentence helps** — does it spot
-> anomalies better, or mainly put all cameras on the same scale? Then XD-Violence, LAVAD's second benchmark. Then **NWPU Campus — the
+> **Say:** "**First, XD-Violence**, LAVAD's second benchmark — already
+> pre-registered, including a prediction that tests the calibration finding on
+> new data. Then **NWPU Campus — the
 > only dataset where the same event is normal in one scene and abnormal in
 > another**: a direct test of concept shift. Then patch-level scoring and the
 > explanations."
 
 **If they ask:**
-- *"What's in the 'Done since Phase 2' box?"* — The within-view check with a
-  confidence range, the direction measurement, per-camera sentences by LLaVA,
-  UCF-Crime with pre-registered predictions, and every citation checked against
-  its source paper.
+- *"What's in the 'Done since Phase 2' box?"* — Per-camera sentences by LLaVA,
+  UCF-Crime with pre-registered predictions and error bars, the measurement
+  audit of how the sentence helps, and every citation checked against its
+  source paper.
 
 **→ Next:** "To summarise."
 
@@ -753,12 +764,15 @@ Skip. If asked: *"Which survey has the concept-shift quote?"* — **Liu et al.
 | +0.105 | Correct − wrong | ShT, w=31 |
 | −0.029 | Same gap, sentence in both lists | ShT, w=31 |
 | +0.027 | Correct − none | ShT, w=31 (inside ±0.036) |
-| +0.006 | Correct − wrong, *within each video* | ShT, w=5 (pooled at w=5: +0.100) |
+| +0.006 | Correct − wrong, *within each video* | ShT, w=5 and w=31 (pooled at w=5: +0.100) |
+| 82% / 83% / 87% | Share of each headline gap that is a per-video shift (calibration) | ShT +0.105 / UCF vs none / UCF vs others' |
+| +0.017 | ShT correct − wrong without CLIP's softmax | ShT, w=31 |
 | 0.706 / 0.020 | Avenue: none / gap | Avenue, w=31 |
 | +0.033 | Gap inside one camera (mean of 9) | ShT, w=31 |
 | 0.749 / 0.751 | Per-camera sentence: hand / LLaVA | ShT, w=31 |
 | 0.737 / 0.722 | Best swapped arrangement: hand / LLaVA | ShT, w=31 |
-| 0.824 | UCF-Crime, own LLaVA sentence per video | raw pooled, w=5 |
+| 0.824 | UCF-Crime, own LLaVA sentence per video | raw pooled, w=5; 95% CI 0.756–0.877 |
+| +0.110 | UCF-Crime own − other videos' sentences | 95% CI +0.069 to +0.157 |
 | 0.756 / 0.713 | UCF-Crime: none / other videos' sentences | raw pooled, w=5 |
 | +0.096 | UCF-Crime own sentence − wrong domain | raw pooled, w=5 |
 | 82.4 / 80.3 / 80.7 | Ours / LAVAD / AnyAnomaly on UCF-Crime | papers' own metrics |
@@ -785,15 +799,15 @@ Cut in this order (move through the slide in one sentence, don't skip it):
    system writes itself."
 2. "Domain adaptation handles 'things look different'; anomaly detection is
    'the same thing means something different'."
-3. "0.824 on UCF-Crime with no training — comparable to or above the best
-   training-free methods."
+3. "0.824 on UCF-Crime with no training — level with the best training-free
+   methods."
 4. "Where the sentence goes matters more than what it says."
-5. "It works by telling cameras apart — it needs several scenes, and I measured
-   that rather than assuming it."
+5. "It works mainly by putting cameras on one scale — scale, not sort — and I
+   measured that with a rule fixed in advance."
 
 # Appendix D — Never say
 
-- "I beat LAVAD." → say "comparable or better".
+- "I beat LAVAD." → say "comparable — inside my own error bars".
 - "The sentence redefines what's normal." → say "the sentence tells the model
   which scene it's in".
 - "LLaVA writes better sentences than a human." → say "it matches".

@@ -736,12 +736,11 @@ box(s, L + 6.35, 2.6, 4.8, 1.3,
     "Nothing else could have caused it.",
     15, color=INK, spacing=1.3)
 
-callout(s, L, 4.4, CW, 1.55, "What a second metric showed (Phase 3)",
-        "Judged only by which frames rank highest INSIDE each video, the gap is "
-        "+0.006 (pooled: +0.100, same w=5). The sentence mostly shifts each "
-        "video's overall score level — "
-        "telling cameras apart — and the pooled metric rewards that. It barely "
-        "re-ranks frames within a video. A full audit is the next experiment.",
+callout(s, L, 4.4, CW, 1.55, "What the measurement audit showed (Phase 3)",
+        "With the decision rule fixed before running it: 82% of this 0.105 is a "
+        "shift in each video's overall score level, which puts cameras on one "
+        "scale. Frames inside a video are barely re-ranked (+0.006). Every "
+        "published number was reproduced first (52 checks).",
         tone="caution", size=15)
 
 box(s, L, 6.15, CW, 0.7,
@@ -870,7 +869,7 @@ box(s, L, 1.9, CW, 0.72,
     "different places, 140 with a crime. Four predictions were committed to "
     "git before any score was computed.",
     15, color=INK_2, spacing=1.3)
-bignum(s, L, 2.75, "0.824", "AUROC, no training — LAVAD 0.803, AnyAnomaly 0.807",
+bignum(s, L, 2.75, "0.824", "AUROC, no training · 95% CI 0.756–0.877 · level with LAVAD 0.803, AnyAnomaly 0.807",
        w=3.6, vsize=60)
 table(s, [
     ["Registered prediction", "Measured", "Outcome"],
@@ -891,8 +890,8 @@ figure_slide(
     "fig_chart_ucf_crime.png",
     "The video's own LLaVA sentence reaches 0.824; borrowed sentences average "
     "0.713, below having none. The dashed line is LAVAD's 0.803 (AnyAnomaly: "
-    "0.807). Both are other papers' numbers, so read it as comparable, not as a "
-    "margin.")
+    "0.807). Both sit inside our 95% interval (0.756–0.877), so read it as "
+    "comparable, not as a margin.")
 
 # ================================================================ 16 NEGATIVES
 s = slide("Six things that did not work", "Results  ·  negative findings")
@@ -943,9 +942,9 @@ bullets(s, [
      "the benchmark’s own anomaly classes. Ours needs a description of the ordinary."),
 ], 5.42, size=13.5, gap=0.9)
 
-callout(s, L, 6.35, CW, 0.85, "Where we lead",
-        "First of six training-free methods on UCF-Crime; behind AnyAnomaly on "
-        "the campus benchmarks.", size=13.5)
+callout(s, L, 6.35, CW, 0.85, "Where we stand",
+        "Level with LAVAD and AnyAnomaly on UCF-Crime (inside our 95% interval); "
+        "behind AnyAnomaly on campus.", size=13.5)
 
 # ================================================================ 17 LIMITS
 s = slide("Limitations we are stating ourselves", "Assessment")
@@ -956,9 +955,9 @@ bullets(s, [
     ("Resolution ceiling.", "Whole-frame embeddings at 224×224 cannot resolve "
      "small objects. Quadrant scoring did not close it; patch-level scoring is "
      "untested."),
-    ("What the sentence actually does is not settled.", "Inside each video it "
-     "barely re-ranks frames (+0.006); most of the 0.105 is per-video score "
-     "shifts that the pooled metric rewards. An audit is the next experiment."),
+    ("The sentence mainly calibrates.", "A pre-specified audit: 82–87% of the "
+     "headline gains are per-video score shifts that put cameras on one scale; "
+     "frames inside a video are barely re-ranked (at most +0.024)."),
     ("The metrics are scale-sensitive.", "Softmax plus per-clip normalisation "
      "changes pooled figures without changing rankings; on UCF-Crime the effect "
      "shrinks under per-video normalisation."),
@@ -972,20 +971,18 @@ bullets(s, [
 s = slide("What comes next", "Next")
 table(s, [
     ["Priority", "Work", "Why it matters"],
-    ["1", "Re-check how the scene sentence helps, on all datasets",
-     "Does it spot anomalies better, or mainly put all cameras on the same scale?"],
-    ["2", "XD-Violence (pre-registered) and UCF-Crime on every frame",
-     "LAVAD's second benchmark; makes the comparison airtight"],
-    ["3", "NWPU Campus — scene-dependent anomalies",
-     "The only benchmark where the same event flips label by scene: a direct concept-shift test"],
-    ["4", "Patch-level scoring; M4 explanations",
+    ["1", "XD-Violence (pre-registered) and UCF-Crime on every frame",
+     "LAVAD's second benchmark; tests the calibration reading on new data"],
+    ["2", "NWPU Campus — scene-dependent anomalies (pre-registered)",
+     "The only benchmark where the same event flips label by scene: the method's boundary"],
+    ["3", "Patch-level scoring; M4 explanations",
      "Higher figure on small anomalies; completes the framework for the thesis"],
 ], L, 2.0, CW, col_w=[1.2, 5.5, 4.93], size=13.5, row_h=0.62, num_cols=(0,))
 
 callout(s, L, 5.2, CW, 1.5, "Done since Phase 2",
-        "Within-view control with a confidence interval; prototype direction "
-        "measured; per-camera sentences written by the system (0.751); "
-        "UCF-Crime under pre-registered predictions (0.824); every citation "
+        "Per-camera sentences written by the system (0.751); UCF-Crime under "
+        "pre-registered predictions (0.824, 95% CI 0.756–0.877); a measurement "
+        "audit of how the sentence helps (mostly calibration); every citation "
         "checked against its source.", size=15)
 
 # ================================================================ 19 SUMMARY
@@ -996,8 +993,8 @@ items = [
      "detection is dominated by concept shift."),
     ("The method", "Every model frozen; adaptation carried by one sentence per "
      "camera, which the system writes itself from a few frames."),
-    ("The result", "0.751 on ShanghaiTech and 0.824 on UCF-Crime with no "
-     "training. A wrong sentence costs 0.105 — mostly by shifting scores between videos."),
+    ("The result", "0.751 on ShanghaiTech; 0.824 on UCF-Crime, level with the "
+     "best training-free methods — no training. It works mainly by putting cameras on one scale."),
     ("The finding", "Where the description is injected dominates what it says, "
      "to the point of reversing the effect. Not in the literature."),
     ("The boundary", "It needs several scenes: flat on single-camera Avenue, "
@@ -1093,7 +1090,8 @@ NOTES = [
  "only. Then the Phase 3 check, said plainly: judged only inside each video, "
  "the gap is +0.006. The sentence mostly shifts each video's score level - it "
  "tells cameras apart - rather than re-ranking frames. We found this ourselves "
- "and the audit is the next experiment. Saying it first is what protects you.",
+ "and then measured it with a rule fixed in advance: 82 to 87 percent is "
+ "calibration. Saying it first is what protects you.",
 
  "Volunteer the surprise: we expected motion to help and it does not. The "
  "pooled embedding already registers enough of it. Reporting the prediction "
@@ -1118,23 +1116,23 @@ NOTES = [
 
  "Anchor on the trained baseline: 73.4 matches the benchmark's own 2018 "
  "baseline using none of its training data. Then the reframe - AnyAnomaly is "
- "handed the class list, we are not. Then the UCF column: first of six "
- "training-free methods, above LAVAD and AnyAnomaly - say 'comparable or "
- "better', since these are other papers' numbers. The ‡ rows come from LAVAD's "
+ "handed the class list, we are not. Then the UCF column: the highest figure, "
+ "but inside our own bootstrap interval - say 'level with LAVAD and "
+ "AnyAnomaly', never 'better'. The ‡ rows come from LAVAD's "
  "paper, the rest from AnyAnomaly's.",
 
  "Deliver these confidently rather than apologetically. Dwell on the first "
- "two: we found ourselves that the pooled metric rewards score shifts, and "
+ "two after the first: we measured that the pooled metric rewards score shifts, and "
  "that applies to every CLIP-based zero-shot VAD paper, not only ours.",
 
- "The re-check comes first because it decides how the result is described. Then "
- "XD-Violence, LAVAD's other benchmark. NWPU Campus is the one dataset where "
+ "XD-Violence comes first: LAVAD's other benchmark, already pre-registered, with "
+ "a prediction that tests the calibration reading. NWPU Campus is the one dataset where "
  "the same event is normal in one scene and abnormal in another - the direct "
  "test of concept shift. Point at the box at the bottom for what is done.",
 
  "Close on the boundary, not the number. Say plainly that one registered "
- "prediction failed and the claim was narrowed, and that the within-video "
- "check is being audited. Then hand over.",
+ "prediction failed and the claim was narrowed, and that the audit showed the "
+ "sentence mostly puts cameras on one scale. Then hand over.",
 ]
 # Notes for the figure and reference slides, spliced in at the deck positions
 # those slides occupy. Keys are FINAL (0-based) deck positions, so insert in
