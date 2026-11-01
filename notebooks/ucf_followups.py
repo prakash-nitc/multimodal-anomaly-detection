@@ -16,8 +16,13 @@ for per-video sentences (A) against no sentence (B):
                   is anomalous? 0.5 = no relation. Repeated with shuffled captions.
   gain vs videos  AUROC gain: anomalous frames vs frames of NORMAL videos.
   gain within     AUROC gain: anomalous frames vs normal frames of the ANOMALOUS
-                  videos -- the case a scene-type prior cannot help, because both
-                  sets of frames share one caption.
+                  videos, pooled across those videos. Correction (1 Nov 2026, after
+                  the first run): this removes normal videos, but it still compares
+                  frames across different anomalous videos with different captions,
+                  so cross-video calibration can still move it. It is not a purely
+                  within-video measure; that is macro_m in measurement_audit.py. The
+                  decision rule is left as committed. Its "NOT NEEDED" outcome is
+                  weaker than first described; it did not fire on the real data.
 
 DECISION RULE -- fixed before any of these numbers was computed:
   SCENE-PRIOR SUPPORTED    shift AUROC 95% CI above 0.5, gain vs videos CI above
