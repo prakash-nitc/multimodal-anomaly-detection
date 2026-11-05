@@ -236,6 +236,76 @@ python notebooks/ideas_sweep.py selftest
 python notebooks/ideas_sweep.py step3 2>&1 | tee ~/dazvad/logs/ideas_step3.log
 ```
 
+---
+
+## Step 4: phrases chosen by scene (written 5 November 2026, before scoring)
+
+### Question
+
+The bank (B) leans towards crime, and NWPU Campus fell when it was added, though within noise. Can the
+system see what kind of scene a camera shows, and use only the anomaly types that fit that scene? This idea
+came from the project's author. It is retrieval, because nothing is generated at detection time.
+
+### How it works
+
+1. Each unit (camera, scene or video, as in earlier runs) takes its first video's five calm frames, the
+   same ones the earlier retrieval used, chosen by the plain detector without labels.
+2. Their mean image vector is compared with eight scene sentences (`ideas.SCENES`), by cosine similarity.
+3. The closest scene gives a list of anomaly types, and the phrases of those types form the abnormal side.
+   No new phrase is written, so each scene uses part of the frozen bank.
+4. If no scene beats the neutral phrases ("a photo of a place" and two others), the self-check from the earlier
+   retrieval fails, and the unit keeps the whole bank.
+
+### Conditions (PE-Core, no sentence; normal side is always base + C)
+
+| Name | Definition |
+|---|---|
+| B | Current best: the whole bank |
+| S | The bank part for the closest scene |
+| S_wrong | Control: the bank part for the least-matching scene. Units that fail the self-check keep the whole bank here too |
+| C, old_llava | As before, for reference |
+
+### Gates
+
+For each dataset: B and C match step 3; the videos and the old LLaVA scores match the earlier runs
+(difference ≤ 1e-5). A dataset that fails is not reported.
+
+### Decision rule
+
+S replaces B only if **both** hold:
+- S passes the rule against B;
+- S beats S_wrong with a CI above 0 on at least 2 datasets.
+
+The second condition matters because without it, a gain could come from having fewer phrases rather than
+from knowing the scene, and the extra step would not have earned its place. If either fails, S is dropped and B stays.
+
+### Predictions
+
+| | Prediction | Why |
+|---|---|---|
+| K1 | S fails the rule against B | Our earlier retrieval disappointed, and a smaller abnormal side can miss real anomalies |
+| K2 | S is above B on NWPU Campus | Campus scenes lose the crime phrases that may hurt there |
+| K3 | S beats S_wrong, CI above 0, on at least 2 datasets | The wrong scene removes the types that fit |
+| K4 | XD-Violence falls back to the whole bank more often than any other dataset | Its films, games and sports fit no surveillance scene |
+| K5 | S lowers XD-Violence | Its videos are the hardest to place in a scene |
+
+### Limitations
+
+- An LLM (Claude) wrote the scene sentences and the scene-to-type table before scoring, knowing these
+  benchmarks. Other tables would give other numbers.
+- The calm frames come from the test videos, so this is transductive. In deployment they would be setup footage,
+  and frames already showing an incident could pick the wrong scene.
+- A video's abnormal side can now differ from another's, which shifts score levels between videos. The audit reports this.
+- One best scene is chosen, with no blending. A scene the table lacks gets its closest match, unless the self-check catches it.
+
+### Run
+
+```bash
+cd ~/dazvad/repo && git pull && source ~/dazvad/venv/bin/activate
+python notebooks/ideas_sweep.py selftest
+python notebooks/ideas_sweep.py step4 2>&1 | tee ~/dazvad/logs/ideas_step4.log
+```
+
 ## Addenda
 
 Changes to a step after its commit go here, dated, and never in that step's text.
@@ -243,6 +313,11 @@ Changes to a step after its commit go here, dated, and never in that step's text
 **5 November 2026, step 2 outcome.** All gates passed at commit e312e97. E and EC both fail the
 rule against C: only XD-Violence gains significantly, and EC is significantly worse on UCF-Crime.
 The idea is dropped, and the current best stays PE-Core + C. Predictions H2 and H3 held; H1 and H4 were refuted.
+
+**5 November 2026, step 3 outcome.** All gates passed at commit f42b917. B passes the rule against C,
+gaining significantly on UCF-Crime and XD-Violence, and is the current best. T fails (significantly worse on
+ShanghaiTech), D fails (significantly worse on NWPU Campus), and the pairs cannot be chosen because their parts
+did not both pass. All five predictions held. Step 4 runs, because the bank proved useful.
 
 **5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
 passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its

@@ -7,6 +7,7 @@ here without a dated addendum there.
     python notebooks/ideas_sweep.py step1        # server, after fixes_sweep.py
     python notebooks/ideas_sweep.py step2        # server
     python notebooks/ideas_sweep.py step3        # server
+    python notebooks/ideas_sweep.py step4        # server, after step3
 
 Step 1 checks the current best before anything is built on it:
 
@@ -24,6 +25,10 @@ Step 3 takes three ideas from the papers, each on top of C:
     B     a frozen bank of concrete anomalous actions as the abnormal side
     T     the same bank, scored by anomaly type (NOVA)
     D     different templates on each side (Flashback)
+
+Step 4 chooses part of the bank from what the camera shows:
+
+    S     each unit's calm frames pick a scene, and that scene's types form the abnormal side
 """
 from __future__ import annotations
 
@@ -751,6 +756,257 @@ def selftest_step3(expect):
 
 
 # ======================================================================
+# step 4: phrases chosen by scene
+# ======================================================================
+STEP4_PAIRS = (("S", "B"), ("S", "S_wrong"), ("S_wrong", "B"), ("S", "C"), ("S", "old_llava"))
+SCENE_NAMES = tuple(ideas.SCENES)
+
+
+def pick_scenes(v, scene_emb, fallback):
+    """-> (best scene, least-matching scene), or (None, None) when the self-check failed."""
+    if fallback:
+        return None, None
+    sims = scene_emb @ v
+    return SCENE_NAMES[int(np.argmax(sims))], SCENE_NAMES[int(np.argmin(sims))]
+
+
+def bank_for(scene):
+    """A chosen scene's part of the bank; the whole bank when no scene was chosen."""
+    return ideas.scene_phrases(scene) if scene else ideas.BANK_PHRASES
+
+
+def choose_scene_rule(rows):
+    """Scene choice replaces B only if it passes the rule and also beats the wrong scene."""
+    r = fs.passes([x["S - B"] for x in rows])
+    ctrl = sum(x["S - S_wrong"]["ci95"][0] > 0 for x in rows)
+    ok = r["passes"] and ctrl >= 2
+    return {"rule": r, "above_wrong_scene": ctrl, "best": "S" if ok else "B"}
+
+
+def scene_one(ds, spec, data, enc, B, fake=False, log=print):
+    b = fs.Bench(ds, spec, data, enc, B, fake)
+    met = b.R.metric
+    report = {"dataset": ds, "backbone": TAG, "n_videos": len(data["F"]), "gates": [], "notes": b.notes}
+    log("\n" + "=" * 78 + "\n%s on %s  (%d videos, %d units, primary %s)\n" % (
+        ds.upper(), TAG, b.R.n, len(b.R.unit_list), spec["metric"]) + "=" * 78)
+    normal, _ = fs.phrases({"C"}, b.R.base_n, b.R.base_a)
+    N = enc(normal)
+
+    # the scene of each unit, from its calm frames
+    scene_emb = enc(list(SCENE_NAMES))
+    desc = b.R.describe_units([{"text": t} for t in SCENE_NAMES], b.margins(set()))
+    where = {n: i for i, n in enumerate(data["names"])}
+    best, worst = {}, {}
+    for u, r in desc.items():
+        v = fs.rt.camera_vector(data["F"][where[r["video"]]], r["calm"])
+        best[u], worst[u] = pick_scenes(v, scene_emb, r["fallback"])
+    counts = {s: sum(x == s for x in best.values()) for s in SCENE_NAMES}
+    report["scene_counts"] = counts
+    report["fallback_units"] = sum(x is None for x in best.values())
+    report["units"] = len(best)
+    log("  units using the whole bank: %d of %d" % (report["fallback_units"], len(best)))
+    for s, c in counts.items():
+        log("    %3d  %s" % (c, s))
+
+    def by_unit(chosen):
+        return [ns.margins_proto(f, N, enc(bank_for(chosen[u]))) for f, u in zip(data["F"], data["units"])]
+
+    M = {"C": b.margins({"C"}),
+         "B": [ns.margins_proto(f, N, enc(ideas.BANK_PHRASES)) for f in data["F"]],
+         "S": by_unit(best), "S_wrong": by_unit(worst)}
+    S = {k: b.score(m) for k, m in M.items()}
+
+    # ---------------------------------------------------------------- gates
+    ok_all = True
+
+    def gate(what, got, ref):
+        nonlocal ok_all
+        ok = ref is not None and abs(got - ref) <= ns.TOL_PATH
+        ok_all &= ok
+        report["gates"].append({"what": what, "got": got, "ref": ref, "ok": ok})
+        log("  gate  %-34s %.6f  reference %s  %s" % (
+            what, got, "none" if ref is None else "%.6f" % ref, "ok" if ok else "MISMATCH"))
+
+    prev = json.load(open(os.path.join(ns.TABLES, "ideas_step3_%s.json" % ds)))["point"]
+    gate("B == step 3", met(S["B"]), prev.get("B"))
+    gate("C == step 3", met(S["C"]), prev.get("C"))
+    z = fs.scores_loader("vitl")(ds)
+    same_videos = list(z["names"]) == list(data["names"])
+    gate("same videos as the ViT-L run", float(same_videos), 1.0)
+    S["old_llava"] = ns.split_by_lengths(z["llava"], z["lengths"])
+    if same_videos:
+        gate("ViT-L LLaVA == step 3", met(S["old_llava"]), prev.get("old_llava"))
+    report["gates_passed"] = bool(ok_all)
+    if not ok_all:
+        log("  VALIDATION FAILED -- %s is not reported." % ds)
+        return report, {}
+
+    # ---------------------------------------------------------------- points
+    point = {k: met(v) for k, v in S.items()}
+    log("\n  %-16s %8s" % ("condition", spec["metric"]))
+    for k, v in point.items():
+        log("  %-16s %8.4f" % (k, v))
+    report["point"] = point
+    if spec["metric"] == "xd_ap":
+        report["secondary"] = {
+            k: ns.weighted_secondary(np.concatenate(S[k]), np.concatenate(data["wpos"]),
+                                     np.concatenate(data["wneg"])) for k in ("B", "S", "S_wrong")}
+
+    # ---------------------------------------------------------------- bootstrap
+    log("\n  paired bootstrap: %d resamples of %d videos, seed %d" % (B, b.R.n, SEED))
+    need = {k for p in STEP4_PAIRS for k in p}
+    draws = ns.paired_bootstrap({k: S[k] for k in need}, met, b.R.n, B, SEED)
+    report["comparisons"] = {}
+    for x, y in STEP4_PAIRS:
+        g = draws[x] - draws[y]
+        r = {"point": point[x] - point[y], "ci95": ns.ci95(g), "frac_positive": float(np.mean(g > 0))}
+        report["comparisons"]["%s - %s" % (x, y)] = r
+        log("  %-22s %+.4f   95%% CI [%+.4f, %+.4f]" % ("%s - %s" % (x, y), r["point"], *r["ci95"]))
+
+    # ---------------------------------------------------------------- audit
+    from measurement_audit import split, verdict
+    r = split(M["S"], M["B"], data["L"], spec["w"], spec["normalize"])
+    r["verdict"] = verdict(r)
+    report["audit"] = {"S": r}
+    log("  audit S vs B  gap %+.4f  level share %5.2f  macro_m gap %+.4f  ->  %s"
+        % (r["gap"], r["level_share"], r["macro_m_gap"], r["verdict"]))
+    return report, {k: S[k] for k in ("S", "S_wrong")}
+
+
+def predictions_step4(reports, decision):
+    cmp = lambda d, name: reports[d]["comparisons"][name]             # noqa: E731
+    res = {}
+    res["K1 scene choice fails the rule against B"] = {"value": decision["rule"], "holds": not decision["rule"]["passes"]}
+    v = cmp("nwpu_campus", "S - B")["point"]
+    res["K2 scene choice is above B on NWPU"] = {"value": v, "holds": v > 0}
+    v = decision["above_wrong_scene"]
+    res["K3 the right scene beats the wrong scene, CI above 0, on at least 2"] = {"value": v, "holds": v >= 2}
+    v = {d: reports[d]["fallback_units"] / reports[d]["units"] for d in ORDER}
+    res["K4 XD falls back to the whole bank more often than any other dataset"] = {
+        "value": v, "holds": all(v["xd_violence"] > x for d, x in v.items() if d != "xd_violence")}
+    v = cmp("xd_violence", "S - B")["point"]
+    res["K5 scene choice lowers XD"] = {"value": v, "holds": v < 0}
+    return res
+
+
+def summarise_step4(args, reports):
+    rows = [reports[d]["comparisons"] for d in ORDER]
+    decision = choose_scene_rule(rows)
+    r = decision["rule"]
+    print("\n" + "=" * 78 + "\nSTEP 4 DECISION\n" + "=" * 78)
+    print("  S vs B  positive on %d/%d, CI above 0 on %d, CI below 0 on %d  ->  %s"
+          % (r["positive"], r["datasets"], r["ci_above_zero"], r["ci_below_zero"], "PASS" if r["passes"] else "fail"))
+    print("  S beats the wrong scene, CI above 0, on %d datasets" % decision["above_wrong_scene"])
+    print("  CURRENT BEST: PE-Core + C, %s" % decision["best"])
+    verdict = compare_with_old([x["S - old_llava"] for x in rows])
+    print("\n  S against the old LLaVA model, same videos: %s" % verdict)
+    pr = predictions_step4(reports, decision)
+    print("\nPRE-REGISTERED PREDICTIONS")
+    for k, x in pr.items():
+        print("  %-72s %s" % (k, "HOLDS" if x["holds"] else "REFUTED"))
+    out = {"manifest": manifest(args), "decision": decision, "old_models": {"S vs old_llava": verdict}, "predictions": pr}
+    path = os.path.join(ns.TABLES, "ideas_step4_summary.json")
+    json.dump(out, open(path, "w"), indent=1, default=float)
+    print("\nsaved %s" % path)
+    return out
+
+
+def save_step4(args, ds, rep, keep, data):
+    json.dump({"manifest": manifest(args), **rep},
+              open(os.path.join(ns.TABLES, "ideas_step4_%s.json" % ds), "w"), indent=1, default=float)
+    if rep["gates_passed"]:
+        np.savez(os.path.join(ns.TABLES, "ideas_step4_scores_%s.npz" % ds),
+                 names=np.array(data["names"], dtype=object),
+                 lengths=np.array([len(x) for x in data["F"]]),
+                 **{k: np.concatenate(v).astype(np.float64) for k, v in keep.items()})
+
+
+def step4(args):
+    specs = {d: ns.spec_for(d, TAG) for d in ORDER}
+    print("loading %s's text encoder ..." % ns.BACKBONES[TAG][0])
+    enc = ns.text_encoder(TAG)
+    reports = {}
+    for ds in ORDER:
+        data = ns.load(ds, specs[ds])
+        rep, keep = scene_one(ds, specs[ds], data, enc, args.boot)
+        save_step4(args, ds, rep, keep, data)
+        reports[ds] = rep
+    if not all(r["gates_passed"] for r in reports.values()):
+        print("a dataset failed its gates -- no decision")
+        return 1
+    summarise_step4(args, reports)
+    return 0
+
+
+def selftest_step4(expect):
+    expect(all(set(v) <= set(ideas.BANK) and len(v) >= 2 for v in ideas.SCENES.values()),
+           "every scene uses at least two real bank types")
+    expect(set(ideas.BANK) == {t for v in ideas.SCENES.values() for t in v}, "every bank type belongs to some scene")
+    expect(all(set(ideas.scene_phrases(s)) < set(ideas.BANK_PHRASES) for s in ideas.SCENES),
+           "each scene uses part of the bank and no new phrase")
+    expect(ideas.scene_phrases("a highway with moving vehicles")[:1] == ["two cars crashing into each other"],
+           "a scene's phrases come from its own types")
+    expect(bank_for(None) == ideas.BANK_PHRASES, "no scene chosen -> the whole bank")
+    E = np.eye(len(SCENE_NAMES))
+    v = E[2] * 0.9 + E[5] * 0.1 - E[1] * 0.4
+    expect(pick_scenes(v, E, False) == (SCENE_NAMES[2], SCENE_NAMES[1]), "picks the closest and the least-matching scene")
+    expect(pick_scenes(v, E, True) == (None, None), "a failed self-check picks no scene")
+
+    ok = {"point": 0.02, "ci95": [0.01, 0.03]}
+    flat = {"point": 0.01, "ci95": [-0.01, 0.03]}
+    bad = {"point": -0.02, "ci95": [-0.03, -0.01]}
+
+    def rows(s, w):
+        return [{"S - B": a, "S - S_wrong": b} for a, b in zip(s, w)]
+    win = [ok, ok, flat, flat]
+    expect(choose_scene_rule(rows(win, win))["best"] == "S", "passes and beats the wrong scene -> S")
+    expect(choose_scene_rule(rows(win, [ok, flat, flat, flat]))["best"] == "B", "does not beat the wrong scene -> B stays")
+    expect(choose_scene_rule(rows([ok, ok, ok, bad], win))["best"] == "B", "fails the rule -> B stays")
+
+    print("\n  step 4, end to end, on synthetic results in a temporary folder ...")
+    tables, logged = ns.TABLES, []
+    enc = ns.fake_encoder()
+    rng = np.random.default_rng(4)
+    with tempfile.TemporaryDirectory() as tmp:
+        ns.TABLES = tmp
+        try:
+            reports = {}
+            fargs = SimpleNamespace(step="selftest", boot=20)
+            first = {}
+            for ds in ORDER:
+                spec = ns.spec_for(ds, "vitl")
+                data = ns.fake_dataset(ds, spec, rng)
+                first[ds] = data
+                for t in fs.ENCODERS:
+                    fs.save(fargs, ds, t, *_fixes_fixture(ds, spec, data, enc, logged), data)
+                rep, keep = papers_one(ds, spec, data, enc, 5, fake=True, log=logged.append)
+                save_step3(fargs, ds, rep, keep, data)
+                rep, keep = scene_one(ds, spec, data, enc, 20, fake=True, log=logged.append)
+                expect(rep["gates_passed"], "%s: every gate passes" % ds)
+                expect(set(rep["comparisons"]) == {"%s - %s" % p for p in STEP4_PAIRS}, "%s: all comparisons made" % ds)
+                expect(sum(rep["scene_counts"].values()) + rep["fallback_units"] == rep["units"],
+                       "%s: every unit has a scene or the whole bank" % ds)
+                expect(all(len(x) == len(y) for x, y in zip(keep["S"], data["F"])), "%s: one score per frame" % ds)
+                save_step4(fargs, ds, rep, keep, data)
+                reports[ds] = rep
+
+            ds = ORDER[0]
+            path = os.path.join(tmp, "ideas_step3_%s.json" % ds)
+            saved = json.load(open(path))
+            saved["point"]["B"] += 0.01
+            json.dump(saved, open(path, "w"))
+            rep, keep = scene_one(ds, ns.spec_for(ds, "vitl"), first[ds], enc, 5, fake=True, log=logged.append)
+            expect(not rep["gates_passed"] and keep == {}, "a mismatched reference stops the dataset")
+
+            out = summarise_step4(fargs, reports)
+            expect(out["decision"]["best"] in ("B", "S"), "the decision names a current best")
+            expect(len(out["predictions"]) == 5, "all predictions made")
+            expect(os.path.exists(os.path.join(tmp, "ideas_step4_summary.json")), "summary saved")
+        finally:
+            ns.TABLES = tables
+
+
+# ======================================================================
 # self-test (no data, no GPU)
 # ======================================================================
 def selftest(args):
@@ -828,16 +1084,17 @@ def selftest(args):
             ns.TABLES = tables
     selftest_step2(expect)
     selftest_step3(expect)
+    selftest_step4(expect)
     print("\n%s" % ("SELF-TEST FAILED: %s" % fails if fails else "self-test passed"))
     return 1 if fails else 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["selftest", "step1", "step2", "step3"])
+    ap.add_argument("step", choices=["selftest", "step1", "step2", "step3", "step4"])
     ap.add_argument("--boot", type=int, default=1000)
     args = ap.parse_args()
-    return {"selftest": selftest, "step1": step1, "step2": step2, "step3": step3}[args.step](args)
+    return {"selftest": selftest, "step1": step1, "step2": step2, "step3": step3, "step4": step4}[args.step](args)
 
 
 if __name__ == "__main__":

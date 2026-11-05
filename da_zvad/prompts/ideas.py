@@ -75,6 +75,33 @@ BANK: Dict[str, List[str]] = {
 }
 BANK_PHRASES: List[str] = [p for v in BANK.values() for p in v]
 
+# Step 4: which anomaly types each scene gets. No new phrases; each scene uses a
+# subset of the frozen bank. Written once by an LLM before it was scored. A camera
+# matching none of these sentences keeps the whole bank.
+SCENES: Dict[str, List[str]] = {
+    "a pedestrian walkway on a campus": [
+        "fighting", "vandalism", "falling", "vehicle among pedestrians", "sudden running", "trespass",
+    ],
+    "a city street with traffic": [
+        "fighting", "weapon", "theft", "vandalism", "road accident", "fire or explosion", "riot or arrest",
+    ],
+    "a highway with moving vehicles": ["road accident", "fire or explosion"],
+    "the inside of a shop": ["fighting", "weapon", "theft", "vandalism", "fire or explosion"],
+    "a parking lot": ["fighting", "theft", "vandalism", "road accident", "fire or explosion"],
+    "the inside of a house or a room": ["fighting", "weapon", "theft", "fire or explosion", "abuse", "falling"],
+    "a public square with a crowd": [
+        "fighting", "weapon", "fire or explosion", "riot or arrest", "falling",
+        "vehicle among pedestrians", "sudden running",
+    ],
+    "a corridor or a building entrance": ["fighting", "theft", "vandalism", "abuse", "falling", "trespass"],
+}
+
+
+def scene_phrases(scene: str) -> List[str]:
+    """The bank phrases one scene uses, in bank order."""
+    return [p for t, v in BANK.items() if t in SCENES[scene] for p in v]
+
+
 # Flashback's repulsive prompting (Fig. 2, p.4): different yaml wrappers per side,
 # written out here so the text does not depend on a yaml library's line wrapping.
 GENERIC_CATEGORY = "anomalous event"
