@@ -5,12 +5,18 @@ here without a dated addendum there.
 
     python notebooks/ideas_sweep.py selftest     # laptop, no data, ~1 min
     python notebooks/ideas_sweep.py step1        # server, after fixes_sweep.py
+    python notebooks/ideas_sweep.py step2        # server
 
 Step 1 checks the current best before anything is built on it:
 
     C2    a second wording of the calm normal side
     K     whether the side keywords earn their place on top of C
     old   PE-Core with and without the fixes against the ViT-L models, same videos
+
+Step 2 averages the two encoders' margins:
+
+    E     PE-Core + C with plain ViT-L
+    EC    PE-Core + C with ViT-L + C
 """
 from __future__ import annotations
 
@@ -234,6 +240,238 @@ def step1(args):
 
 
 # ======================================================================
+# step 2: both encoders together
+# ======================================================================
+STEP2_PAIRS = (("E", "C"), ("EC", "C"), ("EC", "E"),
+               ("E", "old_llava"), ("EC", "old_llava"), ("E", "old_plain"), ("EC", "old_plain"))
+COMBINED = ("E", "EC")
+
+
+def fuse(a, b):
+    """Mean of two encoders' margins, frame by frame, before the sigmoid and smoothing."""
+    return [(x + y) / 2.0 for x, y in zip(a, b)]
+
+
+def choose_combined(rows):
+    """Which combination replaces PE-Core + C, if any, from each dataset's comparisons."""
+    r = {k: fs.passes([x["%s - C" % k] for x in rows]) for k in COMBINED}
+    gain = {k: float(np.mean([x["%s - C" % k]["point"] for x in rows])) for k in COMBINED}
+    passed = [k for k in COMBINED if r[k]["passes"]]
+    return {"rule": r, "gain": gain, "best": max(passed, key=lambda k: gain[k]) if passed else "C"}
+
+
+def combine_one(ds, spec, data, enc, spec_v, data_v, enc_v, B, fake=False, log=print):
+    pe = fs.Bench(ds, spec, data, enc, B, fake)
+    vit = fs.Bench(ds, spec_v, data_v, enc_v, B, fake)
+    met = pe.R.metric
+    report = {"dataset": ds, "n_videos": len(data["F"]), "gates": [], "notes": pe.notes + vit.notes}
+    log("\n" + "=" * 78 + "\n%s, both encoders  (%d videos, primary %s)\n" % (
+        ds.upper(), pe.R.n, spec["metric"]) + "=" * 78)
+
+    # ---------------------------------------------------------------- gates
+    ok_all = True
+
+    def gate(what, got, ref):
+        nonlocal ok_all
+        ok = ref is not None and abs(got - ref) <= ns.TOL_PATH
+        ok_all &= ok
+        report["gates"].append({"what": what, "got": got, "ref": ref, "ok": ok})
+        log("  gate  %-34s %.6f  reference %s  %s" % (
+            what, got, "none" if ref is None else "%.6f" % ref, "ok" if ok else "MISMATCH"))
+
+    same = list(data["names"]) == list(data_v["names"])
+    same = same and all(len(x) == len(y) and np.array_equal(x, y) for x, y in zip(data["L"], data_v["L"]))
+    same = same and all(len(x) == len(y) for x, y in zip(data["F"], data_v["F"]))
+    gate("same videos, frames and labels", float(same), 1.0)
+    if not same:
+        report["gates_passed"] = False
+        log("  VALIDATION FAILED -- %s is not reported." % ds)
+        return report, {}
+    M = {"C": pe.margins({"C"}), "vit": vit.margins(set()), "vit_C": vit.margins({"C"})}
+    S = {k: pe.score(m) for k, m in M.items()}
+    table = {t: json.load(open(os.path.join(ns.TABLES, "fixes_%s_%s.json" % (ds, t))))["table"] for t in fs.ENCODERS}
+    gate("PE-Core C == fixes run", met(S["C"]), table[TAG].get("none|C"))
+    gate("ViT-L plain == fixes run", met(S["vit"]), table["vitl"].get("none|base"))
+    gate("ViT-L C == fixes run", met(S["vit_C"]), table["vitl"].get("none|C"))
+    z = fs.scores_loader("vitl")(ds)
+    for k, name in (("old_llava", "llava"), ("old_plain", "base")):
+        S[k] = ns.split_by_lengths(z[name], z["lengths"])
+    gate("ViT-L LLaVA == fixes run", met(S["old_llava"]), table["vitl"].get("llava|base"))
+    report["gates_passed"] = bool(ok_all)
+    if not ok_all:
+        log("  VALIDATION FAILED -- %s is not reported." % ds)
+        return report, {}
+
+    # ---------------------------------------------------------------- points
+    M["E"], M["EC"] = fuse(M["C"], M["vit"]), fuse(M["C"], M["vit_C"])
+    S["E"], S["EC"] = pe.score(M["E"]), pe.score(M["EC"])
+    point = {k: met(v) for k, v in S.items()}
+    log("\n  %-16s %8s" % ("condition", spec["metric"]))
+    for k, v in point.items():
+        log("  %-16s %8.4f" % (k, v))
+    report["point"] = point
+    if spec["metric"] == "xd_ap":
+        report["secondary"] = {
+            k: ns.weighted_secondary(np.concatenate(S[k]), np.concatenate(data["wpos"]),
+                                     np.concatenate(data["wneg"])) for k in ("C", "E", "EC")}
+    report["tied_score_fraction"] = {
+        k: float(1.0 - len(np.unique(np.concatenate(v))) / sum(len(x) for x in v)) for k, v in S.items()}
+
+    # ---------------------------------------------------------------- bootstrap
+    log("\n  paired bootstrap: %d resamples of %d videos, seed %d" % (B, pe.R.n, SEED))
+    need = {k for p in STEP2_PAIRS for k in p}
+    draws = ns.paired_bootstrap({k: S[k] for k in need}, met, pe.R.n, B, SEED)
+    report["comparisons"] = {}
+    for x, y in STEP2_PAIRS:
+        g = draws[x] - draws[y]
+        r = {"point": point[x] - point[y], "ci95": ns.ci95(g), "frac_positive": float(np.mean(g > 0))}
+        report["comparisons"]["%s - %s" % (x, y)] = r
+        log("  %-22s %+.4f   95%% CI [%+.4f, %+.4f]" % ("%s - %s" % (x, y), r["point"], *r["ci95"]))
+
+    # ---------------------------------------------------------------- audit
+    from measurement_audit import split, verdict
+    report["audit"] = {}
+    for k in COMBINED:
+        r = split(M[k], M["C"], data["L"], spec["w"], spec["normalize"])
+        r["verdict"] = verdict(r)
+        report["audit"][k] = r
+        log("  audit %-3s vs C  gap %+.4f  level share %5.2f  macro_m gap %+.4f  ->  %s"
+            % (k, r["gap"], r["level_share"], r["macro_m_gap"], r["verdict"]))
+    return report, {k: S[k] for k in COMBINED}
+
+
+def predictions_step2(reports, decision):
+    cmp = lambda d, name: reports[d]["comparisons"][name]             # noqa: E731
+    res = {}
+    passed = [k for k in COMBINED if decision["rule"][k]["passes"]]
+    res["H1 at least one combination passes the rule against PE-Core + C"] = {"value": passed, "holds": len(passed) > 0}
+    v = cmp("xd_violence", "EC - C")["point"]
+    res["H2 EC is above PE-Core + C on XD"] = {"value": v, "holds": v > 0}
+    v = {k: cmp("ucf_crime", "%s - C" % k)["ci95"] for k in COMBINED}
+    res["H3 neither combination has a CI above 0 on UCF"] = {"value": v, "holds": all(x[0] <= 0 for x in v.values())}
+    v = {k: cmp("nwpu_campus", "%s - C" % k)["point"] for k in COMBINED}
+    res["H4 both combinations are above PE-Core + C on NWPU"] = {"value": v, "holds": all(x > 0 for x in v.values())}
+    return res
+
+
+def summarise_step2(args, reports):
+    rows = [reports[d]["comparisons"] for d in ORDER]
+    decision = choose_combined(rows)
+    print("\n" + "=" * 78 + "\nSTEP 2 DECISION\n" + "=" * 78)
+    for k in COMBINED:
+        r = decision["rule"][k]
+        print("  %-3s vs C  mean gain %+.4f, positive on %d/%d, CI above 0 on %d, CI below 0 on %d  ->  %s"
+              % (k, decision["gain"][k], r["positive"], r["datasets"], r["ci_above_zero"], r["ci_below_zero"],
+                 "PASS" if r["passes"] else "fail"))
+    print("  CURRENT BEST: %s" % {"C": "PE-Core + C", "E": "PE-Core + C with plain ViT-L",
+                                  "EC": "PE-Core + C with ViT-L + C"}[decision["best"]])
+    verdicts = {}
+    print("\n  against the old models, same videos:")
+    for x in COMBINED:
+        for y in OLD:
+            v = compare_with_old([r["%s - %s" % (x, y)] for r in rows])
+            verdicts["%s vs %s" % (x, y)] = v
+            print("    %-3s vs %-10s %s" % (x, y, v))
+    pr = predictions_step2(reports, decision)
+    print("\nPRE-REGISTERED PREDICTIONS")
+    for k, r in pr.items():
+        print("  %-70s %s" % (k, "HOLDS" if r["holds"] else "REFUTED"))
+    out = {"manifest": manifest(args), "decision": decision, "old_models": verdicts, "predictions": pr}
+    path = os.path.join(ns.TABLES, "ideas_step2_summary.json")
+    json.dump(out, open(path, "w"), indent=1, default=float)
+    print("\nsaved %s" % path)
+    return out
+
+
+def save_step2(args, ds, rep, keep, data):
+    json.dump({"manifest": manifest(args), **rep},
+              open(os.path.join(ns.TABLES, "ideas_step2_%s.json" % ds), "w"), indent=1, default=float)
+    if rep["gates_passed"]:
+        np.savez(os.path.join(ns.TABLES, "ideas_step2_scores_%s.npz" % ds),
+                 names=np.array(data["names"], dtype=object),
+                 lengths=np.array([len(x) for x in data["F"]]),
+                 **{k: np.concatenate(v).astype(np.float64) for k, v in keep.items()})
+
+
+def step2(args):
+    print("loading both text encoders ...")
+    enc, enc_v = ns.text_encoder(TAG), ns.text_encoder("vitl")
+    reports = {}
+    for ds in ORDER:
+        spec, spec_v = ns.spec_for(ds, TAG), ns.spec_for(ds, "vitl")
+        data, data_v = ns.load(ds, spec), ns.load(ds, spec_v)
+        rep, keep = combine_one(ds, spec, data, enc, spec_v, data_v, enc_v, args.boot)
+        save_step2(args, ds, rep, keep, data)
+        reports[ds] = rep
+    if not all(r["gates_passed"] for r in reports.values()):
+        print("a dataset failed its gates -- no decision")
+        return 1
+    summarise_step2(args, reports)
+    return 0
+
+
+def selftest_step2(expect):
+    ok = {"point": 0.02, "ci95": [0.01, 0.03]}
+    big = {"point": 0.04, "ci95": [0.01, 0.07]}
+    flat = {"point": 0.01, "ci95": [-0.01, 0.03]}
+    bad = {"point": -0.02, "ci95": [-0.03, -0.01]}
+
+    def rows(e, ec):
+        return [{"E - C": a, "EC - C": b} for a, b in zip(e, ec)]
+    fail = [ok, ok, flat, bad]
+    expect(choose_combined(rows(fail, fail))["best"] == "C", "both combinations fail -> PE-Core + C stays")
+    expect(choose_combined(rows([ok, ok, flat, flat], fail))["best"] == "E", "only E passes -> E")
+    expect(choose_combined(rows([ok, ok, flat, flat], [big, big, flat, flat]))["best"] == "EC",
+           "both pass -> the larger mean gain")
+    a, b = [np.array([0.2, 0.4])], [np.array([0.4, 0.0])]
+    expect(np.allclose(fuse(a, b)[0], [0.3, 0.2]), "fusion is the mean of the margins")
+    expect(np.allclose(fuse(a, a)[0], a[0]), "fusing a score with itself changes nothing")
+
+    print("\n  step 2, end to end, on synthetic results in a temporary folder ...")
+    tables, logged = ns.TABLES, []
+    enc = ns.fake_encoder()
+    rng = np.random.default_rng(2)
+    with tempfile.TemporaryDirectory() as tmp:
+        ns.TABLES = tmp
+        try:
+            reports = {}
+            fargs = SimpleNamespace(step="selftest", boot=20)
+            for ds in ORDER:
+                spec = ns.spec_for(ds, "vitl")
+                data = ns.fake_dataset(ds, spec, rng)
+                other = dict(data, F=[ns.unit(f + 0.3 * rng.standard_normal(f.shape)) for f in data["F"]])
+                fs.save(fargs, ds, TAG, *_fixes_fixture(ds, spec, data, enc, logged), data)
+                fs.save(fargs, ds, "vitl", *_fixes_fixture(ds, spec, other, enc, logged), other)
+                rep, keep = combine_one(ds, spec, data, enc, spec, other, enc, 20, fake=True, log=logged.append)
+                expect(rep["gates_passed"], "%s: every gate passes" % ds)
+                expect(set(rep["comparisons"]) == {"%s - %s" % p for p in STEP2_PAIRS}, "%s: all comparisons made" % ds)
+                expect(rep["point"]["E"] != rep["point"]["C"], "%s: fusion changes the score" % ds)
+                expect(all(len(x) == len(y) for x, y in zip(keep["E"], data["F"])), "%s: one score per frame" % ds)
+                save_step2(fargs, ds, rep, keep, data)
+                reports[ds] = rep
+
+            ds = ORDER[0]
+            spec = ns.spec_for(ds, "vitl")
+            data = ns.fake_dataset(ds, spec, np.random.default_rng(5))
+            short = dict(data, F=[data["F"][0][:-1]] + data["F"][1:])
+            rep, keep = combine_one(ds, spec, data, enc, spec, short, enc, 5, fake=True, log=logged.append)
+            expect(not rep["gates_passed"] and keep == {}, "a different frame count stops the dataset")
+
+            out = summarise_step2(fargs, reports)
+            expect(out["decision"]["best"] in ("C", "E", "EC"), "the decision names a current best")
+            expect(len(out["predictions"]) == 4 and len(out["old_models"]) == 4,
+                   "all predictions and old-model verdicts made")
+            expect(os.path.exists(os.path.join(tmp, "ideas_step2_summary.json")), "summary saved")
+        finally:
+            ns.TABLES = tables
+
+
+def _fixes_fixture(ds, spec, data, enc, logged):
+    """A stand-in for one encoder's fixes run, for the self-test's gates to read."""
+    return fs.evaluate(ds, spec, data, enc, 5, TAG, fake=True, log=logged.append)
+
+
+# ======================================================================
 # self-test (no data, no GPU)
 # ======================================================================
 def selftest(args):
@@ -309,16 +547,17 @@ def selftest(args):
             expect(os.path.exists(os.path.join(tmp, "ideas_step1_summary.json")), "summary saved")
         finally:
             ns.TABLES = tables
+    selftest_step2(expect)
     print("\n%s" % ("SELF-TEST FAILED: %s" % fails if fails else "self-test passed"))
     return 1 if fails else 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["selftest", "step1"])
+    ap.add_argument("step", choices=["selftest", "step1", "step2"])
     ap.add_argument("--boot", type=int, default=1000)
     args = ap.parse_args()
-    return {"selftest": selftest, "step1": step1}[args.step](args)
+    return {"selftest": selftest, "step1": step1, "step2": step2}[args.step](args)
 
 
 if __name__ == "__main__":

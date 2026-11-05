@@ -104,6 +104,68 @@ python notebooks/ideas_sweep.py selftest
 python notebooks/ideas_sweep.py step1 2>&1 | tee ~/dazvad/logs/ideas_step1.log
 ```
 
+---
+
+## Step 2: both encoders together (written 5 November 2026, before scoring)
+
+### Question
+
+Does averaging the two encoders beat PE-Core + C, the current best after step 1?
+The two encoders are strong in different places, and neither needs training.
+
+### Conditions (no sentence)
+
+| Name | Definition |
+|---|---|
+| C | PE-Core + C, the current best |
+| E | The mean of PE-Core + C's margin and plain ViT-L's margin, per frame |
+| EC | The mean of PE-Core + C's margin and ViT-L + C's margin, per frame |
+| old_llava, old_plain | As in step 1 |
+
+Margins are averaged before the sigmoid and smoothing. Both encoders have a learned logit
+scale close to 100 (99.9 and 100.0), so both margins are in the same units and neither
+is rescaled. No weight is tuned.
+
+### Gates
+
+For each dataset: both encoders have the same videos, frame counts and labels; and PE-Core + C,
+plain ViT-L, ViT-L + C and ViT-L with LLaVA match the fixes run (difference ≤ 1e-5).
+
+### Decision rule
+
+- E and EC are each judged against C by the rule.
+- If one passes, it becomes the current best. If both pass, the one with the larger mean
+  gain does. If neither passes, PE-Core + C stays.
+- Against the old models, the same three words as step 1 apply.
+
+### Predictions
+
+| | Prediction | Why |
+|---|---|---|
+| H1 | At least one combination passes the rule against C | Combining models that fail in different places usually helps |
+| H2 | EC is above C on XD-Violence | ViT-L was stronger than PE-Core on XD before any fix |
+| H3 | Neither combination has a CI above 0 on UCF-Crime | ViT-L is much weaker than PE-Core on UCF |
+| H4 | Both combinations are above C on NWPU Campus | Both encoders are close there, and their errors may differ |
+
+### Limitations
+
+- A combination doubles the image and text encoding at run time, a real cost in deployment. A pass
+  shows a gain in score, not that the gain is worth that cost.
+- Equal weights are one choice; other weights are untested, on purpose.
+
+### Run
+
+```bash
+cd ~/dazvad/repo && git pull && source ~/dazvad/venv/bin/activate
+python notebooks/ideas_sweep.py selftest
+python notebooks/ideas_sweep.py step2 2>&1 | tee ~/dazvad/logs/ideas_step2.log
+```
+
 ## Addenda
 
-None yet. Changes to a step after its commit go here, dated, and never in that step's text.
+Changes to a step after its commit go here, dated, and never in that step's text.
+
+**5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
+passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its
+CI on NWPU Campus is below 0 (−0.014 [−0.026, −0.003]). The current best is PE-Core + C.
+Predictions G1, G4 and G5 held; G2 and G3 were refuted.
