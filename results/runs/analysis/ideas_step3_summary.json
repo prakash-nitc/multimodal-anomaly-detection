@@ -1,0 +1,126 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T16:44:02+00:00",
+  "git_commit": "f42b91797260bff3cd4576a0fd86c715dee40bca",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "b07bdc31eca44e2ab5719f9399ffd8b933cf3d10d2391083e916ebd366358caa",
+   "ideas_py": "a21f209e6ac4144453d4dbb783062953408d27da475f3180afc6d5645bbf5954",
+   "ideas_sweep": "8e34ca13a4e325225ebd25729037799db847e8bf6e505d75157b2f338ddcf87c"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step3",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "decision": {
+  "rule": {
+   "B": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 2,
+    "ci_below_zero": 0,
+    "passes": true
+   },
+   "T": {
+    "datasets": 4,
+    "positive": 1,
+    "ci_above_zero": 1,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "D": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 3,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "BD": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 2,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "TD": {
+    "datasets": 4,
+    "positive": 1,
+    "ci_above_zero": 1,
+    "ci_below_zero": 0,
+    "passes": false
+   }
+  },
+  "gain": {
+   "B": 0.030633362605767073,
+   "T": -0.0001487718601186072,
+   "D": 0.02448942047620878,
+   "BD": 0.024431827021277053,
+   "TD": 0.005245836036787216
+  },
+  "bank_useful": true,
+  "best": "B"
+ },
+ "old_models": {
+  "B vs old_llava": "no worse",
+  "T vs old_llava": "worse on 1",
+  "D vs old_llava": "no worse",
+  "BD vs old_llava": "no worse",
+  "TD vs old_llava": "no worse"
+ },
+ "predictions": {
+  "J1 at least one of B, T and D passes the rule against PE-Core + C": {
+   "value": [
+    "B"
+   ],
+   "holds": true
+  },
+  "J2 scoring by type reaches 0.70 on XD": {
+   "value": 0.7693254453302502,
+   "holds": true
+  },
+  "J3 scoring by type lowers ShanghaiTech": {
+   "value": -0.08202639246229759,
+   "holds": true
+  },
+  "J4 different templates raise UCF": {
+   "value": 0.04643102801582777,
+   "holds": true
+  },
+  "J5 nothing reaches NOVA's UCF 89.86 or XD 84.82": {
+   "value": {
+    "ucf_crime": 0.8636286101825714,
+    "xd_violence": 0.7693254453302502
+   },
+   "holds": true
+  }
+ }
+}
