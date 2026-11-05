@@ -1,0 +1,123 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-03T21:02:52+00:00",
+  "git_commit": "a87ff8763c82bd5dd6c7a104a538ce76efdd3b84",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "run",
+   "backbone": "pe-l",
+   "datasets": null,
+   "boot": 1000,
+   "fake": false,
+   "verbose": false
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5
+  }
+ },
+ "datasets": [
+  "shanghaitech",
+  "ucf_crime",
+  "xd_violence",
+  "nwpu_campus"
+ ],
+ "backbone": "pe-l",
+ "gates": {
+  "shanghaitech": true,
+  "ucf_crime": true,
+  "xd_violence": true,
+  "nwpu_campus": true
+ },
+ "final_system": "N",
+ "headline": {
+  "shanghaitech": {
+   "FINAL - legacy_none": {
+    "point": 0.12077352620370718,
+    "ci95": [
+     0.08057844236324023,
+     0.1633789261027003
+    ],
+    "frac_positive": 1.0
+   },
+   "FINAL - legacy_best": {
+    "point": 0.044465433336077,
+    "ci95": [
+     0.018108216142124878,
+     0.07317640729957016
+    ],
+    "frac_positive": 0.999
+   }
+  },
+  "ucf_crime": {
+   "FINAL - legacy_none": {
+    "point": -0.08545994176402827,
+    "ci95": [
+     -0.15203605593508185,
+     -0.027033667400352256
+    ],
+    "frac_positive": 0.002
+   },
+   "FINAL - legacy_best": {
+    "point": -0.0911470698969804,
+    "ci95": [
+     -0.16775866624961056,
+     -0.02910851942941567
+    ],
+    "frac_positive": 0.0
+   }
+  },
+  "xd_violence": {
+   "FINAL - legacy_none": {
+    "point": 0.05303340423487901,
+    "ci95": [
+     0.027993467016725573,
+     0.0740168944157479
+    ],
+    "frac_positive": 1.0
+   },
+   "FINAL - legacy_best": {
+    "point": 0.12792682843125558,
+    "ci95": [
+     0.0902845327539037,
+     0.16846980381673288
+    ],
+    "frac_positive": 1.0
+   }
+  },
+  "nwpu_campus": {
+   "FINAL - legacy_none": {
+    "point": 0.02336289617582521,
+    "ci95": [
+     -0.025152943911593048,
+     0.07418552082540697
+    ],
+    "frac_positive": 0.823
+   },
+   "FINAL - legacy_best": {
+    "point": -0.009681702573309359,
+    "ci95": [
+     -0.051348656301220895,
+     0.027347306542877287
+    ],
+    "frac_positive": 0.333
+   }
+  }
+ }
+}

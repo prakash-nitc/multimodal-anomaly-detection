@@ -1,0 +1,226 @@
+loading ViT-L-14's text encoder ...
+  ViT-L-14 / laion2b_s32b_b82k: learned logit scale 99.998 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH on vitl  (107 videos, 12 units, primary auroc)
+==============================================================================
+  gate  base margins == legacy path                 max |diff| 0.0e+00  ok
+  gate  legacy_none    0.706749  earlier run 0.706749  ok
+  gate  legacy_shared  0.733638  earlier run 0.733638  ok
+  gate  legacy_R       0.737549  earlier run 0.737549  ok
+  gate  legacy_best    0.750663  earlier run 0.750663  ok
+
+  condition           auroc
+  base               0.7067
+  C                  0.7237
+  A                  0.7318
+  K                  0.6502
+  S                  0.7196
+  S90                0.7265
+  A_heavy            0.7341
+  CAKS               0.7467
+  shared             0.7336
+  CAKS_shared        0.7459
+  R                  0.7375
+  CAKS_R             0.7475
+  llava              0.7507
+  CAKS_llava         0.7528
+  R_perm             0.7210
+  llava_perm         0.7011
+  tied score fraction, worst: base 0.0185
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  C - base                   +0.0169   95% CI [-0.0048, +0.0400]
+  A - base                   +0.0251   95% CI [+0.0150, +0.0361]
+  K - base                   -0.0565   95% CI [-0.0960, -0.0172]
+  S - base                   +0.0128   95% CI [+0.0083, +0.0177]
+  S90 - base                 +0.0198   95% CI [+0.0123, +0.0281]
+  CAKS - base                +0.0400   95% CI [+0.0182, +0.0624]
+  shared - base              +0.0269   95% CI [+0.0054, +0.0495]
+  R - base                   +0.0308   95% CI [+0.0106, +0.0521]
+  R - shared                 +0.0039   95% CI [-0.0111, +0.0184]
+  CAKS_shared - shared       +0.0122   95% CI [-0.0088, +0.0318]
+  CAKS_R - R                 +0.0100   95% CI [-0.0056, +0.0281]
+  R - R_perm                 +0.0165   95% CI [+0.0018, +0.0322]
+  llava - base               +0.0439   95% CI [+0.0237, +0.0669]
+  llava - shared             +0.0170   95% CI [-0.0088, +0.0409]
+  R - llava                  -0.0131   95% CI [-0.0343, +0.0074]
+  CAKS_llava - llava         +0.0022   95% CI [-0.0126, +0.0165]
+  llava - llava_perm         +0.0496   95% CI [+0.0275, +0.0718]
+  audit C        vs base  gap +0.0169  level share  0.17  macro_m gap +0.0272  ->  RE-RANKING-dominated
+  audit A        vs base  gap +0.0251  level share  0.86  macro_m gap +0.0018  ->  CALIBRATION-dominated
+  audit K        vs base  gap -0.0565  level share -0.21  macro_m gap -0.0974  ->  RE-RANKING-dominated
+  audit S        vs base  gap +0.0128  level share  0.74  macro_m gap +0.0006  ->  CALIBRATION-dominated
+  audit CAKS     vs base  gap +0.0400  level share  0.64  macro_m gap +0.0060  ->  MIXED
+  audit shared   vs base  gap +0.0269  level share  0.69  macro_m gap +0.0000  ->  CALIBRATION-dominated
+  audit llava    vs base  gap +0.0439  level share  0.55  macro_m gap +0.0002  ->  MIXED
+  audit R        vs base  gap +0.0308  level share  0.83  macro_m gap +0.0106  ->  MIXED
+  saved /home/m251250cs/dazvad/work/tables/fixes_shanghaitech_vitl.json
+
+==============================================================================
+UCF_CRIME on vitl  (290 videos, 290 units, primary auroc)
+==============================================================================
+  gate  base margins == legacy path                 max |diff| 0.0e+00  ok
+  gate  legacy_none    0.756136  earlier run 0.756136  ok
+  gate  legacy_shared  0.812932  earlier run 0.812932  ok
+  gate  legacy_R       0.792560  earlier run 0.792560  ok
+  gate  legacy_best    0.823482  earlier run 0.823482  ok
+
+  condition           auroc
+  base               0.7561
+  C                  0.7348
+  A                  0.7808
+  K                  0.7780
+  S                  0.7610
+  S90                0.7665
+  A_heavy            0.7827
+  CAKS               0.8117
+  shared             0.8129
+  CAKS_shared        0.8282
+  R                  0.7926
+  CAKS_R             0.8215
+  llava              0.8235
+  CAKS_llava         0.8329
+  R_perm             0.7078
+  llava_perm         0.6857
+  tied score fraction, worst: base 0.0011
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  C - base                   -0.0213   95% CI [-0.0733, +0.0278]
+  A - base                   +0.0247   95% CI [+0.0093, +0.0422]
+  K - base                   +0.0218   95% CI [-0.0233, +0.0732]
+  S - base                   +0.0049   95% CI [+0.0023, +0.0075]
+  S90 - base                 +0.0103   95% CI [+0.0049, +0.0162]
+  CAKS - base                +0.0556   95% CI [-0.0056, +0.1271]
+  shared - base              +0.0568   95% CI [+0.0182, +0.0994]
+  R - base                   +0.0364   95% CI [-0.0263, +0.1109]
+  R - shared                 -0.0204   95% CI [-0.0739, +0.0429]
+  CAKS_shared - shared       +0.0153   95% CI [-0.0339, +0.0693]
+  CAKS_R - R                 +0.0289   95% CI [-0.0046, +0.0672]
+  R - R_perm                 +0.0848   95% CI [+0.0243, +0.1464]
+  llava - base               +0.0673   95% CI [-0.0043, +0.1513]
+  llava - shared             +0.0105   95% CI [-0.0469, +0.0756]
+  R - llava                  -0.0309   95% CI [-0.0770, +0.0101]
+  CAKS_llava - llava         +0.0094   95% CI [-0.0123, +0.0333]
+  llava - llava_perm         +0.1378   95% CI [+0.0725, +0.2148]
+  audit C        vs base  gap -0.0213  level share  1.04  macro_m gap -0.0366  ->  MIXED
+  audit A        vs base  gap +0.0247  level share  0.86  macro_m gap -0.0010  ->  CALIBRATION-dominated
+  audit K        vs base  gap +0.0218  level share  1.48  macro_m gap -0.0159  ->  MIXED
+  audit S        vs base  gap +0.0049  level share  1.14  macro_m gap +0.0010  ->  NO EFFECT TO DECOMPOSE
+  audit CAKS     vs base  gap +0.0556  level share  1.02  macro_m gap -0.0212  ->  MIXED
+  audit shared   vs base  gap +0.0568  level share  1.05  macro_m gap -0.0141  ->  CALIBRATION-dominated
+  audit llava    vs base  gap +0.0673  level share  0.83  macro_m gap +0.0007  ->  CALIBRATION-dominated
+  audit R        vs base  gap +0.0364  level share  0.95  macro_m gap -0.0137  ->  MIXED
+  saved /home/m251250cs/dazvad/work/tables/fixes_ucf_crime_vitl.json
+
+==============================================================================
+XD_VIOLENCE on vitl  (800 videos, 800 units, primary xd_ap)
+==============================================================================
+  gate  base margins == legacy path                 max |diff| 0.0e+00  ok
+  gate  legacy_none    0.624274  earlier run 0.624274  ok
+  gate  legacy_shared  0.581879  earlier run 0.581879  ok
+  gate  legacy_R       0.597732  earlier run 0.597732  ok
+  gate  legacy_best    0.417050  earlier run 0.417050  ok
+
+  condition           xd_ap
+  base               0.6243
+  C                  0.6136
+  A                  0.5947
+  K                  0.5113
+  S                  0.6263
+  S90                0.6250
+  A_heavy            0.4316
+  CAKS               0.5722
+  shared             0.5819
+  CAKS_shared        0.5710
+  R                  0.5977
+  CAKS_R             0.5677
+  llava              0.4170
+  CAKS_llava         0.5174
+  R_perm             0.5184
+  llava_perm         0.4535
+  tied score fraction, worst: K 0.0002
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  C - base                   -0.0107   95% CI [-0.0362, +0.0154]
+  A - base                   -0.0296   95% CI [-0.0669, +0.0075]
+  K - base                   -0.1129   95% CI [-0.1549, -0.0741]
+  S - base                   +0.0020   95% CI [-0.0016, +0.0061]
+  S90 - base                 +0.0007   95% CI [-0.0075, +0.0096]
+  CAKS - base                -0.0520   95% CI [-0.1203, +0.0097]
+  shared - base              -0.0424   95% CI [-0.0670, -0.0201]
+  R - base                   -0.0265   95% CI [-0.0609, +0.0081]
+  R - shared                 +0.0159   95% CI [-0.0310, +0.0664]
+  CAKS_shared - shared       -0.0109   95% CI [-0.0874, +0.0580]
+  CAKS_R - R                 -0.0300   95% CI [-0.0957, +0.0281]
+  R - R_perm                 +0.0794   95% CI [+0.0372, +0.1208]
+  llava - base               -0.2072   95% CI [-0.2605, -0.1546]
+  llava - shared             -0.1648   95% CI [-0.2214, -0.1120]
+  R - llava                  +0.1807   95% CI [+0.1274, +0.2350]
+  CAKS_llava - llava         +0.1004   95% CI [+0.0437, +0.1561]
+  llava - llava_perm         -0.0364   95% CI [-0.0831, +0.0088]
+  audit C        vs base  gap -0.0214  level share -0.02  macro_m gap -0.0076  ->  RE-RANKING-dominated
+  audit A        vs base  gap -0.0165  level share  0.30  macro_m gap -0.0140  ->  RE-RANKING-dominated
+  audit K        vs base  gap -0.0527  level share  0.84  macro_m gap -0.0186  ->  MIXED
+  audit S        vs base  gap +0.0006  level share  0.18  macro_m gap -0.0046  ->  NO EFFECT TO DECOMPOSE
+  audit CAKS     vs base  gap -0.0172  level share  0.25  macro_m gap -0.0017  ->  RE-RANKING-dominated
+  audit shared   vs base  gap -0.0080  level share  0.92  macro_m gap +0.0003  ->  NO EFFECT TO DECOMPOSE
+  audit llava    vs base  gap -0.1327  level share  0.69  macro_m gap -0.0396  ->  CALIBRATION-dominated
+  audit R        vs base  gap -0.0457  level share  0.87  macro_m gap -0.0006  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/fixes_xd_violence_vitl.json
+
+==============================================================================
+NWPU_CAMPUS on vitl  (242 videos, 43 units, primary auroc)
+==============================================================================
+  gate  base margins == legacy path                 max |diff| 0.0e+00  ok
+  gate  legacy_none    0.659089  earlier run 0.659089  ok
+  gate  legacy_shared  0.648306  earlier run 0.648306  ok
+  gate  legacy_R       0.610969  earlier run 0.610970  ok
+  gate  legacy_best    0.666969  earlier run 0.666969  ok
+
+  condition           auroc
+  base               0.6591
+  C                  0.6528
+  A                  0.6536
+  K                  0.6058
+  S                  0.6587
+  S90                0.6580
+  A_heavy            0.6414
+  CAKS               0.6187
+  shared             0.6483
+  CAKS_shared        0.6121
+  R                  0.6110
+  CAKS_R             0.6086
+  llava              0.6670
+  CAKS_llava         0.6459
+  R_perm             0.6095
+  llava_perm         0.6009
+  tied score fraction, worst: A_heavy 0.0035
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  C - base                   -0.0063   95% CI [-0.0407, +0.0296]
+  A - base                   -0.0055   95% CI [-0.0167, +0.0070]
+  K - base                   -0.0533   95% CI [-0.0800, -0.0257]
+  S - base                   -0.0004   95% CI [-0.0024, +0.0016]
+  S90 - base                 -0.0011   95% CI [-0.0053, +0.0031]
+  CAKS - base                -0.0403   95% CI [-0.0879, +0.0031]
+  shared - base              -0.0108   95% CI [-0.0385, +0.0187]
+  R - base                   -0.0481   95% CI [-0.1012, +0.0051]
+  R - shared                 -0.0373   95% CI [-0.0818, +0.0064]
+  CAKS_shared - shared       -0.0362   95% CI [-0.0793, +0.0014]
+  CAKS_R - R                 -0.0024   95% CI [-0.0443, +0.0345]
+  R - R_perm                 +0.0015   95% CI [-0.0443, +0.0442]
+  llava - base               +0.0079   95% CI [-0.0248, +0.0426]
+  llava - shared             +0.0187   95% CI [-0.0241, +0.0653]
+  R - llava                  -0.0560   95% CI [-0.1242, +0.0082]
+  CAKS_llava - llava         -0.0211   95% CI [-0.0582, +0.0088]
+  llava - llava_perm         +0.0661   95% CI [+0.0142, +0.1093]
+  audit C        vs base  gap -0.0063  level share  1.29  macro_m gap -0.0004  ->  NO EFFECT TO DECOMPOSE
+  audit A        vs base  gap -0.0055  level share  1.37  macro_m gap +0.0122  ->  NO EFFECT TO DECOMPOSE
+  audit K        vs base  gap -0.0533  level share  0.73  macro_m gap -0.0714  ->  MIXED
+  audit S        vs base  gap -0.0004  level share  0.96  macro_m gap +0.0000  ->  NO EFFECT TO DECOMPOSE
+  audit CAKS     vs base  gap -0.0403  level share  1.01  macro_m gap -0.0051  ->  CALIBRATION-dominated
+  audit shared   vs base  gap -0.0108  level share  1.28  macro_m gap +0.0184  ->  MIXED
+  audit llava    vs base  gap +0.0079  level share  0.40  macro_m gap +0.0276  ->  NO EFFECT TO DECOMPOSE
+  audit R        vs base  gap -0.0481  level share  1.07  macro_m gap -0.0004  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/fixes_nwpu_campus_vitl.json

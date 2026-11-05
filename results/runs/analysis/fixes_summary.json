@@ -1,0 +1,485 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T10:07:15+00:00",
+  "git_commit": "9ae7671bcd5ba6beaf05363c075cffb923adeba7",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "decide",
+   "backbone": "vitl",
+   "datasets": null,
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "vitl": {
+  "rule": {
+   "C": {
+    "datasets": 4,
+    "positive": 1,
+    "ci_above_zero": 0,
+    "ci_below_zero": 0,
+    "passes": false
+   },
+   "A": {
+    "datasets": 4,
+    "positive": 2,
+    "ci_above_zero": 2,
+    "ci_below_zero": 0,
+    "passes": false
+   },
+   "K": {
+    "datasets": 4,
+    "positive": 1,
+    "ci_above_zero": 0,
+    "ci_below_zero": 3,
+    "passes": false
+   },
+   "S": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 2,
+    "ci_below_zero": 0,
+    "passes": true
+   }
+  },
+  "adopted": "S",
+  "after_check": "S",
+  "check": [
+   {
+    "set": "S",
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 2,
+    "ci_below_zero": 0,
+    "passes": true
+   }
+  ],
+  "lodo": {
+   "shanghaitech": {
+    "set": "base",
+    "point": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ]
+   },
+   "ucf_crime": {
+    "set": "base",
+    "point": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ]
+   },
+   "xd_violence": {
+    "set": "AS",
+    "point": -0.04032968248448132,
+    "ci95": [
+     -0.07910115764901685,
+     -0.002099838089351243
+    ]
+   },
+   "nwpu_campus": {
+    "set": "AS",
+    "point": -0.005879810531832952,
+    "ci95": [
+     -0.017538478690074348,
+     0.006343230773995167
+    ]
+   }
+  },
+  "gain": {
+   "C": -0.005347467293353947,
+   "A": 0.003683679249094851,
+   "K": -0.05023273989808,
+   "S": 0.004824115566665038
+  }
+ },
+ "pe-l": {
+  "rule": {
+   "C": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 3,
+    "ci_below_zero": 0,
+    "passes": true
+   },
+   "A": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 1,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "K": {
+    "datasets": 4,
+    "positive": 2,
+    "ci_above_zero": 0,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "S": {
+    "datasets": 4,
+    "positive": 2,
+    "ci_above_zero": 2,
+    "ci_below_zero": 1,
+    "passes": false
+   }
+  },
+  "adopted": "C",
+  "after_check": "C",
+  "check": [
+   {
+    "set": "C",
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 3,
+    "ci_below_zero": 0,
+    "passes": true
+   }
+  ],
+  "lodo": {
+   "shanghaitech": {
+    "set": "C",
+    "point": 0.09049300930474458,
+    "ci95": [
+     0.04396088985021213,
+     0.142373967106515
+    ]
+   },
+   "ucf_crime": {
+    "set": "C",
+    "point": -0.02963689966996874,
+    "ci95": [
+     -0.08491966357089566,
+     0.024323657763217058
+    ]
+   },
+   "xd_violence": {
+    "set": "CS",
+    "point": 0.13756883410737597,
+    "ci95": [
+     0.10324867214127016,
+     0.16543788403317047
+    ]
+   },
+   "nwpu_campus": {
+    "set": "C",
+    "point": 0.05120543205313255,
+    "ci95": [
+     0.008295122991803872,
+     0.0993708649263221
+    ]
+   }
+  },
+  "gain": {
+   "C": 0.06329442584503955,
+   "A": 8.363147097525947e-05,
+   "K": -0.0004992416563504576,
+   "S": -1.2250503652347366e-05
+  }
+ },
+ "encoders": {
+  "shanghaitech": {
+   "base": {
+    "vitl": 0.7067489022838399,
+    "pe-l": 0.66612483659812,
+    "point": -0.04062406568571986,
+    "ci95": [
+     -0.08533703955825943,
+     0.0021438209347142373
+    ]
+   },
+   "shared": {
+    "vitl": 0.7336381086466054,
+    "pe-l": 0.6974059602120253,
+    "point": -0.036232148434580114,
+    "ci95": [
+     -0.07511512993915437,
+     0.001200073717711309
+    ]
+   },
+   "llava": {
+    "vitl": 0.7506625130947203,
+    "pe-l": 0.7424329294657502,
+    "point": -0.008229583628970083,
+    "ci95": [
+     -0.042719227637431564,
+     0.030585688620363042
+    ]
+   },
+   "R": {
+    "vitl": 0.737548894740294,
+    "pe-l": 0.7089072925036756,
+    "point": -0.02864160223661838,
+    "ci95": [
+     -0.06937857005144639,
+     0.01312702275617546
+    ]
+   },
+   "CAKS": {
+    "vitl": 0.7467052946350995,
+    "pe-l": 0.7890163082963397,
+    "point": 0.04231101366124024,
+    "ci95": [
+     0.010322652311303523,
+     0.0823329709527813
+    ]
+   }
+  },
+  "ucf_crime": {
+   "base": {
+    "vitl": 0.7561364959935255,
+    "pe-l": 0.8468344759394288,
+    "point": 0.09069797994590334,
+    "ci95": [
+     0.015377689988961645,
+     0.1736033921311567
+    ]
+   },
+   "shared": {
+    "vitl": 0.8129321476077735,
+    "pe-l": 0.8674696555633935,
+    "point": 0.05453750795561996,
+    "ci95": [
+     -0.010598509059830173,
+     0.13517437180400307
+    ]
+   },
+   "llava": {
+    "vitl": 0.823481533105648,
+    "pe-l": 0.852521604072381,
+    "point": 0.029040070966733,
+    "ci95": [
+     0.0008310170145213987,
+     0.06197307547592153
+    ]
+   },
+   "R": {
+    "vitl": 0.792560146065103,
+    "pe-l": 0.8365516181800107,
+    "point": 0.043991472114907615,
+    "ci95": [
+     -0.003036468782192351,
+     0.09768644119587117
+    ]
+   },
+   "CAKS": {
+    "vitl": 0.8116968406349151,
+    "pe-l": 0.8773882882333398,
+    "point": 0.06569144759842471,
+    "ci95": [
+     0.02991941338725058,
+     0.11187554455660279
+    ]
+   }
+  },
+  "xd_violence": {
+   "base": {
+    "vitl": 0.6242736711005099,
+    "pe-l": 0.49371862238171627,
+    "point": -0.13055504871879364,
+    "ci95": [
+     -0.18079178182622843,
+     -0.07902544606621986
+    ]
+   },
+   "shared": {
+    "vitl": 0.5818791334342402,
+    "pe-l": 0.5632774723135701,
+    "point": -0.018601661120670188,
+    "ci95": [
+     -0.05614850518325048,
+     0.021599237821604292
+    ]
+   },
+   "llava": {
+    "vitl": 0.41704988665152554,
+    "pe-l": 0.4188251981853397,
+    "point": 0.0017753115338141612,
+    "ci95": [
+     -0.02736033578115788,
+     0.03563838509974632
+    ]
+   },
+   "R": {
+    "vitl": 0.5977324868428074,
+    "pe-l": 0.45305829439964174,
+    "point": -0.1446741924431657,
+    "ci95": [
+     -0.18734162205715343,
+     -0.09953781621643487
+    ]
+   },
+   "CAKS": {
+    "vitl": 0.572224532890469,
+    "pe-l": 0.6119603799288449,
+    "point": 0.03973584703837585,
+    "ci95": [
+     -0.015392245790673697,
+     0.09808133724233917
+    ]
+   }
+  },
+  "nwpu_campus": {
+   "base": {
+    "vitl": 0.6590888078251449,
+    "pe-l": 0.6174738938563656,
+    "point": -0.041614913968779255,
+    "ci95": [
+     -0.11880829835850282,
+     0.02869564635219142
+    ]
+   },
+   "shared": {
+    "vitl": 0.6483055208418895,
+    "pe-l": 0.5883752977552481,
+    "point": -0.05993022308664142,
+    "ci95": [
+     -0.14426508937117033,
+     0.018795474545561682
+    ]
+   },
+   "llava": {
+    "vitl": 0.6669692744941582,
+    "pe-l": 0.6505184926055002,
+    "point": -0.016450781888658006,
+    "ci95": [
+     -0.08278099921678707,
+     0.03939845008889439
+    ]
+   },
+   "R": {
+    "vitl": 0.6109693840133301,
+    "pe-l": 0.5699331859713763,
+    "point": -0.0410361980419538,
+    "ci95": [
+     -0.11691269738113017,
+     0.036317035934807874
+    ]
+   },
+   "CAKS": {
+    "vitl": 0.6187428372505994,
+    "pe-l": 0.6527627433379097,
+    "point": 0.034019906087310314,
+    "ci95": [
+     -0.029807845364691252,
+     0.10908129658754986
+    ]
+   }
+  }
+ },
+ "predictions": {
+  "F1 calm normal side beats the backwards N on UCF on both encoders, and on XD on ViT-L": {
+   "value": {
+    "vitl": {
+     "ucf_crime": 0.08757648574286692,
+     "xd_violence": 0.08665626666007065
+    },
+    "pe-l": {
+     "ucf_crime": 0.05582304209405953,
+     "xd_violence": 0.08808275745737082
+    }
+   },
+   "holds": true
+  },
+  "F2 visual anchor changes UCF and XD by under 0.03 on both encoders": {
+   "value": {
+    "vitl": {
+     "ucf_crime": 0.02468902553976471,
+     "xd_violence": -0.029559346023893873
+    },
+    "pe-l": {
+     "ucf_crime": 0.012566156281822671,
+     "xd_violence": -0.036526623264475755
+    }
+   },
+   "holds": false
+  },
+  "F3 side keywords gain under +0.05 on UCF on both encoders": {
+   "value": {
+    "vitl": 0.021849577777336426,
+    "pe-l": 0.01818321878670548
+   },
+   "holds": true
+  },
+  "F4 anomaly weight is calibration or no effect on >= 3 of 4 datasets on both encoders": {
+   "value": {
+    "vitl": {
+     "shanghaitech": "CALIBRATION-dominated",
+     "ucf_crime": "NO EFFECT TO DECOMPOSE",
+     "xd_violence": "NO EFFECT TO DECOMPOSE",
+     "nwpu_campus": "NO EFFECT TO DECOMPOSE"
+    },
+    "pe-l": {
+     "shanghaitech": "NO EFFECT TO DECOMPOSE",
+     "ucf_crime": "NO EFFECT TO DECOMPOSE",
+     "xd_violence": "CALIBRATION-dominated",
+     "nwpu_campus": "NO EFFECT TO DECOMPOSE"
+    }
+   },
+   "holds": true
+  },
+  "F5 at most one fix passes the rule on both encoders": {
+   "value": [],
+   "holds": true
+  },
+  "F6 LLaVA stays below no sentence on XD on both encoders, with and without all fixes": {
+   "value": {
+    "vitl": {
+     "llava": 0.41704988665152554,
+     "base": 0.6242736711005099,
+     "CAKS_llava": 0.5174317163888682,
+     "CAKS": 0.572224532890469
+    },
+    "pe-l": {
+     "llava": 0.4188251981853397,
+     "base": 0.49371862238171627,
+     "CAKS_llava": 0.5597918158898536,
+     "CAKS": 0.6119603799288449
+    }
+   },
+   "holds": true
+  },
+  "F7 some fix has CIs on opposite sides of 0 on the two encoders, same dataset": {
+   "value": [],
+   "holds": false
+  },
+  "F8 each unit's own LLaVA sentence beats another's on >= 3 of 4 on both encoders": {
+   "value": {
+    "vitl": 3,
+    "pe-l": 3
+   },
+   "holds": true
+  }
+ }
+}

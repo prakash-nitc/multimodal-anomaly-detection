@@ -1,0 +1,2818 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-03T21:06:40+00:00",
+  "git_commit": "a87ff8763c82bd5dd6c7a104a538ce76efdd3b84",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "run",
+   "backbone": "pe-l",
+   "datasets": null,
+   "boot": 1000,
+   "fake": false,
+   "verbose": false
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5
+  }
+ },
+ "dataset": "nwpu_campus",
+ "n_videos": 242,
+ "gates": [
+  {
+   "what": "new code path == legacy (none)",
+   "max_abs": 0.0,
+   "tol": 1e-05,
+   "ok": true
+  },
+  {
+   "what": "subset none == legacy_none",
+   "max_abs": 0.0,
+   "tol": 0.0006,
+   "ok": true
+  },
+  {
+   "what": "subset R == legacy_R",
+   "max_abs": 0.0,
+   "tol": 0.0006,
+   "ok": true
+  }
+ ],
+ "notes": [],
+ "gates_passed": true,
+ "retrieval": {
+  "library_size": 207,
+  "fallback_units": 0,
+  "units": 43,
+  "contaminated_phrases": 0,
+  "per_unit": {
+   "D001": {
+    "calm": [
+     2,
+     3,
+     17,
+     18,
+     20
+    ],
+    "phrases": [
+     90,
+     98,
+     99,
+     91,
+     100
+    ],
+    "top": [
+     90,
+     98,
+     99,
+     91,
+     100
+    ],
+    "sims": [
+     0.2245337001295077,
+     0.21680751452243138,
+     0.20367694476781245,
+     0.19929191700754617,
+     0.1946727457518451
+    ],
+    "neutral_max": 0.17635900703035345,
+    "fallback": false,
+    "video": "nwpu_campus/D001_01",
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a petrol station forecourt with a car slowly leaving a space",
+     "a parking lot with a car slowly leaving a space",
+     "a petrol station forecourt with nobody around"
+    ],
+    "top_texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a petrol station forecourt with a car slowly leaving a space",
+     "a parking lot with a car slowly leaving a space",
+     "a petrol station forecourt with nobody around"
+    ]
+   },
+   "D002": {
+    "calm": [
+     12,
+     13,
+     14,
+     17,
+     21
+    ],
+    "phrases": [
+     27,
+     23,
+     90,
+     26,
+     7
+    ],
+    "top": [
+     27,
+     23,
+     90,
+     26,
+     7
+    ],
+    "sims": [
+     0.22358727573649753,
+     0.22193807733653614,
+     0.21735982802870135,
+     0.21150957010259763,
+     0.2104118127905581
+    ],
+    "neutral_max": 0.165707074760032,
+    "fallback": false,
+    "video": "nwpu_campus/D002_01",
+    "texts": [
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a parking lot with a person walking to a parked car",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a parking lot with a person walking to a parked car",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D003": {
+    "calm": [
+     1,
+     3,
+     11,
+     12,
+     18
+    ],
+    "phrases": [
+     23,
+     22,
+     27,
+     45,
+     26
+    ],
+    "top": [
+     23,
+     22,
+     27,
+     45,
+     26
+    ],
+    "sims": [
+     0.23860527296020065,
+     0.22957933866436342,
+     0.2282513768284997,
+     0.2271257259067993,
+     0.22707354015830264
+    ],
+    "neutral_max": 0.16882988803784463,
+    "fallback": false,
+    "video": "nwpu_campus/D003_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with nobody around",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with nobody around",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk"
+    ]
+   },
+   "D013": {
+    "calm": [
+     0,
+     1,
+     4,
+     7,
+     8
+    ],
+    "phrases": [
+     23,
+     26,
+     27,
+     22,
+     24
+    ],
+    "top": [
+     23,
+     26,
+     27,
+     22,
+     24
+    ],
+    "sims": [
+     0.27499053777113336,
+     0.269859032147602,
+     0.26460480577531426,
+     0.25838130954989896,
+     0.25466118232298407
+    ],
+    "neutral_max": 0.16786761772810552,
+    "fallback": false,
+    "video": "nwpu_campus/D013_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D014": {
+    "calm": [
+     1,
+     7,
+     11,
+     12,
+     25
+    ],
+    "phrases": [
+     90,
+     98,
+     20,
+     103,
+     41
+    ],
+    "top": [
+     90,
+     98,
+     20,
+     103,
+     41
+    ],
+    "sims": [
+     0.21489838652386148,
+     0.20219788348083115,
+     0.1896644966086745,
+     0.18965823530199055,
+     0.18641292493229436
+    ],
+    "neutral_max": 0.16862623116698472,
+    "fallback": false,
+    "video": "nwpu_campus/D014_01",
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a school courtyard with a few people crossing",
+     "a building entrance with people carrying bags",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a school courtyard with a few people crossing",
+     "a building entrance with people carrying bags",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ]
+   },
+   "D029": {
+    "calm": [
+     7,
+     19,
+     20,
+     21,
+     22
+    ],
+    "phrases": [
+     23,
+     26,
+     25,
+     22,
+     7
+    ],
+    "top": [
+     23,
+     26,
+     25,
+     22,
+     7
+    ],
+    "sims": [
+     0.2599904003865634,
+     0.2556084996731641,
+     0.2522149304849357,
+     0.25163900279717677,
+     0.24912080643657286
+    ],
+    "neutral_max": 0.17597977559749395,
+    "fallback": false,
+    "video": "nwpu_campus/D029_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D031": {
+    "calm": [
+     14,
+     21,
+     22,
+     23,
+     24
+    ],
+    "phrases": [
+     23,
+     22,
+     27,
+     25,
+     24
+    ],
+    "top": [
+     23,
+     22,
+     27,
+     25,
+     24
+    ],
+    "sims": [
+     0.27090696944548365,
+     0.2594722528955681,
+     0.25697820004652117,
+     0.2558800439157346,
+     0.25226351816917
+    ],
+    "neutral_max": 0.17507835858118012,
+    "fallback": false,
+    "video": "nwpu_campus/D031_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D035": {
+    "calm": [
+     1,
+     2,
+     6,
+     9,
+     10
+    ],
+    "phrases": [
+     23,
+     27,
+     22,
+     45,
+     11
+    ],
+    "top": [
+     23,
+     27,
+     22,
+     45,
+     11
+    ],
+    "sims": [
+     0.26501826766874603,
+     0.26091381647628364,
+     0.24685487793666422,
+     0.24679934862523487,
+     0.24214418247136213
+    ],
+    "neutral_max": 0.1731056206533368,
+    "fallback": false,
+    "video": "nwpu_campus/D035_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a paved path between university buildings with nobody around"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a paved path between university buildings with nobody around"
+    ]
+   },
+   "D036": {
+    "calm": [
+     1,
+     2,
+     26,
+     27,
+     28
+    ],
+    "phrases": [
+     23,
+     27,
+     45,
+     88,
+     84
+    ],
+    "top": [
+     23,
+     27,
+     45,
+     88,
+     84
+    ],
+    "sims": [
+     0.23649132509638843,
+     0.23155919430342958,
+     0.22545407047748955,
+     0.21361768963151828,
+     0.21359031678800508
+    ],
+    "neutral_max": 0.17829690810434232,
+    "fallback": false,
+    "video": "nwpu_campus/D036_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with nobody around",
+     "a quiet residential street with nobody around",
+     "a quiet residential street with light traffic"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with nobody around",
+     "a quiet residential street with nobody around",
+     "a quiet residential street with light traffic"
+    ]
+   },
+   "D038": {
+    "calm": [
+     1,
+     3,
+     9,
+     15,
+     16
+    ],
+    "phrases": [
+     23,
+     27,
+     22,
+     24,
+     25
+    ],
+    "top": [
+     23,
+     27,
+     22,
+     24,
+     25
+    ],
+    "sims": [
+     0.24343198142634137,
+     0.23433592747607238,
+     0.2263957060096069,
+     0.21721705149525972,
+     0.21380380201870086
+    ],
+    "neutral_max": 0.17274903480687492,
+    "fallback": false,
+    "video": "nwpu_campus/D038_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light",
+     "a campus road beside lecture halls with cars parked along the side"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light",
+     "a campus road beside lecture halls with cars parked along the side"
+    ]
+   },
+   "D042": {
+    "calm": [
+     3,
+     5,
+     13,
+     15,
+     31
+    ],
+    "phrases": [
+     20,
+     90,
+     7,
+     17,
+     10
+    ],
+    "top": [
+     20,
+     90,
+     7,
+     17,
+     10
+    ],
+    "sims": [
+     0.2480123355569478,
+     0.2391122643440286,
+     0.2331144919987826,
+     0.23213313263534388,
+     0.2320259365990277
+    ],
+    "neutral_max": 0.19063888382350125,
+    "fallback": false,
+    "video": "nwpu_campus/D042_01",
+    "texts": [
+     "a school courtyard with a few people crossing",
+     "a parking lot with a person walking to a parked car",
+     "a paved path between university buildings with a few people walking slowly",
+     "a school courtyard with people walking",
+     "a paved path between university buildings with people carrying bags"
+    ],
+    "top_texts": [
+     "a school courtyard with a few people crossing",
+     "a parking lot with a person walking to a parked car",
+     "a paved path between university buildings with a few people walking slowly",
+     "a school courtyard with people walking",
+     "a paved path between university buildings with people carrying bags"
+    ]
+   },
+   "D043": {
+    "calm": [
+     3,
+     4,
+     22,
+     24,
+     31
+    ],
+    "phrases": [
+     10,
+     90,
+     4,
+     2,
+     20
+    ],
+    "top": [
+     10,
+     90,
+     4,
+     2,
+     20
+    ],
+    "sims": [
+     0.23534516465235927,
+     0.2348213790424472,
+     0.2337059463773476,
+     0.231382039948825,
+     0.23000735065170108
+    ],
+    "neutral_max": 0.18946371898740103,
+    "fallback": false,
+    "video": "nwpu_campus/D043_01",
+    "texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a parking lot with a person walking to a parked car",
+     "a university campus walkway with people carrying bags",
+     "a university campus walkway with people standing and talking",
+     "a school courtyard with a few people crossing"
+    ],
+    "top_texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a parking lot with a person walking to a parked car",
+     "a university campus walkway with people carrying bags",
+     "a university campus walkway with people standing and talking",
+     "a school courtyard with a few people crossing"
+    ]
+   },
+   "D047": {
+    "calm": [
+     1,
+     2,
+     3,
+     11,
+     14
+    ],
+    "phrases": [
+     23,
+     27,
+     22,
+     26,
+     7
+    ],
+    "top": [
+     23,
+     27,
+     22,
+     26,
+     7
+    ],
+    "sims": [
+     0.2446122306031282,
+     0.23409312326477136,
+     0.22491273403111703,
+     0.22372075744184178,
+     0.21447556548491464
+    ],
+    "neutral_max": 0.15203026765879774,
+    "fallback": false,
+    "video": "nwpu_campus/D047_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D048": {
+    "calm": [
+     2,
+     3,
+     4,
+     21,
+     24
+    ],
+    "phrases": [
+     15,
+     14,
+     16,
+     12,
+     10
+    ],
+    "top": [
+     15,
+     14,
+     16,
+     12,
+     10
+    ],
+    "sims": [
+     0.24900039916963657,
+     0.24479555721406795,
+     0.2430307586981586,
+     0.24220504554549532,
+     0.24130715433525426
+    ],
+    "neutral_max": 0.18183237540918915,
+    "fallback": false,
+    "video": "nwpu_campus/D048_01",
+    "texts": [
+     "a college campus square with a few people crossing",
+     "a college campus square with people sitting on benches",
+     "a college campus square with nobody around",
+     "a college campus square with people walking",
+     "a paved path between university buildings with people carrying bags"
+    ],
+    "top_texts": [
+     "a college campus square with a few people crossing",
+     "a college campus square with people sitting on benches",
+     "a college campus square with nobody around",
+     "a college campus square with people walking",
+     "a paved path between university buildings with people carrying bags"
+    ]
+   },
+   "D054": {
+    "calm": [
+     7,
+     10,
+     11,
+     12,
+     31
+    ],
+    "phrases": [
+     26,
+     23,
+     27,
+     41,
+     127
+    ],
+    "top": [
+     26,
+     23,
+     27,
+     41,
+     127
+    ],
+    "sims": [
+     0.2462813487261166,
+     0.2441671779784231,
+     0.23782984934961324,
+     0.2371240375149727,
+     0.2300121229400282
+    ],
+    "neutral_max": 0.17419599148320022,
+    "fallback": false,
+    "video": "nwpu_campus/D054_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a bus stop with people walking"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a bus stop with people walking"
+    ]
+   },
+   "D055": {
+    "calm": [
+     1,
+     2,
+     3,
+     4,
+     17
+    ],
+    "phrases": [
+     26,
+     23,
+     27,
+     22,
+     24
+    ],
+    "top": [
+     26,
+     23,
+     27,
+     22,
+     24
+    ],
+    "sims": [
+     0.26835580153832883,
+     0.26796252366517853,
+     0.25973590173983796,
+     0.24477018504901712,
+     0.24202432847492672
+    ],
+    "neutral_max": 0.17427036741809934,
+    "fallback": false,
+    "video": "nwpu_campus/D055_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D068": {
+    "calm": [
+     2,
+     3,
+     4,
+     5,
+     24
+    ],
+    "phrases": [
+     23,
+     27,
+     22,
+     25,
+     5
+    ],
+    "top": [
+     23,
+     27,
+     22,
+     25,
+     5
+    ],
+    "sims": [
+     0.26507869741305123,
+     0.2642406699853831,
+     0.2558274426601288,
+     0.2555016566186471,
+     0.25071293886267826
+    ],
+    "neutral_max": 0.18466901617968767,
+    "fallback": false,
+    "video": "nwpu_campus/D068_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a university campus walkway with nobody around"
+    ]
+   },
+   "D076": {
+    "calm": [
+     3,
+     5,
+     6,
+     7,
+     8
+    ],
+    "phrases": [
+     45,
+     11,
+     27,
+     23,
+     33
+    ],
+    "top": [
+     45,
+     11,
+     27,
+     23,
+     33
+    ],
+    "sims": [
+     0.2428792661516207,
+     0.2401010593781766,
+     0.23702425601914223,
+     0.23384891388579543,
+     0.23352979747219538
+    ],
+    "neutral_max": 0.17503038763706297,
+    "fallback": false,
+    "video": "nwpu_campus/D076_01",
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a footpath beside a lawn on campus with nobody around"
+    ],
+    "top_texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a footpath beside a lawn on campus with nobody around"
+    ]
+   },
+   "D077": {
+    "calm": [
+     8,
+     9,
+     16,
+     26,
+     27
+    ],
+    "phrases": [
+     41,
+     45,
+     29,
+     40,
+     7
+    ],
+    "top": [
+     41,
+     45,
+     29,
+     40,
+     7
+    ],
+    "sims": [
+     0.23606763337408637,
+     0.23570361141165408,
+     0.23279673380406263,
+     0.23108746311480466,
+     0.22902221626800795
+    ],
+    "neutral_max": 0.16998779922677731,
+    "fallback": false,
+    "video": "nwpu_campus/D077_01",
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a footpath beside a lawn on campus with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a footpath beside a lawn on campus with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D092": {
+    "calm": [
+     4,
+     5,
+     10,
+     11,
+     15
+    ],
+    "phrases": [
+     16,
+     15,
+     11,
+     27,
+     5
+    ],
+    "top": [
+     16,
+     15,
+     11,
+     27,
+     5
+    ],
+    "sims": [
+     0.2847206090185327,
+     0.26750480177893765,
+     0.2674633887064172,
+     0.2656780087114278,
+     0.2631475836780034
+    ],
+    "neutral_max": 0.18523641701700377,
+    "fallback": false,
+    "video": "nwpu_campus/D092_01",
+    "texts": [
+     "a college campus square with nobody around",
+     "a college campus square with a few people crossing",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a college campus square with nobody around",
+     "a college campus square with a few people crossing",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a university campus walkway with nobody around"
+    ]
+   },
+   "D094": {
+    "calm": [
+     0,
+     1,
+     4,
+     23,
+     25
+    ],
+    "phrases": [
+     16,
+     27,
+     11,
+     23,
+     7
+    ],
+    "top": [
+     16,
+     27,
+     11,
+     23,
+     7
+    ],
+    "sims": [
+     0.2781030410211258,
+     0.27652520037536743,
+     0.27478834677378905,
+     0.27379485764059625,
+     0.27281347653763255
+    ],
+    "neutral_max": 0.18585585579004807,
+    "fallback": false,
+    "video": "nwpu_campus/D094_01",
+    "texts": [
+     "a college campus square with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a college campus square with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with light traffic",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D099": {
+    "calm": [
+     0,
+     1,
+     2,
+     6,
+     12
+    ],
+    "phrases": [
+     7,
+     11,
+     6,
+     9,
+     10
+    ],
+    "top": [
+     7,
+     11,
+     6,
+     9,
+     10
+    ],
+    "sims": [
+     0.26229674407931347,
+     0.26171765640623246,
+     0.2563357727736104,
+     0.2546272584227113,
+     0.2525531781653502
+    ],
+    "neutral_max": 0.17492036228603233,
+    "fallback": false,
+    "video": "nwpu_campus/D099_01",
+    "texts": [
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with nobody around",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with people walking in both directions",
+     "a paved path between university buildings with people carrying bags"
+    ],
+    "top_texts": [
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with nobody around",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with people walking in both directions",
+     "a paved path between university buildings with people carrying bags"
+    ]
+   },
+   "D109": {
+    "calm": [
+     6,
+     15,
+     21,
+     22,
+     24
+    ],
+    "phrases": [
+     104,
+     103,
+     156,
+     102,
+     101
+    ],
+    "top": [
+     104,
+     103,
+     156,
+     102,
+     101
+    ],
+    "sims": [
+     0.2678765968847432,
+     0.25025691630071034,
+     0.24187988173011363,
+     0.23961063450021863,
+     0.2381914969148991
+    ],
+    "neutral_max": 0.1755523354738151,
+    "fallback": false,
+    "video": "nwpu_campus/D109_01",
+    "texts": [
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a bank lobby with nobody around",
+     "a building entrance with people standing and waiting",
+     "a building entrance with people walking"
+    ],
+    "top_texts": [
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a bank lobby with nobody around",
+     "a building entrance with people standing and waiting",
+     "a building entrance with people walking"
+    ]
+   },
+   "D111": {
+    "calm": [
+     16,
+     17,
+     18,
+     20,
+     21
+    ],
+    "phrases": [
+     23,
+     27,
+     22,
+     25,
+     24
+    ],
+    "top": [
+     23,
+     27,
+     22,
+     25,
+     24
+    ],
+    "sims": [
+     0.2721542505800893,
+     0.2662420974520953,
+     0.2654241293280857,
+     0.25661681160913535,
+     0.2561582933084542
+    ],
+    "neutral_max": 0.1785358280005052,
+    "fallback": false,
+    "video": "nwpu_campus/D111_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars parked along the side",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D121": {
+    "calm": [
+     13,
+     14,
+     20,
+     21,
+     22
+    ],
+    "phrases": [
+     51,
+     33,
+     59,
+     29,
+     5
+    ],
+    "top": [
+     51,
+     33,
+     59,
+     29,
+     5
+    ],
+    "sims": [
+     0.205067236733722,
+     0.20491660468020206,
+     0.20394728377190913,
+     0.20128155369879108,
+     0.20113183185881361
+    ],
+    "neutral_max": 0.17758482226338546,
+    "fallback": false,
+    "video": "nwpu_campus/D121_01",
+    "texts": [
+     "a riverside promenade with nobody around",
+     "a footpath beside a lawn on campus with nobody around",
+     "a public park with people relaxing",
+     "a footpath beside a lawn on campus with a few people walking slowly",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a riverside promenade with nobody around",
+     "a footpath beside a lawn on campus with nobody around",
+     "a public park with people relaxing",
+     "a footpath beside a lawn on campus with a few people walking slowly",
+     "a university campus walkway with nobody around"
+    ]
+   },
+   "D122": {
+    "calm": [
+     11,
+     14,
+     16,
+     17,
+     21
+    ],
+    "phrases": [
+     59,
+     60,
+     57,
+     51,
+     47
+    ],
+    "top": [
+     59,
+     60,
+     57,
+     51,
+     47
+    ],
+    "sims": [
+     0.19687680582183797,
+     0.19217491294055916,
+     0.19165060050271343,
+     0.19051354565300388,
+     0.18392021063833897
+    ],
+    "neutral_max": 0.18056773504931706,
+    "fallback": false,
+    "video": "nwpu_campus/D122_01",
+    "texts": [
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a public park with people walking",
+     "a riverside promenade with nobody around",
+     "a riverside promenade with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a public park with people walking",
+     "a riverside promenade with nobody around",
+     "a riverside promenade with a few people walking slowly"
+    ]
+   },
+   "D124": {
+    "calm": [
+     4,
+     6,
+     7,
+     8,
+     28
+    ],
+    "phrases": [
+     57,
+     1,
+     5,
+     59,
+     0
+    ],
+    "top": [
+     57,
+     1,
+     5,
+     59,
+     0
+    ],
+    "sims": [
+     0.21182416512552152,
+     0.20981368753072785,
+     0.208119156149522,
+     0.20720313228157258,
+     0.20581410513834722
+    ],
+    "neutral_max": 0.18380570226695567,
+    "fallback": false,
+    "video": "nwpu_campus/D124_01",
+    "texts": [
+     "a public park with people walking",
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with nobody around",
+     "a public park with people relaxing",
+     "a university campus walkway with people walking"
+    ],
+    "top_texts": [
+     "a public park with people walking",
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with nobody around",
+     "a public park with people relaxing",
+     "a university campus walkway with people walking"
+    ]
+   },
+   "D127": {
+    "calm": [
+     9,
+     10,
+     17,
+     19,
+     26
+    ],
+    "phrases": [
+     1,
+     5,
+     0,
+     57,
+     59
+    ],
+    "top": [
+     1,
+     5,
+     0,
+     57,
+     59
+    ],
+    "sims": [
+     0.21093211625675592,
+     0.20899497762142955,
+     0.20896506667923398,
+     0.2078715005005168,
+     0.20738725529528992
+    ],
+    "neutral_max": 0.1754855658146669,
+    "fallback": false,
+    "video": "nwpu_campus/D127_01",
+    "texts": [
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with nobody around",
+     "a university campus walkway with people walking",
+     "a public park with people walking",
+     "a public park with people relaxing"
+    ],
+    "top_texts": [
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with nobody around",
+     "a university campus walkway with people walking",
+     "a public park with people walking",
+     "a public park with people relaxing"
+    ]
+   },
+   "D129": {
+    "calm": [
+     1,
+     9,
+     11,
+     15,
+     18
+    ],
+    "phrases": [
+     59,
+     58,
+     14,
+     51,
+     5
+    ],
+    "top": [
+     59,
+     58,
+     14,
+     51,
+     5
+    ],
+    "sims": [
+     0.22596151381747082,
+     0.2194742072537294,
+     0.21584056211377142,
+     0.2015776455347339,
+     0.19852176671426305
+    ],
+    "neutral_max": 0.1614912430619245,
+    "fallback": false,
+    "video": "nwpu_campus/D129_01",
+    "texts": [
+     "a public park with people relaxing",
+     "a public park with people sitting on benches",
+     "a college campus square with people sitting on benches",
+     "a riverside promenade with nobody around",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a public park with people relaxing",
+     "a public park with people sitting on benches",
+     "a college campus square with people sitting on benches",
+     "a riverside promenade with nobody around",
+     "a university campus walkway with nobody around"
+    ]
+   },
+   "D148": {
+    "calm": [
+     4,
+     5,
+     6,
+     9,
+     16
+    ],
+    "phrases": [
+     16,
+     104,
+     56,
+     5,
+     14
+    ],
+    "top": [
+     16,
+     104,
+     56,
+     5,
+     14
+    ],
+    "sims": [
+     0.22952100591076768,
+     0.22792284138852498,
+     0.2227543403004471,
+     0.22226965527823342,
+     0.21924473933525507
+    ],
+    "neutral_max": 0.17895449336427843,
+    "fallback": false,
+    "video": "nwpu_campus/D148_01",
+    "texts": [
+     "a college campus square with nobody around",
+     "a building entrance with nobody around",
+     "a city plaza with nobody around",
+     "a university campus walkway with nobody around",
+     "a college campus square with people sitting on benches"
+    ],
+    "top_texts": [
+     "a college campus square with nobody around",
+     "a building entrance with nobody around",
+     "a city plaza with nobody around",
+     "a university campus walkway with nobody around",
+     "a college campus square with people sitting on benches"
+    ]
+   },
+   "D149": {
+    "calm": [
+     3,
+     10,
+     23,
+     26,
+     28
+    ],
+    "phrases": [
+     101,
+     104,
+     103,
+     20,
+     1
+    ],
+    "top": [
+     101,
+     104,
+     103,
+     20,
+     1
+    ],
+    "sims": [
+     0.23838158199356005,
+     0.22569576965156976,
+     0.22560532263395977,
+     0.22073528161635836,
+     0.21813188966127334
+    ],
+    "neutral_max": 0.16667259229718956,
+    "fallback": false,
+    "video": "nwpu_campus/D149_01",
+    "texts": [
+     "a building entrance with people walking",
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a school courtyard with a few people crossing",
+     "a university campus walkway with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a building entrance with people walking",
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a school courtyard with a few people crossing",
+     "a university campus walkway with a few people walking slowly"
+    ]
+   },
+   "D150": {
+    "calm": [
+     26,
+     28,
+     29,
+     30,
+     31
+    ],
+    "phrases": [
+     19,
+     14,
+     21,
+     5,
+     27
+    ],
+    "top": [
+     19,
+     14,
+     21,
+     5,
+     27
+    ],
+    "sims": [
+     0.2429084980676795,
+     0.22415414366249703,
+     0.21715638256980158,
+     0.21181383301369444,
+     0.20616669880640814
+    ],
+    "neutral_max": 0.15998163144614702,
+    "fallback": false,
+    "video": "nwpu_campus/D150_01",
+    "texts": [
+     "a school courtyard with people sitting on benches",
+     "a college campus square with people sitting on benches",
+     "a school courtyard with nobody around",
+     "a university campus walkway with nobody around",
+     "a campus road beside lecture halls with nobody around"
+    ],
+    "top_texts": [
+     "a school courtyard with people sitting on benches",
+     "a college campus square with people sitting on benches",
+     "a school courtyard with nobody around",
+     "a university campus walkway with nobody around",
+     "a campus road beside lecture halls with nobody around"
+    ]
+   },
+   "D151": {
+    "calm": [
+     4,
+     6,
+     12,
+     13,
+     29
+    ],
+    "phrases": [
+     19,
+     20,
+     17,
+     14,
+     54
+    ],
+    "top": [
+     19,
+     20,
+     17,
+     14,
+     54
+    ],
+    "sims": [
+     0.2799697543098286,
+     0.2636603879500867,
+     0.2618370944629208,
+     0.25956556704136424,
+     0.2479636334205672
+    ],
+    "neutral_max": 0.16686065451698967,
+    "fallback": false,
+    "video": "nwpu_campus/D151_01",
+    "texts": [
+     "a school courtyard with people sitting on benches",
+     "a school courtyard with a few people crossing",
+     "a school courtyard with people walking",
+     "a college campus square with people sitting on benches",
+     "a city plaza with people sitting on benches"
+    ],
+    "top_texts": [
+     "a school courtyard with people sitting on benches",
+     "a school courtyard with a few people crossing",
+     "a school courtyard with people walking",
+     "a college campus square with people sitting on benches",
+     "a city plaza with people sitting on benches"
+    ]
+   },
+   "D154": {
+    "calm": [
+     15,
+     20,
+     23,
+     25,
+     27
+    ],
+    "phrases": [
+     26,
+     23,
+     22,
+     27,
+     24
+    ],
+    "top": [
+     26,
+     23,
+     22,
+     27,
+     24
+    ],
+    "sims": [
+     0.2674415511398346,
+     0.2616678035042935,
+     0.24461160261537013,
+     0.24314698335932622,
+     0.24009088196357958
+    ],
+    "neutral_max": 0.16779475780169298,
+    "fallback": false,
+    "video": "nwpu_campus/D154_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D155": {
+    "calm": [
+     1,
+     2,
+     4,
+     10,
+     27
+    ],
+    "phrases": [
+     10,
+     8,
+     7,
+     6,
+     9
+    ],
+    "top": [
+     10,
+     8,
+     7,
+     6,
+     9
+    ],
+    "sims": [
+     0.2788491163537097,
+     0.27175757079831575,
+     0.2713564827060132,
+     0.2697860869925738,
+     0.26968972469461583
+    ],
+    "neutral_max": 0.1816710408934062,
+    "fallback": false,
+    "video": "nwpu_campus/D155_01",
+    "texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people standing and talking",
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with people walking in both directions"
+    ],
+    "top_texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people standing and talking",
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with people walking in both directions"
+    ]
+   },
+   "D158": {
+    "calm": [
+     18,
+     19,
+     20,
+     21,
+     28
+    ],
+    "phrases": [
+     26,
+     10,
+     9,
+     6,
+     7
+    ],
+    "top": [
+     26,
+     10,
+     9,
+     6,
+     7
+    ],
+    "sims": [
+     0.2654797513196946,
+     0.25764989825502366,
+     0.25653397725573623,
+     0.253899388786044,
+     0.2532338288029853
+    ],
+    "neutral_max": 0.1685451869208972,
+    "fallback": false,
+    "video": "nwpu_campus/D158_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people walking in both directions",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people walking in both directions",
+     "a paved path between university buildings with people walking",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "D164": {
+    "calm": [
+     6,
+     22,
+     23,
+     26,
+     27
+    ],
+    "phrases": [
+     20,
+     17,
+     27,
+     21,
+     10
+    ],
+    "top": [
+     20,
+     17,
+     27,
+     21,
+     10
+    ],
+    "sims": [
+     0.25133135053118905,
+     0.24833557532244252,
+     0.24633117224380374,
+     0.24518414348013373,
+     0.24212687390313117
+    ],
+    "neutral_max": 0.16530256585991449,
+    "fallback": false,
+    "video": "nwpu_campus/D164_01",
+    "texts": [
+     "a school courtyard with a few people crossing",
+     "a school courtyard with people walking",
+     "a campus road beside lecture halls with nobody around",
+     "a school courtyard with nobody around",
+     "a paved path between university buildings with people carrying bags"
+    ],
+    "top_texts": [
+     "a school courtyard with a few people crossing",
+     "a school courtyard with people walking",
+     "a campus road beside lecture halls with nobody around",
+     "a school courtyard with nobody around",
+     "a paved path between university buildings with people carrying bags"
+    ]
+   },
+   "D235": {
+    "calm": [
+     12,
+     16,
+     17,
+     19,
+     20
+    ],
+    "phrases": [
+     23,
+     26,
+     27,
+     22,
+     24
+    ],
+    "top": [
+     23,
+     26,
+     27,
+     22,
+     24
+    ],
+    "sims": [
+     0.2778234051733658,
+     0.27686206381947465,
+     0.27034589638764395,
+     0.2638226046901801,
+     0.26067173462785886
+    ],
+    "neutral_max": 0.17081655865361828,
+    "fallback": false,
+    "video": "nwpu_campus/D235_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D236": {
+    "calm": [
+     1,
+     18,
+     19,
+     22,
+     30
+    ],
+    "phrases": [
+     26,
+     23,
+     75,
+     27,
+     24
+    ],
+    "top": [
+     26,
+     23,
+     75,
+     27,
+     24
+    ],
+    "sims": [
+     0.2599621598632012,
+     0.25099627997667584,
+     0.24228292808378113,
+     0.23891096522893598,
+     0.23797761268210454
+    ],
+    "neutral_max": 0.17682544673656372,
+    "fallback": false,
+    "video": "nwpu_campus/D236_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light"
+    ]
+   },
+   "D248": {
+    "calm": [
+     2,
+     3,
+     10,
+     11,
+     12
+    ],
+    "phrases": [
+     4,
+     1,
+     2,
+     10,
+     3
+    ],
+    "top": [
+     4,
+     1,
+     2,
+     10,
+     3
+    ],
+    "sims": [
+     0.2450401763057743,
+     0.243463353534677,
+     0.24232052755242472,
+     0.24210420066331462,
+     0.24150796971976699
+    ],
+    "neutral_max": 0.16395276185366303,
+    "fallback": false,
+    "video": "nwpu_campus/D248_01",
+    "texts": [
+     "a university campus walkway with people carrying bags",
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with people standing and talking",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking in both directions"
+    ],
+    "top_texts": [
+     "a university campus walkway with people carrying bags",
+     "a university campus walkway with a few people walking slowly",
+     "a university campus walkway with people standing and talking",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking in both directions"
+    ]
+   },
+   "D268": {
+    "calm": [
+     5,
+     17,
+     27,
+     28,
+     30
+    ],
+    "phrases": [
+     26,
+     23,
+     27,
+     24,
+     41
+    ],
+    "top": [
+     26,
+     23,
+     27,
+     24,
+     41
+    ],
+    "sims": [
+     0.24684573616626265,
+     0.24180374263488236,
+     0.234124414308972,
+     0.22683594955336106,
+     0.22228167490123424
+    ],
+    "neutral_max": 0.17035002154069814,
+    "fallback": false,
+    "video": "nwpu_campus/D268_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a campus road beside lecture halls with cars waiting at a red light",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ]
+   },
+   "D273": {
+    "calm": [
+     12,
+     13,
+     24,
+     27,
+     31
+    ],
+    "phrases": [
+     26,
+     23,
+     15,
+     27,
+     20
+    ],
+    "top": [
+     26,
+     23,
+     15,
+     27,
+     20
+    ],
+    "sims": [
+     0.2823656734981286,
+     0.25111957166025434,
+     0.24705366678669796,
+     0.2460336260159022,
+     0.24556006774558112
+    ],
+    "neutral_max": 0.18302837020726886,
+    "fallback": false,
+    "video": "nwpu_campus/D273_01",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a college campus square with a few people crossing",
+     "a campus road beside lecture halls with nobody around",
+     "a school courtyard with a few people crossing"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a college campus square with a few people crossing",
+     "a campus road beside lecture halls with nobody around",
+     "a school courtyard with a few people crossing"
+    ]
+   },
+   "D282": {
+    "calm": [
+     1,
+     2,
+     5,
+     7,
+     9
+    ],
+    "phrases": [
+     23,
+     27,
+     11,
+     22,
+     5
+    ],
+    "top": [
+     23,
+     27,
+     11,
+     22,
+     5
+    ],
+    "sims": [
+     0.25939937695005283,
+     0.2587988929662458,
+     0.2474280086365384,
+     0.23855782712305845,
+     0.23501075453262044
+    ],
+    "neutral_max": 0.17191306203729484,
+    "fallback": false,
+    "video": "nwpu_campus/D282_01",
+    "texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with light traffic",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with cars driving slowly",
+     "a university campus walkway with nobody around"
+    ]
+   }
+  }
+ },
+ "retrieval_nocampus": {
+  "library_size": 170,
+  "fallback_units": 0,
+  "per_unit": {
+   "D001": {
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a petrol station forecourt with a car slowly leaving a space",
+     "a parking lot with a car slowly leaving a space",
+     "a petrol station forecourt with nobody around"
+    ],
+    "fallback": false
+   },
+   "D002": {
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a bus stop with nobody around",
+     "a convenience store with nobody around",
+     "a sidewalk beside a busy road with nobody around"
+    ],
+    "fallback": false
+   },
+   "D003": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a quiet residential street with light traffic",
+     "a quiet residential street with pedestrians crossing at a crosswalk",
+     "a sidewalk beside a busy road with people walking"
+    ],
+    "fallback": false
+   },
+   "D013": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a sidewalk beside a busy road with people walking",
+     "a city street with nobody around"
+    ],
+    "fallback": false
+   },
+   "D014": {
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a petrol station forecourt with a person walking to a parked car",
+     "a building entrance with people carrying bags",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a building entrance with people walking"
+    ],
+    "fallback": false
+   },
+   "D029": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a public park with people walking",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a tree-lined garden path with people walking"
+    ],
+    "fallback": false
+   },
+   "D031": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a sidewalk beside a busy road with nobody around",
+     "a quiet residential street with light traffic"
+    ],
+    "fallback": false
+   },
+   "D035": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a sidewalk beside a busy road with people carrying bags"
+    ],
+    "fallback": false
+   },
+   "D036": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a quiet residential street with nobody around",
+     "a quiet residential street with light traffic",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking"
+    ],
+    "fallback": false
+   },
+   "D038": {
+    "texts": [
+     "a quiet residential street with light traffic",
+     "a sidewalk beside a busy road with nobody around",
+     "a road intersection controlled by traffic lights with nobody around",
+     "a road intersection controlled by traffic lights with light traffic",
+     "a quiet residential street with nobody around"
+    ],
+    "fallback": false
+   },
+   "D042": {
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a parking lot with a car slowly leaving a space",
+     "an underground car park with a person walking to a parked car",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a parking lot with nobody around"
+    ],
+    "fallback": false
+   },
+   "D043": {
+    "texts": [
+     "a parking lot with a person walking to a parked car",
+     "a building entrance with people carrying bags",
+     "a building entrance with people standing and waiting",
+     "a building entrance with people walking",
+     "a building entrance with nobody around"
+    ],
+    "fallback": false
+   },
+   "D047": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a road intersection controlled by traffic lights with nobody around"
+    ],
+    "fallback": false
+   },
+   "D048": {
+    "texts": [
+     "a city plaza with people sitting on benches",
+     "a public park with people walking",
+     "a public park with people sitting on benches",
+     "a city plaza with a few people crossing",
+     "a city plaza with nobody around"
+    ],
+    "fallback": false
+   },
+   "D054": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a bus stop with people walking",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with people walking in both directions"
+    ],
+    "fallback": false
+   },
+   "D055": {
+    "texts": [
+     "a quiet residential street with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a city street with nobody around",
+     "a sidewalk beside a busy road with nobody around"
+    ],
+    "fallback": false
+   },
+   "D068": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a parking lot with a person walking to a parked car",
+     "a building entrance with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a city plaza with nobody around"
+    ],
+    "fallback": false
+   },
+   "D076": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a tree-lined garden path with nobody around",
+     "a sidewalk beside a busy road with people walking",
+     "a quiet residential street with nobody around"
+    ],
+    "fallback": false
+   },
+   "D077": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with people walking",
+     "a tree-lined garden path with people walking",
+     "a sidewalk beside a busy road with people walking in both directions"
+    ],
+    "fallback": false
+   },
+   "D092": {
+    "texts": [
+     "a city plaza with nobody around",
+     "a city plaza with a few people crossing",
+     "a city plaza with people sitting on benches",
+     "a city plaza with people walking",
+     "a public park with nobody around"
+    ],
+    "fallback": false
+   },
+   "D094": {
+    "texts": [
+     "a city plaza with nobody around",
+     "a building entrance with nobody around",
+     "a building entrance with people walking",
+     "a city plaza with a few people crossing",
+     "a city plaza with people walking"
+    ],
+    "fallback": false
+   },
+   "D099": {
+    "texts": [
+     "a public park with nobody around",
+     "a public park with people walking",
+     "a tree-lined garden path with nobody around",
+     "a tree-lined garden path with people walking",
+     "a tree-lined garden path with people relaxing"
+    ],
+    "fallback": false
+   },
+   "D109": {
+    "texts": [
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a bank lobby with nobody around",
+     "a building entrance with people standing and waiting",
+     "a building entrance with people walking"
+    ],
+    "fallback": false
+   },
+   "D111": {
+    "texts": [
+     "a parking lot with a car slowly leaving a space",
+     "a parking lot with nobody around",
+     "a sidewalk beside a busy road with nobody around",
+     "a parking lot with a person walking to a parked car",
+     "a city street with nobody around"
+    ],
+    "fallback": false
+   },
+   "D121": {
+    "texts": [
+     "a riverside promenade with nobody around",
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a public park with people walking",
+     "a riverside promenade with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "D122": {
+    "texts": [
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a public park with people walking",
+     "a riverside promenade with nobody around",
+     "a riverside promenade with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "D124": {
+    "texts": [
+     "a public park with people walking",
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a riverside promenade with nobody around",
+     "a tree-lined garden path with people relaxing"
+    ],
+    "fallback": false
+   },
+   "D127": {
+    "texts": [
+     "a public park with people walking",
+     "a public park with people relaxing",
+     "a public park with nobody around",
+     "a public park with people sitting on benches",
+     "a riverside promenade with nobody around"
+    ],
+    "fallback": false
+   },
+   "D129": {
+    "texts": [
+     "a public park with people relaxing",
+     "a public park with people sitting on benches",
+     "a riverside promenade with nobody around",
+     "a public park with nobody around",
+     "a city plaza with people sitting on benches"
+    ],
+    "fallback": false
+   },
+   "D148": {
+    "texts": [
+     "a building entrance with nobody around",
+     "a city plaza with nobody around",
+     "a city plaza with people sitting on benches",
+     "an office lobby with nobody around",
+     "a bus stop with nobody around"
+    ],
+    "fallback": false
+   },
+   "D149": {
+    "texts": [
+     "a building entrance with people walking",
+     "a building entrance with nobody around",
+     "a building entrance with people carrying bags",
+     "a building entrance with people standing and waiting",
+     "a city plaza with people sitting on benches"
+    ],
+    "fallback": false
+   },
+   "D150": {
+    "texts": [
+     "a city plaza with people sitting on benches",
+     "a public park with people sitting on benches",
+     "a building entrance with nobody around",
+     "a public park with nobody around",
+     "a public park with people relaxing"
+    ],
+    "fallback": false
+   },
+   "D151": {
+    "texts": [
+     "a city plaza with people sitting on benches",
+     "a public park with people sitting on benches",
+     "a building entrance with people walking",
+     "a building entrance with people carrying bags",
+     "a city plaza with people walking"
+    ],
+    "fallback": false
+   },
+   "D154": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a sidewalk beside a busy road with nobody around",
+     "a quiet residential street with pedestrians crossing at a crosswalk"
+    ],
+    "fallback": false
+   },
+   "D155": {
+    "texts": [
+     "a city plaza with people walking",
+     "a city plaza with a few people crossing",
+     "a building entrance with people carrying bags",
+     "a building entrance with people walking",
+     "a city plaza with people standing and talking"
+    ],
+    "fallback": false
+   },
+   "D158": {
+    "texts": [
+     "a building entrance with people walking",
+     "a building entrance with people carrying bags",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "D164": {
+    "texts": [
+     "a building entrance with people carrying bags",
+     "a building entrance with people standing and waiting",
+     "a building entrance with nobody around",
+     "a building entrance with people walking",
+     "a parking lot with a person walking to a parked car"
+    ],
+    "fallback": false
+   },
+   "D235": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a highway with pedestrians crossing at a crosswalk"
+    ],
+    "fallback": false
+   },
+   "D236": {
+    "texts": [
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with nobody around",
+     "a road intersection controlled by traffic lights with light traffic",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a sidewalk beside a busy road with nobody around"
+    ],
+    "fallback": false
+   },
+   "D248": {
+    "texts": [
+     "a building entrance with people carrying bags",
+     "a building entrance with people walking",
+     "a city plaza with people walking",
+     "a city plaza with a few people crossing",
+     "a sidewalk beside a busy road with people carrying bags"
+    ],
+    "fallback": false
+   },
+   "D268": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a highway with pedestrians crossing at a crosswalk"
+    ],
+    "fallback": false
+   },
+   "D273": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people standing and talking",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk"
+    ],
+    "fallback": false
+   },
+   "D282": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a city street with nobody around",
+     "a parking lot with nobody around",
+     "a quiet residential street with nobody around"
+    ],
+    "fallback": false
+   }
+  }
+ },
+ "subsets": {
+  "none": 0.6174738938563656,
+  "W": 0.4975791984956759,
+  "N": 0.6408367900321909,
+  "P": 0.6492760367163024,
+  "E": 0.6167952539084653,
+  "R": 0.5699331859713763,
+  "WN": 0.6076288659289768,
+  "WP": 0.5796297396377262,
+  "WE": 0.4963638657138499,
+  "WR": 0.47663705493168745,
+  "NP": 0.6197242683728189,
+  "NE": 0.6411616683876822,
+  "NR": 0.6308812650833324,
+  "PE": 0.6515315816132957,
+  "PR": 0.5508863963498825,
+  "ER": 0.5674364422110356,
+  "WNP": 0.5727913918908876,
+  "WNE": 0.6070178442911176,
+  "WNR": 0.5929074846575375,
+  "WPE": 0.5771786492374728,
+  "WPR": 0.520325817091249,
+  "WER": 0.4745752098465558,
+  "NPE": 0.6161295215772324,
+  "NPR": 0.5578695269749631,
+  "NER": 0.6310137148316338,
+  "PER": 0.5482499178606212,
+  "WNPE": 0.5688334961453163,
+  "WNPR": 0.5268489060794874,
+  "WNER": 0.5922894347246179,
+  "WPER": 0.5174901750546618,
+  "NPER": 0.5549007629183731,
+  "WNPER": 0.5238667577044782
+ },
+ "comparisons": {
+  "FULL - legacy_none": {
+   "point": -0.09360713615188743,
+   "ci95": [
+    -0.15105215490215576,
+    -0.039229584564458415
+   ],
+   "frac_positive": 0.0
+  },
+  "legacy_R - legacy_none": {
+   "point": -0.04754070788498932,
+   "ci95": [
+    -0.09409098286004787,
+    0.0013746033241632005
+   ],
+   "frac_positive": 0.028
+  },
+  "FULL - legacy_best": {
+   "point": -0.126651734901022,
+   "ci95": [
+    -0.20193833507051837,
+    -0.055060170221867516
+   ],
+   "frac_positive": 0.0
+  },
+  "legacy_R - legacy_best": {
+   "point": -0.08058530663412389,
+   "ci95": [
+    -0.13388897222105672,
+    -0.025460778143238896
+   ],
+   "frac_positive": 0.0
+  },
+  "FULL - FULL_llava": {
+   "point": -0.09230499475872533,
+   "ci95": [
+    -0.14345368604183475,
+    -0.041348810758395624
+   ],
+   "frac_positive": 0.0
+  },
+  "FULL - FULL-W": {
+   "point": -0.031034005213894877,
+   "ci95": [
+    -0.10054950911412038,
+    0.033427763950661986
+   ],
+   "frac_positive": 0.184
+  },
+  "FULL - FULL-N": {
+   "point": 0.006376582649816442,
+   "ci95": [
+    -0.007356052592181303,
+    0.01950464194121699
+   ],
+   "frac_positive": 0.839
+  },
+  "FULL - FULL-P": {
+   "point": -0.06842267702013971,
+   "ci95": [
+    -0.1132057070583968,
+    -0.024193700223513658
+   ],
+   "frac_positive": 0.001
+  },
+  "FULL - FULL-E": {
+   "point": -0.002982148375009208,
+   "ci95": [
+    -0.009712407402807476,
+    0.00248835083671073
+   ],
+   "frac_positive": 0.164
+  },
+  "FULL - FULL-R": {
+   "point": -0.044966738440838094,
+   "ci95": [
+    -0.0991197706916,
+    0.01716347473235514
+   ],
+   "frac_positive": 0.084
+  },
+  "FULL - FULL_shared": {
+   "point": -0.036689264774331765,
+   "ci95": [
+    -0.06575046667204601,
+    -0.003151526747341553
+   ],
+   "frac_positive": 0.02
+  },
+  "FULL - FULL_R5raw": {
+   "point": 0.0034956172774316396,
+   "ci95": [
+    -0.02399625193560677,
+    0.038769783288296465
+   ],
+   "frac_positive": 0.59
+  },
+  "FULL - FULL_Rperm": {
+   "point": -0.019534195335824345,
+   "ci95": [
+    -0.0028262613835707212,
+    0.05252483313045248
+   ],
+   "frac_positive": 0.965
+  },
+  "legacy_R - legacy_Rperm": {
+   "point": -0.00198141577929134,
+   "ci95": [
+    0.01006495162396691,
+    0.05881964208303898
+   ],
+   "frac_positive": 0.996
+  },
+  "FULL_nocampus - FULL": {
+   "point": 0.056303647281773284,
+   "ci95": [
+    -0.00044378812104400536,
+    0.10949200254479473
+   ],
+   "frac_positive": 0.974
+  },
+  "legacy_R_nocampus - legacy_R": {
+   "point": 0.055461535302331555,
+   "ci95": [
+    0.014255647801570945,
+    0.09947706452500577
+   ],
+   "frac_positive": 0.997
+  }
+ },
+ "n_resamples": 1000,
+ "audit": {
+  "FULL vs legacy_none": {
+   "gap": -0.09360713615188743,
+   "level": -0.08287871876258984,
+   "shape": -0.010728417389297584,
+   "level_share": 0.8853888941555738,
+   "macro_gap": -0.09268186593869265,
+   "macro_m_gap": -0.08432605627142109,
+   "margin_gap": -0.09226834983943699,
+   "lambda_gap": {
+    "1": -0.09226876542557982,
+    "10": -0.09230900394269015,
+    "30": -0.09259393713599551,
+    "100": -0.09360713615188743,
+    "300": -0.09360412926391382
+   },
+   "offset_mean": 0.0019544813865644095,
+   "offset_sd": 0.01629964919228086,
+   "verdict": "MIXED"
+  },
+  "FULL vs FULL-R": {
+   "gap": -0.044966738440838094,
+   "level": -0.06784359439965892,
+   "shape": 0.02287685595882083,
+   "level_share": 1.5087506177242427,
+   "macro_gap": 0.01278979493350585,
+   "macro_m_gap": 0.015045662532976678,
+   "margin_gap": -0.0441221940601495,
+   "lambda_gap": {
+    "1": -0.044122768546876134,
+    "10": -0.044154120854405954,
+    "30": -0.044371386845182825,
+    "100": -0.044966738440838094,
+    "300": -0.04475620739019737
+   },
+   "offset_mean": -0.029777925676605668,
+   "offset_sd": 0.01610166428500755,
+   "verdict": "MIXED"
+  },
+  "legacy_R vs legacy_none": {
+   "gap": -0.04754070788498932,
+   "level": -0.07504607505779093,
+   "shape": 0.02750536717280161,
+   "level_share": 1.5785645270437014,
+   "macro_gap": 0.006929443163865456,
+   "macro_m_gap": 0.01165863033823833,
+   "margin_gap": -0.04791171630231983,
+   "lambda_gap": {
+    "1": -0.04791116626183689,
+    "10": -0.04786932651576492,
+    "30": -0.0476530994903448,
+    "100": -0.04754070788498932,
+    "300": -0.04632035140008517
+   },
+   "offset_mean": -0.04246016994785892,
+   "offset_sd": 0.009915385864256313,
+   "verdict": "CALIBRATION-dominated"
+  }
+ },
+ "point": {
+  "legacy_none": 0.6174738938563656,
+  "legacy_shared": 0.5883752977552481,
+  "legacy_best": 0.6505184926055002,
+  "legacy_R": 0.5699331859713763,
+  "FULL": 0.5238667577044782,
+  "FULL-W": 0.5549007629183731,
+  "FULL-N": 0.5174901750546618,
+  "FULL-P": 0.5922894347246179,
+  "FULL-E": 0.5268489060794874,
+  "FULL-R": 0.5688334961453163,
+  "ladder_W": 0.4975791984956759,
+  "ladder_WN": 0.6076288659289768,
+  "ladder_WNP": 0.5727913918908876,
+  "FULL_R5raw": 0.5203711404270466,
+  "FULL_shared": 0.56055602247881,
+  "FULL_llava": 0.6161717524632035,
+  "FULL_nocampus": 0.5801704049862515,
+  "legacy_R_nocampus": 0.6253947212737079,
+  "FULL_Rperm": 0.5434009530403026,
+  "legacy_Rperm": 0.5719146017506677
+ },
+ "final": {
+  "systems": {
+   "FINAL": "N"
+  },
+  "point": {
+   "legacy_none": 0.6174738938563656,
+   "legacy_best": 0.6505184926055002,
+   "FINAL": 0.6408367900321909
+  },
+  "comparisons": {
+   "FINAL - legacy_none": {
+    "point": 0.02336289617582521,
+    "ci95": [
+     -0.025152943911593048,
+     0.07418552082540697
+    ],
+    "frac_positive": 0.823
+   },
+   "FINAL - legacy_best": {
+    "point": -0.009681702573309359,
+    "ci95": [
+     -0.051348656301220895,
+     0.027347306542877287
+    ],
+    "frac_positive": 0.333
+   }
+  },
+  "notes": [],
+  "audit": {
+   "gap": 0.0233628961758251,
+   "level": -0.020184083881907067,
+   "shape": 0.043546980057732165,
+   "level_share": -0.8639375756329677,
+   "macro_gap": 0.03474075547280253,
+   "macro_m_gap": 0.038976041625876645,
+   "margin_gap": 0.025369113833444867,
+   "lambda_gap": {
+    "1": 0.02536921161841954,
+    "10": 0.02533068433836727,
+    "30": 0.025048953602985202,
+    "100": 0.0233628961758251,
+    "300": 0.021998746885548592
+   },
+   "offset_mean": -0.00017355442891171447,
+   "offset_sd": 0.010740992274375478,
+   "verdict": "RE-RANKING-dominated"
+  }
+ }
+}

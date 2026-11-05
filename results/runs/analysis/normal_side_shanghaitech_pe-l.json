@@ -1,0 +1,1051 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-03T21:03:08+00:00",
+  "git_commit": "a87ff8763c82bd5dd6c7a104a538ce76efdd3b84",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "run",
+   "backbone": "pe-l",
+   "datasets": null,
+   "boot": 1000,
+   "fake": false,
+   "verbose": false
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5
+  }
+ },
+ "dataset": "shanghaitech",
+ "n_videos": 107,
+ "gates": [
+  {
+   "what": "new code path == legacy (none)",
+   "max_abs": 0.0,
+   "tol": 1e-05,
+   "ok": true
+  },
+  {
+   "what": "subset none == legacy_none",
+   "max_abs": 0.0,
+   "tol": 0.0006,
+   "ok": true
+  },
+  {
+   "what": "subset R == legacy_R",
+   "max_abs": 0.0,
+   "tol": 0.0006,
+   "ok": true
+  }
+ ],
+ "notes": [],
+ "gates_passed": true,
+ "retrieval": {
+  "library_size": 207,
+  "fallback_units": 0,
+  "units": 12,
+  "contaminated_phrases": 0,
+  "per_unit": {
+   "01": {
+    "calm": [
+     20,
+     21,
+     75,
+     78,
+     99
+    ],
+    "phrases": [
+     10,
+     1,
+     7,
+     15,
+     4
+    ],
+    "top": [
+     10,
+     1,
+     7,
+     15,
+     4
+    ],
+    "sims": [
+     0.24943599066442884,
+     0.24754670974267987,
+     0.24739387484443798,
+     0.24624473023247861,
+     0.24438673614684517
+    ],
+    "neutral_max": 0.15449669561072338,
+    "fallback": false,
+    "video": "shanghaitech/01_0014",
+    "texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with a few people walking slowly",
+     "a paved path between university buildings with a few people walking slowly",
+     "a college campus square with a few people crossing",
+     "a university campus walkway with people carrying bags"
+    ],
+    "top_texts": [
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with a few people walking slowly",
+     "a paved path between university buildings with a few people walking slowly",
+     "a college campus square with a few people crossing",
+     "a university campus walkway with people carrying bags"
+    ]
+   },
+   "02": {
+    "calm": [
+     61,
+     64,
+     137,
+     144,
+     146
+    ],
+    "phrases": [
+     26,
+     10,
+     7,
+     6,
+     1
+    ],
+    "top": [
+     26,
+     10,
+     7,
+     6,
+     1
+    ],
+    "sims": [
+     0.22851263170900235,
+     0.22517720669048763,
+     0.22187867922809015,
+     0.22081199992446573,
+     0.2186670013222205
+    ],
+    "neutral_max": 0.14018896940156034,
+    "fallback": false,
+    "video": "shanghaitech/02_0128",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people walking",
+     "a university campus walkway with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people walking",
+     "a university campus walkway with a few people walking slowly"
+    ]
+   },
+   "03": {
+    "calm": [
+     156,
+     157,
+     158,
+     159,
+     162
+    ],
+    "phrases": [
+     26,
+     81,
+     75,
+     15,
+     69
+    ],
+    "top": [
+     26,
+     81,
+     75,
+     15,
+     69
+    ],
+    "sims": [
+     0.2763753558523061,
+     0.25801155267196496,
+     0.2567022991221244,
+     0.2267455986543256,
+     0.22582760616897288
+    ],
+    "neutral_max": 0.1410600082632798,
+    "fallback": false,
+    "video": "shanghaitech/03_0031",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a college campus square with a few people crossing",
+     "a city street with pedestrians crossing at a crosswalk"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a college campus square with a few people crossing",
+     "a city street with pedestrians crossing at a crosswalk"
+    ]
+   },
+   "04": {
+    "calm": [
+     12,
+     13,
+     119,
+     124,
+     137
+    ],
+    "phrases": [
+     15,
+     1,
+     12,
+     0,
+     20
+    ],
+    "top": [
+     15,
+     1,
+     12,
+     0,
+     20
+    ],
+    "sims": [
+     0.27291903377798454,
+     0.271994960097216,
+     0.270500847038785,
+     0.26917348460870927,
+     0.26866911306239927
+    ],
+    "neutral_max": 0.16522675603453107,
+    "fallback": false,
+    "video": "shanghaitech/04_0001",
+    "texts": [
+     "a college campus square with a few people crossing",
+     "a university campus walkway with a few people walking slowly",
+     "a college campus square with people walking",
+     "a university campus walkway with people walking",
+     "a school courtyard with a few people crossing"
+    ],
+    "top_texts": [
+     "a college campus square with a few people crossing",
+     "a university campus walkway with a few people walking slowly",
+     "a college campus square with people walking",
+     "a university campus walkway with people walking",
+     "a school courtyard with a few people crossing"
+    ]
+   },
+   "05": {
+    "calm": [
+     10,
+     11,
+     14,
+     15,
+     16
+    ],
+    "phrases": [
+     5,
+     1,
+     11,
+     27,
+     7
+    ],
+    "top": [
+     5,
+     1,
+     11,
+     27,
+     7
+    ],
+    "sims": [
+     0.24835139211824372,
+     0.24451204418473246,
+     0.2409576341412138,
+     0.2404106265100418,
+     0.23884348935800348
+    ],
+    "neutral_max": 0.15021879128189775,
+    "fallback": false,
+    "video": "shanghaitech/05_0017",
+    "texts": [
+     "a university campus walkway with nobody around",
+     "a university campus walkway with a few people walking slowly",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with a few people walking slowly"
+    ],
+    "top_texts": [
+     "a university campus walkway with nobody around",
+     "a university campus walkway with a few people walking slowly",
+     "a paved path between university buildings with nobody around",
+     "a campus road beside lecture halls with nobody around",
+     "a paved path between university buildings with a few people walking slowly"
+    ]
+   },
+   "06": {
+    "calm": [
+     19,
+     21,
+     24,
+     25,
+     29
+    ],
+    "phrases": [
+     104,
+     11,
+     10,
+     7,
+     5
+    ],
+    "top": [
+     104,
+     11,
+     10,
+     7,
+     5
+    ],
+    "sims": [
+     0.2649974896507813,
+     0.25913429377284897,
+     0.25633352869021797,
+     0.2544735263132411,
+     0.2543595125030332
+    ],
+    "neutral_max": 0.1711207652239669,
+    "fallback": false,
+    "video": "shanghaitech/06_0144",
+    "texts": [
+     "a building entrance with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with a few people walking slowly",
+     "a university campus walkway with nobody around"
+    ],
+    "top_texts": [
+     "a building entrance with nobody around",
+     "a paved path between university buildings with nobody around",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with a few people walking slowly",
+     "a university campus walkway with nobody around"
+    ]
+   },
+   "07": {
+    "calm": [
+     100,
+     103,
+     104,
+     105,
+     106
+    ],
+    "phrases": [
+     26,
+     81,
+     23,
+     75,
+     4
+    ],
+    "top": [
+     26,
+     81,
+     23,
+     75,
+     4
+    ],
+    "sims": [
+     0.25066340243855123,
+     0.21869074948959166,
+     0.21457600671468774,
+     0.21209272060075557,
+     0.2106490386266396
+    ],
+    "neutral_max": 0.13325803137037712,
+    "fallback": false,
+    "video": "shanghaitech/07_0005",
+    "texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a university campus walkway with people carrying bags"
+    ],
+    "top_texts": [
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a highway with pedestrians crossing at a crosswalk",
+     "a campus road beside lecture halls with light traffic",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a university campus walkway with people carrying bags"
+    ]
+   },
+   "08": {
+    "calm": [
+     39,
+     65,
+     66,
+     69,
+     71
+    ],
+    "phrases": [
+     4,
+     10,
+     0,
+     3,
+     9
+    ],
+    "top": [
+     4,
+     10,
+     0,
+     3,
+     9
+    ],
+    "sims": [
+     0.29534111620817594,
+     0.2914538413573772,
+     0.2830893106399729,
+     0.2812902428922507,
+     0.27365209827355147
+    ],
+    "neutral_max": 0.14569585145267203,
+    "fallback": false,
+    "video": "shanghaitech/08_0044",
+    "texts": [
+     "a university campus walkway with people carrying bags",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking",
+     "a university campus walkway with people walking in both directions",
+     "a paved path between university buildings with people walking in both directions"
+    ],
+    "top_texts": [
+     "a university campus walkway with people carrying bags",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking",
+     "a university campus walkway with people walking in both directions",
+     "a paved path between university buildings with people walking in both directions"
+    ]
+   },
+   "09": {
+    "calm": [
+     44,
+     45,
+     47,
+     113,
+     153
+    ],
+    "phrases": [
+     4,
+     10,
+     0,
+     3,
+     6
+    ],
+    "top": [
+     4,
+     10,
+     0,
+     3,
+     6
+    ],
+    "sims": [
+     0.28332978308063117,
+     0.2812094629915377,
+     0.278834126719318,
+     0.27362126247418755,
+     0.27215837251143427
+    ],
+    "neutral_max": 0.14342549275282537,
+    "fallback": false,
+    "video": "shanghaitech/09_0057",
+    "texts": [
+     "a university campus walkway with people carrying bags",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking",
+     "a university campus walkway with people walking in both directions",
+     "a paved path between university buildings with people walking"
+    ],
+    "top_texts": [
+     "a university campus walkway with people carrying bags",
+     "a paved path between university buildings with people carrying bags",
+     "a university campus walkway with people walking",
+     "a university campus walkway with people walking in both directions",
+     "a paved path between university buildings with people walking"
+    ]
+   },
+   "10": {
+    "calm": [
+     11,
+     15,
+     86,
+     87,
+     108
+    ],
+    "phrases": [
+     7,
+     10,
+     6,
+     15,
+     9
+    ],
+    "top": [
+     7,
+     10,
+     6,
+     15,
+     9
+    ],
+    "sims": [
+     0.262332387513277,
+     0.2615165776228751,
+     0.25959045959398547,
+     0.2595733690046092,
+     0.2593222943891387
+    ],
+    "neutral_max": 0.14334914762429557,
+    "fallback": false,
+    "video": "shanghaitech/10_0037",
+    "texts": [
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people walking",
+     "a college campus square with a few people crossing",
+     "a paved path between university buildings with people walking in both directions"
+    ],
+    "top_texts": [
+     "a paved path between university buildings with a few people walking slowly",
+     "a paved path between university buildings with people carrying bags",
+     "a paved path between university buildings with people walking",
+     "a college campus square with a few people crossing",
+     "a paved path between university buildings with people walking in both directions"
+    ]
+   },
+   "11": {
+    "calm": [
+     88,
+     91,
+     92,
+     93,
+     94
+    ],
+    "phrases": [
+     50,
+     4,
+     26,
+     10,
+     44
+    ],
+    "top": [
+     50,
+     4,
+     26,
+     10,
+     44
+    ],
+    "sims": [
+     0.256924499769772,
+     0.2566414140716875,
+     0.25594082864347556,
+     0.24675432536931605,
+     0.2448500693843502
+    ],
+    "neutral_max": 0.13864011186792075,
+    "fallback": false,
+    "video": "shanghaitech/11_0176",
+    "texts": [
+     "a riverside promenade with people carrying bags",
+     "a university campus walkway with people carrying bags",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a sidewalk beside a busy road with people carrying bags"
+    ],
+    "top_texts": [
+     "a riverside promenade with people carrying bags",
+     "a university campus walkway with people carrying bags",
+     "a campus road beside lecture halls with pedestrians crossing at a crosswalk",
+     "a paved path between university buildings with people carrying bags",
+     "a sidewalk beside a busy road with people carrying bags"
+    ]
+   },
+   "12": {
+    "calm": [
+     80,
+     83,
+     122,
+     131,
+     133
+    ],
+    "phrases": [
+     57,
+     52,
+     10,
+     55,
+     15
+    ],
+    "top": [
+     57,
+     52,
+     10,
+     55,
+     15
+    ],
+    "sims": [
+     0.23803224859561015,
+     0.2317776715559743,
+     0.23111178701857277,
+     0.23038684847137378,
+     0.22872989619706344
+    ],
+    "neutral_max": 0.14211895554048903,
+    "fallback": false,
+    "video": "shanghaitech/12_0142",
+    "texts": [
+     "a public park with people walking",
+     "a city plaza with people walking",
+     "a paved path between university buildings with people carrying bags",
+     "a city plaza with a few people crossing",
+     "a college campus square with a few people crossing"
+    ],
+    "top_texts": [
+     "a public park with people walking",
+     "a city plaza with people walking",
+     "a paved path between university buildings with people carrying bags",
+     "a city plaza with a few people crossing",
+     "a college campus square with a few people crossing"
+    ]
+   }
+  }
+ },
+ "retrieval_nocampus": {
+  "library_size": 170,
+  "fallback_units": 0,
+  "per_unit": {
+   "01": {
+    "texts": [
+     "a public park with people relaxing",
+     "a city plaza with people sitting on benches",
+     "a city plaza with a few people crossing",
+     "a public park with people sitting on benches",
+     "a public park with people walking"
+    ],
+    "fallback": false
+   },
+   "02": {
+    "texts": [
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a sidewalk beside a busy road with people carrying bags",
+     "a sidewalk beside a busy road with people walking in both directions",
+     "a building entrance with people walking"
+    ],
+    "fallback": false
+   },
+   "03": {
+    "texts": [
+     "a highway with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a city street with pedestrians crossing at a crosswalk",
+     "a quiet residential street with pedestrians crossing at a crosswalk",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "04": {
+    "texts": [
+     "a public park with people walking",
+     "a city plaza with people walking",
+     "a city plaza with a few people crossing",
+     "a tree-lined garden path with people walking",
+     "a public park with people relaxing"
+    ],
+    "fallback": false
+   },
+   "05": {
+    "texts": [
+     "a sidewalk beside a busy road with nobody around",
+     "a riverside promenade with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly",
+     "a sidewalk beside a busy road with people walking",
+     "a riverside promenade with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "06": {
+    "texts": [
+     "a building entrance with nobody around",
+     "a building entrance with people walking",
+     "a building entrance with people carrying bags",
+     "a building entrance with people standing and waiting",
+     "a long indoor corridor with nobody around"
+    ],
+    "fallback": false
+   },
+   "07": {
+    "texts": [
+     "a highway with pedestrians crossing at a crosswalk",
+     "a road intersection controlled by traffic lights with pedestrians crossing at a crosswalk",
+     "a riverside promenade with people carrying bags",
+     "a riverside promenade with people walking",
+     "a riverside promenade with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "08": {
+    "texts": [
+     "a public park with people walking",
+     "a sidewalk beside a busy road with people carrying bags",
+     "a building entrance with people carrying bags",
+     "a city plaza with people walking",
+     "a sidewalk beside a busy road with people walking"
+    ],
+    "fallback": false
+   },
+   "09": {
+    "texts": [
+     "a riverside promenade with people carrying bags",
+     "a public park with people walking",
+     "a riverside promenade with people walking",
+     "a bus stop with people walking",
+     "a sidewalk beside a busy road with people carrying bags"
+    ],
+    "fallback": false
+   },
+   "10": {
+    "texts": [
+     "a city plaza with a few people crossing",
+     "a city plaza with people walking",
+     "a public park with people walking",
+     "a city plaza with nobody around",
+     "a sidewalk beside a busy road with a few people walking slowly"
+    ],
+    "fallback": false
+   },
+   "11": {
+    "texts": [
+     "a riverside promenade with people carrying bags",
+     "a sidewalk beside a busy road with people carrying bags",
+     "a riverside promenade with people walking",
+     "a riverside promenade with people walking in both directions",
+     "a sidewalk beside a busy road with people walking"
+    ],
+    "fallback": false
+   },
+   "12": {
+    "texts": [
+     "a public park with people walking",
+     "a city plaza with people walking",
+     "a city plaza with a few people crossing",
+     "a public park with people relaxing",
+     "a sidewalk beside a busy road with people walking"
+    ],
+    "fallback": false
+   }
+  }
+ },
+ "subsets": {
+  "none": 0.66612483659812,
+  "W": 0.7042184656329697,
+  "N": 0.7868983628018272,
+  "P": 0.6621033354555921,
+  "E": 0.6646446556102019,
+  "R": 0.7089072925036756,
+  "WN": 0.8093893068748356,
+  "WP": 0.7582606282970824,
+  "WE": 0.7061321899887081,
+  "WR": 0.762994036897457,
+  "NP": 0.7348077793071801,
+  "NE": 0.7912870732626163,
+  "NR": 0.7903082629303319,
+  "PE": 0.6657748949891213,
+  "PR": 0.7107306734970616,
+  "ER": 0.7053722345300957,
+  "WNP": 0.7794159270535194,
+  "WNE": 0.809493951053393,
+  "WNR": 0.8225610831873926,
+  "WPE": 0.756912062797709,
+  "WPR": 0.7675524085991802,
+  "WER": 0.7642988235887151,
+  "NPE": 0.7439558562346633,
+  "NPR": 0.7169875474112939,
+  "NER": 0.7928494313131846,
+  "PER": 0.7145880457239933,
+  "WNPE": 0.7785652022924625,
+  "WNPR": 0.7713151046248888,
+  "WNER": 0.8230746004794538,
+  "WPER": 0.7730242406521179,
+  "NPER": 0.7199059420483731,
+  "WNPER": 0.7742326767569623
+ },
+ "comparisons": {
+  "FULL - legacy_none": {
+   "point": 0.10810784015884223,
+   "ci95": [
+    0.049203790200911444,
+    0.17339410645668207
+   ],
+   "frac_positive": 1.0
+  },
+  "legacy_R - legacy_none": {
+   "point": 0.042782455905555516,
+   "ci95": [
+    0.015042691635967415,
+    0.0722664040402284
+   ],
+   "frac_positive": 0.998
+  },
+  "FULL - legacy_best": {
+   "point": 0.031799747291212044,
+   "ci95": [
+    -0.018144525319702284,
+    0.0850650000833583
+   ],
+   "frac_positive": 0.898
+  },
+  "legacy_R - legacy_best": {
+   "point": -0.03352563696207467,
+   "ci95": [
+    -0.06287205863364892,
+    -0.006253787968412622
+   ],
+   "frac_positive": 0.008
+  },
+  "FULL - FULL_llava": {
+   "point": -0.004748850152689332,
+   "ci95": [
+    -0.040523585544382415,
+    0.03240472359949505
+   ],
+   "frac_positive": 0.411
+  },
+  "FULL - FULL-W": {
+   "point": 0.054326734708589175,
+   "ci95": [
+    0.01397556092149968,
+    0.09830535386408688
+   ],
+   "frac_positive": 0.997
+  },
+  "FULL - FULL-N": {
+   "point": 0.0012084361048443348,
+   "ci95": [
+    -0.004556180992191794,
+    0.008172483785113297
+   ],
+   "frac_positive": 0.667
+  },
+  "FULL - FULL-P": {
+   "point": -0.04884192372249152,
+   "ci95": [
+    -0.07998993328054912,
+    -0.016954818274975966
+   ],
+   "frac_positive": 0.002
+  },
+  "FULL - FULL-E": {
+   "point": 0.0029175721320734427,
+   "ci95": [
+    -0.004948978238624257,
+    0.010122983674951014
+   ],
+   "frac_positive": 0.787
+  },
+  "FULL - FULL-R": {
+   "point": -0.004332525535500231,
+   "ci95": [
+    -0.037580754786350694,
+    0.03136707810211583
+   ],
+   "frac_positive": 0.414
+  },
+  "FULL - FULL_shared": {
+   "point": 0.00868519265192047,
+   "ci95": [
+    -0.011026899229534887,
+    0.02780229565481396
+   ],
+   "frac_positive": 0.789
+  },
+  "FULL - FULL_R5raw": {
+   "point": 0.0015999093207814674,
+   "ci95": [
+    -0.009312684949661703,
+    0.013076812314658242
+   ],
+   "frac_positive": 0.606
+  },
+  "FULL - FULL_Rperm": {
+   "point": 0.02571973064655919,
+   "ci95": [
+    0.008073124685106434,
+    0.05382980224863214
+   ],
+   "frac_positive": 0.992
+  },
+  "legacy_R - legacy_Rperm": {
+   "point": 0.02493064791786792,
+   "ci95": [
+    0.014052300249504948,
+    0.04689546515152579
+   ],
+   "frac_positive": 1.0
+  },
+  "FULL_nocampus - FULL": {
+   "point": -0.005847070586733283,
+   "ci95": [
+    -0.03293114640853603,
+    0.020443086494817558
+   ],
+   "frac_positive": 0.34
+  },
+  "legacy_R_nocampus - legacy_R": {
+   "point": -0.0329892510933294,
+   "ci95": [
+    -0.062268574249862145,
+    -0.006636532233824039
+   ],
+   "frac_positive": 0.004
+  }
+ },
+ "n_resamples": 1000,
+ "audit": {
+  "FULL vs legacy_none": {
+   "gap": 0.10810784015884223,
+   "level": 0.01692377977318804,
+   "shape": 0.09118406038565419,
+   "level_share": 0.15654535090444902,
+   "macro_gap": 0.16905272621224576,
+   "macro_m_gap": 0.1734874814963251,
+   "margin_gap": 0.11014757423984034,
+   "lambda_gap": {
+    "1": 0.11015888368367233,
+    "10": 0.11123126375211223,
+    "30": 0.11560500266344742,
+    "100": 0.10810784015884223,
+    "300": 0.0897669332189972
+   },
+   "offset_mean": 0.009024759846974068,
+   "offset_sd": 0.029144039044041514,
+   "verdict": "RE-RANKING-dominated"
+  },
+  "FULL vs FULL-R": {
+   "gap": -0.004332525535500231,
+   "level": 0.007266295630741826,
+   "shape": -0.011598821166242057,
+   "level_share": -1.6771500989902102,
+   "macro_gap": -0.01061567212823522,
+   "macro_m_gap": -0.016355185959731955,
+   "margin_gap": -0.006189624338267752,
+   "lambda_gap": {
+    "1": -0.006181506997196995,
+    "10": -0.00550302849280726,
+    "30": -0.0033220193853072955,
+    "100": -0.004332525535500231,
+    "300": -0.0020594644094152903
+   },
+   "offset_mean": -0.03825508873673757,
+   "offset_sd": 0.021147538011088603,
+   "verdict": "NO EFFECT TO DECOMPOSE"
+  },
+  "legacy_R vs legacy_none": {
+   "gap": 0.042782455905555516,
+   "level": 0.01191466064060337,
+   "shape": 0.030867795264952147,
+   "level_share": 0.27849407866873277,
+   "macro_gap": 0.044480014904809684,
+   "macro_m_gap": 0.05065943340318069,
+   "margin_gap": 0.018691489906913716,
+   "lambda_gap": {
+    "1": 0.01871374650070623,
+    "10": 0.020831951475964727,
+    "30": 0.03148414526621235,
+    "100": 0.042782455905555516,
+    "300": 0.037966782116994224
+   },
+   "offset_mean": -0.044768579531181914,
+   "offset_sd": 0.011175783686904221,
+   "verdict": "RE-RANKING-dominated"
+  }
+ },
+ "point": {
+  "legacy_none": 0.66612483659812,
+  "legacy_shared": 0.6974059602120253,
+  "legacy_best": 0.7424329294657502,
+  "legacy_R": 0.7089072925036756,
+  "FULL": 0.7742326767569623,
+  "FULL-W": 0.7199059420483731,
+  "FULL-N": 0.7730242406521179,
+  "FULL-P": 0.8230746004794538,
+  "FULL-E": 0.7713151046248888,
+  "FULL-R": 0.7785652022924625,
+  "ladder_W": 0.7042184656329697,
+  "ladder_WN": 0.8093893068748356,
+  "ladder_WNP": 0.7794159270535194,
+  "FULL_R5raw": 0.7726327674361808,
+  "FULL_shared": 0.7655474841050418,
+  "FULL_llava": 0.7789815269096516,
+  "FULL_nocampus": 0.768385606170229,
+  "legacy_R_nocampus": 0.6759180414103462,
+  "FULL_Rperm": 0.7485129461104031,
+  "legacy_Rperm": 0.6839766445858076
+ },
+ "final": {
+  "systems": {
+   "FINAL": "N"
+  },
+  "point": {
+   "legacy_none": 0.66612483659812,
+   "legacy_best": 0.7424329294657502,
+   "FINAL": 0.7868983628018272
+  },
+  "comparisons": {
+   "FINAL - legacy_none": {
+    "point": 0.12077352620370718,
+    "ci95": [
+     0.08057844236324023,
+     0.1633789261027003
+    ],
+    "frac_positive": 1.0
+   },
+   "FINAL - legacy_best": {
+    "point": 0.044465433336077,
+    "ci95": [
+     0.018108216142124878,
+     0.07317640729957016
+    ],
+    "frac_positive": 0.999
+   }
+  },
+  "notes": [],
+  "audit": {
+   "gap": 0.12077352620370718,
+   "level": 0.0029799062614545013,
+   "shape": 0.11779361994225268,
+   "level_share": 0.02467350548685919,
+   "macro_gap": 0.16966597968163577,
+   "macro_m_gap": 0.18435104640378053,
+   "margin_gap": 0.11937059214426637,
+   "lambda_gap": {
+    "1": 0.11937487112864276,
+    "10": 0.1198454614927732,
+    "30": 0.12294048907988497,
+    "100": 0.12077352620370718,
+    "300": 0.09746070379520833
+   },
+   "offset_mean": 0.0019540492066696317,
+   "offset_sd": 0.007205774442141942,
+   "verdict": "RE-RANKING-dominated"
+  }
+ }
+}

@@ -1,0 +1,271 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-03T16:47:21+00:00",
+  "git_commit": "a87ff8763c82bd5dd6c7a104a538ce76efdd3b84",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "run",
+   "backbone": "vitl",
+   "datasets": null,
+   "boot": 1000,
+   "fake": false,
+   "verbose": false
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5
+  }
+ },
+ "datasets": [
+  "shanghaitech",
+  "ucf_crime",
+  "xd_violence",
+  "nwpu_campus"
+ ],
+ "backbone": "vitl",
+ "gates": {
+  "shanghaitech": true,
+  "ucf_crime": true,
+  "xd_violence": true,
+  "nwpu_campus": true
+ },
+ "keep_or_drop": {
+  "W": {
+   "datasets": 4,
+   "positive": 3,
+   "ci_above_zero": 1,
+   "ci_below_zero": 1,
+   "decision": "DROP"
+  },
+  "N": {
+   "datasets": 4,
+   "positive": 3,
+   "ci_above_zero": 2,
+   "ci_below_zero": 0,
+   "decision": "KEEP"
+  },
+  "P": {
+   "datasets": 4,
+   "positive": 2,
+   "ci_above_zero": 1,
+   "ci_below_zero": 1,
+   "decision": "DROP"
+  },
+  "E": {
+   "datasets": 4,
+   "positive": 2,
+   "ci_above_zero": 2,
+   "ci_below_zero": 0,
+   "decision": "DROP"
+  },
+  "R": {
+   "datasets": 4,
+   "positive": 2,
+   "ci_above_zero": 1,
+   "ci_below_zero": 1,
+   "decision": "DROP"
+  }
+ },
+ "predictions": {
+  "P1 FULL beats legacy_none on all but at most one dataset": {
+   "value": "2 of 4",
+   "holds": false
+  },
+  "P2 XD-Violence: retrieval beats LLaVA's sentence in today's system (AP)": {
+   "value": 0.18068264411832247,
+   "holds": true
+  },
+  "P3 own retrieved phrases beat another camera's on >= 3 of the multi-camera datasets": {
+   "value": "2 of 4",
+   "holds": false
+  },
+  "P4 the retrieval gain is never RE-RANKING-dominated": {
+   "value": {
+    "shanghaitech": "NO EFFECT TO DECOMPOSE",
+    "ucf_crime": "CALIBRATION-dominated",
+    "xd_violence": "CALIBRATION-dominated",
+    "nwpu_campus": "NO EFFECT TO DECOMPOSE"
+   },
+   "holds": true
+  },
+  "P5a ShanghaiTech: worries do not help (FULL - FULL-W <= 0)": {
+   "value": -0.05647772727923417,
+   "holds": true
+  },
+  "P5b UCF-Crime and XD-Violence: worries help (FULL - FULL-W > 0)": {
+   "value": {
+    "ucf_crime": 0.017908027938440707,
+    "xd_violence": 0.06607512696587903
+   },
+   "holds": true
+  },
+  "P6 removing campus phrases lowers FULL on ShanghaiTech and NWPU": {
+   "value": {
+    "shanghaitech": 0.011315044699524157,
+    "nwpu_campus": 0.012490747096764121
+   },
+   "holds": false
+  }
+ },
+ "final_system": "N",
+ "leave_one_dataset_out": {
+  "shanghaitech": "E",
+  "ucf_crime": "N",
+  "xd_violence": "none",
+  "nwpu_campus": "NE"
+ },
+ "headline": {
+  "shanghaitech": {
+   "FINAL - legacy_none": {
+    "point": 0.045339775740876664,
+    "ci95": [
+     0.016331978562973814,
+     0.07400474533801837
+    ],
+    "frac_positive": 1.0
+   },
+   "FINAL - legacy_best": {
+    "point": 0.001426115971364883,
+    "ci95": [
+     -0.024090690283685802,
+     0.02731441929140364
+    ],
+    "frac_positive": 0.546
+   },
+   "LODO - legacy_none": {
+    "point": 0.003427965863457283,
+    "ci95": [
+     -0.001812574772436945,
+     0.008409484081273918
+    ],
+    "frac_positive": 0.889
+   },
+   "LODO - legacy_best": {
+    "point": -0.0404856939060545,
+    "ci95": [
+     -0.06364470764085546,
+     -0.019541793101663183
+    ],
+    "frac_positive": 0.0
+   }
+  },
+  "ucf_crime": {
+   "FINAL - legacy_none": {
+    "point": -0.10889188755938062,
+    "ci95": [
+     -0.19149333868273785,
+     -0.034462802803325594
+    ],
+    "frac_positive": 0.0
+   },
+   "FINAL - legacy_best": {
+    "point": -0.1762369069796521,
+    "ci95": [
+     -0.2488943409804483,
+     -0.10987799655706218
+    ],
+    "frac_positive": 0.0
+   },
+   "LODO - legacy_none": {
+    "point": -0.10889188755938062,
+    "ci95": [
+     -0.19149333868273785,
+     -0.034462802803325594
+    ],
+    "frac_positive": 0.0
+   },
+   "LODO - legacy_best": {
+    "point": -0.1762369069796521,
+    "ci95": [
+     -0.2488943409804483,
+     -0.10987799655706218
+    ],
+    "frac_positive": 0.0
+   }
+  },
+  "xd_violence": {
+   "FINAL - legacy_none": {
+    "point": -0.09737871568703815,
+    "ci95": [
+     -0.12672333452917117,
+     -0.06774649297890561
+    ],
+    "frac_positive": 0.0
+   },
+   "FINAL - legacy_best": {
+    "point": 0.10984511110555839,
+    "ci95": [
+     0.06353754299567449,
+     0.15721241711050468
+    ],
+    "frac_positive": 1.0
+   },
+   "LODO - legacy_none": {
+    "point": 1.3566286982680253e-09,
+    "ci95": [
+     -9.439956979995223e-09,
+     1.3938775328403706e-08
+    ],
+    "frac_positive": 0.56
+   },
+   "LODO - legacy_best": {
+    "point": 0.20722382814922524,
+    "ci95": [
+     0.15460945594189085,
+     0.260465464281207
+    ],
+    "frac_positive": 1.0
+   }
+  },
+  "nwpu_campus": {
+   "FINAL - legacy_none": {
+    "point": -0.03344708170521371,
+    "ci95": [
+     -0.08142372709203083,
+     0.01579100056057589
+    ],
+    "frac_positive": 0.087
+   },
+   "FINAL - legacy_best": {
+    "point": -0.041327585043592685,
+    "ci95": [
+     -0.10498300217339583,
+     0.020158207261625614
+    ],
+    "frac_positive": 0.094
+   },
+   "LODO - legacy_none": {
+    "point": -0.03241591470021088,
+    "ci95": [
+     -0.0831775758228154,
+     0.018645317345341365
+    ],
+    "frac_positive": 0.104
+   },
+   "LODO - legacy_best": {
+    "point": -0.040296418038589854,
+    "ci95": [
+     -0.10795609452621291,
+     0.023877810272372076
+    ],
+    "frac_positive": 0.112
+   }
+  }
+ }
+}

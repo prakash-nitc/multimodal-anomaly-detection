@@ -1,0 +1,245 @@
+skipping avenue: no cache at ~/dazvad/work/embeddings/avenue_PE-Core-L-14-336_step2_crops1.npz
+loading PE-Core-L-14-336's text encoder ...
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH  (107 videos, 12 units, primary auroc)
+==============================================================================
+  gate  new scoring path reproduces the legacy margins   max |diff| 0.0e+00  ok
+  retrieval: 207-phrase library, 0 of 12 units fell back to base prompts
+    01                       ['a paved path between university buildings with people carrying bags', 'a university campus walkway with a few people walking slowly']
+    02                       ['a campus road beside lecture halls with pedestrians crossing at a crosswalk', 'a paved path between university buildings with people carrying bags']
+    03                       ['a campus road beside lecture halls with pedestrians crossing at a crosswalk', 'a highway with pedestrians crossing at a crosswalk']
+  gate  subset none  reproduces legacy_none  |diff| 0.0e+00  ok
+  gate  subset R     reproduces legacy_R     |diff| 0.0e+00  ok
+
+  condition                 auroc
+  legacy_none              0.6661
+  legacy_shared            0.6974
+  legacy_best              0.7424
+  legacy_R                 0.7089
+  FULL                     0.7742
+  FULL-W                   0.7199
+  FULL-N                   0.7730
+  FULL-P                   0.8231
+  FULL-E                   0.7713
+  FULL-R                   0.7786
+  ladder_W                 0.7042
+  ladder_WN                0.8094
+  ladder_WNP               0.7794
+  FULL_R5raw               0.7726
+  FULL_shared              0.7655
+  FULL_llava               0.7790
+  FULL_nocampus            0.7684
+  legacy_R_nocampus        0.6759
+  FULL_Rperm               0.7485
+  legacy_Rperm             0.6840
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  FULL - legacy_none                   +0.1081   95% CI [+0.0492, +0.1734]
+  legacy_R - legacy_none               +0.0428   95% CI [+0.0150, +0.0723]
+  FULL - legacy_best                   +0.0318   95% CI [-0.0181, +0.0851]
+  legacy_R - legacy_best               -0.0335   95% CI [-0.0629, -0.0063]
+  FULL - FULL_llava                    -0.0047   95% CI [-0.0405, +0.0324]
+  FULL - FULL-W                        +0.0543   95% CI [+0.0140, +0.0983]
+  FULL - FULL-N                        +0.0012   95% CI [-0.0046, +0.0082]
+  FULL - FULL-P                        -0.0488   95% CI [-0.0800, -0.0170]
+  FULL - FULL-E                        +0.0029   95% CI [-0.0049, +0.0101]
+  FULL - FULL-R                        -0.0043   95% CI [-0.0376, +0.0314]
+  FULL - FULL_shared                   +0.0087   95% CI [-0.0110, +0.0278]
+  FULL - FULL_R5raw                    +0.0016   95% CI [-0.0093, +0.0131]
+  FULL - FULL_Rperm                    +0.0257   95% CI [+0.0081, +0.0538]
+  legacy_R - legacy_Rperm              +0.0249   95% CI [+0.0141, +0.0469]
+  FULL_nocampus - FULL                 -0.0058   95% CI [-0.0329, +0.0204]
+  legacy_R_nocampus - legacy_R         -0.0330   95% CI [-0.0623, -0.0066]
+  audit FULL vs legacy_none        gap +0.1081  level share  0.16  macro_m gap +0.1735  ->  RE-RANKING-dominated
+  audit FULL vs FULL-R             gap -0.0043  level share -1.68  macro_m gap -0.0164  ->  NO EFFECT TO DECOMPOSE
+  audit legacy_R vs legacy_none    gap +0.0428  level share  0.28  macro_m gap +0.0507  ->  RE-RANKING-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_shanghaitech_pe-l.json
+
+==============================================================================
+UCF_CRIME  (290 videos, 290 units, primary auroc)
+==============================================================================
+  gate  new scoring path reproduces the legacy margins   max |diff| 0.0e+00  ok
+  retrieval: 207-phrase library, 2 of 290 units fell back to base prompts
+    ucf_crime/Abuse028_x264  ['the front of a house with a person walking to the door', 'a parking lot with a person walking to a parked car']
+    ucf_crime/Abuse030_x264  ['a quiet residential street with nobody around', 'the front of a house with a person walking to the door']
+    ucf_crime/Arrest001_x264 ['an office lobby with people carrying bags', 'an office lobby with people standing and waiting']
+  gate  subset none  reproduces legacy_none  |diff| 0.0e+00  ok
+  gate  subset R     reproduces legacy_R     |diff| 0.0e+00  ok
+
+  condition                 auroc
+  legacy_none              0.8468
+  legacy_shared            0.8675
+  legacy_best              0.8525
+  legacy_R                 0.8366
+  FULL                     0.8352
+  FULL-W                   0.8024
+  FULL-N                   0.8380
+  FULL-P                   0.8369
+  FULL-E                   0.8316
+  FULL-R                   0.8198
+  ladder_W                 0.7704
+  ladder_WN                0.8166
+  ladder_WNP               0.8077
+  FULL_R5raw               0.8325
+  FULL_shared              0.8737
+  FULL_llava               0.8473
+  FULL_Rperm               0.8189
+  legacy_Rperm             0.8042
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  FULL - legacy_none                   -0.0116   95% CI [-0.0483, +0.0206]
+  legacy_R - legacy_none               -0.0103   95% CI [-0.0388, +0.0171]
+  FULL - legacy_best                   -0.0173   95% CI [-0.0775, +0.0374]
+  legacy_R - legacy_best               -0.0160   95% CI [-0.0700, +0.0368]
+  FULL - FULL_llava                    -0.0121   95% CI [-0.0525, +0.0287]
+  FULL - FULL-W                        +0.0328   95% CI [+0.0089, +0.0597]
+  FULL - FULL-N                        -0.0028   95% CI [-0.0086, +0.0021]
+  FULL - FULL-P                        -0.0017   95% CI [-0.0356, +0.0307]
+  FULL - FULL-E                        +0.0036   95% CI [+0.0009, +0.0062]
+  FULL - FULL-R                        +0.0154   95% CI [-0.0119, +0.0406]
+  FULL - FULL_shared                   -0.0385   95% CI [-0.0947, +0.0017]
+  FULL - FULL_R5raw                    +0.0027   95% CI [-0.0106, +0.0164]
+  FULL - FULL_Rperm                    +0.0163   95% CI [-0.0086, +0.0451]
+  legacy_R - legacy_Rperm              +0.0324   95% CI [-0.0230, +0.0618]
+  audit FULL vs legacy_none        gap -0.0116  level share  1.89  macro_m gap -0.0057  ->  MIXED
+  audit FULL vs FULL-R             gap +0.0154  level share  0.55  macro_m gap +0.0070  ->  MIXED
+  audit legacy_R vs legacy_none    gap -0.0103  level share  2.21  macro_m gap +0.0016  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_ucf_crime_pe-l.json
+
+==============================================================================
+XD_VIOLENCE  (800 videos, 800 units, primary xd_ap)
+==============================================================================
+  gate  new scoring path reproduces the legacy margins   max |diff| 0.0e+00  ok
+  retrieval: 207-phrase library, 216 of 800 units fell back to base prompts
+    xd_violence/A.Beautiful. ['an open-plan office with machines operating', 'an open-plan office with workers walking']
+    xd_violence/A.Beautiful. (fallback)
+    xd_violence/A.Beautiful. ['a college campus square with people sitting on benches', 'a public park with people sitting on benches']
+  gate  subset none  reproduces legacy_none  |diff| 0.0e+00  ok
+  gate  subset R     reproduces legacy_R     |diff| 0.0e+00  ok
+
+  condition                 xd_ap
+  legacy_none              0.4937
+  legacy_shared            0.5633
+  legacy_best              0.4188
+  legacy_R                 0.4531
+  FULL                     0.7181
+  FULL-W                   0.5572
+  FULL-N                   0.7021
+  FULL-P                   0.5842
+  FULL-E                   0.6837
+  FULL-R                   0.7335
+  ladder_W                 0.4870
+  ladder_WN                0.5883
+  ladder_WNP               0.6959
+  FULL_R5raw               0.7282
+  FULL_shared              0.7738
+  FULL_llava               0.6415
+  FULL_Rperm               0.7325
+  legacy_Rperm             0.4589
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  FULL - legacy_none                   +0.2244   95% CI [+0.1807, +0.2680]
+  legacy_R - legacy_none               -0.0407   95% CI [-0.0677, -0.0145]
+  FULL - legacy_best                   +0.2993   95% CI [+0.2463, +0.3528]
+  legacy_R - legacy_best               +0.0342   95% CI [-0.0034, +0.0753]
+  FULL - FULL_llava                    +0.0766   95% CI [+0.0456, +0.1118]
+  FULL - FULL-W                        +0.1609   95% CI [+0.1309, +0.1901]
+  FULL - FULL-N                        +0.0160   95% CI [+0.0046, +0.0276]
+  FULL - FULL-P                        +0.1340   95% CI [+0.1018, +0.1668]
+  FULL - FULL-E                        +0.0345   95% CI [+0.0268, +0.0423]
+  FULL - FULL-R                        -0.0154   95% CI [-0.0246, -0.0067]
+  FULL - FULL_shared                   -0.0557   95% CI [-0.0722, -0.0407]
+  FULL - FULL_R5raw                    -0.0100   95% CI [-0.0139, -0.0061]
+  FULL - FULL_Rperm                    -0.0143   95% CI [-0.0235, -0.0057]
+  legacy_R - legacy_Rperm              -0.0059   95% CI [-0.0251, +0.0269]
+  audit FULL vs legacy_none        gap +0.1481  level share  0.92  macro_m gap +0.0477  ->  CALIBRATION-dominated
+  audit FULL vs FULL-R             gap -0.0063  level share -0.24  macro_m gap -0.0098  ->  NO EFFECT TO DECOMPOSE
+  audit legacy_R vs legacy_none    gap +0.0101  level share  1.88  macro_m gap -0.0170  ->  MIXED
+  saved /home/m251250cs/dazvad/work/tables/normal_side_xd_violence_pe-l.json
+
+==============================================================================
+NWPU_CAMPUS  (242 videos, 43 units, primary auroc)
+==============================================================================
+  gate  new scoring path reproduces the legacy margins   max |diff| 0.0e+00  ok
+  retrieval: 207-phrase library, 0 of 43 units fell back to base prompts
+    D001                     ['a parking lot with a person walking to a parked car', 'a petrol station forecourt with a person walking to a parked car']
+    D002                     ['a campus road beside lecture halls with nobody around', 'a campus road beside lecture halls with light traffic']
+    D003                     ['a campus road beside lecture halls with light traffic', 'a campus road beside lecture halls with cars driving slowly']
+  gate  subset none  reproduces legacy_none  |diff| 0.0e+00  ok
+  gate  subset R     reproduces legacy_R     |diff| 0.0e+00  ok
+
+  condition                 auroc
+  legacy_none              0.6175
+  legacy_shared            0.5884
+  legacy_best              0.6505
+  legacy_R                 0.5699
+  FULL                     0.5239
+  FULL-W                   0.5549
+  FULL-N                   0.5175
+  FULL-P                   0.5923
+  FULL-E                   0.5268
+  FULL-R                   0.5688
+  ladder_W                 0.4976
+  ladder_WN                0.6076
+  ladder_WNP               0.5728
+  FULL_R5raw               0.5204
+  FULL_shared              0.5606
+  FULL_llava               0.6162
+  FULL_nocampus            0.5802
+  legacy_R_nocampus        0.6254
+  FULL_Rperm               0.5434
+  legacy_Rperm             0.5719
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  FULL - legacy_none                   -0.0936   95% CI [-0.1511, -0.0392]
+  legacy_R - legacy_none               -0.0475   95% CI [-0.0941, +0.0014]
+  FULL - legacy_best                   -0.1267   95% CI [-0.2019, -0.0551]
+  legacy_R - legacy_best               -0.0806   95% CI [-0.1339, -0.0255]
+  FULL - FULL_llava                    -0.0923   95% CI [-0.1435, -0.0413]
+  FULL - FULL-W                        -0.0310   95% CI [-0.1005, +0.0334]
+  FULL - FULL-N                        +0.0064   95% CI [-0.0074, +0.0195]
+  FULL - FULL-P                        -0.0684   95% CI [-0.1132, -0.0242]
+  FULL - FULL-E                        -0.0030   95% CI [-0.0097, +0.0025]
+  FULL - FULL-R                        -0.0450   95% CI [-0.0991, +0.0172]
+  FULL - FULL_shared                   -0.0367   95% CI [-0.0658, -0.0032]
+  FULL - FULL_R5raw                    +0.0035   95% CI [-0.0240, +0.0388]
+  FULL - FULL_Rperm                    -0.0195   95% CI [-0.0028, +0.0525]
+  legacy_R - legacy_Rperm              -0.0020   95% CI [+0.0101, +0.0588]
+  FULL_nocampus - FULL                 +0.0563   95% CI [-0.0004, +0.1095]
+  legacy_R_nocampus - legacy_R         +0.0555   95% CI [+0.0143, +0.0995]
+  audit FULL vs legacy_none        gap -0.0936  level share  0.89  macro_m gap -0.0843  ->  MIXED
+  audit FULL vs FULL-R             gap -0.0450  level share  1.51  macro_m gap +0.0150  ->  MIXED
+  audit legacy_R vs legacy_none    gap -0.0475  level share  1.58  macro_m gap +0.0117  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_nwpu_campus_pe-l.json
+
+==============================================================================
+FINAL SYSTEM = N  (selected by the rule on these same data)
+==============================================================================
+
+  shanghaitech: FINAL = N
+    FINAL - legacy_none          0.7869 vs 0.6661  +0.1208  95% CI [+0.0806, +0.1634]
+    FINAL - legacy_best          0.7869 vs 0.7424  +0.0445  95% CI [+0.0181, +0.0732]
+    audit FINAL vs legacy_none  gap +0.1208  level share  0.02  ->  RE-RANKING-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_shanghaitech_pe-l.json
+
+  ucf_crime: FINAL = N
+    FINAL - legacy_none          0.7614 vs 0.8468  -0.0855  95% CI [-0.1520, -0.0270]
+    FINAL - legacy_best          0.7614 vs 0.8525  -0.0911  95% CI [-0.1678, -0.0291]
+    audit FINAL vs legacy_none  gap -0.0855  level share  1.10  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_ucf_crime_pe-l.json
+
+  xd_violence: FINAL = N
+    FINAL - legacy_none          0.5468 vs 0.4937  +0.0530  95% CI [+0.0280, +0.0740]
+    FINAL - legacy_best          0.5468 vs 0.4188  +0.1279  95% CI [+0.0903, +0.1685]
+    audit FINAL vs legacy_none  gap +0.0626  level share  1.05  ->  CALIBRATION-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_xd_violence_pe-l.json
+
+  nwpu_campus: FINAL = N
+    FINAL - legacy_none          0.6408 vs 0.6175  +0.0234  95% CI [-0.0252, +0.0742]
+    FINAL - legacy_best          0.6408 vs 0.6505  -0.0097  95% CI [-0.0513, +0.0273]
+    audit FINAL vs legacy_none  gap +0.0234  level share -0.86  ->  RE-RANKING-dominated
+  saved /home/m251250cs/dazvad/work/tables/normal_side_nwpu_campus_pe-l.json
+
+saved /home/m251250cs/dazvad/work/tables/normal_side_summary_pe-l.json -- copy normal_side_*.json to results/runs/analysis/ on the laptop
