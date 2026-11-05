@@ -1,0 +1,91 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T18:27:58+00:00",
+  "git_commit": "e8de2f0785280162cd96dd6a244ece656a7fcb2b",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "2a47c4390f5497add980f1ac20f814df63d529f42733d01c363c1b4f64d3576f",
+   "ideas_py": "d889dbc6a76a4410a4b0300354a1ac271b1fccfc083e274a81de5c7daaacec1c",
+   "ideas_sweep": "d0ee71aca2ad9c5ba0af5389eb12306fffedfd71181bc0652980adf57ec8850e"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step5",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "decision": {
+  "rule": {
+   "datasets": 4,
+   "positive": 1,
+   "ci_above_zero": 0,
+   "ci_below_zero": 2,
+   "passes": false
+  },
+  "above_wrong_memory": 1,
+  "best": "B"
+ },
+ "old_models": {
+  "M vs old_llava": "no worse"
+ },
+ "predictions": {
+  "L1 camera memory fails the rule against B": {
+   "value": {
+    "datasets": 4,
+    "positive": 1,
+    "ci_above_zero": 0,
+    "ci_below_zero": 2,
+    "passes": false
+   },
+   "holds": true
+  },
+  "L2 camera memory raises NWPU": {
+   "value": 0.00697242317034541,
+   "holds": true
+  },
+  "L3 camera memory lowers XD": {
+   "value": -0.11685308177776665,
+   "holds": true
+  },
+  "L4 own memory beats another unit's, CI above 0, on at least 2": {
+   "value": 1,
+   "holds": false
+  },
+  "L5 memory alone is below B on every dataset": {
+   "value": {
+    "shanghaitech": -0.16589289508229954,
+    "ucf_crime": -0.12243678506215672,
+    "xd_violence": -0.4650844088958085,
+    "nwpu_campus": -0.08572326534344032
+   },
+   "holds": true
+  }
+ }
+}

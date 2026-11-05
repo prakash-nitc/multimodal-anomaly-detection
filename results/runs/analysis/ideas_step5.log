@@ -1,0 +1,116 @@
+loading PE-Core-L-14-336's text encoder ...
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH on pe-l  (107 videos, 12 units, primary auroc)
+==============================================================================
+  frames with no memory yet: 2.1%
+  gate  B == step 3                        0.782956  reference 0.782956  ok
+  gate  C == step 3                        0.756618  reference 0.756618  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.750663  reference 0.750663  ok
+
+  condition           auroc
+  C                  0.7566
+  B                  0.7830
+  M                  0.7503
+  M_wrong            0.7385
+  N_only             0.6171
+  old_llava          0.7507
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  M - B                  -0.0327   95% CI [-0.0617, -0.0037]
+  M - M_wrong            +0.0118   95% CI [-0.0293, +0.0529]
+  M - C                  -0.0063   95% CI [-0.0436, +0.0278]
+  M - old_llava          -0.0004   95% CI [-0.0440, +0.0445]
+  audit M vs B  gap -0.0327  level share -0.07  macro_m gap -0.0246  ->  RE-RANKING-dominated
+
+==============================================================================
+UCF_CRIME on pe-l  (290 videos, 290 units, primary auroc)
+==============================================================================
+  frames with no memory yet: 4.2%
+  gate  B == step 3                        0.855806  reference 0.855806  ok
+  gate  C == step 3                        0.817198  reference 0.817198  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.823482  reference 0.823482  ok
+
+  condition           auroc
+  C                  0.8172
+  B                  0.8558
+  M                  0.8504
+  M_wrong            0.8213
+  N_only             0.7334
+  old_llava          0.8235
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  M - B                  -0.0054   95% CI [-0.0173, +0.0083]
+  M - M_wrong            +0.0291   95% CI [+0.0070, +0.0561]
+  M - C                  +0.0332   95% CI [-0.0000, +0.0694]
+  M - old_llava          +0.0270   95% CI [-0.0228, +0.0835]
+  audit M vs B  gap -0.0054  level share -0.00  macro_m gap +0.0205  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+XD_VIOLENCE on pe-l  (800 videos, 800 units, primary xd_ap)
+==============================================================================
+  frames with no memory yet: 5.5%
+  gate  B == step 3                        0.722330  reference 0.722330  ok
+  gate  C == step 3                        0.634835  reference 0.634835  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.417050  reference 0.417050  ok
+
+  condition           xd_ap
+  C                  0.6348
+  B                  0.7223
+  M                  0.6055
+  M_wrong            0.6110
+  N_only             0.2572
+  old_llava          0.4170
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  M - B                  -0.1169   95% CI [-0.1348, -0.0997]
+  M - M_wrong            -0.0055   95% CI [-0.0226, +0.0108]
+  M - C                  -0.0294   95% CI [-0.0550, -0.0027]
+  M - old_llava          +0.1884   95% CI [+0.1419, +0.2346]
+  audit M vs B  gap -0.0453  level share -0.00  macro_m gap -0.0891  ->  RE-RANKING-dominated
+
+==============================================================================
+NWPU_CAMPUS on pe-l  (242 videos, 43 units, primary auroc)
+==============================================================================
+  frames with no memory yet: 1.8%
+  gate  B == step 3                        0.638771  reference 0.638771  ok
+  gate  C == step 3                        0.668679  reference 0.668679  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.666969  reference 0.666969  ok
+
+  condition           auroc
+  C                  0.6687
+  B                  0.6388
+  M                  0.6457
+  M_wrong            0.6548
+  N_only             0.5530
+  old_llava          0.6670
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  M - B                  +0.0070   95% CI [-0.0142, +0.0299]
+  M - M_wrong            -0.0091   95% CI [-0.0306, +0.0123]
+  M - C                  -0.0229   95% CI [-0.0599, +0.0129]
+  M - old_llava          -0.0212   95% CI [-0.0761, +0.0376]
+  audit M vs B  gap +0.0070  level share  1.35  macro_m gap -0.0043  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+STEP 5 DECISION
+==============================================================================
+  M vs B  positive on 1/4, CI above 0 on 0, CI below 0 on 2  ->  fail
+  M beats another unit's memory, CI above 0, on 1 datasets
+  CURRENT BEST: PE-Core + C, B
+
+  M against the old LLaVA model, same videos: no worse
+
+PRE-REGISTERED PREDICTIONS
+  L1 camera memory fails the rule against B                            HOLDS
+  L2 camera memory raises NWPU                                         HOLDS
+  L3 camera memory lowers XD                                           HOLDS
+  L4 own memory beats another unit's, CI above 0, on at least 2        REFUTED
+  L5 memory alone is below B on every dataset                          HOLDS
+
+saved /home/m251250cs/dazvad/work/tables/ideas_step5_summary.json

@@ -392,6 +392,16 @@ did not both pass. All five predictions held. Step 4 runs, because the bank prov
 four differences within noise, so it is dropped and B stays the current best. The wrong scene is significantly worse
 than B on all four datasets, and S beats it significantly on XD-Violence and NWPU Campus. All five predictions held.
 
+**6 November 2026, step 5 outcome.** All gates passed at commit e8de2f0. M fails the rule against B: it is
+significantly worse on ShanghaiTech (−0.033) and XD-Violence (−0.117), and the other two differences are within
+noise. Its own memory beats another unit's significantly only on UCF-Crime. M is dropped, and B stays the current
+best. Predictions L1, L2, L3 and L5 held; L4 was refuted.
+
+**6 November 2026, step 6 skipped.** The per-video baseline was not run. The reason is a judgement, not a
+measurement: step 5 showed that adjusting each unit separately hurt, and a per-video baseline would remove the
+differences in level between videos that B's gains on UCF-Crime and XD-Violence partly rest on. The round ends here
+with PE-Core + C + B as the current best.
+
 **5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
 passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its
 CI on NWPU Campus is below 0 (−0.014 [−0.026, −0.003]). The current best is PE-Core + C.

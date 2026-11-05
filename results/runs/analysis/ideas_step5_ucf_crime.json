@@ -1,0 +1,139 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T18:23:37+00:00",
+  "git_commit": "e8de2f0785280162cd96dd6a244ece656a7fcb2b",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "2a47c4390f5497add980f1ac20f814df63d529f42733d01c363c1b4f64d3576f",
+   "ideas_py": "d889dbc6a76a4410a4b0300354a1ac271b1fccfc083e274a81de5c7daaacec1c",
+   "ideas_sweep": "d0ee71aca2ad9c5ba0af5389eb12306fffedfd71181bc0652980adf57ec8850e"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step5",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "dataset": "ucf_crime",
+ "backbone": "pe-l",
+ "n_videos": 290,
+ "gates": [
+  {
+   "what": "B == step 3",
+   "got": 0.8558055536991398,
+   "ref": 0.8558055536991398,
+   "ok": true
+  },
+  {
+   "what": "C == step 3",
+   "got": 0.8171975821667437,
+   "ref": 0.8171975821667437,
+   "ok": true
+  },
+  {
+   "what": "same videos as the ViT-L run",
+   "got": 1.0,
+   "ref": 1.0,
+   "ok": true
+  },
+  {
+   "what": "ViT-L LLaVA == step 3",
+   "got": 0.823481533105648,
+   "ref": 0.823481533105648,
+   "ok": true
+  }
+ ],
+ "notes": [],
+ "frames_without_memory": 0.04164632219892581,
+ "gates_passed": true,
+ "point": {
+  "C": 0.8171975821667437,
+  "B": 0.8558055536991398,
+  "M": 0.8504401636749819,
+  "M_wrong": 0.8213248640082684,
+  "N_only": 0.7333687686369831,
+  "old_llava": 0.823481533105648
+ },
+ "comparisons": {
+  "M - B": {
+   "point": -0.005365390024157923,
+   "ci95": [
+    -0.01726251970013317,
+    0.008310192360348396
+   ],
+   "frac_positive": 0.223
+  },
+  "M - M_wrong": {
+   "point": 0.029115299666713446,
+   "ci95": [
+    0.007017621813493746,
+    0.05606164107989369
+   ],
+   "frac_positive": 0.993
+  },
+  "M - C": {
+   "point": 0.03324258150823822,
+   "ci95": [
+    -1.20192551765131e-05,
+    0.06942907371259684
+   ],
+   "frac_positive": 0.975
+  },
+  "M - old_llava": {
+   "point": 0.026958630569333897,
+   "ci95": [
+    -0.022813945575605878,
+    0.08351552656395278
+   ],
+   "frac_positive": 0.856
+  }
+ },
+ "audit": {
+  "M": {
+   "gap": -0.005365390024157923,
+   "level": 0.0,
+   "shape": -0.005365390024157923,
+   "level_share": -0.0,
+   "macro_gap": 0.01589514459958341,
+   "macro_m_gap": 0.020469429057573985,
+   "margin_gap": -0.0067759672182970965,
+   "lambda_gap": {
+    "1": -0.006774690456368027,
+    "10": -0.0066682946118421516,
+    "30": -0.006242652260899928,
+    "100": -0.005365390024157923,
+    "300": -0.0027470727099848657
+   },
+   "offset_mean": -1.9375887795952327e-19,
+   "offset_sd": 4.296445577897072e-18,
+   "verdict": "NO EFFECT TO DECOMPOSE"
+  }
+ }
+}
