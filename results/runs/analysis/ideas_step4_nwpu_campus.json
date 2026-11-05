@@ -1,0 +1,157 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T18:06:34+00:00",
+  "git_commit": "a95eb279c8b74b0530e97faefe5975d3e6f7908f",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "945e5ded98abe31679c634c51da5d5c925e48dbc2c15e39f6abd48f8e827dbf0",
+   "ideas_py": "d889dbc6a76a4410a4b0300354a1ac271b1fccfc083e274a81de5c7daaacec1c",
+   "ideas_sweep": "8dd10d0459d34f1316d2bc3799c2db0f5fdb7e652c04b285071334dff506a98d"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step4",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "dataset": "nwpu_campus",
+ "backbone": "pe-l",
+ "n_videos": 242,
+ "gates": [
+  {
+   "what": "B == step 3",
+   "got": 0.63877143691109,
+   "ref": 0.63877143691109,
+   "ok": true
+  },
+  {
+   "what": "C == step 3",
+   "got": 0.6686793381326199,
+   "ref": 0.6686793381326199,
+   "ok": true
+  },
+  {
+   "what": "same videos as the ViT-L run",
+   "got": 1.0,
+   "ref": 1.0,
+   "ok": true
+  },
+  {
+   "what": "ViT-L LLaVA == step 3",
+   "got": 0.6669692744941582,
+   "ref": 0.6669692744941582,
+   "ok": true
+  }
+ ],
+ "notes": [],
+ "scene_counts": {
+  "a pedestrian walkway on a campus": 34,
+  "a city street with traffic": 1,
+  "a highway with moving vehicles": 0,
+  "the inside of a shop": 0,
+  "a parking lot": 3,
+  "the inside of a house or a room": 0,
+  "a public square with a crowd": 1,
+  "a corridor or a building entrance": 3
+ },
+ "fallback_units": 1,
+ "units": 43,
+ "gates_passed": true,
+ "point": {
+  "C": 0.6686793381326199,
+  "B": 0.63877143691109,
+  "S": 0.6486380386485333,
+  "S_wrong": 0.5863822566229764,
+  "old_llava": 0.6669692744941582
+ },
+ "comparisons": {
+  "S - B": {
+   "point": 0.009866601737443359,
+   "ci95": [
+    -0.004657748623161772,
+    0.02671997847790349
+   ],
+   "frac_positive": 0.889
+  },
+  "S - S_wrong": {
+   "point": 0.06225578202555693,
+   "ci95": [
+    0.021303144961413504,
+    0.10597900310850909
+   ],
+   "frac_positive": 0.999
+  },
+  "S_wrong - B": {
+   "point": -0.05238918028811357,
+   "ci95": [
+    -0.09258838606702362,
+    -0.01522529393780891
+   ],
+   "frac_positive": 0.003
+  },
+  "S - C": {
+   "point": -0.020041299484086617,
+   "ci95": [
+    -0.058593588697629394,
+    0.014113590679988327
+   ],
+   "frac_positive": 0.148
+  },
+  "S - old_llava": {
+   "point": -0.018331235845624905,
+   "ci95": [
+    -0.07874185728730336,
+    0.03924421209553723
+   ],
+   "frac_positive": 0.284
+  }
+ },
+ "audit": {
+  "S": {
+   "gap": 0.009866601737443359,
+   "level": 0.015208270995411943,
+   "shape": -0.005341669257968584,
+   "level_share": 1.5413889604662123,
+   "macro_gap": -0.005977030154628249,
+   "macro_m_gap": -0.004161190476660193,
+   "margin_gap": 0.009120710173157742,
+   "lambda_gap": {
+    "1": 0.00912101575120372,
+    "10": 0.00913054978624206,
+    "30": 0.009225670120431961,
+    "100": 0.009866601737443359,
+    "300": 0.009958947422974762
+   },
+   "offset_mean": 0.009563771939663799,
+   "offset_sd": 0.007060232341870702,
+   "verdict": "NO EFFECT TO DECOMPOSE"
+  }
+ }
+}

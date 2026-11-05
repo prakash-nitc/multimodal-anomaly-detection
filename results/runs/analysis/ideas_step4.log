@@ -1,0 +1,148 @@
+loading PE-Core-L-14-336's text encoder ...
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH on pe-l  (107 videos, 12 units, primary auroc)
+==============================================================================
+  units using the whole bank: 0 of 12
+     11  a pedestrian walkway on a campus
+      0  a city street with traffic
+      0  a highway with moving vehicles
+      0  the inside of a shop
+      0  a parking lot
+      0  the inside of a house or a room
+      0  a public square with a crowd
+      1  a corridor or a building entrance
+  gate  B == step 3                        0.782956  reference 0.782956  ok
+  gate  C == step 3                        0.756618  reference 0.756618  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.750663  reference 0.750663  ok
+
+  condition           auroc
+  C                  0.7566
+  B                  0.7830
+  S                  0.7724
+  S_wrong            0.7502
+  old_llava          0.7507
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  S - B                  -0.0106   95% CI [-0.0256, +0.0057]
+  S - S_wrong            +0.0222   95% CI [-0.0090, +0.0555]
+  S_wrong - B            -0.0327   95% CI [-0.0538, -0.0121]
+  S - C                  +0.0158   95% CI [-0.0234, +0.0538]
+  S - old_llava          +0.0217   95% CI [-0.0216, +0.0629]
+  audit S vs B  gap -0.0106  level share  1.02  macro_m gap +0.0049  ->  MIXED
+
+==============================================================================
+UCF_CRIME on pe-l  (290 videos, 290 units, primary auroc)
+==============================================================================
+  units using the whole bank: 63 of 290
+      4  a pedestrian walkway on a campus
+     58  a city street with traffic
+      7  a highway with moving vehicles
+     81  the inside of a shop
+     36  a parking lot
+      1  the inside of a house or a room
+      4  a public square with a crowd
+     36  a corridor or a building entrance
+  gate  B == step 3                        0.855806  reference 0.855806  ok
+  gate  C == step 3                        0.817198  reference 0.817198  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.823482  reference 0.823482  ok
+
+  condition           auroc
+  C                  0.8172
+  B                  0.8558
+  S                  0.8516
+  S_wrong            0.8106
+  old_llava          0.8235
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  S - B                  -0.0042   95% CI [-0.0311, +0.0205]
+  S - S_wrong            +0.0410   95% CI [-0.0145, +0.1030]
+  S_wrong - B            -0.0452   95% CI [-0.1019, -0.0039]
+  S - C                  +0.0344   95% CI [-0.0035, +0.0739]
+  S - old_llava          +0.0281   95% CI [-0.0266, +0.0916]
+  audit S vs B  gap -0.0042  level share  0.86  macro_m gap -0.0087  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+XD_VIOLENCE on pe-l  (800 videos, 800 units, primary xd_ap)
+==============================================================================
+  units using the whole bank: 411 of 800
+      5  a pedestrian walkway on a campus
+     73  a city street with traffic
+     90  a highway with moving vehicles
+      8  the inside of a shop
+     20  a parking lot
+     17  the inside of a house or a room
+    134  a public square with a crowd
+     42  a corridor or a building entrance
+  gate  B == step 3                        0.722330  reference 0.722330  ok
+  gate  C == step 3                        0.634835  reference 0.634835  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.417050  reference 0.417050  ok
+
+  condition           xd_ap
+  C                  0.6348
+  B                  0.7223
+  S                  0.7087
+  S_wrong            0.6687
+  old_llava          0.4170
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  S - B                  -0.0137   95% CI [-0.0360, +0.0062]
+  S - S_wrong            +0.0399   95% CI [+0.0127, +0.0651]
+  S_wrong - B            -0.0536   95% CI [-0.0669, -0.0415]
+  S - C                  +0.0738   95% CI [+0.0472, +0.0999]
+  S - old_llava          +0.2916   95% CI [+0.2419, +0.3418]
+  audit S vs B  gap +0.0023  level share  0.86  macro_m gap +0.0032  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+NWPU_CAMPUS on pe-l  (242 videos, 43 units, primary auroc)
+==============================================================================
+  units using the whole bank: 1 of 43
+     34  a pedestrian walkway on a campus
+      1  a city street with traffic
+      0  a highway with moving vehicles
+      0  the inside of a shop
+      3  a parking lot
+      0  the inside of a house or a room
+      1  a public square with a crowd
+      3  a corridor or a building entrance
+  gate  B == step 3                        0.638771  reference 0.638771  ok
+  gate  C == step 3                        0.668679  reference 0.668679  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L LLaVA == step 3              0.666969  reference 0.666969  ok
+
+  condition           auroc
+  C                  0.6687
+  B                  0.6388
+  S                  0.6486
+  S_wrong            0.5864
+  old_llava          0.6670
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  S - B                  +0.0099   95% CI [-0.0047, +0.0267]
+  S - S_wrong            +0.0623   95% CI [+0.0213, +0.1060]
+  S_wrong - B            -0.0524   95% CI [-0.0926, -0.0152]
+  S - C                  -0.0200   95% CI [-0.0586, +0.0141]
+  S - old_llava          -0.0183   95% CI [-0.0787, +0.0392]
+  audit S vs B  gap +0.0099  level share  1.54  macro_m gap -0.0042  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+STEP 4 DECISION
+==============================================================================
+  S vs B  positive on 1/4, CI above 0 on 0, CI below 0 on 0  ->  fail
+  S beats the wrong scene, CI above 0, on 2 datasets
+  CURRENT BEST: PE-Core + C, B
+
+  S against the old LLaVA model, same videos: no worse
+
+PRE-REGISTERED PREDICTIONS
+  K1 scene choice fails the rule against B                                 HOLDS
+  K2 scene choice is above B on NWPU                                       HOLDS
+  K3 the right scene beats the wrong scene, CI above 0, on at least 2      HOLDS
+  K4 XD falls back to the whole bank more often than any other dataset     HOLDS
+  K5 scene choice lowers XD                                                HOLDS
+
+saved /home/m251250cs/dazvad/work/tables/ideas_step4_summary.json
