@@ -6,6 +6,7 @@ here without a dated addendum there.
     python notebooks/ideas_sweep.py selftest     # laptop, no data, ~1 min
     python notebooks/ideas_sweep.py step1        # server, after fixes_sweep.py
     python notebooks/ideas_sweep.py step2        # server
+    python notebooks/ideas_sweep.py step3        # server
 
 Step 1 checks the current best before anything is built on it:
 
@@ -17,6 +18,12 @@ Step 2 averages the two encoders' margins:
 
     E     PE-Core + C with plain ViT-L
     EC    PE-Core + C with ViT-L + C
+
+Step 3 takes three ideas from the papers, each on top of C:
+
+    B     a frozen bank of concrete anomalous actions as the abnormal side
+    T     the same bank, scored by anomaly type (NOVA)
+    D     different templates on each side (Flashback)
 """
 from __future__ import annotations
 
@@ -472,6 +479,278 @@ def _fixes_fixture(ds, spec, data, enc, logged):
 
 
 # ======================================================================
+# step 3: the papers' ideas
+# ======================================================================
+STEP3 = ("B", "T", "D", "BD", "TD")
+STEP3_PAIRS = tuple((k, "C") for k in STEP3) + tuple((k, "old_llava") for k in STEP3)
+COMBO = {"B": "BD", "T": "TD"}
+
+
+def top_half_mean(S):
+    """Each row's mean over its top 50% of columns (NOVA eq. 4)."""
+    k = int(np.ceil(S.shape[1] / 2.0))
+    return np.partition(S, S.shape[1] - k, axis=1)[:, -k:].mean(axis=1)
+
+
+def margin_by_type(F, N, groups):
+    """Top-half mean over the normal phrases, against the best-matching anomaly type."""
+    abnormal = np.max([top_half_mean(F @ g.T) for g in groups], axis=0)
+    return abnormal - top_half_mean(F @ N.T)
+
+
+def choose_papers(rows):
+    """What replaces PE-Core + C, if anything, from each dataset's comparisons. A pair
+    is only considered when its two parts pass alone."""
+    r = {k: fs.passes([x["%s - C" % k] for x in rows]) for k in STEP3}
+    gain = {k: float(np.mean([x["%s - C" % k]["point"] for x in rows])) for k in STEP3}
+    bank = [k for k in ("B", "T") if r[k]["passes"]]
+    candidates = bank + (["D"] if r["D"]["passes"] else [])
+    if bank and r["D"]["passes"]:
+        pair = COMBO[max(bank, key=lambda k: gain[k])]
+        if r[pair]["passes"]:
+            candidates.append(pair)
+    return {"rule": r, "gain": gain, "bank_useful": bool(bank),
+            "best": max(candidates, key=lambda k: gain[k]) if candidates else "C"}
+
+
+def papers_one(ds, spec, data, enc, B, fake=False, log=print):
+    b = fs.Bench(ds, spec, data, enc, B, fake)
+    met = b.R.metric
+    report = {"dataset": ds, "backbone": TAG, "n_videos": len(data["F"]), "gates": [], "notes": b.notes}
+    log("\n" + "=" * 78 + "\n%s on %s  (%d videos, primary %s)\n" % (
+        ds.upper(), TAG, b.R.n, spec["metric"]) + "=" * 78)
+    normal, base_a = fs.phrases({"C"}, b.R.base_n, b.R.base_a)
+    N, T_N = enc(normal), enc([ideas.template_normal(p) for p in normal])
+    A = enc(ideas.BANK_PHRASES)
+    groups = [enc(v) for v in ideas.BANK.values()]
+    T_groups = [enc([ideas.template_anomalous(p, c) for p in v]) for c, v in ideas.BANK.items()]
+    T_A = np.concatenate(T_groups)
+    T_base = enc([ideas.template_anomalous(p) for p in base_a])
+
+    M = {"C": b.margins({"C"}),
+         "B": [ns.margins_proto(f, N, A) for f in data["F"]],
+         "T": [margin_by_type(f, N, groups) for f in data["F"]],
+         "D": [ns.margins_proto(f, T_N, T_base) for f in data["F"]],
+         "BD": [ns.margins_proto(f, T_N, T_A) for f in data["F"]],
+         "TD": [margin_by_type(f, T_N, T_groups) for f in data["F"]]}
+    S = {k: b.score(m) for k, m in M.items()}
+
+    # ---------------------------------------------------------------- gates
+    ok_all = True
+
+    def gate(what, got, ref):
+        nonlocal ok_all
+        ok = ref is not None and abs(got - ref) <= ns.TOL_PATH
+        ok_all &= ok
+        report["gates"].append({"what": what, "got": got, "ref": ref, "ok": ok})
+        log("  gate  %-34s %.6f  reference %s  %s" % (
+            what, got, "none" if ref is None else "%.6f" % ref, "ok" if ok else "MISMATCH"))
+
+    same = [ns.margins_proto(f, N, enc(base_a)) for f in data["F"]]
+    gate("C through the new scoring path", float(max(np.max(np.abs(x - y)) for x, y in zip(same, M["C"]))), 0.0)
+    table = json.load(open(os.path.join(ns.TABLES, "fixes_%s_%s.json" % (ds, TAG))))["table"]
+    gate("PE-Core C == fixes run", met(S["C"]), table.get("none|C"))
+    z = fs.scores_loader("vitl")(ds)
+    same_videos = list(z["names"]) == list(data["names"])
+    gate("same videos as the ViT-L run", float(same_videos), 1.0)
+    S["old_llava"] = ns.split_by_lengths(z["llava"], z["lengths"])
+    vit = json.load(open(os.path.join(ns.TABLES, "fixes_%s_vitl.json" % ds)))["table"]
+    if same_videos:
+        gate("ViT-L LLaVA == fixes run", met(S["old_llava"]), vit.get("llava|base"))
+    report["gates_passed"] = bool(ok_all)
+    if not ok_all:
+        log("  VALIDATION FAILED -- %s is not reported." % ds)
+        return report, {}
+
+    # ---------------------------------------------------------------- points
+    point = {k: met(v) for k, v in S.items()}
+    log("\n  %-16s %8s" % ("condition", spec["metric"]))
+    for k, v in point.items():
+        log("  %-16s %8.4f" % (k, v))
+    report["point"] = point
+    if spec["metric"] == "xd_ap":
+        report["secondary"] = {
+            k: ns.weighted_secondary(np.concatenate(S[k]), np.concatenate(data["wpos"]),
+                                     np.concatenate(data["wneg"])) for k in ("C",) + STEP3}
+    tie = {k: float(1.0 - len(np.unique(np.concatenate(v))) / sum(len(x) for x in v)) for k, v in S.items()}
+    report["tied_score_fraction"] = tie
+    log("  tied score fraction, worst: %s %.4f" % max(tie.items(), key=lambda kv: kv[1]))
+
+    # ---------------------------------------------------------------- bootstrap
+    log("\n  paired bootstrap: %d resamples of %d videos, seed %d" % (B, b.R.n, SEED))
+    need = {k for p in STEP3_PAIRS for k in p}
+    draws = ns.paired_bootstrap({k: S[k] for k in need}, met, b.R.n, B, SEED)
+    report["comparisons"] = {}
+    for x, y in STEP3_PAIRS:
+        g = draws[x] - draws[y]
+        r = {"point": point[x] - point[y], "ci95": ns.ci95(g), "frac_positive": float(np.mean(g > 0))}
+        report["comparisons"]["%s - %s" % (x, y)] = r
+        log("  %-22s %+.4f   95%% CI [%+.4f, %+.4f]" % ("%s - %s" % (x, y), r["point"], *r["ci95"]))
+
+    # ---------------------------------------------------------------- audit
+    from measurement_audit import split, verdict
+    report["audit"] = {}
+    for k in STEP3:
+        r = split(M[k], M["C"], data["L"], spec["w"], spec["normalize"])
+        r["verdict"] = verdict(r)
+        report["audit"][k] = r
+        log("  audit %-3s vs C  gap %+.4f  level share %5.2f  macro_m gap %+.4f  ->  %s"
+            % (k, r["gap"], r["level_share"], r["macro_m_gap"], r["verdict"]))
+    return report, {k: S[k] for k in STEP3}
+
+
+def predictions_step3(reports, decision):
+    cmp = lambda d, name: reports[d]["comparisons"][name]             # noqa: E731
+    res = {}
+    passed = [k for k in ("B", "T", "D") if decision["rule"][k]["passes"]]
+    res["J1 at least one of B, T and D passes the rule against PE-Core + C"] = {
+        "value": passed, "holds": len(passed) > 0}
+    v = reports["xd_violence"]["point"]["T"]
+    res["J2 scoring by type reaches 0.70 on XD"] = {"value": v, "holds": v >= 0.70}
+    v = cmp("shanghaitech", "T - C")["point"]
+    res["J3 scoring by type lowers ShanghaiTech"] = {"value": v, "holds": v < 0}
+    v = cmp("ucf_crime", "D - C")["point"]
+    res["J4 different templates raise UCF"] = {"value": v, "holds": v > 0}
+    v = {"ucf_crime": max(reports["ucf_crime"]["point"][k] for k in STEP3),
+         "xd_violence": max(reports["xd_violence"]["point"][k] for k in STEP3)}
+    res["J5 nothing reaches NOVA's UCF 89.86 or XD 84.82"] = {
+        "value": v, "holds": v["ucf_crime"] < 0.8986 and v["xd_violence"] < 0.8482}
+    return res
+
+
+def summarise_step3(args, reports):
+    rows = [reports[d]["comparisons"] for d in ORDER]
+    decision = choose_papers(rows)
+    print("\n" + "=" * 78 + "\nSTEP 3 DECISION\n" + "=" * 78)
+    for k in STEP3:
+        r = decision["rule"][k]
+        print("  %-3s vs C  mean gain %+.4f, positive on %d/%d, CI above 0 on %d, CI below 0 on %d  ->  %s"
+              % (k, decision["gain"][k], r["positive"], r["datasets"], r["ci_above_zero"], r["ci_below_zero"],
+                 "PASS" if r["passes"] else "fail"))
+    print("  bank useful, so step 4 runs: %s" % ("yes" if decision["bank_useful"] else "no"))
+    print("  CURRENT BEST: %s" % ("PE-Core + C" if decision["best"] == "C" else "PE-Core + C, " + decision["best"]))
+    verdicts = {}
+    print("\n  against the old LLaVA model, same videos:")
+    for x in STEP3:
+        v = compare_with_old([r["%s - old_llava" % x] for r in rows])
+        verdicts["%s vs old_llava" % x] = v
+        print("    %-3s %s" % (x, v))
+    pr = predictions_step3(reports, decision)
+    print("\nPRE-REGISTERED PREDICTIONS")
+    for k, r in pr.items():
+        print("  %-70s %s" % (k, "HOLDS" if r["holds"] else "REFUTED"))
+    out = {"manifest": manifest(args), "decision": decision, "old_models": verdicts, "predictions": pr}
+    path = os.path.join(ns.TABLES, "ideas_step3_summary.json")
+    json.dump(out, open(path, "w"), indent=1, default=float)
+    print("\nsaved %s" % path)
+    return out
+
+
+def save_step3(args, ds, rep, keep, data):
+    json.dump({"manifest": manifest(args), **rep},
+              open(os.path.join(ns.TABLES, "ideas_step3_%s.json" % ds), "w"), indent=1, default=float)
+    if rep["gates_passed"]:
+        np.savez(os.path.join(ns.TABLES, "ideas_step3_scores_%s.npz" % ds),
+                 names=np.array(data["names"], dtype=object),
+                 lengths=np.array([len(x) for x in data["F"]]),
+                 **{k: np.concatenate(v).astype(np.float64) for k, v in keep.items()})
+
+
+def step3(args):
+    specs = {d: ns.spec_for(d, TAG) for d in ORDER}
+    print("loading %s's text encoder ..." % ns.BACKBONES[TAG][0])
+    enc = ns.text_encoder(TAG)
+    reports = {}
+    for ds in ORDER:
+        data = ns.load(ds, specs[ds])
+        rep, keep = papers_one(ds, specs[ds], data, enc, args.boot)
+        save_step3(args, ds, rep, keep, data)
+        reports[ds] = rep
+    if not all(r["gates_passed"] for r in reports.values()):
+        print("a dataset failed its gates -- no decision")
+        return 1
+    summarise_step3(args, reports)
+    return 0
+
+
+def selftest_step3(expect):
+    bank = ideas.BANK_PHRASES
+    expect(len(ideas.BANK) == 12 and all(len(v) == 4 for v in ideas.BANK.values()), "twelve types of four phrases")
+    expect(len(set(bank)) == 48, "no phrase repeats in the bank")
+    expect(not set(bank) & set(fixes.CALM_NORMAL + ideas.CALM_SECOND), "no bank phrase is on the normal side")
+    n, a = ideas.template_normal("x"), ideas.template_anomalous("x", "y")
+    expect(n != a and "x" in n and "x" in a and "y" in a, "the two sides get different wrappers")
+    expect(n == "Normal Scene:\n- x\n", "the normal wrapper matches Flashback's yaml")
+    expect(a == "Anomalous Scene:\n    Action Category: y\n    Scene Description: x\n",
+           "the anomalous wrapper matches Flashback's yaml")
+
+    S = np.array([[1.0, 2.0, 3.0, 4.0], [4.0, 0.0, 2.0, 0.0]])
+    expect(np.allclose(top_half_mean(S), [3.5, 3.0]), "top-half mean, even count")
+    expect(np.allclose(top_half_mean(S[:, :3]), [2.5, 3.0]), "top-half mean rounds up, odd count")
+    F = np.eye(3)
+    N = np.array([[0.0, 0.0, 1.0]])
+    g = [np.array([[1.0, 0.0, 0.0]]), np.array([[0.0, 1.0, 0.0]])]
+    expect(np.allclose(margin_by_type(F, N, g), [1.0, 1.0, -1.0]), "scoring by type takes the best-matching type")
+
+    ok = {"point": 0.02, "ci95": [0.01, 0.03]}
+    big = {"point": 0.04, "ci95": [0.01, 0.07]}
+    flat = {"point": 0.01, "ci95": [-0.01, 0.03]}
+    bad = {"point": -0.02, "ci95": [-0.03, -0.01]}
+    win, lose = [ok, ok, flat, flat], [ok, ok, flat, bad]
+
+    def rows(**kw):
+        return [{"%s - C" % k: kw.get(k, lose)[i] for k in STEP3} for i in range(4)]
+    expect(choose_papers(rows())["best"] == "C", "nothing passes -> PE-Core + C stays")
+    expect(not choose_papers(rows(D=win))["bank_useful"], "only templates pass -> the bank is not useful")
+    expect(choose_papers(rows(B=win))["best"] == "B" and choose_papers(rows(B=win))["bank_useful"], "only B passes -> B")
+    strong = [big, big, flat, flat]
+    expect(choose_papers(rows(B=win, T=strong))["best"] == "T", "B and T both pass -> the larger gain")
+    expect(choose_papers(rows(T=win, D=win, TD=strong))["best"] == "TD", "parts and pair pass, pair larger -> pair")
+    expect(choose_papers(rows(T=strong, D=win))["best"] == "T", "the pair fails -> the best single")
+    expect(choose_papers(rows(TD=strong))["best"] == "C", "a pair is ignored unless its parts pass")
+
+    print("\n  step 3, end to end, on synthetic results in a temporary folder ...")
+    tables, logged = ns.TABLES, []
+    enc = ns.fake_encoder()
+    rng = np.random.default_rng(3)
+    with tempfile.TemporaryDirectory() as tmp:
+        ns.TABLES = tmp
+        try:
+            reports = {}
+            fargs = SimpleNamespace(step="selftest", boot=20)
+            first = {}
+            for ds in ORDER:
+                spec = ns.spec_for(ds, "vitl")
+                data = ns.fake_dataset(ds, spec, rng)
+                first[ds] = data
+                for t in fs.ENCODERS:
+                    fs.save(fargs, ds, t, *_fixes_fixture(ds, spec, data, enc, logged), data)
+                rep, keep = papers_one(ds, spec, data, enc, 20, fake=True, log=logged.append)
+                expect(rep["gates_passed"], "%s: every gate passes" % ds)
+                expect(set(rep["comparisons"]) == {"%s - %s" % p for p in STEP3_PAIRS}, "%s: all comparisons made" % ds)
+                expect(len({round(rep["point"][k], 9) for k in STEP3}) == 5, "%s: the five conditions differ" % ds)
+                expect(all(len(x) == len(y) for x, y in zip(keep["TD"], data["F"])), "%s: one score per frame" % ds)
+                save_step3(fargs, ds, rep, keep, data)
+                reports[ds] = rep
+
+            ds = ORDER[0]
+            path = os.path.join(tmp, "fixes_%s_%s.json" % (ds, TAG))
+            saved = json.load(open(path))
+            saved["table"]["none|C"] += 0.01
+            json.dump(saved, open(path, "w"))
+            rep, keep = papers_one(ds, ns.spec_for(ds, "vitl"), first[ds], enc, 5, fake=True, log=logged.append)
+            expect(not rep["gates_passed"] and keep == {}, "a mismatched reference stops the dataset")
+
+            out = summarise_step3(fargs, reports)
+            expect(out["decision"]["best"] in ("C",) + STEP3, "the decision names a current best")
+            expect(len(out["predictions"]) == 5 and len(out["old_models"]) == 5,
+                   "all predictions and old-model verdicts made")
+            expect(os.path.exists(os.path.join(tmp, "ideas_step3_summary.json")), "summary saved")
+        finally:
+            ns.TABLES = tables
+
+
+# ======================================================================
 # self-test (no data, no GPU)
 # ======================================================================
 def selftest(args):
@@ -548,16 +827,17 @@ def selftest(args):
         finally:
             ns.TABLES = tables
     selftest_step2(expect)
+    selftest_step3(expect)
     print("\n%s" % ("SELF-TEST FAILED: %s" % fails if fails else "self-test passed"))
     return 1 if fails else 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["selftest", "step1", "step2"])
+    ap.add_argument("step", choices=["selftest", "step1", "step2", "step3"])
     ap.add_argument("--boot", type=int, default=1000)
     args = ap.parse_args()
-    return {"selftest": selftest, "step1": step1, "step2": step2}[args.step](args)
+    return {"selftest": selftest, "step1": step1, "step2": step2, "step3": step3}[args.step](args)
 
 
 if __name__ == "__main__":

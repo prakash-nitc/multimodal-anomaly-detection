@@ -161,9 +161,88 @@ python notebooks/ideas_sweep.py selftest
 python notebooks/ideas_sweep.py step2 2>&1 | tee ~/dazvad/logs/ideas_step2.log
 ```
 
+---
+
+## Step 3: the papers' ideas (written 5 November 2026, before scoring)
+
+### Question
+
+NOVA and Flashback score higher than we do, mostly through better text and scoring. Do their
+ideas help PE-Core + C, across crime and campus benchmarks, with one setup for all of them?
+
+### Conditions (PE-Core, no sentence; normal side is always base + C)
+
+| Name | Definition | Source |
+|---|---|---|
+| C | Current best | Step 1 |
+| B | Abnormal side replaced by a bank of 48 concrete actions, 12 types of 4 (`ideas.BANK`), mean-pooled as now | NOVA and ASK-Hint: rich, concrete text |
+| T | The same bank, scored by type: for each type the mean of its top 2 phrases, then the highest type, minus the mean of the top half of the normal phrases | NOVA eq. 4 and the max over classes, p.5 |
+| D | Different templates per side on the existing phrases: Flashback's two yaml wrappers, with "anomalous event" as the action category | Flashback Fig. 2, p.4 |
+| BD | B with the templates, each phrase's type as its action category | |
+| TD | T with the templates, likewise | |
+
+The twelve types are fighting, weapon, theft, vandalism, road accident, fire or explosion, riot or arrest,
+abuse, falling, vehicle among pedestrians, sudden running and trespass. The bank is the same for every dataset.
+
+Differences from the sources:
+- NOVA writes 20 normal and 20 anomaly phrases per class, with a class list and hand-written guidance per
+  dataset. Here there are 4 per type, one shared normal side and one list for all datasets. ASK-Hint found
+  that too many prompts hurt, and NOVA's own banks are made for crime benchmarks only.
+- No geometry-guided rewriting, visual anchor or motion gate.
+- NOVA uses α = 0.9 and τ = 0.03. Here α stays 1 and λ stays 100, so nothing else changes.
+- Flashback retrieves captions per segment from a memory with a video encoder. Here only its templates are
+  used, with frames and prototypes. Its wrappers contain "Normal" and "Anomalous", so D overlaps with K, which failed step 1.
+
+### Gates
+
+For each dataset: C through the new scoring path gives identical margins; C matches the fixes run; the
+videos and the old LLaVA scores match the ViT-L run (difference ≤ 1e-5).
+
+### Decision rule
+
+- B, T and D are each judged against C by the rule.
+- B and T use the same bank, so if both pass, the larger mean gain goes on.
+- A pair (BD or TD) counts only if its two parts pass alone and the pair also passes. A pair whose
+  parts failed is reported but cannot be chosen, even if it looks best.
+- The current best becomes whichever eligible condition has the largest mean gain. If nothing passes,
+  PE-Core + C stays.
+- **Step 4 runs only if B or T passes**, because it needs a useful bank. Otherwise it is skipped.
+- Against the old LLaVA model, the same three words as step 1 apply.
+
+### Predictions
+
+| | Prediction | Why |
+|---|---|---|
+| J1 | At least one of B, T and D passes the rule against C | These ideas account for much of the papers' lead |
+| J2 | T reaches 0.70 on XD-Violence | NOVA's class-name template with this scoring reaches 77.94 |
+| J3 | T lowers ShanghaiTech | Our per-phrase scoring helped XD and hurt ShanghaiTech in the full stack |
+| J4 | D raises UCF-Crime | Flashback's largest gain from templates was on UCF |
+| J5 | Nothing reaches NOVA's UCF-Crime 89.86 or XD-Violence 84.82 | Our setup is not tailored to those datasets |
+
+### Limitations
+
+- An LLM (Claude) wrote the bank before scoring, knowing these benchmarks' anomaly classes and our earlier
+  results. The vehicle and running types come close to ShanghaiTech's and NWPU's classes, and most others to UCF-Crime's
+  and XD-Violence's. So the bank is not independent of these datasets. Only the sealed test can show whether it transfers.
+- One wording, one size and one set of types. Other banks would give other numbers.
+- T compares individual phrases while B compares prototypes, so their margins differ in scale, and λ
+  is not retuned for T. That may limit T.
+
+### Run
+
+```bash
+cd ~/dazvad/repo && git pull && source ~/dazvad/venv/bin/activate
+python notebooks/ideas_sweep.py selftest
+python notebooks/ideas_sweep.py step3 2>&1 | tee ~/dazvad/logs/ideas_step3.log
+```
+
 ## Addenda
 
 Changes to a step after its commit go here, dated, and never in that step's text.
+
+**5 November 2026, step 2 outcome.** All gates passed at commit e312e97. E and EC both fail the
+rule against C: only XD-Violence gains significantly, and EC is significantly worse on UCF-Crime.
+The idea is dropped, and the current best stays PE-Core + C. Predictions H2 and H3 held; H1 and H4 were refuted.
 
 **5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
 passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its
