@@ -1,0 +1,103 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T16:18:31+00:00",
+  "git_commit": "e312e97cced1473e1c07ded67da8fa7537c6e07c",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "a136f545d2c66a0c403777e07b8bae7f8ec9ed856e63dd7b290e25aa78a2fa8d",
+   "ideas_py": "b94bc61d4f77826116ca847f0c7b3e7eb051597a55125b94f645bb75336810d4",
+   "ideas_sweep": "edb8c3030479dc2adb414df74e8eff7d394493b1e4d3eb6e6b68a53b114cb2cb"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step2",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "decision": {
+  "rule": {
+   "E": {
+    "datasets": 4,
+    "positive": 2,
+    "ci_above_zero": 1,
+    "ci_below_zero": 0,
+    "passes": false
+   },
+   "EC": {
+    "datasets": 4,
+    "positive": 2,
+    "ci_above_zero": 1,
+    "ci_below_zero": 1,
+    "passes": false
+   }
+  },
+  "gain": {
+   "E": 0.010732723814280087,
+   "EC": 0.00025183099235126516
+  },
+  "best": "C"
+ },
+ "old_models": {
+  "E vs old_llava": "no worse",
+  "E vs old_plain": "better",
+  "EC vs old_llava": "no worse",
+  "EC vs old_plain": "better"
+ },
+ "predictions": {
+  "H1 at least one combination passes the rule against PE-Core + C": {
+   "value": [],
+   "holds": false
+  },
+  "H2 EC is above PE-Core + C on XD": {
+   "value": 0.03103569947717255,
+   "holds": true
+  },
+  "H3 neither combination has a CI above 0 on UCF": {
+   "value": {
+    "E": [
+     -0.040643819598292955,
+     0.025516071001404003
+    ],
+    "EC": [
+     -0.06411061139612124,
+     -0.00025065917770451243
+    ]
+   },
+   "holds": true
+  },
+  "H4 both combinations are above PE-Core + C on NWPU": {
+   "value": {
+    "E": 0.0076999922749869665,
+    "EC": -0.001834702811904787
+   },
+   "holds": false
+  }
+ }
+}

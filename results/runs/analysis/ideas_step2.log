@@ -1,0 +1,140 @@
+loading both text encoders ...
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+  ViT-L-14 / laion2b_s32b_b82k: learned logit scale 99.998 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH, both encoders  (107 videos, primary auroc)
+==============================================================================
+  gate  same videos, frames and labels     1.000000  reference 1.000000  ok
+  gate  PE-Core C == fixes run             0.756618  reference 0.756618  ok
+  gate  ViT-L plain == fixes run           0.706749  reference 0.706749  ok
+  gate  ViT-L C == fixes run               0.723674  reference 0.723674  ok
+  gate  ViT-L LLaVA == fixes run           0.750663  reference 0.750663  ok
+
+  condition           auroc
+  C                  0.7566
+  vit                0.7067
+  vit_C              0.7237
+  old_llava          0.7507
+  old_plain          0.7067
+  E                  0.7544
+  EC                 0.7568
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  E - C                  -0.0022   95% CI [-0.0224, +0.0183]
+  EC - C                 +0.0001   95% CI [-0.0259, +0.0251]
+  EC - E                 +0.0023   95% CI [-0.0139, +0.0174]
+  E - old_llava          +0.0038   95% CI [-0.0265, +0.0336]
+  EC - old_llava         +0.0061   95% CI [-0.0236, +0.0352]
+  E - old_plain          +0.0477   95% CI [+0.0219, +0.0765]
+  EC - old_plain         +0.0500   95% CI [+0.0232, +0.0795]
+  audit E   vs C  gap -0.0022  level share -5.92  macro_m gap -0.0427  ->  NO EFFECT TO DECOMPOSE
+  audit EC  vs C  gap +0.0001  level share 107.59  macro_m gap -0.0358  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+UCF_CRIME, both encoders  (290 videos, primary auroc)
+==============================================================================
+  gate  same videos, frames and labels     1.000000  reference 1.000000  ok
+  gate  PE-Core C == fixes run             0.817198  reference 0.817198  ok
+  gate  ViT-L plain == fixes run           0.756136  reference 0.756136  ok
+  gate  ViT-L C == fixes run               0.734821  reference 0.734821  ok
+  gate  ViT-L LLaVA == fixes run           0.823482  reference 0.823482  ok
+
+  condition           auroc
+  C                  0.8172
+  vit                0.7561
+  vit_C              0.7348
+  old_llava          0.8235
+  old_plain          0.7561
+  E                  0.8116
+  EC                 0.7889
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  E - C                  -0.0056   95% CI [-0.0406, +0.0255]
+  EC - C                 -0.0283   95% CI [-0.0641, -0.0003]
+  EC - E                 -0.0227   95% CI [-0.0495, -0.0003]
+  E - old_llava          -0.0119   95% CI [-0.0706, +0.0407]
+  EC - old_llava         -0.0346   95% CI [-0.0909, +0.0103]
+  E - old_plain          +0.0555   95% CI [+0.0093, +0.1140]
+  EC - old_plain         +0.0327   95% CI [-0.0248, +0.1002]
+  audit E   vs C  gap -0.0056  level share -0.14  macro_m gap +0.0023  ->  NO EFFECT TO DECOMPOSE
+  audit EC  vs C  gap -0.0283  level share  0.63  macro_m gap -0.0159  ->  MIXED
+
+==============================================================================
+XD_VIOLENCE, both encoders  (800 videos, primary xd_ap)
+==============================================================================
+  gate  same videos, frames and labels     1.000000  reference 1.000000  ok
+  gate  PE-Core C == fixes run             0.634835  reference 0.634835  ok
+  gate  ViT-L plain == fixes run           0.624274  reference 0.624274  ok
+  gate  ViT-L C == fixes run               0.613551  reference 0.613551  ok
+  gate  ViT-L LLaVA == fixes run           0.417050  reference 0.417050  ok
+
+  condition           xd_ap
+  C                  0.6348
+  vit                0.6243
+  vit_C              0.6136
+  old_llava          0.4170
+  old_plain          0.6243
+  E                  0.6778
+  EC                 0.6659
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  E - C                  +0.0430   95% CI [+0.0271, +0.0586]
+  EC - C                 +0.0310   95% CI [+0.0094, +0.0520]
+  EC - E                 -0.0120   95% CI [-0.0287, +0.0026]
+  E - old_llava          +0.2608   95% CI [+0.2103, +0.3126]
+  EC - old_llava         +0.2488   95% CI [+0.2009, +0.2984]
+  E - old_plain          +0.0536   95% CI [+0.0305, +0.0772]
+  EC - old_plain         +0.0416   95% CI [+0.0164, +0.0684]
+  audit E   vs C  gap +0.0280  level share  0.73  macro_m gap +0.0032  ->  CALIBRATION-dominated
+  audit EC  vs C  gap +0.0175  level share  1.52  macro_m gap -0.0092  ->  MIXED
+
+==============================================================================
+NWPU_CAMPUS, both encoders  (242 videos, primary auroc)
+==============================================================================
+  gate  same videos, frames and labels     1.000000  reference 1.000000  ok
+  gate  PE-Core C == fixes run             0.668679  reference 0.668679  ok
+  gate  ViT-L plain == fixes run           0.659089  reference 0.659089  ok
+  gate  ViT-L C == fixes run               0.652812  reference 0.652812  ok
+  gate  ViT-L LLaVA == fixes run           0.666969  reference 0.666969  ok
+
+  condition           auroc
+  C                  0.6687
+  vit                0.6591
+  vit_C              0.6528
+  old_llava          0.6670
+  old_plain          0.6591
+  E                  0.6764
+  EC                 0.6668
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  E - C                  +0.0077   95% CI [-0.0284, +0.0434]
+  EC - C                 -0.0018   95% CI [-0.0450, +0.0364]
+  EC - E                 -0.0095   95% CI [-0.0274, +0.0065]
+  E - old_llava          +0.0094   95% CI [-0.0231, +0.0409]
+  EC - old_llava         -0.0001   95% CI [-0.0406, +0.0377]
+  E - old_plain          +0.0173   95% CI [-0.0238, +0.0566]
+  EC - old_plain         +0.0078   95% CI [-0.0378, +0.0543]
+  audit E   vs C  gap +0.0077  level share  2.48  macro_m gap -0.0096  ->  NO EFFECT TO DECOMPOSE
+  audit EC  vs C  gap -0.0018  level share -4.46  macro_m gap -0.0172  ->  NO EFFECT TO DECOMPOSE
+
+==============================================================================
+STEP 2 DECISION
+==============================================================================
+  E   vs C  mean gain +0.0107, positive on 2/4, CI above 0 on 1, CI below 0 on 0  ->  fail
+  EC  vs C  mean gain +0.0003, positive on 2/4, CI above 0 on 1, CI below 0 on 1  ->  fail
+  CURRENT BEST: PE-Core + C
+
+  against the old models, same videos:
+    E   vs old_llava  no worse
+    E   vs old_plain  better
+    EC  vs old_llava  no worse
+    EC  vs old_plain  better
+
+PRE-REGISTERED PREDICTIONS
+  H1 at least one combination passes the rule against PE-Core + C        REFUTED
+  H2 EC is above PE-Core + C on XD                                       HOLDS
+  H3 neither combination has a CI above 0 on UCF                         HOLDS
+  H4 both combinations are above PE-Core + C on NWPU                     REFUTED
+
+saved /home/m251250cs/dazvad/work/tables/ideas_step2_summary.json
