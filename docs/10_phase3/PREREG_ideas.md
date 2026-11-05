@@ -402,6 +402,9 @@ measurement: step 5 showed that adjusting each unit separately hurt, and a per-v
 differences in level between videos that B's gains on UCF-Crime and XD-Violence partly rest on. The round ends here
 with PE-Core + C + B as the current best.
 
+**6 November 2026, freeze.** PE-Core + C + B is frozen as the chosen model in `PREREG_sealed_ubnormal.md`,
+which also fixes the single sealed test on UBnormal.
+
 **5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
 passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its
 CI on NWPU Campus is below 0 (−0.014 [−0.026, −0.003]). The current best is PE-Core + C.
