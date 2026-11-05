@@ -1,0 +1,199 @@
+loading PE-Core-L-14-336's text encoder ...
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+
+==============================================================================
+SHANGHAITECH on pe-l  (107 videos, primary auroc)
+==============================================================================
+  gate  calm phrases via the second path   0.000000  reference 0.000000  ok
+  gate  PE-Core base == fixes run          0.666125  reference 0.666125  ok
+  gate  PE-Core C == fixes run             0.756618  reference 0.756618  ok
+  gate  PE-Core CK == fixes run            0.779614  reference 0.779614  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L llava == fixes run           0.750663  reference 0.750663  ok
+  gate  ViT-L base == fixes run            0.706749  reference 0.706749  ok
+
+  condition           auroc
+  base               0.6661
+  C                  0.7566
+  CK                 0.7796
+  C2                 0.7232
+  C2K                0.7549
+  C_places           0.7527
+  C_people           0.7468
+  C2_places          0.7307
+  C2_people          0.6962
+  old_llava          0.7507
+  old_plain          0.7067
+
+  paired bootstrap: 1000 resamples of 107 videos, seed 20261104
+  C2 - base              +0.0571   95% CI [+0.0240, +0.0942]
+  C - base               +0.0905   95% CI [+0.0440, +0.1424]
+  C2 - C                 -0.0334   95% CI [-0.0534, -0.0166]
+  CK - base              +0.1135   95% CI [+0.0726, +0.1577]
+  CK - C                 +0.0230   95% CI [+0.0079, +0.0372]
+  C2K - base             +0.0888   95% CI [+0.0575, +0.1252]
+  C2K - C2               +0.0317   95% CI [+0.0185, +0.0457]
+  C2K - CK               -0.0247   95% CI [-0.0391, -0.0108]
+  base - old_llava       -0.0845   95% CI [-0.1305, -0.0421]
+  C - old_llava          +0.0060   95% CI [-0.0320, +0.0491]
+  CK - old_llava         +0.0290   95% CI [-0.0083, +0.0694]
+  base - old_plain       -0.0406   95% CI [-0.0853, +0.0021]
+  C - old_plain          +0.0499   95% CI [+0.0104, +0.0924]
+  CK - old_plain         +0.0729   95% CI [+0.0324, +0.1168]
+  audit C2   vs base  gap +0.0571  level share -0.22  macro_m gap +0.1168  ->  RE-RANKING-dominated
+  audit C2K  vs base  gap +0.0888  level share  0.01  macro_m gap +0.1315  ->  RE-RANKING-dominated
+  audit CK   vs base  gap +0.1135  level share  0.00  macro_m gap +0.1590  ->  RE-RANKING-dominated
+
+==============================================================================
+UCF_CRIME on pe-l  (290 videos, primary auroc)
+==============================================================================
+  gate  calm phrases via the second path   0.000000  reference 0.000000  ok
+  gate  PE-Core base == fixes run          0.846834  reference 0.846834  ok
+  gate  PE-Core C == fixes run             0.817198  reference 0.817198  ok
+  gate  PE-Core CK == fixes run            0.861503  reference 0.861503  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L llava == fixes run           0.823482  reference 0.823482  ok
+  gate  ViT-L base == fixes run            0.756136  reference 0.756136  ok
+
+  condition           auroc
+  base               0.8468
+  C                  0.8172
+  CK                 0.8615
+  C2                 0.8348
+  C2K                0.8665
+  C_places           0.8378
+  C_people           0.8124
+  C2_places          0.8343
+  C2_people          0.8386
+  old_llava          0.8235
+  old_plain          0.7561
+
+  paired bootstrap: 1000 resamples of 290 videos, seed 20261104
+  C2 - base              -0.0120   95% CI [-0.0570, +0.0334]
+  C - base               -0.0296   95% CI [-0.0849, +0.0243]
+  C2 - C                 +0.0176   95% CI [+0.0003, +0.0358]
+  CK - base              +0.0147   95% CI [-0.0257, +0.0614]
+  CK - C                 +0.0443   95% CI [+0.0237, +0.0681]
+  C2K - base             +0.0197   95% CI [-0.0162, +0.0633]
+  C2K - C2               +0.0317   95% CI [+0.0148, +0.0546]
+  C2K - CK               +0.0050   95% CI [-0.0094, +0.0212]
+  base - old_llava       +0.0234   95% CI [-0.0315, +0.0779]
+  C - old_llava          -0.0063   95% CI [-0.0688, +0.0528]
+  CK - old_llava         +0.0380   95% CI [-0.0096, +0.0859]
+  base - old_plain       +0.0907   95% CI [+0.0154, +0.1736]
+  C - old_plain          +0.0611   95% CI [-0.0144, +0.1528]
+  CK - old_plain         +0.1054   95% CI [+0.0304, +0.1998]
+  audit C2   vs base  gap -0.0120  level share  2.54  macro_m gap +0.0316  ->  MIXED
+  audit C2K  vs base  gap +0.0197  level share  0.01  macro_m gap +0.0502  ->  RE-RANKING-dominated
+  audit CK   vs base  gap +0.0147  level share -0.41  macro_m gap +0.0468  ->  RE-RANKING-dominated
+
+==============================================================================
+XD_VIOLENCE on pe-l  (800 videos, primary xd_ap)
+==============================================================================
+  gate  calm phrases via the second path   0.000000  reference 0.000000  ok
+  gate  PE-Core base == fixes run          0.493719  reference 0.493719  ok
+  gate  PE-Core C == fixes run             0.634835  reference 0.634835  ok
+  gate  PE-Core CK == fixes run            0.682556  reference 0.682556  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L llava == fixes run           0.417050  reference 0.417050  ok
+  gate  ViT-L base == fixes run            0.624274  reference 0.624274  ok
+
+  condition           xd_ap
+  base               0.4937
+  C                  0.6348
+  CK                 0.6826
+  C2                 0.6223
+  C2K                0.6393
+  C_places           0.5857
+  C_people           0.6278
+  C2_places          0.5398
+  C2_people          0.6555
+  old_llava          0.4170
+  old_plain          0.6243
+
+  paired bootstrap: 1000 resamples of 800 videos, seed 20261104
+  C2 - base              +0.1285   95% CI [+0.0956, +0.1568]
+  C - base               +0.1411   95% CI [+0.1061, +0.1696]
+  C2 - C                 -0.0126   95% CI [-0.0244, +0.0008]
+  CK - base              +0.1888   95% CI [+0.1530, +0.2216]
+  CK - C                 +0.0477   95% CI [+0.0348, +0.0616]
+  C2K - base             +0.1456   95% CI [+0.1085, +0.1803]
+  C2K - C2               +0.0170   95% CI [+0.0030, +0.0305]
+  C2K - CK               -0.0433   95% CI [-0.0580, -0.0279]
+  base - old_llava       +0.0767   95% CI [+0.0188, +0.1380]
+  C - old_llava          +0.2178   95% CI [+0.1676, +0.2693]
+  CK - old_llava         +0.2655   95% CI [+0.2154, +0.3183]
+  base - old_plain       -0.1306   95% CI [-0.1808, -0.0790]
+  C - old_plain          +0.0106   95% CI [-0.0251, +0.0445]
+  CK - old_plain         +0.0583   95% CI [+0.0226, +0.0925]
+  audit C2   vs base  gap +0.1195  level share  0.95  macro_m gap +0.0385  ->  CALIBRATION-dominated
+  audit C2K  vs base  gap +0.1359  level share  0.89  macro_m gap +0.0556  ->  MIXED
+  audit CK   vs base  gap +0.1487  level share  0.91  macro_m gap +0.0541  ->  MIXED
+
+==============================================================================
+NWPU_CAMPUS on pe-l  (242 videos, primary auroc)
+==============================================================================
+  gate  calm phrases via the second path   0.000000  reference 0.000000  ok
+  gate  PE-Core base == fixes run          0.617474  reference 0.617474  ok
+  gate  PE-Core C == fixes run             0.668679  reference 0.668679  ok
+  gate  PE-Core CK == fixes run            0.654422  reference 0.654422  ok
+  gate  same videos as the ViT-L run       1.000000  reference 1.000000  ok
+  gate  ViT-L llava == fixes run           0.666969  reference 0.666969  ok
+  gate  ViT-L base == fixes run            0.659089  reference 0.659089  ok
+
+  condition           auroc
+  base               0.6175
+  C                  0.6687
+  CK                 0.6544
+  C2                 0.6695
+  C2K                0.6543
+  C_places           0.6662
+  C_people           0.6541
+  C2_places          0.6638
+  C2_people          0.6546
+  old_llava          0.6670
+  old_plain          0.6591
+
+  paired bootstrap: 1000 resamples of 242 videos, seed 20261104
+  C2 - base              +0.0520   95% CI [+0.0138, +0.0911]
+  C - base               +0.0512   95% CI [+0.0083, +0.0994]
+  C2 - C                 +0.0008   95% CI [-0.0280, +0.0296]
+  CK - base              +0.0369   95% CI [-0.0104, +0.0874]
+  CK - C                 -0.0143   95% CI [-0.0259, -0.0034]
+  C2K - base             +0.0368   95% CI [-0.0048, +0.0782]
+  C2K - C2               -0.0152   95% CI [-0.0292, -0.0029]
+  C2K - CK               -0.0001   95% CI [-0.0355, +0.0338]
+  base - old_llava       -0.0495   95% CI [-0.1108, +0.0082]
+  C - old_llava          +0.0017   95% CI [-0.0606, +0.0602]
+  CK - old_llava         -0.0125   95% CI [-0.0822, +0.0506]
+  base - old_plain       -0.0416   95% CI [-0.1188, +0.0287]
+  C - old_plain          +0.0096   95% CI [-0.0658, +0.0839]
+  CK - old_plain         -0.0047   95% CI [-0.0859, +0.0717]
+  audit C2   vs base  gap +0.0520  level share  0.23  macro_m gap +0.0546  ->  RE-RANKING-dominated
+  audit C2K  vs base  gap +0.0368  level share  0.23  macro_m gap +0.0253  ->  RE-RANKING-dominated
+  audit CK   vs base  gap +0.0369  level share -0.05  macro_m gap +0.0472  ->  RE-RANKING-dominated
+
+==============================================================================
+STEP 1 DECISION
+==============================================================================
+  second wording vs plain    positive on 3/4, CI above 0 on 3, CI below 0 on 0  ->  PASS
+  keywords on top of C       positive on 3/4, CI above 0 on 3, CI below 0 on 1  ->  fail
+  keywords on the second wording: positive on 3/4
+  CURRENT BEST: PE-Core C
+
+  against the old models, same videos:
+    base  vs old_llava  worse on 1
+    base  vs old_plain  worse on 1
+    C     vs old_llava  no worse
+    C     vs old_plain  no worse
+    CK    vs old_llava  no worse
+    CK    vs old_plain  better
+
+PRE-REGISTERED PREDICTIONS
+  G1 the second wording passes the rule against plain PE-Core                        HOLDS
+  G2 the two wordings differ within noise on at least 3 of 4 datasets                REFUTED
+  G3 side keywords pass the rule on top of C                                         REFUTED
+  G4 the second wording also lowers UCF-Crime                                        HOLDS
+  G5 C beats the old LLaVA model on XD with a CI above 0, and no CI is below 0       HOLDS
+
+saved /home/m251250cs/dazvad/work/tables/ideas_step1_summary.json

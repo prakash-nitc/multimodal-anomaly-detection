@@ -1,0 +1,125 @@
+{
+ "manifest": {
+  "started_utc": "2026-11-05T14:45:00+00:00",
+  "git_commit": "7168814854e585a3f9505bc3bce094ce7b58f50e",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca",
+   "prereg_fixes": "055a56cdedec72c0eb6ddac05812aea4c3011d8eb8d3f738ab3e97af745abf51",
+   "fixes_py": "32ab541b436c77f573a31659ccc2265e57b0b2da670bbefab69ab92627635321",
+   "fixes_sweep": "5efe7532daafff5c3501e11a88476a64075b7d69822bc1c259d827a5dabf2e38",
+   "prereg_ideas": "caa600b49f5f54adcf496745d6cec10729145b7168c33a8d6326c25a4e302547",
+   "ideas_py": "b94bc61d4f77826116ca847f0c7b3e7eb051597a55125b94f645bb75336810d4",
+   "ideas_sweep": "0ef8c48a15a0c9d88e25f5e52764acf899d6895f5cc5d5c0bc5fb05c5eb825dd"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "step1",
+   "boot": 1000
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5,
+   "N_SHUFFLE": 5,
+   "FIXES": [
+    "C",
+    "A",
+    "K",
+    "S"
+   ]
+  }
+ },
+ "decision": {
+  "wording": {
+   "datasets": 4,
+   "positive": 3,
+   "ci_above_zero": 3,
+   "ci_below_zero": 0,
+   "passes": true
+  },
+  "keywords": {
+   "datasets": 4,
+   "positive": 3,
+   "ci_above_zero": 3,
+   "ci_below_zero": 1,
+   "passes": false
+  },
+  "keywords_second_wording_positive": 3,
+  "keywords_adopted": false,
+  "best": "C"
+ },
+ "old_models": {
+  "base vs old_llava": "worse on 1",
+  "base vs old_plain": "worse on 1",
+  "C vs old_llava": "no worse",
+  "C vs old_plain": "no worse",
+  "CK vs old_llava": "no worse",
+  "CK vs old_plain": "better"
+ },
+ "predictions": {
+  "G1 the second wording passes the rule against plain PE-Core": {
+   "value": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 3,
+    "ci_below_zero": 0,
+    "passes": true
+   },
+   "holds": true
+  },
+  "G2 the two wordings differ within noise on at least 3 of 4 datasets": {
+   "value": [
+    "xd_violence",
+    "nwpu_campus"
+   ],
+   "holds": false
+  },
+  "G3 side keywords pass the rule on top of C": {
+   "value": {
+    "datasets": 4,
+    "positive": 3,
+    "ci_above_zero": 3,
+    "ci_below_zero": 1,
+    "passes": false
+   },
+   "holds": false
+  },
+  "G4 the second wording also lowers UCF-Crime": {
+   "value": -0.011991392265685907,
+   "holds": true
+  },
+  "G5 C beats the old LLaVA model on XD with a CI above 0, and no CI is below 0": {
+   "value": {
+    "shanghaitech": [
+     -0.03203291226784781,
+     0.04913508409261312
+    ],
+    "ucf_crime": [
+     -0.06875057363067218,
+     0.05277022745738889
+    ],
+    "xd_violence": [
+     0.1675828128713543,
+     0.26931258022638455
+    ],
+    "nwpu_campus": [
+     -0.060625173538624046,
+     0.060213480511824874
+    ]
+   },
+   "holds": true
+  }
+ }
+}
