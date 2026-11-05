@@ -306,6 +306,75 @@ python notebooks/ideas_sweep.py selftest
 python notebooks/ideas_sweep.py step4 2>&1 | tee ~/dazvad/logs/ideas_step4.log
 ```
 
+---
+
+## Step 5: camera memory (written 5 November 2026, before scoring)
+
+### Question
+
+Everything so far compares a frame with text. Does it help to also ask how unlike this camera's own past a
+frame is? That needs no words and no training, and it directly tests the idea that normal depends on the camera.
+
+### How it works
+
+- **Memory:** each unit (camera, scene or video, as before) goes through its videos in name order and its frames
+  in time order. A frame sees only earlier frames of its own unit, so no future frame is used.
+- **Novelty:** 1 minus the mean cosine similarity to the 5 nearest earlier frames, leaving out the latest w sampled
+  frames, where w is the dataset's existing smoothing window (31 on ShanghaiTech, 5 elsewhere). Those frames would match almost anything.
+- **Combining:** the margin plus the novelty's deviation from its unit mean, scaled to the margin's spread within
+  that unit. So the two count equally, and the margin's level across units is kept. No weight is tuned.
+- A frame with fewer than 5 earlier frames has no novelty and keeps its margin.
+
+### Conditions (PE-Core, no sentence; text is B throughout)
+
+| Name | Definition |
+|---|---|
+| B | Current best |
+| M | B with the unit's own memory |
+| M_wrong | Control: B with the next unit's frames as memory, all of them, combined the same way |
+| N_only | Novelty alone, with no text, point estimate only |
+| C, old_llava | As before, for reference |
+
+### Gates
+
+For each dataset: B and C match step 3; the videos and the old LLaVA scores match the earlier runs
+(difference ≤ 1e-5). A dataset that fails is not reported.
+
+### Decision rule
+
+M replaces B only if **both** hold:
+- M passes the rule against B;
+- M beats M_wrong with a CI above 0 on at least 2 datasets, so the gain comes from the unit's own past.
+
+If either fails, M is dropped and B stays.
+
+### Predictions
+
+| | Prediction | Why |
+|---|---|---|
+| L1 | M fails the rule against B | Our simple visual anchor failed, and novelty also fires on harmless change |
+| L2 | M raises NWPU Campus | Scene-dependent anomalies are what a camera's own past should catch |
+| L3 | M lowers XD-Violence | Its videos contain edits and scene cuts, which look novel without being anomalies |
+| L4 | M beats M_wrong, CI above 0, on at least 2 datasets | A camera's own past should be the better reference |
+| L5 | N_only is below B on every dataset | Novelty alone knows nothing about what is dangerous |
+
+### Limitations
+
+- Memory comes from test videos, which contain anomalies, and a long incident soon starts to look familiar. In
+  deployment it would start from setup footage, and the benchmarks' normal training videos are not used here.
+- On UCF-Crime and XD-Violence each video is its own unit, so memory is short and starts empty.
+- The scale and mean of the novelty use the whole unit, so this is not yet fully causal. A live system would need running estimates.
+- Name order stands in for time order between a unit's videos, and those videos may not be consecutive.
+- k = 5 and equal weighting are single choices, not tuned or tested.
+
+### Run
+
+```bash
+cd ~/dazvad/repo && git pull && source ~/dazvad/venv/bin/activate
+python notebooks/ideas_sweep.py selftest
+python notebooks/ideas_sweep.py step5 2>&1 | tee ~/dazvad/logs/ideas_step5.log
+```
+
 ## Addenda
 
 Changes to a step after its commit go here, dated, and never in that step's text.
@@ -318,6 +387,10 @@ The idea is dropped, and the current best stays PE-Core + C. Predictions H2 and 
 gaining significantly on UCF-Crime and XD-Violence, and is the current best. T fails (significantly worse on
 ShanghaiTech), D fails (significantly worse on NWPU Campus), and the pairs cannot be chosen because their parts
 did not both pass. All five predictions held. Step 4 runs, because the bank proved useful.
+
+**5 November 2026, step 4 outcome.** All gates passed at commit a95eb27. S fails the rule against B, with all
+four differences within noise, so it is dropped and B stays the current best. The wrong scene is significantly worse
+than B on all four datasets, and S beats it significantly on XD-Violence and NWPU Campus. All five predictions held.
 
 **5 November 2026, step 1 outcome.** All gates passed at commit 7168814. The second wording
 passes the rule, so C counts as real. K fails: it gains significantly on three datasets, but its

@@ -8,6 +8,7 @@ here without a dated addendum there.
     python notebooks/ideas_sweep.py step2        # server
     python notebooks/ideas_sweep.py step3        # server
     python notebooks/ideas_sweep.py step4        # server, after step3
+    python notebooks/ideas_sweep.py step5        # server, after step3
 
 Step 1 checks the current best before anything is built on it:
 
@@ -29,6 +30,10 @@ Step 3 takes three ideas from the papers, each on top of C:
 Step 4 chooses part of the bank from what the camera shows:
 
     S     each unit's calm frames pick a scene, and that scene's types form the abnormal side
+
+Step 5 adds what the camera has seen before, with no text:
+
+    M     B plus how unlike the unit's earlier frames each frame is
 """
 from __future__ import annotations
 
@@ -1007,6 +1012,296 @@ def selftest_step4(expect):
 
 
 # ======================================================================
+# step 5: camera memory
+# ======================================================================
+STEP5_PAIRS = (("M", "B"), ("M", "M_wrong"), ("M", "C"), ("M", "old_llava"))
+KNN = 5
+
+
+def novelty(X, gap, k=KNN):
+    """1 - mean similarity to the k nearest earlier frames, leaving out the last gap
+    frames. NaN until k earlier frames exist."""
+    X = np.asarray(X, dtype=np.float32)
+    S = X @ X.T
+    out = np.full(len(X), np.nan)
+    for t in range(len(X)):
+        end = t - gap
+        if end >= k:
+            out[t] = 1.0 - np.partition(S[t, :end], end - k)[end - k:].mean()
+    return out
+
+
+def novelty_against(X, Y, k=KNN):
+    """The same measure against another unit's frames, all of them."""
+    S = np.asarray(X, dtype=np.float32) @ np.asarray(Y, dtype=np.float32).T
+    k = min(k, S.shape[1])
+    return 1.0 - np.partition(S, S.shape[1] - k, axis=1)[:, -k:].mean(axis=1)
+
+
+def add_memory(m, n):
+    """The margin plus the novelty's deviation from its mean, scaled to the margin's
+    spread, so each counts equally and the margin's level across units is kept."""
+    ok = np.isfinite(n)
+    if ok.sum() < 2 or np.std(n[ok]) == 0:
+        return np.asarray(m, dtype=float).copy()
+    d = np.zeros_like(n, dtype=float)
+    d[ok] = (n[ok] - n[ok].mean()) / np.std(n[ok])
+    return m + np.std(m) * d
+
+
+def unit_order(data):
+    """unit -> its video indices in name order."""
+    out = {}
+    for i, u in enumerate(data["units"]):
+        out.setdefault(u, []).append(i)
+    return {u: sorted(v, key=lambda i: data["names"][i]) for u, v in sorted(out.items())}
+
+
+def with_memory(data, base, gap, wrong=False):
+    """-> (combined margins, novelty alone), one array per video."""
+    units = unit_order(data)
+    names = list(units)
+    M, N = [None] * len(base), [None] * len(base)
+    for j, u in enumerate(names):
+        idx = units[u]
+        X = np.concatenate([data["F"][i] for i in idx])
+        if wrong:
+            other = units[names[(j + 1) % len(names)]]
+            n = novelty_against(X, np.concatenate([data["F"][i] for i in other]))
+        else:
+            n = novelty(X, gap)
+        c = add_memory(np.concatenate([base[i] for i in idx]), n)
+        ends = np.cumsum([len(data["F"][i]) for i in idx])[:-1]
+        for i, part, q in zip(idx, np.split(c, ends), np.split(n, ends)):
+            M[i], N[i] = part, q
+    return M, N
+
+
+def choose_memory(rows):
+    """Memory replaces B only if it passes the rule and also beats another unit's memory."""
+    r = fs.passes([x["M - B"] for x in rows])
+    ctrl = sum(x["M - M_wrong"]["ci95"][0] > 0 for x in rows)
+    ok = r["passes"] and ctrl >= 2
+    return {"rule": r, "above_wrong_memory": ctrl, "best": "M" if ok else "B"}
+
+
+def memory_one(ds, spec, data, enc, B, fake=False, log=print):
+    b = fs.Bench(ds, spec, data, enc, B, fake)
+    met = b.R.metric
+    report = {"dataset": ds, "backbone": TAG, "n_videos": len(data["F"]), "gates": [], "notes": b.notes}
+    log("\n" + "=" * 78 + "\n%s on %s  (%d videos, %d units, primary %s)\n" % (
+        ds.upper(), TAG, b.R.n, len(b.R.unit_list), spec["metric"]) + "=" * 78)
+    normal, _ = fs.phrases({"C"}, b.R.base_n, b.R.base_a)
+    N, A = enc(normal), enc(ideas.BANK_PHRASES)
+    base = [ns.margins_proto(f, N, A) for f in data["F"]]
+    own, alone = with_memory(data, base, spec["w"])
+    wrong, _ = with_memory(data, base, spec["w"], wrong=True)
+    known = np.concatenate(alone)
+    report["frames_without_memory"] = float(np.mean(~np.isfinite(known)))
+    centred = [np.nan_to_num(x - np.nanmean(known)) for x in alone]
+    M = {"C": b.margins({"C"}), "B": base, "M": own, "M_wrong": wrong, "N_only": centred}
+    S = {k: b.score(m) for k, m in M.items()}
+    log("  frames with no memory yet: %.1f%%" % (100.0 * report["frames_without_memory"]))
+
+    # ---------------------------------------------------------------- gates
+    ok_all = True
+
+    def gate(what, got, ref):
+        nonlocal ok_all
+        ok = ref is not None and abs(got - ref) <= ns.TOL_PATH
+        ok_all &= ok
+        report["gates"].append({"what": what, "got": got, "ref": ref, "ok": ok})
+        log("  gate  %-34s %.6f  reference %s  %s" % (
+            what, got, "none" if ref is None else "%.6f" % ref, "ok" if ok else "MISMATCH"))
+
+    prev = json.load(open(os.path.join(ns.TABLES, "ideas_step3_%s.json" % ds)))["point"]
+    gate("B == step 3", met(S["B"]), prev.get("B"))
+    gate("C == step 3", met(S["C"]), prev.get("C"))
+    z = fs.scores_loader("vitl")(ds)
+    same_videos = list(z["names"]) == list(data["names"])
+    gate("same videos as the ViT-L run", float(same_videos), 1.0)
+    S["old_llava"] = ns.split_by_lengths(z["llava"], z["lengths"])
+    if same_videos:
+        gate("ViT-L LLaVA == step 3", met(S["old_llava"]), prev.get("old_llava"))
+    report["gates_passed"] = bool(ok_all)
+    if not ok_all:
+        log("  VALIDATION FAILED -- %s is not reported." % ds)
+        return report, {}
+
+    # ---------------------------------------------------------------- points
+    point = {k: met(v) for k, v in S.items()}
+    log("\n  %-16s %8s" % ("condition", spec["metric"]))
+    for k, v in point.items():
+        log("  %-16s %8.4f" % (k, v))
+    report["point"] = point
+    if spec["metric"] == "xd_ap":
+        report["secondary"] = {
+            k: ns.weighted_secondary(np.concatenate(S[k]), np.concatenate(data["wpos"]),
+                                     np.concatenate(data["wneg"])) for k in ("B", "M", "M_wrong", "N_only")}
+
+    # ---------------------------------------------------------------- bootstrap
+    log("\n  paired bootstrap: %d resamples of %d videos, seed %d" % (B, b.R.n, SEED))
+    need = {k for p in STEP5_PAIRS for k in p}
+    draws = ns.paired_bootstrap({k: S[k] for k in need}, met, b.R.n, B, SEED)
+    report["comparisons"] = {}
+    for x, y in STEP5_PAIRS:
+        g = draws[x] - draws[y]
+        r = {"point": point[x] - point[y], "ci95": ns.ci95(g), "frac_positive": float(np.mean(g > 0))}
+        report["comparisons"]["%s - %s" % (x, y)] = r
+        log("  %-22s %+.4f   95%% CI [%+.4f, %+.4f]" % ("%s - %s" % (x, y), r["point"], *r["ci95"]))
+
+    # ---------------------------------------------------------------- audit
+    from measurement_audit import split, verdict
+    r = split(M["M"], M["B"], data["L"], spec["w"], spec["normalize"])
+    r["verdict"] = verdict(r)
+    report["audit"] = {"M": r}
+    log("  audit M vs B  gap %+.4f  level share %5.2f  macro_m gap %+.4f  ->  %s"
+        % (r["gap"], r["level_share"], r["macro_m_gap"], r["verdict"]))
+    return report, {k: S[k] for k in ("M", "M_wrong", "N_only")}
+
+
+def predictions_step5(reports, decision):
+    cmp = lambda d, name: reports[d]["comparisons"][name]             # noqa: E731
+    res = {}
+    res["L1 camera memory fails the rule against B"] = {"value": decision["rule"], "holds": not decision["rule"]["passes"]}
+    v = cmp("nwpu_campus", "M - B")["point"]
+    res["L2 camera memory raises NWPU"] = {"value": v, "holds": v > 0}
+    v = cmp("xd_violence", "M - B")["point"]
+    res["L3 camera memory lowers XD"] = {"value": v, "holds": v < 0}
+    v = decision["above_wrong_memory"]
+    res["L4 own memory beats another unit's, CI above 0, on at least 2"] = {"value": v, "holds": v >= 2}
+    v = {d: reports[d]["point"]["N_only"] - reports[d]["point"]["B"] for d in ORDER}
+    res["L5 memory alone is below B on every dataset"] = {"value": v, "holds": all(x < 0 for x in v.values())}
+    return res
+
+
+def summarise_step5(args, reports):
+    rows = [reports[d]["comparisons"] for d in ORDER]
+    decision = choose_memory(rows)
+    r = decision["rule"]
+    print("\n" + "=" * 78 + "\nSTEP 5 DECISION\n" + "=" * 78)
+    print("  M vs B  positive on %d/%d, CI above 0 on %d, CI below 0 on %d  ->  %s"
+          % (r["positive"], r["datasets"], r["ci_above_zero"], r["ci_below_zero"], "PASS" if r["passes"] else "fail"))
+    print("  M beats another unit's memory, CI above 0, on %d datasets" % decision["above_wrong_memory"])
+    print("  CURRENT BEST: PE-Core + C, %s" % ("B with camera memory" if decision["best"] == "M" else "B"))
+    verdict = compare_with_old([x["M - old_llava"] for x in rows])
+    print("\n  M against the old LLaVA model, same videos: %s" % verdict)
+    pr = predictions_step5(reports, decision)
+    print("\nPRE-REGISTERED PREDICTIONS")
+    for k, x in pr.items():
+        print("  %-68s %s" % (k, "HOLDS" if x["holds"] else "REFUTED"))
+    out = {"manifest": manifest(args), "decision": decision, "old_models": {"M vs old_llava": verdict}, "predictions": pr}
+    path = os.path.join(ns.TABLES, "ideas_step5_summary.json")
+    json.dump(out, open(path, "w"), indent=1, default=float)
+    print("\nsaved %s" % path)
+    return out
+
+
+def save_step5(args, ds, rep, keep, data):
+    json.dump({"manifest": manifest(args), **rep},
+              open(os.path.join(ns.TABLES, "ideas_step5_%s.json" % ds), "w"), indent=1, default=float)
+    if rep["gates_passed"]:
+        np.savez(os.path.join(ns.TABLES, "ideas_step5_scores_%s.npz" % ds),
+                 names=np.array(data["names"], dtype=object),
+                 lengths=np.array([len(x) for x in data["F"]]),
+                 **{k: np.concatenate(v).astype(np.float64) for k, v in keep.items()})
+
+
+def step5(args):
+    specs = {d: ns.spec_for(d, TAG) for d in ORDER}
+    print("loading %s's text encoder ..." % ns.BACKBONES[TAG][0])
+    enc = ns.text_encoder(TAG)
+    reports = {}
+    for ds in ORDER:
+        data = ns.load(ds, specs[ds])
+        rep, keep = memory_one(ds, specs[ds], data, enc, args.boot)
+        save_step5(args, ds, rep, keep, data)
+        reports[ds] = rep
+    if not all(r["gates_passed"] for r in reports.values()):
+        print("a dataset failed its gates -- no decision")
+        return 1
+    summarise_step5(args, reports)
+    return 0
+
+
+def selftest_step5(expect):
+    X = np.array([[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 1.0], [1.0, 0.0]])
+    n = novelty(X, gap=0, k=2)
+    expect(np.isnan(n[:2]).all(), "no score until k earlier frames exist")
+    expect(np.allclose(n[2:], [0.0, 1.0, 0.0]), "a frame unlike the past is novel, a familiar one is not")
+    n = novelty(X, gap=1, k=2)
+    expect(np.isnan(n[:3]).all() and np.allclose(n[3:], [1.0, 0.0]), "the gap leaves out the latest frames")
+    Y = np.random.default_rng(0).standard_normal((30, 8))
+    Y /= np.linalg.norm(Y, axis=1, keepdims=True)
+    a, c = novelty(Y, 2)[:20], novelty(np.concatenate([Y[:20], Y[:10] * -1.0]), 2)[:20]
+    expect(np.allclose(a, c, equal_nan=True), "the memory uses no future frame")
+    expect(np.allclose(novelty_against(X[:2], X[3:4]), [1.0, 1.0]), "memory from another unit works")
+    expect(novelty_against(X[:2], X[3:], k=9).shape == (2,), "another unit shorter than k is fine")
+
+    m = np.array([0.1, 0.2, 0.3, 0.4])
+    expect(np.allclose(add_memory(m, np.full(4, np.nan)), m), "no memory at all -> the margin is unchanged")
+    expect(np.allclose(add_memory(m, np.full(4, 0.5)), m), "flat novelty -> the margin is unchanged")
+    q = add_memory(m, np.array([np.nan, 0.0, 1.0, 0.5]))
+    expect(np.isclose(q[0], m[0]), "a frame with no memory keeps its margin")
+    expect(np.isclose(add_memory(m + 5.0, np.array([0.0, 1.0, 2.0, 3.0])).mean(), m.mean() + 5.0),
+           "the margin's level across units is kept")
+    d = add_memory(m, np.array([1.0, 2.0, 3.0, 4.0])) - m
+    expect(np.isclose(np.std(d), np.std(m)), "novelty counts as much as the margin")
+
+    ok = {"point": 0.02, "ci95": [0.01, 0.03]}
+    flat = {"point": 0.01, "ci95": [-0.01, 0.03]}
+    bad = {"point": -0.02, "ci95": [-0.03, -0.01]}
+
+    def rows(s, w):
+        return [{"M - B": a, "M - M_wrong": b} for a, b in zip(s, w)]
+    win = [ok, ok, flat, flat]
+    expect(choose_memory(rows(win, win))["best"] == "M", "passes and beats another unit's memory -> M")
+    expect(choose_memory(rows(win, [ok, flat, flat, flat]))["best"] == "B", "does not beat it -> B stays")
+    expect(choose_memory(rows([ok, ok, ok, bad], win))["best"] == "B", "fails the rule -> B stays")
+
+    print("\n  step 5, end to end, on synthetic results in a temporary folder ...")
+    tables, logged = ns.TABLES, []
+    enc = ns.fake_encoder()
+    rng = np.random.default_rng(5)
+    with tempfile.TemporaryDirectory() as tmp:
+        ns.TABLES = tmp
+        try:
+            reports = {}
+            fargs = SimpleNamespace(step="selftest", boot=20)
+            first = {}
+            for ds in ORDER:
+                spec = ns.spec_for(ds, "vitl")
+                data = ns.fake_dataset(ds, spec, rng)
+                first[ds] = data
+                for t in fs.ENCODERS:
+                    fs.save(fargs, ds, t, *_fixes_fixture(ds, spec, data, enc, logged), data)
+                rep, keep = papers_one(ds, spec, data, enc, 5, fake=True, log=logged.append)
+                save_step3(fargs, ds, rep, keep, data)
+                rep, keep = memory_one(ds, spec, data, enc, 20, fake=True, log=logged.append)
+                expect(rep["gates_passed"], "%s: every gate passes" % ds)
+                expect(set(rep["comparisons"]) == {"%s - %s" % p for p in STEP5_PAIRS}, "%s: all comparisons made" % ds)
+                expect(rep["point"]["M"] != rep["point"]["B"], "%s: memory changes the score" % ds)
+                expect(all(len(x) == len(y) for x, y in zip(keep["M"], data["F"])), "%s: one score per frame" % ds)
+                save_step5(fargs, ds, rep, keep, data)
+                reports[ds] = rep
+
+            ds = ORDER[0]
+            path = os.path.join(tmp, "ideas_step3_%s.json" % ds)
+            saved = json.load(open(path))
+            saved["point"]["B"] += 0.01
+            json.dump(saved, open(path, "w"))
+            rep, keep = memory_one(ds, ns.spec_for(ds, "vitl"), first[ds], enc, 5, fake=True, log=logged.append)
+            expect(not rep["gates_passed"] and keep == {}, "a mismatched reference stops the dataset")
+
+            out = summarise_step5(fargs, reports)
+            expect(out["decision"]["best"] in ("B", "M"), "the decision names a current best")
+            expect(len(out["predictions"]) == 5, "all predictions made")
+            expect(os.path.exists(os.path.join(tmp, "ideas_step5_summary.json")), "summary saved")
+        finally:
+            ns.TABLES = tables
+
+
+# ======================================================================
 # self-test (no data, no GPU)
 # ======================================================================
 def selftest(args):
@@ -1085,16 +1380,18 @@ def selftest(args):
     selftest_step2(expect)
     selftest_step3(expect)
     selftest_step4(expect)
+    selftest_step5(expect)
     print("\n%s" % ("SELF-TEST FAILED: %s" % fails if fails else "self-test passed"))
     return 1 if fails else 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["selftest", "step1", "step2", "step3", "step4"])
+    ap.add_argument("step", choices=["selftest", "step1", "step2", "step3", "step4", "step5"])
     ap.add_argument("--boot", type=int, default=1000)
     args = ap.parse_args()
-    return {"selftest": selftest, "step1": step1, "step2": step2, "step3": step3, "step4": step4}[args.step](args)
+    return {"selftest": selftest, "step1": step1, "step2": step2, "step3": step3, "step4": step4,
+            "step5": step5}[args.step](args)
 
 
 if __name__ == "__main__":
