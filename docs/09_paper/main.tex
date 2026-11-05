@@ -191,13 +191,25 @@ any score was computed, per-video generated descriptors reach $0.824$
 frame-level AUROC, against $0.756$ with none and $0.713$ when each video is given
 another video's description; the prediction that the context effect would grow
 with scene diversity is refuted, the effect being comparable to ShanghaiTech's.
-A video-level bootstrap places that figure in $[0.756, 0.877]$, level with the
-best published training-free results rather than above them, while the
+A video-level bootstrap places that figure in $[0.756, 0.877]$, comparable to
+LAVAD and AnyAnomaly and below the newest training-free methods, while the
 advantage of a video's own description over another video's, $+0.110$, has an
 interval of $[+0.069, +0.157]$. A measurement audit, its decision rule fixed
 before any number was computed, finds that $82$--$87\%$ of the headline context
 gaps come from shifting each video's score level---calibrating cameras against
-one another---and almost none from re-ranking frames within a video.
+one another---and almost none from re-ranking frames within a video. On
+XD-Violence the generated descriptor lowers average precision from $0.624$ to
+$0.417$, because in 127 of the 500 violent videos the frames it is written from
+already show the event. A subsequent round of pre-registered experiments
+therefore replaces the per-video descriptor with fixed text, on a stronger frozen
+encoder (PE-Core): eight calm normal phrases and a frozen bank of 48 concrete
+anomalous actions, each change kept only if it passed a rule fixed before
+scoring. This configuration reaches $0.783$, $0.856$ and $0.639$ AUROC on
+ShanghaiTech, UCF-Crime and NWPU Campus and $0.722$ AP on XD-Violence---no worse
+than the descriptor-based system on any benchmark and significantly better on
+XD-Violence---with no captioning model. These figures are exploratory, since the
+same benchmarks guided the choices; the configuration is frozen for a single test
+on an unseen benchmark.
 \end{abstract}
 
 % ---------- keywords ----------
@@ -228,14 +240,14 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
 \textbf{\S} & \textbf{Section} & \textbf{Status} & \textbf{Notes} \\
 \midrule
 --- & Title (front matter)             & \done       & May be refined \\
---- & Abstract (front matter)          & \done       & Updated with Phase 3 results \\
+--- & Abstract (front matter)          & \done       & Updated with Phase 4 results \\
 1   & Introduction                     & \done       & Motivation integrated; roadmap added \\
 2   & Literature review                & \done       & 6 DA surveys, 12 VAD/VLM papers reviewed \\
 3   & Observations and research gap    & \done       & Gap identified and grounded in the surveys \\
-4   & Contribution points              & \done       & 5 contributions stated \\
+4   & Contribution points              & \done       & 6 contributions stated (C6 added in Phase 4) \\
 5   & Problem formulation, objectives  & \done       & --- \\
 6   & Proposed methodology             & \done       & Framework detailed; algorithms cited \\
-7   & Results and analysis             & \inprog     & Results 1--7 and the measurement audit complete; Result 8 (explanations) pending \\
+7   & Results and analysis             & \inprog     & Results 1--7, the audit, Results 9--10 (Phase 4) complete; Result 8 (explanations) and the sealed test pending \\
 8   & Conclusion and discussion        & \done       & Rewritten against measured outcomes \\
 --- & References                       & \inprog     & Grows with the document \\
 \bottomrule
@@ -328,19 +340,32 @@ Domain-Adaptive Video Anomaly Detection with Vision-Language Models}.}
          comparison with LAVAD and AnyAnomaly is restated as comparable, not
          above; ``first of six'' withdrawn. Abstract, Result~7, the comparison
          and the conclusion updated. No earlier number changed. \\
+06 Nov 2026 & Phase 4 written up (Results~9--10). XD-Violence and NWPU Campus
+         added; the generated descriptor fails on XD-Violence ($0.624 \to
+         0.417$ AP). A pre-registered round on two frozen encoders replaces the
+         descriptor with fixed text on PE-Core: calm normal phrases and a frozen
+         bank of concrete actions, frozen for a single sealed test on UBnormal
+         (Section~\ref{sec:res-final}). Correction: three sentences described the
+         UCF-Crime figure as level with the best training-free results; newer
+         methods report up to $89.9$, so it is now stated as comparable to LAVAD
+         and AnyAnomaly and below the newest methods. New figure
+         (Fig.~\ref{fig:arch-final}) and comparison
+         (Table~\ref{tbl:sota-final}); the original figure is kept for the
+         original design. No earlier number changed. \\
 % ---- ADD NEW ROWS HERE (newest at the bottom) ----
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\wnote{\textbf{Current status of results.} Results~1--7 are completed
+\wnote{\textbf{Current status of results.} Results~1--7 and~9--10 are completed
 measurements on real data, obtained on an NVIDIA A40: the MVTec~AD image-domain
 baseline, ShanghaiTech (detection, context sweep, component ablation, per-camera
-descriptors), CUHK Avenue, and UCF-Crime under pre-registered predictions. Each
-carries a run manifest or a committed script recording what produced it.
-Result~8 (explanations under domain shift) is outstanding and marked as such;
-the claims depending on it are not made. No number appears in this document that
-has not been measured.}
+descriptors), CUHK Avenue, UCF-Crime under pre-registered predictions, and the
+Phase~4 round on ShanghaiTech, UCF-Crime, XD-Violence and NWPU Campus with two
+encoders. Each carries a run manifest or a committed script recording what
+produced it. Result~8 (explanations under domain shift) and the sealed UBnormal
+test are outstanding and marked as such; the claims depending on them are not
+made. No number appears in this document that has not been measured.}
 
 % =====================================================================
 % END OF DOCUMENT STATUS SECTION
@@ -650,6 +675,14 @@ nor to exceed the state of the art in detection accuracy.}
   \item \textbf{Explanation under shift.} We report the first examination of how
         generated natural-language explanations behave when the supplied domain
         context is incorrect.
+
+  \item \textbf{Describing normality instead of the scene.} We show where a
+        generated per-video descriptor fails---it describes the anomaly as normal
+        when the frames it is written from already contain it---and, under rules
+        registered before scoring, on two frozen encoders and on crime and campus
+        benchmarks alike, that fixed text describing calm normality together
+        with a frozen bank of concrete anomalous actions replaces it with no loss
+        on any benchmark (Results~9--10).
 \end{enumerate}
 
 % =====================================================================
@@ -823,7 +856,8 @@ cost does not scale with the length of quiet video.
 \begin{figure}[pos=h]
 \centering
 \includegraphics[width=\linewidth]{dazvad_architecture}
-\caption{The DA-ZVAD framework. Every model is frozen; the verbalised scene
+\caption{The original DA-ZVAD framework (Phases~1--3). The configuration finally
+adopted after Phase~4 is shown in Fig.~\ref{fig:arch-final}. Every model is frozen; the verbalised scene
 context (M3) is the sole adaptation mechanism. At setup, the same frozen LLaVA
 used for explanation captions a camera's first three frames, and the consensus
 caption becomes that camera's descriptor $c_k$, so no human-written text is
@@ -951,6 +985,49 @@ the only expensive stage and is independent of the prompts, the scoring rule and
 the temporal window, so a single encoding pass supports the comparison of many
 scoring hypotheses without re-encoding.
 
+\subsection{The configuration adopted after Phase 4}
+\label{sec:method-final}
+Phase~4 (Results~9--10) kept the scoring rule of Equation~\eqref{eq:framescore}
+and the smoothing of Equation~\eqref{eq:smooth}, and changed the encoder and the
+text. Figure~\ref{fig:arch-final} shows the result, which is frozen for the sealed
+test of Section~\ref{sec:res-final}.
+
+\begin{figure}[pos=h]
+\centering
+\includegraphics[width=\linewidth]{dazvad_architecture_v3_paper}
+\caption{The configuration adopted after Phase~4 and frozen for the sealed test.
+M1 uses the frozen PE-Core encoder \citep{bolya2025pe}. M3 no longer carries a
+descriptor for each camera: the normal ensemble is three general phrases plus
+eight calm, low-motion phrases (C), and the abnormal ensemble is a frozen bank of
+48 concrete actions in twelve types (B). The 59 phrases are the same for every
+camera and were fixed before they were scored. Scoring and smoothing are those of
+Equations~\eqref{eq:framescore} and~\eqref{eq:smooth}; written as a sigmoid of the
+margin $m_t=\langle v_t,e^{-}\rangle-\langle v_t,e^{+}\rangle$, the two-way
+softmax is the same function. No captioning model is used.}
+\label{fig:arch-final}
+\end{figure}
+
+\begin{description}
+  \item[Encoder.] PE-Core-L/14 at $336\times336$ pixels \citep{bolya2025pe}, used
+  frozen through \texttt{open\_clip}; frame embeddings have 1024 dimensions. Its
+  learned logit scale is $99.9$; $\lambda$ is held at $100$ as in every earlier run.
+  \item[Normal ensemble.] The three general surveillance phrases plus eight calm
+  phrases: four quiet places (``an empty walkway'', ``an empty street'', ``an empty
+  room'', ``a quiet open area with nobody around'') and four calm people (``a
+  person standing still'', ``a person sitting quietly'', ``two people talking
+  calmly'', ``a person walking slowly''). No phrase names or resembles an
+  anomalous action, following the rule of \citet{yin2026nova}.
+  \item[Abnormal ensemble.] Forty-eight concrete actions, four for each of twelve
+  types: fighting, weapon, theft, vandalism, road accident, fire or explosion, riot
+  or arrest, abuse, falling, vehicle among pedestrians, sudden running and
+  trespass. Concrete actions follow \citet{zou2026askhint}. The bank was written
+  once by an LLM before it was scored and then frozen; the same list is used for
+  every benchmark.
+  \item[Sampling and smoothing.] Every sixteenth frame and $w=5$ sampled frames
+  with raw scores, as on UCF-Crime; ShanghaiTech keeps its benchmark protocol
+  (every second frame, $w=31$, per-clip normalisation).
+\end{description}
+
 % =====================================================================
 \section{Results and Analysis}
 \label{sec:results}
@@ -959,8 +1036,10 @@ scoring hypotheses without re-encoding.
 \subsection{Datasets}
 \begin{table}[width=\linewidth,cols=4,pos=h]
 \caption{Datasets. MVTec~AD is a detection baseline; the adaptation experiments
-run on the three video benchmarks, which span one scene (Avenue), twelve
-(ShanghaiTech) and several hundred (UCF-Crime).}\label{tbl:datasets}
+run on the video benchmarks, which span one scene (Avenue), twelve
+(ShanghaiTech), 43 (NWPU Campus) and several hundred (UCF-Crime, XD-Violence).
+UBnormal is reserved for the single sealed test of the frozen configuration and
+has not been opened.}\label{tbl:datasets}
 \begin{tabularx}{\linewidth}{@{}l l Z l@{}}
 \toprule
 \textbf{Dataset} & \textbf{Domain} & \textbf{Content} & \textbf{Status} \\
@@ -969,6 +1048,9 @@ MVTec AD \citep{bergmann2019mvtec} & Industrial & 15 product categories, 1{,}725
 ShanghaiTech \citep{liu2018shanghaitech} & Surveillance & Campus CCTV, 13 scenes (12 present in the test split), 107 test clips, 40{,}791 frames, frame-level ground truth & \done \\
 CUHK Avenue \citep{lu2013avenue} & Surveillance & Outdoor campus walkway, single view, 21 test videos, 15{,}324 frames & \done \\
 UCF-Crime \citep{sultani2018ucfcrime} & Surveillance & Real-world CCTV, 13 crime classes, test split of 290 videos (140 anomalous, 150 normal), frame-level temporal annotation & \done \\
+XD-Violence \citep{wu2020xdviolence} & Mixed video & Films, sports, games, news, CCTV and hand-held footage; six violence classes; test split of 800 videos (500 violent, 300 not); scored by average precision & \done \\
+NWPU Campus \citep{cao2023nwpu} & Surveillance & Campus CCTV, 43 scenes, 28 anomaly classes including scene-dependent ones; 242 test videos (124 with anomalies) & \done \\
+UBnormal \citep{acsintoae2022ubnormal} & Synthetic & 29 rendered scenes; official test split (92{,}640 frames); sealed test only & \notstarted \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1030,6 +1112,19 @@ imbalance-aware measures.
         performance on the minority class than the ROC curve is
         \citep{davis2006pr}, so we report both rather than relying on AUROC
         alone.
+
+  \item \textbf{Average precision on XD-Violence} (primary there). The benchmark
+        defines frame-level AP as its metric, because AUROC ``usually shows an
+        optimistic result when dealing with class-imbalanced data''
+        \citep{wu2020xdviolence}. We compute it as the official code does
+        (trapezoidal area under the precision--recall curve over snippet scores);
+        non-interpolated AP agrees with it to within $0.0001$, so the figure is
+        not inflated by ties \citep{song2026vlmanswer}.
+
+  \item \textbf{Paired video-level bootstrap.} Phase~4 comparisons resample whole
+        videos, 1000 times with a fixed seed, and score both conditions on each
+        resample; a difference is called significant when its 95\% interval
+        excludes zero.
 
   \item \textbf{Explanation assessment} (qualitative at this stage): correctness,
         specificity, and consistency with the supplied domain context.
@@ -1847,6 +1942,128 @@ $+0.105$ under the softmax is $+0.017$ under the margin beneath it, so pooled
 AUROC from CLIP softmax scores can report large differences that within-video
 ranking does not show---a caution for any CLIP-based detector evaluated this way.
 
+\subsection{Result 9: XD-Violence and NWPU Campus, and where the descriptor fails}
+\label{sec:res-xd}
+Two further benchmarks were added in Phase~4: XD-Violence, whose videos come from
+films, sports, games and news as well as CCTV, and NWPU Campus, whose 43 scenes
+include anomalies that depend on the scene \citep{wu2020xdviolence, cao2023nwpu}.
+With the ViT-L/14 pipeline of Results~1--7 and no descriptor, they reach $0.624$ AP
+and $0.659$ AUROC. A generated descriptor for each video lowers XD-Violence to
+$0.417$ and leaves NWPU Campus within noise ($0.667$).
+
+The XD-Violence failure has a direct cause. The descriptor is written from a
+video's first three sampled frames, and in 127 of the 500 violent test videos the
+violence has already begun in those frames, so the description of normality names
+the event. In an exploratory analysis that uses the labels, dropping the descriptor
+on those 127 videos recovers 66\% of the loss ($0.417 \to 0.554$); filtering
+descriptions for violent words recovers 7\%. A fix therefore cannot depend on what
+the first frames happen to show.
+
+A pre-registered experiment on the normal side of the prompts, run on both
+encoders, found no configuration that beat the descriptor-free detector across all
+four benchmarks. It also contained an error disclosed in its record: its
+``near-miss'' component added look-alike actions (``hugging'' beside fighting) to
+the normal ensemble, the opposite of the rule in \citet{yin2026nova}, which forbids
+them. Result~10 corrects that design.
+
+\subsection{Result 10: describing normality rather than the scene}
+\label{sec:res-final}
+Phase~4 changed one thing at a time on the frozen PE-Core encoder
+\citep{bolya2025pe}, with each step's rules and predictions committed before it
+was scored, and every run first reproducing the earlier scores exactly
+(difference $\le 10^{-5}$). A change was kept only if, across the four benchmarks,
+it scored higher on more than half, its paired 95\% interval lay above zero on at
+least two, and below zero on none.
+
+\subsubsection{The encoder alone is not the improvement}
+Replacing ViT-L/14 by PE-Core with no other change raises UCF-Crime from $0.756$
+to $0.847$ and lowers the other three (Table~\ref{tbl:phase4}): significantly on
+XD-Violence ($-0.131$), and within noise on ShanghaiTech and NWPU Campus. The gains
+below come from the text.
+
+\subsubsection{Calm normal phrases}
+Adding eight calm, low-motion phrases to the normal ensemble (C;
+Section~\ref{sec:method-final}) changes PE-Core by $+0.091$ $[+0.044, +0.142]$ on
+ShanghaiTech, $+0.141$ $[+0.106, +0.170]$ on XD-Violence and $+0.051$
+$[+0.008, +0.099]$ on NWPU Campus, and by $-0.030$ $[-0.085, +0.024]$ on
+UCF-Crime. A second wording with no phrase in common also passes the rule
+($+0.057$, $-0.012$, $+0.129$, $+0.052$), so the effect is not one choice of
+words, although the two wordings differ significantly on ShanghaiTech and
+UCF-Crime. The same phrases do nothing measurable on ViT-L/14, so the effect is
+encoder-dependent. By the audit of Section~\ref{sec:res-audit}, the gains on
+ShanghaiTech and NWPU Campus are mostly re-ranking within videos, unlike the
+descriptor's, while the gain on XD-Violence is mostly calibration.
+
+\subsubsection{A frozen bank of concrete actions}
+Replacing the three abstract abnormal phrases by 48 concrete actions (B) on top of
+C adds $+0.039$ $[+0.006, +0.074]$ on UCF-Crime and $+0.088$ $[+0.067, +0.109]$ on
+XD-Violence; ShanghaiTech ($+0.026$) and NWPU Campus ($-0.030$
+$[-0.066, +0.001]$) change within noise. Against the descriptor-based system on
+the same videos, PE-Core with C and B is no worse on any benchmark and
+significantly better on XD-Violence ($+0.305$ $[+0.255, +0.359]$).
+
+\begin{table}[width=\linewidth,cols=5,pos=h]
+\caption{Phase~4 results on the same test videos (AUROC; AP on XD-Violence). The
+last row is the configuration frozen for the sealed test. Every row after the
+second uses no descriptor and no captioning model.}\label{tbl:phase4}
+\begin{tabularx}{\linewidth}{@{}Z l l l l@{}}
+\toprule
+\textbf{Configuration} & \textbf{ShT} & \textbf{UCF} & \textbf{XD (AP)} & \textbf{NWPU} \\
+\midrule
+ViT-L/14, no descriptor                         & 0.707 & 0.756 & 0.624 & 0.659 \\
+ViT-L/14, generated descriptor per video/camera & 0.751 & 0.824 & 0.417 & 0.667 \\
+PE-Core, no descriptor                          & 0.666 & 0.847 & 0.494 & 0.618 \\
+PE-Core + calm normal phrases (C)               & 0.757 & 0.817 & 0.635 & 0.669 \\
+\textbf{PE-Core + C + action bank (B)}          & \textbf{0.783} & \textbf{0.856} & \textbf{0.722} & 0.639 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{What was tried and not kept}
+Table~\ref{tbl:round} lists every step of the round. Two failures are informative.
+Scoring by anomaly type, as NOVA does \citep{yin2026nova}, raises XD-Violence to
+$0.769$ while lowering ShanghaiTech by $0.082$ $[0.025, 0.138]$: text tailored to
+crime footage costs accuracy on campus footage. Choosing the bank's types from each
+camera's scene, matched without labels from five calm frames, recognises scenes
+sensibly (11 of 12 ShanghaiTech cameras choose ``a pedestrian walkway on a
+campus'') and the deliberately wrong scene is significantly worse than the whole
+bank on all four benchmarks, but the right scene adds nothing over the whole bank.
+
+\begin{table}[width=\linewidth,cols=3,pos=h]
+\caption{The Phase~4 round, in order. Each step was judged against the current best
+by the rule stated above; differences are paired, with 95\% intervals where
+given.}\label{tbl:round}
+\begin{tabularx}{\linewidth}{@{}l Z Z@{}}
+\toprule
+\textbf{Step} & \textbf{Change} & \textbf{Outcome} \\
+\midrule
+1 & Second wording of the calm phrases & Passes: C is kept \\
+1 & ``Normal scene:'' / ``Anomalous scene:'' labels on top of C & Fails: three significant gains, but NWPU $-0.014$ $[-0.026, -0.003]$ \\
+2 & PE-Core and ViT-L/14 margins averaged & Fails: significant gain on XD-Violence only \\
+3 & Frozen bank of concrete actions (B) & \textbf{Passes: kept} \\
+3 & Bank scored by anomaly type & Fails: ShanghaiTech $-0.082$ \\
+3 & Different templates per side \citep{lee2025flashback} & Fails: NWPU $-0.026$ $[-0.049, -0.007]$ \\
+4 & Bank types chosen by scene & Fails: all differences within noise \\
+5 & Novelty against the camera's own past frames & Fails: ShanghaiTech $-0.033$, XD-Violence $-0.117$ \\
+6 & Per-video baseline subtraction & Not run; reason recorded before the round ended \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsubsection{Freezing, and the test that remains}
+Every figure in this result was obtained on benchmarks that guided the choices,
+many conditions were scored, intervals are not corrected for multiple comparisons,
+and the bank was written by an LLM that knew these benchmarks' anomaly types. The
+figures are therefore exploratory. On 6~November~2026 the configuration of
+Fig.~\ref{fig:arch-final} was frozen, with its files fixed by hash, before any
+UBnormal \citep{acsintoae2022ubnormal} video or label was obtained. Its official
+test split will be scored once, and the wording that each possible outcome permits
+was fixed at the same time.
+
+\pending{sealed UBnormal result for the frozen configuration: micro- and
+macro-averaged frame AUROC with video-level intervals, against plain PE-Core,
+PE-Core + C and plain ViT-L/14 on the same videos.}
+
 \subsection{Comparison with published methods on the same benchmarks}
 \label{sec:res-comparison}
 All three video benchmarks used here are standard, so published figures are
@@ -1916,7 +2133,10 @@ UCF-Crime the figure also exceeds the two one-class methods that report it
 (FPDM $74.7$, MULDE $78.5$), both of which train on that benchmark's normal
 footage. The cross-paper caveats of this section apply: the UCF-Crime zero-shot
 rows come from a different paper than the campus rows, and our UCF-Crime row
-uses per-video descriptors where the campus rows use one shared sentence.
+uses per-video descriptors where the campus rows use one shared sentence. More
+recent training-free methods, not in Table~\ref{tbl:sota}, report higher
+UCF-Crime figures (up to $89.9$); they are compared with the final configuration
+in Table~\ref{tbl:sota-final}.
 
 The one-class rows are included because they set the scale, and because the
 cost they pay is the quantity this work is trying to remove. Each of them
@@ -2118,6 +2338,61 @@ Neither finding is available without a condition in which the supplied text is
 deliberately wrong while everything else is held fixed. That condition is the
 instrument; these two results are what it produced.
 
+\subsubsection{The final configuration against published methods}
+\label{sec:res-final-comparison}
+Table~\ref{tbl:sota-final} places the configuration of
+Fig.~\ref{fig:arch-final} among published results on the four benchmarks of
+Phase~4. Among the training-free methods listed, it is behind only NOVA, ASK-Hint
+and Flashback-PE on UCF-Crime and only NOVA and Flashback-PE on XD-Violence. On
+ShanghaiTech it sits among the one-class methods
+that train on the benchmark, and on NWPU Campus it lies inside the range of the
+trained methods reported with that benchmark. Three cautions govern the table.
+Our intervals span several points, so gaps of one or two points are not
+differences. Our figures are exploratory (Section~\ref{sec:res-final}). And the
+strongest methods are informed differently: NOVA writes twenty normal and twenty
+anomalous phrases per anomaly class with guidance for each dataset and is
+evaluated on UCF-Crime and XD-Violence only \citep{yin2026nova}; Flashback
+retrieves from a memory of a million generated captions with a video encoder
+\citep{lee2025flashback}; ASK-Hint queries a large video-language model and chose
+its number of prompts from its own results table \citep{zou2026askhint}.
+
+\begin{table}[width=\linewidth,cols=5,pos=h]
+\caption{The final configuration against published results (\%): AUROC, and AP on
+XD-Violence. A dash means not reported. $^{\ast}$As tabulated by
+\citet{yin2026nova}, Table~1. $^{\#}$As tabulated by \citet{lee2025flashback},
+Table~1; VERA itself learns its questions on training data and reports AUC only.
+$^{\P}$Uses a few normal frames from the target and GPT-4. Campus rows marked
+$^{\dagger}$ train on the benchmark's normal footage; NWPU figures are from
+\citet{cao2023nwpu}, Table~4. Our row is exploratory
+(Section~\ref{sec:res-final}).}\label{tbl:sota-final}
+\begin{tabularx}{\linewidth}{@{}Z l l l l@{}}
+\toprule
+\textbf{Method} & \textbf{UCF} & \textbf{XD (AP)} & \textbf{ShT} & \textbf{NWPU} \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Training-free}} \\
+NOVA \citep{yin2026nova} & 89.86 & 84.82 & --- & --- \\
+ASK-Hint \citep{zou2026askhint} & 89.83 & --- & --- & --- \\
+Flashback-PE \citep{lee2025flashback} & 87.29 & 75.13 & --- & --- \\
+\textbf{DA-ZVAD, final (ours)} & \textbf{85.6} & \textbf{72.2} & \textbf{78.3} & \textbf{63.9} \\
+Frozen VLM \citep{song2026vlmanswer} & 85.32 & 68.98 & --- & --- \\
+PANDA$^{\ast}$ & 84.89 & 70.16 & --- & --- \\
+VADTree$^{\ast}$ & 84.74 & 68.85 & --- & --- \\
+EventVAD$^{\ast}$ & 82.03 & 64.04 & --- & --- \\
+AnyAnomaly \citep{anyanomaly2025} & 80.7 & --- & 79.7 & --- \\
+LAVAD \citep{zanella2024lavad} & 80.3 & 62.01 & --- & --- \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Using target-benchmark data}} \\
+VERA$^{\#}$ \citep{ye2025vera} & --- & 70.54 & --- & --- \\
+AnomalyRuler$^{\P}$ \citep{yang2024anomalyruler} & --- & --- & 85.2 & --- \\
+MULDE$^{\dagger}$ \citep{micorek2024mulde} & 78.5 & --- & 81.3 & --- \\
+FPDM$^{\dagger}$ \citep{yan2023fpdm} & 74.7 & --- & 78.6 & --- \\
+MPN$^{\dagger}$ \citep{lv2021mpn} & --- & --- & 73.8 & 64.4 \\
+Cao et al., scene-conditioned$^{\dagger}$ \citep{cao2023nwpu} & --- & --- & --- & 68.2 \\
+Cao et al., unconditioned$^{\dagger}$ \citep{cao2023nwpu} & --- & --- & --- & 65.8 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \wnote{Provenance, recorded deliberately. Every comparison number in
 Table~\ref{tbl:sota} is from Tables~5 and~6 of \citet{anyanomaly2025}, Table~1
 of \citet{zanella2024lavad}, or Table~1 of \citet{liu2018shanghaitech}, and each
@@ -2160,7 +2435,7 @@ follow them.
         parameters updated, an effect can be attributed to the supplied text.
 \end{itemize}
 
-Seven empirical findings follow from the experiments completed to date.
+Eight empirical findings follow from the experiments completed to date.
 
 \emph{Verbalized context is load-bearing, and the evidence is the falsifying
 control rather than the positive one.} Supplying a descriptor of the wrong
@@ -2225,8 +2500,9 @@ The prediction that the effect would grow with scene diversity beyond
 ShanghaiTech's was refuted: the gap is $+0.096$ against $+0.105$. The claim is
 accordingly narrowed from ``the benefit scales with scene diversity'' to ``the
 benefit requires it''. Bootstrapped by video, the $0.824$ lies in
-$[0.756, 0.877]$: level with the best published training-free figures, not above
-them. The own-versus-other advantage of $+0.110$ has an interval of
+$[0.756, 0.877]$: comparable to LAVAD and AnyAnomaly and below the newest
+training-free methods (Section~\ref{sec:res-final-comparison}). The
+own-versus-other advantage of $+0.110$ has an interval of
 $[+0.069, +0.157]$ and is the most secure result on this benchmark.
 
 \emph{What the descriptor supplies is mainly calibration across cameras.} A
@@ -2241,6 +2517,23 @@ reproduce. Per-camera descriptors are the partial exception: part of their gain
 is a change in the shape of each video's scores rather than its level. The
 statement this supports is narrower than ``the text redefines normality'' and is
 measured: language calibrates a frozen detector across cameras without training.
+
+\emph{A descriptor written from a camera's first frames fails when those frames
+contain the anomaly, and describing normality well does better.} On XD-Violence
+the generated descriptor lowers AP from $0.624$ to $0.417$, because in 127 of 500
+violent videos it is written from frames that already show the violence. Phase~4
+replaced it with text fixed in advance---calm normal phrases and a frozen bank of
+concrete actions---on PE-Core, keeping each change only under a rule committed
+before scoring. The result, $0.783$, $0.856$, $0.722$ (AP) and $0.639$, is no worse
+than the descriptor-based system on any benchmark and significantly better on
+XD-Violence, with no captioning model, and the gains from the calm phrases on the
+campus benchmarks are mostly re-ranking within videos rather than calibration.
+Two qualifications bound the statement: the calm phrases help on PE-Core and not
+measurably on ViT-L/14, and every Phase~4 figure is exploratory until the frozen
+configuration has been scored on UBnormal. What survives the round also says
+something about tailoring: text that sharpened detection on crime footage, such as
+scoring by anomaly type, cost accuracy on campus footage, so a single setup for
+both is a stricter requirement than either benchmark family imposes alone.
 
 Result~8 remains outstanding and the corresponding claim is not made: the
 explanation module has not been run on flagged events, so no assertion is
@@ -2336,13 +2629,29 @@ offered about explanation quality under domain shift.
         depends on the captioning model and its instruction, which LLaVA-1.5
         does not reliably follow: in the first run, six of twelve captions
         described people rather than the place.
+  \item The Phase~4 configuration was chosen on the four benchmarks it is
+        reported on, after many conditions were scored, with intervals not
+        corrected for multiple comparisons; its figures are exploratory until the
+        sealed UBnormal test, which is itself synthetic footage.
+  \item The phrase bank was written by an LLM that knew these benchmarks'
+        anomaly classes, so it is not independent of them. The calm phrases were
+        written after earlier results were known; a second wording passed the
+        same rule, but two wordings do not show that every calm wording works.
+  \item On NWPU Campus the bank lowers the score from $0.669$ to $0.639$, within
+        noise, and on XD-Violence the final $0.722$ AP remains below NOVA's
+        $84.82$ and Flashback's $75.13$.
+  \item The final configuration scores one frame at a time from the whole frame,
+        so motion that is anomalous only over time, and objects that occupy a
+        small part of the frame, remain hard for it.
 \end{itemize}
 
 \subsection{Future work}
 \begin{itemize}
-  \item The same pre-registered sweep on XD-Violence, the second benchmark on
-        which LAVAD \citep{zanella2024lavad} reports, where the standard metric
-        is average precision.
+  \item The sealed test of the frozen configuration on UBnormal
+        \citep{acsintoae2022ubnormal}, already pre-registered, and further
+        unseen benchmarks with the same frozen configuration.
+  \item A frozen video encoder in place of the frame encoder, for anomalies that
+        are defined by motion rather than appearance.
   \item UCF-Crime AUROC with scores propagated to every frame, so that the
         figure is comparable under either reading of LAVAD's protocol.
   \item A descriptor exchanged between the two video domains, rather than

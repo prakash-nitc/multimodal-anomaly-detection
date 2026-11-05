@@ -29,7 +29,7 @@ PAPERS = os.path.join(ROOT, "docs", "07_reference_papers")
 LEDGER = os.path.join(PAPERS, "PROVENANCE.md")
 
 OURS = "DA-ZVAD"          # our own rows are measurements, not external figures
-TABLE_LABEL = "tbl:sota"
+TABLE_LABELS = ("tbl:sota", "tbl:sota-final")
 
 
 def ledger_rows():
@@ -49,20 +49,26 @@ def ledger_rows():
 
 
 def table_numbers():
-    """(value, method) for every figure in the comparison table."""
+    """(value, method) for every figure in the comparison tables."""
     tex = io.open(TEX, encoding="utf-8").read()
-    i = tex.index(TABLE_LABEL)
-    block = tex[i:tex.index("end{tabularx}", i)]
     found = []
-    for line in block.split("\n"):
-        if "&" not in line or line.strip().startswith("\\multicolumn"):
-            continue
-        cells = [c.strip() for c in line.split("&")]
-        method = re.sub(r"\\[a-zA-Z]+|[{}$^\\]", "", cells[0]).strip()
-        for c in cells[1:]:
-            for v in re.findall(r"\d+\.\d+", c):
-                found.append((v, method))
+    for label in TABLE_LABELS:
+        i = tex.index(label)
+        block = tex[i:tex.index("end{tabularx}", i)]
+        for line in block.split("\n"):
+            if "&" not in line or line.strip().startswith("\\multicolumn"):
+                continue
+            cells = [c.strip() for c in line.split("&")]
+            method = re.sub(r"\\[a-zA-Z]+|[{}$^\\]", "", cells[0]).strip()
+            for c in cells[1:]:
+                for v in re.findall(r"\d+\.\d+", c):
+                    found.append((v, method))
     return found
+
+
+def first_word(name):
+    """A ledger method's first word without trailing punctuation ("VADTree," -> "VADTree")."""
+    return re.split(r"[\s,]+", name.strip())[0]
 
 
 def main() -> int:
@@ -75,7 +81,7 @@ def main() -> int:
         if OURS in method:
             continue                                   # our own measurement
         hit = next((k for k in known if k[0] == value and
-                    (k[1] in method or method.startswith(k[1].split()[0]))), None)
+                    (k[1] in method or method.startswith(first_word(k[1])))), None)
         if hit is None:
             problems.append("NOT IN LEDGER   %-22s %s" % (method[:22], value))
         elif status[hit] != "verified":
