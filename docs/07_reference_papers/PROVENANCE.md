@@ -38,6 +38,16 @@ unverified. Run it before every upload to Overleaf.
 | `xdviolence` | `Wu et al., ECCV 2020.pdf` | XD-Violence dataset description and metric; PREREG_xd_violence.md |
 | `nwpu` | `Cao et al. 2023, NWPU Campus (CVPR).pdf` | NWPU Campus description, metric, comparison figures; PREREG_nwpu_campus.md |
 | `nwpusupp` | `Cao et al. 2023, NWPU Campus (CVPR) supplementary.pdf` | anomaly classes per scene; definition of scene-dependent anomalies |
+| `nova` | `NOVA_ Normal-Side Modeling….pdf` | closest related work; Tables 1-3 |
+| `flashback` | `Flashback-Memory-Driven….pdf` | related work; encoder and prompt ablation |
+| `askhint` | `Unlocking_Vision-Language_Models….pdf` | related work; prompt count, transfer |
+| `vlmanswer` | `A VLM Answer Is Not an Anomaly Score….pdf` | AP vs trapezoidal PR-AUC; frozen VLM baseline |
+| `csivad` | `Context-structured Video Anomaly Detection….pdf` | video-level results only |
+| `anomalyruler` | `Follow the Rules….pdf` | few-normal-shot results |
+| `ubnormal` | `UBnormal_New_Benchmark….pdf` | sealed-test candidate description |
+| `msad` | `NeurIPS-2024-advancing-video-anomaly-detection….pdf` | sealed-test candidate description |
+| `luo2017` | `A_Revisit_of_Sparse_Coding….pdf` | ShanghaiTech description |
+| `lu2013` | `Lu_Abnormal_Event_Detection_2013_ICCV_paper.pdf` | Avenue description |
 | — | (none — paywalled) | Ada-VAD verified from the publisher's abstract page. The file once saved under that name was a different paper (Zhu et al., TKDD 2024) and was removed |
 
 ---
@@ -83,6 +93,27 @@ weaker evidence and must be either confirmed or removed.
 | 17.83 | XD-Violence AP | Zero-shot CLIP | `lavad` | Table 2, p.6, row ZS CLIP[22] (AUC 38.21) | verified |
 | 27.25 | XD-Violence AP | Zero-shot ImageBind | `lavad` | Table 2, p.6, row ZS IMAGEBIND (IMAGE)[6] (AUC 58.81); the video variant is 25.36 / 55.06 | verified |
 | 88.26 | XD-Violence AUC | VERA | `vera` | Table 3, p.8684, row VERA; VERA learns its questions on training data and reports AUC only | verified |
+| 89.86 | UCF AUROC | NOVA | `nova` | Table 1, p.7; mean of five prompt banks | verified |
+| 84.82 | XD-Violence AP | NOVA | `nova` | Table 1, p.7 | verified |
+| 95.07 | XD-Violence AUC | NOVA | `nova` | Table 1, p.7 | verified |
+| 66.85 | UCF AUROC | NOVA template, classes only | `nova` | Table 3, p.7 | verified |
+| 77.94 | XD-Violence AP | NOVA template, classes only | `nova` | Table 3, p.7 (AUC 90.99) | verified |
+| 84.74 | UCF AUROC | VADTree, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 68.85, AUC 90.55); original PDF not read | verified |
+| 84.89 | UCF AUROC | PANDA, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 70.16); original PDF not read | verified |
+| 82.03 | UCF AUROC | EventVAD, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 64.04, AUC 87.51); original PDF not read | verified |
+| 87.29 | UCF AUROC | Flashback-PE | `flashback` | Table 1, p.6 | verified |
+| 75.13 | XD-Violence AP | Flashback-PE | `flashback` | Table 1, p.6 (AUC 90.54) | verified |
+| 81.65 | UCF AUROC | Flashback-ImageBind | `flashback` | Table 1, p.6 | verified |
+| 60.13 | XD-Violence AP | Flashback-ImageBind | `flashback` | Table 1, p.6 (AUC 83.52) | verified |
+| 70.54 | XD-Violence AP | VERA, as quoted by Flashback | `flashback` | Table 1, p.6; VERA's own paper reports AUC only | verified |
+| 89.83 | UCF AUROC | ASK-Hint | `askhint` | Table 1, PDF p.5 | verified |
+| 90.31 | XD-Violence AUC | ASK-Hint | `askhint` | Table 2, PDF p.6; no AP reported | verified |
+| 85.32 | UCF AUROC | Frozen VLM, yes/no probability | `vlmanswer` | Table 2, p.4; mean over four VLMs | verified |
+| 68.98 | XD-Violence AP | Frozen VLM, yes/no probability | `vlmanswer` | Table 2, p.4; mean over four VLMs | verified |
+| 92.90 | UCF video-level AUROC | CSI-VAD | `csivad` | Table I, p.4; VIDEO level, not comparable with frame level | verified |
+| 85.2 | ShanghaiTech AUROC | AnomalyRuler | `anomalyruler` | Table 3, p.12; few-normal-shot, uses GPT-4 | verified |
+| 71.9 | UBnormal AUROC | AnomalyRuler | `anomalyruler` | Table 3, p.12; few-normal-shot, uses GPT-4 | verified |
+| 62.94 | UBnormal AUROC | OVVAD | `ovvad` | Table 3, p.6; trained | verified |
 | 61.9 | NWPU Campus AUC | MemAE | `nwpu` | Table 4, p.8 (also Table 3, p.7, column Cam) | verified |
 | 62.5 | NWPU Campus AUC | MNAD | `nwpu` | Table 4, p.8 | verified |
 | 62.5 | NWPU Campus AUC | OG-Net | `nwpu` | Table 4, p.8 | verified |
@@ -142,6 +173,12 @@ close paraphrases the argument leans on, and they carry the same rule.
 | ~~LAVAD scores every frame~~ — **this was wrong** (stated in the paper, deck, script and handbook 30 Sep – 2 Oct 2026, corrected 2 Oct). Whether LAVAD computes AUROC over sampled frames or propagated scores is not stated | `lavad` | §4 | corrected |
 
 ---
+| NOVA forbids look-alike actions from normal prompts ("must NEVER appear in a normal description") | `nova` | §3.2, pp.3-4; supp F.1, F.3, pp.13-14 | verified |
+| UBnormal: 29 virtual scenes, 236,902 frames | `ubnormal` | p.2, contributions | verified |
+| MSAD protocol i tests on 120 normal + 240 abnormal videos; protocol ii on 120 + 120 | `msad` | p.7 | verified |
+| ShanghaiTech adds sudden-motion anomalies "such as chasing and brawling"; the paper gives no full class list | `luo2017` | p.5 | verified |
+| Avenue: 14 unusual events "including running, throwing objects, and loitering" | `lu2013` | p.5 | verified |
+| Trapezoidal PR-AUC can exceed non-interpolated AP on tied scores (74.06 vs 50.66 decoded; 70.63 vs 70.25 probability) | `vlmanswer` | Fig. 5, pp.8-9 | verified |
 
 ## Adding a number
 
