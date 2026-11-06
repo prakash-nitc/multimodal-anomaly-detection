@@ -32,7 +32,7 @@ PAPERS = os.path.join(ROOT, "docs", "07_reference_papers")
 LEDGER = os.path.join(PAPERS, "PROVENANCE.md")
 
 OURS = "DA-ZVAD"          # our own rows are measurements, not external figures
-TABLE_LABELS = ("tbl:sota", "tbl:sota-final")
+TABLE_LABELS = ("tbl:sota", "tbl:sota-final", "tbl:sota-ub")
 
 
 def ledger_rows():

@@ -1,0 +1,16 @@
+frozen files
+  hash  da_zvad/prompts/ideas.py           d889dbc6a76a4410  ok
+  hash  da_zvad/prompts/fixes.py           32ab541b436c77f5  ok
+  hash  da_zvad/prompts/banks.py           0ab005d55f05a5a8  ok
+  hash  da_zvad/prompts/templates.py       4de350b2382843e4  ok
+  hash  notebooks/ideas_sweep.py           d0ee71aca2ad9c5b  ok
+  hash  notebooks/fixes_sweep.py           5efe7532daafff5c  ok
+  hash  notebooks/normal_side_sweep.py     d41be068c7dd1b4b  ok
+frozen configuration on the development benchmarks
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+  gate  B on shanghaitech   0.782956  step 3 0.782956  ok
+  gate  B on ucf_crime      0.855806  step 3 0.855806  ok
+  gate  B on xd_violence    0.722330  step 3 0.722330  ok
+  gate  B on nwpu_campus    0.638771  step 3 0.638771  ok
+
+GATES PASSED

@@ -1,0 +1,193 @@
+{
+ "per_scene": [
+  {
+   "scene": 22,
+   "auroc_B": 0.5141744715012041,
+   "auroc_pe_plain": 0.413930960663634,
+   "videos": 5
+  },
+  {
+   "scene": 7,
+   "auroc_B": 0.5798428971679133,
+   "auroc_pe_plain": 0.5427156192845386,
+   "videos": 19
+  },
+  {
+   "scene": 16,
+   "auroc_B": 0.5842267149402455,
+   "auroc_pe_plain": 0.625218672903784,
+   "videos": 3
+  },
+  {
+   "scene": 23,
+   "auroc_B": 0.616726469659729,
+   "auroc_pe_plain": 0.5280484493502002,
+   "videos": 7
+  },
+  {
+   "scene": 4,
+   "auroc_B": 0.6247403597694295,
+   "auroc_pe_plain": 0.6217638143510237,
+   "videos": 8
+  },
+  {
+   "scene": 28,
+   "auroc_B": 0.6590460900870054,
+   "auroc_pe_plain": 0.7414395702543942,
+   "videos": 5
+  },
+  {
+   "scene": 10,
+   "auroc_B": 0.7126733073175389,
+   "auroc_pe_plain": 0.7879127145194853,
+   "videos": 11
+  },
+  {
+   "scene": 29,
+   "auroc_B": 0.7549981213543495,
+   "auroc_pe_plain": 0.8624871420564086,
+   "videos": 8
+  },
+  {
+   "scene": 14,
+   "auroc_B": 0.7597778742920056,
+   "auroc_pe_plain": 0.8220140612889177,
+   "videos": 6
+  },
+  {
+   "scene": 13,
+   "auroc_B": 0.7851507572539467,
+   "auroc_pe_plain": 0.605037667640506,
+   "videos": 11
+  },
+  {
+   "scene": 8,
+   "auroc_B": 0.7904391053526869,
+   "auroc_pe_plain": 0.6113714466739972,
+   "videos": 9
+  },
+  {
+   "scene": 24,
+   "auroc_B": 0.7938840858149215,
+   "auroc_pe_plain": 0.6520263779629774,
+   "videos": 6
+  },
+  {
+   "scene": 19,
+   "auroc_B": 0.8006272938356678,
+   "auroc_pe_plain": 0.840536913589494,
+   "videos": 4
+  },
+  {
+   "scene": 17,
+   "auroc_B": 0.8194095958506633,
+   "auroc_pe_plain": 0.7376424254055165,
+   "videos": 11
+  },
+  {
+   "scene": 9,
+   "auroc_B": 0.8226839410687634,
+   "auroc_pe_plain": 0.6278625279656536,
+   "videos": 9
+  },
+  {
+   "scene": 25,
+   "auroc_B": 0.8240694164989939,
+   "auroc_pe_plain": 0.7924561701418703,
+   "videos": 5
+  },
+  {
+   "scene": 20,
+   "auroc_B": 0.8275816817316695,
+   "auroc_pe_plain": 0.9017339945905146,
+   "videos": 7
+  },
+  {
+   "scene": 12,
+   "auroc_B": 0.8307339826300757,
+   "auroc_pe_plain": 0.8337424556346275,
+   "videos": 8
+  },
+  {
+   "scene": 6,
+   "auroc_B": 0.8621022813495878,
+   "auroc_pe_plain": 0.8237391876169762,
+   "videos": 3
+  },
+  {
+   "scene": 15,
+   "auroc_B": 0.8636712854690614,
+   "auroc_pe_plain": 0.8086099958525823,
+   "videos": 9
+  },
+  {
+   "scene": 5,
+   "auroc_B": 0.877440990139941,
+   "auroc_pe_plain": 0.8673715091801174,
+   "videos": 7
+  },
+  {
+   "scene": 11,
+   "auroc_B": 0.8935986552684294,
+   "auroc_pe_plain": 0.7380574431204185,
+   "videos": 8
+  },
+  {
+   "scene": 18,
+   "auroc_B": 0.9183317046220272,
+   "auroc_pe_plain": 0.7731384787836401,
+   "videos": 5
+  },
+  {
+   "scene": 3,
+   "auroc_B": 0.9349201617847701,
+   "auroc_pe_plain": 0.8827181586198373,
+   "videos": 6
+  },
+  {
+   "scene": 2,
+   "auroc_B": 0.9405804059547507,
+   "auroc_pe_plain": 0.9529160475482912,
+   "videos": 4
+  },
+  {
+   "scene": 21,
+   "auroc_B": 0.9436300605980694,
+   "auroc_pe_plain": 0.6012718452469248,
+   "videos": 6
+  },
+  {
+   "scene": 1,
+   "auroc_B": 0.9437900034646876,
+   "auroc_pe_plain": 0.9012810226298802,
+   "videos": 9
+  },
+  {
+   "scene": 26,
+   "auroc_B": 0.9448185352070655,
+   "auroc_pe_plain": 0.892429131768185,
+   "videos": 6
+  },
+  {
+   "scene": 27,
+   "auroc_B": 0.9782321100737393,
+   "auroc_pe_plain": 0.9738268326732183,
+   "videos": 6
+  }
+ ],
+ "per_type": {
+  "vehicle among pedestrians": 0.5422197062603092,
+  "theft": 0.6199192526364711,
+  "road accident": 0.6233926904709421,
+  "vandalism": 0.6466303057849152,
+  "trespass": 0.6533375281197416,
+  "sudden running": 0.6668707189122309,
+  "weapon": 0.6683785899375627,
+  "fire or explosion": 0.67991140902284,
+  "fighting": 0.6856548996538391,
+  "riot or arrest": 0.711406770758335,
+  "abuse": 0.7228141329724543,
+  "falling": 0.7662359731142399
+ },
+ "whole_bank_unsmoothed": 0.743722322428481
+}

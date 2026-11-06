@@ -101,6 +101,9 @@ weaker evidence and must be either confirmed or removed.
 | 84.74 | UCF AUROC | VADTree, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 68.85, AUC 90.55); original PDF not read | verified |
 | 84.89 | UCF AUROC | PANDA, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 70.16); original PDF not read | verified |
 | 82.03 | UCF AUROC | EventVAD, as quoted by NOVA | `nova` | Table 1, p.7 (XD AP 64.04, AUC 87.51); original PDF not read | verified |
+| 70.16 | XD-Violence AP | PANDA, as quoted by NOVA | `nova` | Table 1, p.7 (given with the UCF row above); original PDF not read | verified |
+| 68.85 | XD-Violence AP | VADTree, as quoted by NOVA | `nova` | Table 1, p.7 (given with the UCF row above); original PDF not read | verified |
+| 64.04 | XD-Violence AP | EventVAD, as quoted by NOVA | `nova` | Table 1, p.7 (given with the UCF row above); original PDF not read | verified |
 | 87.29 | UCF AUROC | Flashback-PE | `flashback` | Table 1, p.6 | verified |
 | 75.13 | XD-Violence AP | Flashback-PE | `flashback` | Table 1, p.6 (AUC 90.54) | verified |
 | 81.65 | UCF AUROC | Flashback-ImageBind | `flashback` | Table 1, p.6 | verified |

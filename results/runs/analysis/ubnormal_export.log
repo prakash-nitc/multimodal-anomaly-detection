@@ -1,0 +1,8 @@
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+  ViT-L-14 / laion2b_s32b_b82k: learned logit scale 99.998 (lambda stays 100)
+reproducing the committed sealed result
+  B          0.7474743326  sealed 0.7474743326  ok
+  C          0.6874055185  sealed 0.6874055185  ok
+  pe_plain   0.6512171314  sealed 0.6512171314  ok
+  vit_plain  0.5864500754  sealed 0.5864500754  ok
+saved /home/m251250cs/ubnormal_paper2_export.npz  (38.2 MB)

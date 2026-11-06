@@ -178,3 +178,13 @@ figure lies inside B's 95% interval, so that difference is not established. On m
 **Limits that apply to this result,** as stated before it was known: UBnormal is computer-generated; it is
 one dataset; and the micro AUROC of all four conditions is computed with each sampled frame's score held
 for the next fifteen frames, as fixed above.
+
+**6 November 2026, after the result: a correction to the U3 rationale.** The rationale for U3 says
+UBnormal's anomaly types "include actions such as crawling, dancing and sleeping (p.2) that our bank does
+not describe". Those types appear in the paper's list of all 22 types, but crawling and dancing are in
+its training split, not its test split. The test split's twelve types (p.2) are running, having a seizure,
+laying down, shuffling, walking drunk, people and car accident, car crash, jumping, fire, smoke,
+jaywalking and driving outside lane. Some of these are described by the bank (a car crash, fire, smoke,
+running, a person on the ground) and others are not. The prediction itself, its range and its outcome
+are unchanged; only its stated reason was imprecise. The UBnormal paper had been read (3 November) before
+the bank was written (5 November), which Paper 2 reports as a threat to validity.
