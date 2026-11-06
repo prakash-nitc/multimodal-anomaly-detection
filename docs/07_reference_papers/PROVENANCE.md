@@ -112,8 +112,16 @@ weaker evidence and must be either confirmed or removed.
 | 68.98 | XD-Violence AP | Frozen VLM, yes/no probability | `vlmanswer` | Table 2, p.4; mean over four VLMs | verified |
 | 92.90 | UCF video-level AUROC | CSI-VAD | `csivad` | Table I, p.4; VIDEO level, not comparable with frame level | verified |
 | 85.2 | ShanghaiTech AUROC | AnomalyRuler | `anomalyruler` | Table 3, p.12; few-normal-shot, uses GPT-4 | verified |
-| 71.9 | UBnormal AUROC | AnomalyRuler | `anomalyruler` | Table 3, p.12; few-normal-shot, uses GPT-4 | verified |
-| 62.94 | UBnormal AUROC | OVVAD | `ovvad` | Table 3, p.6; trained | verified |
+| 71.9 | UBnormal AUROC | AnomalyRuler | `anomalyruler` | Table 3, p.12; few-normal-shot, uses GPT-4. Micro AUROC: the same column gives BAF 59.3, the UBnormal paper's micro test figure for that method (Table 2, p.7) | verified |
+| 62.94 | UBnormal AUROC | OVVAD | `ovvad` | Table 3, p.6; trained. Micro AUROC: its Georgescu rows (59.30, 61.30) equal the UBnormal paper's micro test figures | verified |
+| 59.3 | UBnormal micro AUROC, test | Georgescu et al. (BAF) | `ubnormal` | Table 2, p.7, Test / AUC Micro; trained on UBnormal normal training data | verified |
+| 84.9 | UBnormal macro AUROC, test | Georgescu et al. (BAF) | `ubnormal` | Table 2, p.7, Test / AUC Macro | verified |
+| 61.3 | UBnormal micro AUROC, test | Georgescu et al. + UBnormal anomalies | `ubnormal` | Table 2, p.7, Test / AUC Micro; trained with UBnormal's training anomalies | verified |
+| 85.6 | UBnormal macro AUROC, test | Georgescu et al. + UBnormal anomalies | `ubnormal` | Table 2, p.7, Test / AUC Macro | verified |
+| 68.5 | UBnormal micro AUROC, test | Bertasius et al. (1/32 sample rate, fine-tuned) | `ubnormal` | Table 2, p.7, Test / AUC Micro; best micro test figure in the table; supervised, fine-tuned on UBnormal | verified |
+| 80.3 | UBnormal macro AUROC, test | Bertasius et al. (1/32 sample rate, fine-tuned) | `ubnormal` | Table 2, p.7, Test / AUC Macro | verified |
+| 71.8 | UBnormal AUROC | STG-NF, as tabulated by AnomalyRuler | `anomalyruler` | Table 3, p.12, UB column (micro, as above); trained; original PDF not read | verified |
+| 62.7 | UBnormal AUROC | FPDM, as tabulated by AnomalyRuler | `anomalyruler` | Table 3, p.12, UB column (micro, as above); trained; original PDF not read | verified |
 | 61.9 | NWPU Campus AUC | MemAE | `nwpu` | Table 4, p.8 (also Table 3, p.7, column Cam) | verified |
 | 62.5 | NWPU Campus AUC | MNAD | `nwpu` | Table 4, p.8 | verified |
 | 62.5 | NWPU Campus AUC | OG-Net | `nwpu` | Table 4, p.8 | verified |
@@ -122,6 +130,17 @@ weaker evidence and must be either confirmed or removed.
 | 64.5 | NWPU Campus AUC | AMMC-Net | `nwpu` | Table 4, p.8 | verified |
 | 65.8 | NWPU Campus AUC | Cao et al. (γ=0, no scene conditioning) | `nwpu` | Table 4, p.8 | verified |
 | 68.2 | NWPU Campus AUC | Cao et al. (γ=1, scene-conditioned) | `nwpu` | Table 4, p.8 | verified |
+| 17.8 | XD-Violence AP | Zero-shot CLIP | `lavad` | Table 2, p.6, row ZS CLIP[22] (17.83, shown to one decimal in Paper 1 `tbl:sota`) | verified |
+| 27.3 | XD-Violence AP | Zero-shot ImageBind | `lavad` | Table 2, p.6, row ZS IMAGEBIND (IMAGE)[6] (27.25, shown to one decimal) | verified |
+| 50.3 | XD-Violence AP | LLaVA-1.5 | `lavad` | Table 2, p.6, row LLAVA-1.5[17] (50.26, shown to one decimal) | verified |
+| 62.0 | XD-Violence AP | LAVAD | `lavad` | Table 2, p.6, row LAVAD (62.01, shown to one decimal) | verified |
+| 85.3 | UCF AUROC | Frozen VLM, yes/no probability | `vlmanswer` | Table 2, p.4 (85.32, shown to one decimal); mean over four VLMs | verified |
+| 69.0 | XD-Violence AP | Frozen VLM, yes/no probability | `vlmanswer` | Table 2, p.4 (68.98, shown to one decimal); mean over four VLMs | verified |
+| 87.3 | UCF AUROC | Flashback-PE | `flashback` | Table 1, p.6 (87.29, shown to one decimal) | verified |
+| 75.1 | XD-Violence AP | Flashback-PE | `flashback` | Table 1, p.6 (75.13, shown to one decimal) | verified |
+| 89.8 | UCF AUROC | ASK-Hint | `askhint` | Table 1, PDF p.5 (89.83, shown to one decimal) | verified |
+| 89.9 | UCF AUROC | NOVA | `nova` | Table 1, p.7 (89.86, shown to one decimal); mean of five prompt banks | verified |
+| 84.8 | XD-Violence AP | NOVA | `nova` | Table 1, p.7 (84.82, shown to one decimal) | verified |
 
 **Our own rows** — Avenue 67.7 and ShanghaiTech 73.4 — are not in this ledger.
 They are measurements, and their provenance is the run manifests under

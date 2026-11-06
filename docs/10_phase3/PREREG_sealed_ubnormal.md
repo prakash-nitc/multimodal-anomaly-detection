@@ -138,3 +138,43 @@ and the wording and predictions of this note), with a self-test that passes on s
 refuses a second run unless given a technical reason, which it records. One consequence of the frozen rule is
 made explicit rather than changed: the step-1 rule needs significant gains on at least two benchmarks, so on
 one benchmark the comparison with plain ViT-L can only return "no worse" or "worse".
+
+**6 November 2026: the sealed result.** The test ran once on the server at commit 5c52d41, with no
+technical rerun. Before scoring, the seven frozen files matched their hashes, the frozen configuration
+reproduced its step-3 scores on all four development datasets exactly (0.782956, 0.855806, 0.722330,
+0.638771), all 158 abnormal and 53 normal test videos and every tracks file were present, and the sampled
+labels in the embedding cache agreed with the frame-level labels. The run covered 92,640 test
+frames (49,850 anomalous), the figure this note took from the paper.
+
+| Condition | Micro AUROC (primary) | 95% CI | Macro AUROC | Micro, sampled frames |
+|---|---|---|---|---|
+| B: PE-Core + C + bank (frozen model) | 0.7475 | [0.7044, 0.7886] | 0.9063 | 0.7485 |
+| PE-Core + C | 0.6874 | [0.6344, 0.7414] | 0.8962 | 0.6900 |
+| Plain PE-Core | 0.6512 | [0.5988, 0.7084] | 0.8580 | 0.6538 |
+| Plain ViT-L | 0.5865 | [0.5223, 0.6443] | 0.8129 | 0.5883 |
+
+Paired video-level bootstrap, 1000 resamples of 211 videos, seed 20261104:
+B − plain PE-Core +0.0963 [+0.0509, +0.1424];
+B − plain ViT-L +0.1610 [+0.1117, +0.2150];
+B − C +0.0601 [+0.0158, +0.1024];
+C − plain PE-Core +0.0362 [+0.0057, +0.0690].
+
+**What the result allows us to say,** using only the wording fixed above:
+"Detects anomalies on an unseen dataset, without training" (B's interval lies above 0.5);
+"The calm phrases and bank carried over to unseen data" (B − plain PE-Core, interval above 0);
+against plain ViT-L, "no worse" (the step-1 rule needs two benchmarks to return "better"; it is applied
+literally, although the interval of B − plain ViT-L lies well above 0).
+
+**Predictions:** U1 holds; U2 holds; U3 holds, narrowly (0.7475 against an upper bound of 0.75).
+
+**Published figures,** checked in their PDFs and entered in `docs/07_reference_papers/PROVENANCE.md`
+before being stated here. All are micro frame-level AUROC on the test split:
+B's 74.7 is above the UBnormal authors' baselines (best 68.5, a supervised model fine-tuned on
+UBnormal; Georgescu et al. 59.3, and 61.3 with UBnormal's training anomalies), above OVVAD (62.94, trained),
+FPDM (62.7) and STG-NF (71.8), and above AnomalyRuler (71.9, a few normal frames and GPT-4). AnomalyRuler's
+figure lies inside B's 95% interval, so that difference is not established. On macro AUROC B's
+90.6 is above every macro figure in the authors' Table 2 (best 85.6).
+
+**Limits that apply to this result,** as stated before it was known: UBnormal is computer-generated; it is
+one dataset; and the micro AUROC of all four conditions is computed with each sampled frame's score held
+for the next fifteen frames, as fixed above.

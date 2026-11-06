@@ -1,0 +1,44 @@
+frozen files
+  hash  da_zvad/prompts/ideas.py           d889dbc6a76a4410  ok
+  hash  da_zvad/prompts/fixes.py           32ab541b436c77f5  ok
+  hash  da_zvad/prompts/banks.py           0ab005d55f05a5a8  ok
+  hash  da_zvad/prompts/templates.py       4de350b2382843e4  ok
+  hash  notebooks/ideas_sweep.py           d0ee71aca2ad9c5b  ok
+  hash  notebooks/fixes_sweep.py           5efe7532daafff5c  ok
+  hash  notebooks/normal_side_sweep.py     d41be068c7dd1b4b  ok
+  PE-Core-L-14-336 / meta: learned logit scale 99.886 (lambda stays 100)
+  ViT-L-14 / laion2b_s32b_b82k: learned logit scale 99.998 (lambda stays 100)
+frozen configuration on the development benchmarks
+  gate  B on shanghaitech   0.782956  step 3 0.782956  ok
+  gate  B on ucf_crime      0.855806  step 3 0.855806  ok
+  gate  B on xd_violence    0.722330  step 3 0.722330  ok
+  gate  B on nwpu_campus    0.638771  step 3 0.638771  ok
+
+UBnormal test split: 158 abnormal + 53 normal videos
+  gate  sampled labels agree with the frame-level labels  ok
+
+  condition       micro      macro    sampled
+  B              0.7475     0.9063     0.7485
+  C              0.6874     0.8962     0.6900
+  pe_plain       0.6512     0.8580     0.6538
+  vit_plain      0.5865     0.8129     0.5883
+
+  paired bootstrap: 1000 resamples of 211 videos, seed 20261104
+  B micro AUROC 0.7475  95% CI [0.7044, 0.7886]
+  B - pe_plain     +0.0963  95% CI [+0.0509, +0.1424]
+  B - vit_plain    +0.1610  95% CI [+0.1117, +0.2150]
+  B - C            +0.0601  95% CI [+0.0158, +0.1024]
+  C - pe_plain     +0.0362  95% CI [+0.0057, +0.0690]
+
+WHAT THE RESULT ALLOWS US TO SAY (fixed in the freeze note)
+  detection            Detects anomalies on an unseen dataset, without training
+  transfer             The calm phrases and bank carried over to unseen data
+  against plain ViT-L  no worse
+  (with one benchmark, the step-1 rule cannot return "better"; it is applied literally)
+
+PRE-REGISTERED PREDICTIONS
+  U1 B's 95% CI lies above 0.5                       HOLDS
+  U2 B - plain PE-Core is above 0                    HOLDS
+  U3 B's micro AUROC is between 0.60 and 0.75        HOLDS
+
+saved /home/m251250cs/dazvad/work/tables/sealed_ubnormal.json

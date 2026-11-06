@@ -1,0 +1,128 @@
+{
+ "n_videos": 211,
+ "gates": [
+  {
+   "what": "cached sampled labels == full labels at sampled frames",
+   "ok": true
+  }
+ ],
+ "gates_passed": true,
+ "frames": 92640,
+ "anomalous_frames": 49850,
+ "primary_micro_auroc": {
+  "B": 0.747474332555976,
+  "C": 0.687405518495191,
+  "pe_plain": 0.6512171314129347,
+  "vit_plain": 0.586450075395619
+ },
+ "macro_auroc": {
+  "B": 0.9062739678086955,
+  "C": 0.8961620122184966,
+  "pe_plain": 0.8580138549739188,
+  "vit_plain": 0.8129328225681227
+ },
+ "sampled_micro_auroc": {
+  "B": 0.7485393885666592,
+  "C": 0.6900498710967614,
+  "pe_plain": 0.6538077354682157,
+  "vit_plain": 0.588290813349521
+ },
+ "ci95": {
+  "B": [
+   0.7044484044687477,
+   0.7886153675048695
+  ],
+  "C": [
+   0.6343909895931389,
+   0.7414193851884633
+  ],
+  "pe_plain": [
+   0.5987815626330195,
+   0.7083781205399728
+  ],
+  "vit_plain": [
+   0.5222704832815166,
+   0.6442659055575963
+  ]
+ },
+ "comparisons": {
+  "B - pe_plain": {
+   "point": 0.09625720114304126,
+   "ci95": [
+    0.05086883747657986,
+    0.14242544291705644
+   ]
+  },
+  "B - vit_plain": {
+   "point": 0.16102425716035695,
+   "ci95": [
+    0.11170174919515234,
+    0.21502440291653022
+   ]
+  },
+  "B - C": {
+   "point": 0.0600688140607849,
+   "ci95": [
+    0.015812688288463907,
+    0.10237710780377259
+   ]
+  },
+  "C - pe_plain": {
+   "point": 0.03618838708225636,
+   "ci95": [
+    0.0057451614032488,
+    0.06904471136974243
+   ]
+  }
+ },
+ "wording": {
+  "detection": "Detects anomalies on an unseen dataset, without training",
+  "transfer": "The calm phrases and bank carried over to unseen data",
+  "against plain ViT-L": "no worse"
+ },
+ "predictions": {
+  "U1 B's 95% CI lies above 0.5": true,
+  "U2 B - plain PE-Core is above 0": true,
+  "U3 B's micro AUROC is between 0.60 and 0.75": true
+ },
+ "manifest": {
+  "started_utc": "2026-11-06T16:42:33+00:00",
+  "git_commit": "5c52d4155106831d91366f509f5f45845e21e770",
+  "working_tree": "clean",
+  "sha256": {
+   "prereg": "fbe1b20e05182b5a67c8f249f39bcc2eddc196503c10dae88902ad1187fe8225",
+   "banks.py": "0ab005d55f05a5a89bdb33117ece91c7fd4b13044c74f4bbc3d75726d038139e",
+   "retrieval.py": "e8f49d2ca0b12171b15322ea94e5a57c9601ab64cde7d89148cbf6c1842f3abb",
+   "normal_side_sweep.py": "d41be068c7dd1b4b23664629b9a7a6bc3e887dfc67b9aa46a5236f3e061d75ca"
+  },
+  "host": "dellemc",
+  "python": "3.10.7",
+  "numpy": "1.26.4",
+  "sklearn": "1.7.2",
+  "args": {
+   "step": "score",
+   "root": "/home/m251250cs/dazvad/data/ubnormal",
+   "technical_rerun": null
+  },
+  "constants": {
+   "LAM": 100.0,
+   "BOOT_SEED": 20261104,
+   "CTRL_SEED": 20261104,
+   "N_CTRL": 20,
+   "BOOT_CTRL": 5,
+   "K_CALM": 5,
+   "K_RET": 5,
+   "W_EMB": 5
+  },
+  "frozen_sha256_lf": {
+   "da_zvad/prompts/ideas.py": "d889dbc6a76a4410",
+   "da_zvad/prompts/fixes.py": "32ab541b436c77f5",
+   "da_zvad/prompts/banks.py": "0ab005d55f05a5a8",
+   "da_zvad/prompts/templates.py": "4de350b2382843e4",
+   "notebooks/ideas_sweep.py": "d0ee71aca2ad9c5b",
+   "notebooks/fixes_sweep.py": "5efe7532daafff5c",
+   "notebooks/normal_side_sweep.py": "d41be068c7dd1b4b"
+  }
+ },
+ "technical_rerun": null
+}

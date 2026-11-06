@@ -14,6 +14,7 @@ whether the number in the table is in the ledger, whether the ledger and the
 table agree, and whether the source PDF is present.
 
 Usage:  python scripts/check_provenance.py           # report
+        python scripts/check_provenance.py --tex docs/09_paper/paper1_concept_shift.tex
         python scripts/check_provenance.py --strict  # exit 1 on any problem
 """
 from __future__ import annotations
@@ -25,6 +26,8 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX = os.path.join(ROOT, "docs", "09_paper", "main.tex")
+if "--tex" in sys.argv:                 # e.g. --tex docs/09_paper/paper1_concept_shift.tex
+    TEX = os.path.abspath(sys.argv[sys.argv.index("--tex") + 1])
 PAPERS = os.path.join(ROOT, "docs", "07_reference_papers")
 LEDGER = os.path.join(PAPERS, "PROVENANCE.md")
 
@@ -53,6 +56,8 @@ def table_numbers():
     tex = io.open(TEX, encoding="utf-8").read()
     found = []
     for label in TABLE_LABELS:
+        if label not in tex:
+            continue
         i = tex.index(label)
         block = tex[i:tex.index("end{tabularx}", i)]
         for line in block.split("\n"):
