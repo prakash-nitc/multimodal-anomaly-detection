@@ -32,6 +32,9 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
+% rotating: the architecture figure sits on its own landscape page, where the
+% text height is the available width, so it prints at full size and stays legible
+\usepackage{rotating}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
@@ -847,11 +850,11 @@ evaluates detection only.
 \subsection{Module specifications}
 \label{sec:modules}
 
-% figure (not figure*): cas-sc is a single-column class, so a starred
-% float would have nothing extra to span.
-\begin{figure}[pos=htbp]
+% A landscape page of its own: the diagram is drawn 8.4 in wide, and the portrait
+% text block is only about 6.9 in, which made its labels too small to read.
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\linewidth]{fig_architecture_clip}
+\includegraphics[width=0.97\textheight]{fig_architecture_clip}
 \caption{The DA-ZVAD framework. Every model is frozen; the verbalised scene
 context (M3) is the sole adaptation mechanism. At setup, the same frozen LLaVA
 used for explanation captions a camera's first three frames, and the consensus
@@ -859,7 +862,7 @@ caption becomes that camera's descriptor $c_k$, so no human-written text is
 required. $c_k$ enters the normal prompt ensemble only, and grounds the
 generated explanations.}
 \label{fig:arch}
-\end{figure}
+\end{sidewaysfigure}
 
 \begin{description}
   \item[M1 --- Visual encoder.] A frozen CLIP ViT-L/14 encoder

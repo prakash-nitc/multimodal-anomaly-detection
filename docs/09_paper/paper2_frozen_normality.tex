@@ -14,6 +14,9 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{tabularx}
+% rotating: the architecture figure sits on its own landscape page, where the
+% text height is the available width, so it prints at full size and stays legible
+\usepackage{rotating}
 \usepackage{multirow}
 
 \makeatletter
@@ -77,8 +80,8 @@ and no gradient update. It was developed one change at a time under rules commit
 before each step, on ShanghaiTech, UCF-Crime, XD-Violence and NWPU Campus, where it
 reaches $0.783$, $0.856$, $0.722$ (average precision) and $0.639$; on XD-Violence it
 exceeds the description-based system by $+0.305$ $[+0.255, +0.359]$. The calm phrases
-help on PE-Core but do nothing on CLIP ViT-L/14, and unlike scene descriptions they
-mainly re-rank frames within each video. Before any data from a fifth benchmark was
+help on PE-Core but do nothing on CLIP ViT-L/14, and on two benchmarks, unlike scene
+descriptions, they mainly re-rank frames within each video. Before any data from a fifth benchmark was
 obtained, the model, the evaluation and the permitted wording of every outcome were
 frozen. On the official UBnormal test split, scored once, the model reaches a micro
 AUROC of $0.747$ $[0.704, 0.789]$, $+0.096$ $[+0.051, +0.142]$ above plain PE-Core, and
@@ -88,7 +91,7 @@ all three pre-registered predictions hold.
 \begin{highlights}
 \item One fixed set of 59 phrases replaces text written for each camera
 \item Calm normal phrases help on PE-Core but do nothing on CLIP ViT-L/14
-\item The text prior re-ranks frames, where scene descriptions only calibrated cameras
+\item On two benchmarks the calm phrases re-rank frames, unlike scene descriptions
 \item Model, metrics and wording were frozen before any test data was obtained
 \item Sealed UBnormal test: 0.747 AUROC, all three predictions hold
 \end{highlights}
@@ -148,8 +151,9 @@ benchmark, UBnormal \citep{acsintoae2022ubnormal}, downloaded and scored, once.
         a frozen PE-Core encoder \citep{bolya2025pe} (Section~\ref{sec:method}).
   \item \textbf{What the text does, measured.} The calm phrases are
         encoder-dependent, helping PE-Core on three of four benchmarks and CLIP
-        ViT-L/14 on none, and, unlike scene descriptions, they mainly re-rank frames
-        within a video (Section~\ref{sec:dev}).
+        ViT-L/14 on none, and on ShanghaiTech and NWPU Campus they mainly re-rank
+        frames within a video, which scene descriptions did not
+        (Section~\ref{sec:dev}).
   \item \textbf{A sealed test.} A complete evidence chain, from committed rules for
         each development step to a single scored run on a benchmark obtained after
         freezing, with every number and every claim fixed in advance
@@ -275,16 +279,16 @@ how much closer it lies to the abnormal prototype than to the normal one, smooth
 over a short window. Every component is frozen, the 59 phrases are the same for every
 camera, and nothing is computed from the target site before detection begins.
 
-\begin{figure}[pos=htbp]
+\begin{sidewaysfigure}
 \centering
-\includegraphics[width=\linewidth]{fig_architecture_final}
+\includegraphics[width=0.97\textheight]{fig_architecture_final}
 \caption{The detector. M1: a frozen PE-Core image encoder at $336\times336$ pixels.
 M3: the normal ensemble (three general phrases and eight calm phrases, C) and the
 abnormal ensemble (48 concrete actions in twelve types, B), embedded once by the
 frozen text encoder. Frame scoring: the margin between the two prototypes, passed
 through a sigmoid. M2: a centred moving average. The right-hand panel lists what the
 model does not use.}\label{fig:arch2}
-\end{figure}
+\end{sidewaysfigure}
 
 \subsection{Encoder}
 The image and text encoders are PE-Core-L/14 at $336\times336$ pixels
@@ -577,7 +581,7 @@ first study's description-based system on the same videos, the final model is no
 worse on any benchmark and better on XD-Violence by $+0.305$, the benchmark on which
 the descriptions had failed.
 
-\subsection{Re-ranking, not calibration}
+\subsection{Re-ranking on two benchmarks}
 \label{sec:dev-audit}
 The first study introduced a measurement audit that splits a gain in pooled AUROC
 into a \emph{level} part, which a per-video shift of the scores reproduces, and the
@@ -585,10 +589,12 @@ remainder, and that separately measures the change in AUROC within each video
 \citep{sarangi2026concept}. There, $82$--$87\%$ of a description's gains were level.
 The calm phrases behave differently. On ShanghaiTech their gain is re-ranking-dominated,
 and AUROC within each video rises by $+0.166$; on NWPU Campus it is also
-re-ranking-dominated (within-video $+0.070$). Only on XD-Violence, where many videos
-contain no anomaly at all, is the gain mainly calibration. The calm phrases thus meet
-requirement R3 where the descriptions did not: they change which frames within a
-video score high, not only how each video's scores sit against the others.
+re-ranking-dominated (within-video $+0.070$). On XD-Violence, where many videos
+contain no anomaly at all, the gain is mainly calibration, and on UCF-Crime, where the
+calm phrases did not help ($-0.030$), the audit is mixed. On the two benchmarks where
+re-ranking dominates, the calm phrases meet requirement R3 where the descriptions did
+not: they change which frames within a video score high, not only how each video's
+scores sit against the others.
 
 \subsection{Curves on the development benchmarks}
 Figure~\ref{fig:devroc} shows the full ROC and precision--recall curves of the final
@@ -685,7 +691,7 @@ video-level bootstrap intervals over the 211 videos.}\label{tbl:sealed}
 \textbf{Final model (PE-Core + C + B)} & \textbf{0.747} & \textbf{[0.704, 0.789]} & \textbf{0.906} & \textbf{0.749} \\
 PE-Core + calm phrases (C) & 0.687 & [0.634, 0.741] & 0.896 & 0.690 \\
 Plain PE-Core & 0.651 & [0.599, 0.708] & 0.858 & 0.654 \\
-Plain CLIP ViT-L/14 & 0.587 & [0.522, 0.644] & 0.813 & 0.588 \\
+Plain CLIP ViT-L/14 & 0.586 & [0.522, 0.644] & 0.813 & 0.588 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -886,8 +892,8 @@ which did not help there either, did not pay it back.
 
 \paragraph{What changed from the first study.} The first study's text told the
 detector which scene it was looking at and mostly moved whole videos up or down. The
-fixed prior tells it what ordinary and alarming footage look like in general, and it
-mostly reorders frames within a video. It also removes the dependence on a camera's
+fixed prior tells it what ordinary and alarming footage look like in general, and on
+two of the four benchmarks it mainly reorders frames within a video. It also removes the dependence on a camera's
 opening frames, which was the cause of the XD-Violence failure, and the model that
 results is simpler: no captioning model, no per-camera step, and one encoder pass per
 sampled frame.
@@ -936,8 +942,8 @@ any of the benchmarks, to measure how much of its success is general.
 One fixed set of 59 phrases, written once and used unchanged on every camera, carries a
 frozen detector as well as text written for each camera did on three of four
 development benchmarks, and far better on the one where per-camera text failed. Its
-calm normal phrases work only in the right embedding space, and they help by reordering
-frames within a video rather than by calibrating cameras. Developed under committed
+calm normal phrases work only in the right embedding space, and on two benchmarks they
+help mainly by reordering frames within a video rather than by calibrating cameras. Developed under committed
 rules and frozen before a fifth benchmark was obtained, the model reached $0.747$ AUROC
 on UBnormal, with the text prior adding $+0.096$ over the same encoder alone, and every
 pre-registered prediction held. A training-free detector need not be told where it is;

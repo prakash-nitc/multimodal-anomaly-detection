@@ -103,7 +103,7 @@ def progression(out):
 def forest(out):
     rows = ["Encoder: PE-Core − ViT-L/14", "Calm phrases on PE-Core (C − plain)",
             "Calm phrases on ViT-L/14", "Bank on top of C (B − C)",
-            "Final − Paper-1 system (LLaVA text)", "Final − plain ViT-L/14"]
+            "Final − description-based system", "Final − plain ViT-L/14"]
     eff = {}
     bb = j("normal_side_backbones_pe-l.json")["datasets"]
     for ds in DEV:

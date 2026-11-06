@@ -26,14 +26,15 @@ import matplotlib  # noqa: E402
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+import arch_style  # noqa: E402
 import make_architecture as ma  # noqa: E402
 
 
 def main() -> int:
     root = os.path.dirname(HERE)
     p = argparse.ArgumentParser()
-    p.add_argument("--canvas-width", type=float, default=7.0,
-                   help="printed width in inches; the paper's text block is ~6.9")
+    p.add_argument("--canvas-width", type=float, default=8.4,
+                   help="drawn width in inches; the figure sits on a landscape page")
     p.add_argument("--assets", default=os.path.join(root, "figure_assets"))
     p.add_argument("--out", default=os.path.join(root, "docs", "09_paper", "figures",
                                                  "fig_architecture_clip.png"))
@@ -49,7 +50,8 @@ def main() -> int:
 
     plt.subplots = smaller
     try:
-        print("saved:", ma.build(a.assets, a.out))
+        with arch_style.bold_print_style():
+            print("saved:", ma.build(a.assets, a.out))
     finally:
         plt.subplots = original
     return 0

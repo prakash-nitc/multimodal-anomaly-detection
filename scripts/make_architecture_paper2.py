@@ -31,6 +31,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import FancyBboxPatch  # noqa: E402
 
+import arch_style  # noqa: E402
 import make_architecture as base  # noqa: E402
 import make_architecture_paper_v3 as v3  # noqa: E402
 
@@ -61,7 +62,7 @@ def tinted_container(ax, x, y, w, h, ec, label):
 def main() -> int:
     root = os.path.dirname(HERE)
     p = argparse.ArgumentParser()
-    p.add_argument("--canvas-width", type=float, default=7.8)
+    p.add_argument("--canvas-width", type=float, default=8.4)
     p.add_argument("--assets", default=os.path.join(root, "figure_assets"))
     p.add_argument("--out", default=os.path.join(root, "docs", "09_paper", "figures",
                                                  "fig_architecture_final.png"))
@@ -72,9 +73,6 @@ def main() -> int:
             if hasattr(mod, k):
                 setattr(mod, k, v)
         mod.container = tinted_container
-    # Segoe UI has no snowflake glyph; matplotlib falls back along this list per glyph
-    # (fallback works across font.family entries, not across font.sans-serif ones)
-    plt.rcParams["font.family"] = ["Segoe UI", "Segoe UI Symbol", "DejaVu Sans"]
 
     # drop the outer dashed gold frame that marks Paper 1's figures
     real_rect = v3.Rectangle
@@ -96,7 +94,8 @@ def main() -> int:
 
     plt.subplots = smaller
     try:
-        print("saved:", v3.build(a.assets, a.out))
+        with arch_style.bold_print_style():
+            print("saved:", v3.build(a.assets, a.out))
     finally:
         plt.subplots = original
         v3.Rectangle = real_rect
