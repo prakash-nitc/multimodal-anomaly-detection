@@ -25,6 +25,9 @@ def get_dataset(config) -> "AnomalyDataset":
     if name == "xd_violence":
         from .xd_violence import XDViolenceDataset
         return XDViolenceDataset(config.data_root, frame_step=config.frame_step)
+    if name == "ubnormal":
+        from .ubnormal import UBnormalDataset
+        return UBnormalDataset(config.data_root, frame_step=config.frame_step)
     if name == "synthetic":
         from .base import SyntheticDataset
         return SyntheticDataset(seed=config.seed)

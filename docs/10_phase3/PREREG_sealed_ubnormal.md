@@ -121,4 +121,20 @@ and only after that figure's metric (micro or macro, test split) has been checke
 
 ## Addenda
 
-None yet. The result and any technical fix go here, dated.
+The result and any technical fix go here, dated.
+
+**6 November 2026, before any UBnormal data was downloaded: a technical clarification about one hash.**
+The hash table above was computed on a Windows working copy. There `da_zvad/prompts/templates.py` has
+Windows line endings, which give `5a6456c8bf24bca5`; the committed file, the same content with Linux line
+endings as the server checks it out, gives `4de350b2382843e4`. The file has not changed since commit 2290df8.
+The sealed-test script therefore compares every frozen file's hash with line endings normalised to LF; the
+other six hashes are identical under both. Nothing about the model or the test changes.
+
+**6 November 2026, before any UBnormal data was downloaded: the sealed-test code.** Step 2 of the order of
+work is `da_zvad/datasets/ubnormal.py` (loader, and a literal port of the authors' frame-level labels:
+`gt[start:end + 1] = 1` per track, frame count from OpenCV) and `notebooks/sealed_ubnormal.py` (hash check,
+development gates, the four conditions, the micro, macro and sampled metrics, paired video-level bootstrap,
+and the wording and predictions of this note), with a self-test that passes on synthetic data. The script
+refuses a second run unless given a technical reason, which it records. One consequence of the frozen rule is
+made explicit rather than changed: the step-1 rule needs significant gains on at least two benchmarks, so on
+one benchmark the comparison with plain ViT-L can only return "no worse" or "worse".
