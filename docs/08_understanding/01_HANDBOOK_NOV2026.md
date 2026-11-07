@@ -1,7 +1,8 @@
-# DA-ZVAD Handbook, November 2026 edition
+# DA-ZVAD Handbook, November 2026 edition (final)
 
 *Plain language, built to be learned, remembered, taught and defended.
-Written 6 November 2026, after the improvement round and the freeze. The older,
+First written 6 November 2026 after the freeze; updated 7 November 2026 with the
+sealed UBnormal result, the two papers, the IEEE report and the final deck. The older,
 longer handbook (`00_HANDBOOK.md`) stays as the detailed reference for Phases 1–3.*
 
 ---
@@ -31,32 +32,38 @@ a frozen, ready-made model that understands pictures and words, and compares eac
 frame with two lists of sentences: one describing normal scenes and one describing
 anomalies.
 
-**The journey in four lines.**
+**The journey in five lines.**
 1. We first gave the detector one sentence about each camera. It helped on campus video (0.751).
 2. On XD-Violence it failed badly (0.624 → 0.417), because the sentence was written from
    frames that already showed the violence.
 3. So we stopped relying on that sentence and changed *how the detector describes normal and abnormal*.
 4. The final model: **PE-Core + calm phrases + a frozen phrase bank**, with no sentence for
    each video. XD went from 41.7 to 72.2.
+5. We **froze** it and tested it **once** on UBnormal, a dataset it had never seen: **0.747**,
+   and all three predictions written beforehand came true.
 
 **Final scores** (AUROC; AP for XD):
 
-| ShanghaiTech | UCF-Crime | XD-Violence | NWPU Campus |
-|---|---|---|---|
-| 78.3 | 85.6 | 72.2 | 63.9 |
+| ShanghaiTech | UCF-Crime | XD-Violence | NWPU Campus | **UBnormal (sealed test)** |
+|---|---|---|---|---|
+| 78.3 | 85.6 | 72.2 | 63.9 | **74.7** |
 
-**Status.** These are exploratory, because the model was chosen on these four datasets.
-It is now frozen and will be tested once on a dataset it has never seen, UBnormal.
+**Status.** The first four are *exploratory*, because the model was chosen on those datasets.
+The UBnormal number is the honest one: the model was frozen before any UBnormal file was
+downloaded, and it was scored once. The work is written up as two papers and one IEEE report
+(Part 3.7).
 
 ### The memory card
 
 > **Three ingredients: P-C-B.** **P**E-Core (the encoder), **C**alm normal phrases, **B**ank of concrete actions.
 > Think of a **PCB**, a circuit board: three parts, no moving parts, nothing trained.
 >
-> **Three results:** XD 41.7 → 72.2; no worse than the old model anywhere; no captioning model.
+> **Three results:** XD 41.7 → 72.2; no worse than the old model anywhere; **0.747 on unseen
+> UBnormal, +0.096 over the same encoder alone, all three predictions held.**
 >
-> **Three limits:** chosen on these datasets (sealed test to come); an LLM wrote the bank knowing
-> the datasets; one frame at a time, so motion and small objects are hard.
+> **Three limits:** the development numbers were chosen on those datasets; an LLM wrote the bank
+> knowing their anomaly types; one frame at a time, so motion and small objects are hard.
+> (And UBnormal is computer-generated, not real footage.)
 >
 > **One sentence:** *"A frozen model compares each frame with calm descriptions of normal scenes and
 > concrete descriptions of anomalies — no training, the same setup for every camera."*
@@ -124,7 +131,7 @@ frame and a sentence match, and low when they don't.
 For each frame:
 
 ```
-score = (how close it is to the ABNORMAL sentences) − (how close it is to the NORMAL sentences)
+score = closeness to the ABNORMAL sentences − closeness to the NORMAL sentences
 ```
 
 - Each list of sentences is averaged into one vector first, called a **prototype**.
@@ -209,6 +216,40 @@ We tested one idea at a time, always with rules written first (Part 4.3). What w
 
 What we dropped is listed in Part 5.4. Then we **froze** the model for a single test on unseen data.
 
+## 3.6 The sealed test (6 November)
+
+*"Like a sealed exam paper: study, lock your answers, then open the paper once."*
+- The model's files were fixed by their fingerprints (hashes) and committed to Git **before** any
+  UBnormal file was downloaded. Three predictions and the exact wording for each possible result
+  were committed with them.
+- UBnormal: 29 computer-generated scenes, 211 test videos, 92,640 frames. Its test anomalies
+  (seizures, people lying down, car crashes, fire, smoke, jaywalking…) are deliberately different
+  from its training anomalies.
+- The test was run **once**. Result: **0.747**, +0.096 over plain PE-Core. All three predictions held.
+  Full details in Part 5.7.
+
+## 3.7 Writing it up (6–7 November)
+
+Your guides asked for **two papers**, so the work is split in two:
+
+| | Paper 1 | Paper 2 |
+|---|---|---|
+| Title (short) | Concept shift: what a scene description does, and where it fails | Calm words and concrete actions: a frozen text prior, verified by a sealed test |
+| Model | CLIP ViT-L + a sentence per camera (LLaVA) | PE-Core + calm phrases + phrase bank |
+| Main message | The sentence matters, but mostly calibrates, and it breaks on XD | One fixed list for every camera works better, and holds on unseen data |
+| File | `docs/09_paper/paper1_concept_shift.tex` | `docs/09_paper/paper2_frozen_normality.tex` |
+
+Plus: **one IEEE-format report** combining both, for college (`docs/09_paper/report_ieee_combined.tex`),
+the final slides (`docs/06_presentations/DA-ZVAD_Final_Review.pptx`) and a plain-language speaking
+script (`DA-ZVAD_Final_Presentation_Script.docx`).
+
+**Two honesty points written into Paper 2** (know them; say them first):
+1. The idea of calm, low-motion normal phrases **comes from NOVA**, and it is credited. Our phrases
+   are our own, and we left out NOVA's visual anchor (it is taken from each test video's frames).
+2. The UBnormal paper, which lists its test anomaly types, was read on **3 November**, before the
+   phrase bank was written on **5 November**. No UBnormal video or label was seen before the test,
+   but the overlap may owe something to that reading.
+
 ---
 
 # Part 4 — The final model, step by step
@@ -217,19 +258,20 @@ What we dropped is listed in Part 5.4. Then we **froze** the model for a single 
 
 ![The simple version: three inputs, one frozen encoder, four numbered steps. Learn to redraw this one.](../09_paper/dazvad_architecture_v3_simple.png)
 
-The detailed version, with notation, for the thesis and slides:
-[`docs/09_paper/dazvad_architecture_v3.png`](../09_paper/dazvad_architecture_v3.png).
+The detailed version, with notation (bold, print-size, the one in Paper 2, the report and the
+slides): `docs/09_paper/figures/fig_architecture_final.png`.
 The earlier design (with the sentence and LLaVA) stays at `docs/09_paper/dazvad_architecture_detailed.png`
 for reference.
 
 In plain text:
 
 ```
- Video frame (every 16th) ──► PE-Core image encoder ──► frame vector ─┐
-                                                                      ├─► score = sim(abnormal) − sim(normal)
- Normal side:   3 general + 8 calm phrases ──► PE-Core text ─► avg ───┤        ──► sigmoid(100 ×)
- Abnormal side: 48 concrete actions        ──► PE-Core text ─► avg ───┘        ──► smooth over 5 frames
-                                                                                ──► anomaly score (0 to 1)
+ Frame (every 16th)  ─► PE-Core image encoder ─► frame vector v
+ Normal:   3 general + 8 calm phrases ─► PE-Core text ─► average e⁺
+ Abnormal: 48 concrete actions        ─► PE-Core text ─► average e⁻
+
+ score = sim(v, e⁻) − sim(v, e⁺)
+   ─► sigmoid(100 ×) ─► smooth over 5 frames ─► anomaly score (0 to 1)
 ```
 
 **Memorise it as four verbs: Encode → Compare → Subtract → Smooth.**
@@ -291,7 +333,7 @@ That catches bugs.
 | | ShanghaiTech | UCF-Crime | XD-Violence (AP) | NWPU Campus |
 |---|---|---|---|---|
 | Old: ViT-L + LLaVA sentence | 75.1 | 82.4 | **41.7** | 66.7 |
-| Plain PE-Core | 66.6 | 84.7 | 49.4 | 61.8 |
+| Plain PE-Core | 66.6 | 84.7 | 49.4 | 61.7 |
 | PE-Core + C | 75.7 | 81.7 | 63.5 | 66.9 |
 | **Final: PE-Core + C + B** | **78.3** | **85.6** | **72.2** | **63.9** |
 
@@ -318,7 +360,8 @@ never "beats" or "state of the art".
 2. **One setup for crime and campus.** NOVA, Flashback and ASK-Hint report only on crime datasets.
 3. **Campus is hard for everyone.** NWPU's own authors reach 68.2 *with* training. Trained one-class methods
    score about 62–66. We reach 63.9 with none. On ShanghaiTech we're level with trained FPDM (78.6).
-4. **The numbers can be trusted:** rules first, confidence intervals, failures reported, a sealed test still to come.
+4. **The numbers can be trusted:** rules first, confidence intervals, failures reported, and a
+   sealed test on unseen data that came out as predicted (0.747).
 
 ## 5.4 What we tried and dropped (one line each)
 
@@ -347,25 +390,83 @@ never "beats" or "state of the art".
 
 ## 5.6 Honest limits
 
-- **Exploratory until the sealed test:** the model was chosen on these four datasets.
-- **The bank isn't independent:** the LLM that wrote it knew these datasets' anomaly types.
+- **The four development numbers are exploratory:** the model was chosen on those datasets.
+  Only the UBnormal number is a true test.
+- **The bank isn't independent:** the LLM that wrote it knew the development datasets' anomaly types,
+  and the UBnormal paper (with its anomaly list) had been read before the bank was written.
 - **NWPU dropped a little** with the bank (66.9 → 63.9, within noise).
 - **XD is still behind the leaders** (72.2 against Flashback-PE's 75.1 and NOVA's 84.8).
-- **UBnormal is computer-generated,** so its result won't prove performance on real cameras.
+- **One sealed test, and it is synthetic:** UBnormal is computer-generated, so real footage from new
+  sites is still untested.
+- **The calm-phrase idea is NOVA's,** credited in the paper; what is ours is using it with a fixed
+  bank, on every camera, and testing it this way.
 
 ## 5.7 The sealed test, and why it matters
 
 On 6 November 2026 the model was **frozen**: every setting was fixed and committed (Git commit `3792b86`)
-before any UBnormal data was downloaded. UBnormal has 29 scenes the model has never seen. It will be
-scored **once**, and the result reported whatever it shows. The wording for each possible result was
-fixed in advance (`docs/10_phase3/PREREG_sealed_ubnormal.md`).
+before any UBnormal data was downloaded. The test code, with safety checks ("gates") that refuse to
+run if any frozen file changed, was committed next (`5c52d41`). Then UBnormal was downloaded and
+scored **once**. The script refuses a second run.
 
 > *"We chose the model on four datasets, then froze it and tested it once on a fifth it had never
 > seen. So the final number shows how it does on new data, not how well we tuned it."*
 
+**Before the run, all gates passed:** the seven frozen files matched their fingerprints, the model
+reproduced its development scores exactly, and all 211 test videos were present.
+
+**The result** (micro AUROC over all 92,640 frames; 95% interval from 1,000 re-draws of the videos):
+
+| Model | Micro AUROC | 95% interval | Macro AUROC |
+|---|---|---|---|
+| **Final: PE-Core + calm phrases + bank** | **0.747** | [0.704, 0.789] | 0.906 |
+| PE-Core + calm phrases | 0.687 | [0.634, 0.741] | 0.896 |
+| Plain PE-Core | 0.651 | [0.599, 0.708] | 0.858 |
+| Plain CLIP ViT-L (the old encoder) | 0.586 | [0.522, 0.644] | 0.813 |
+
+- *Micro* = all frames from all videos ranked together (the official measure). *Macro* = AUROC inside
+  each video, then averaged.
+- **Calm phrases add +0.036**, the bank adds **+0.060** more, together **+0.096 [+0.051, +0.142]** over
+  plain PE-Core. Every effect has the same sign as in development.
+
+**The three predictions, written before any UBnormal data existed:**
+
+| Prediction | Measured | Result |
+|---|---|---|
+| U1: the interval lies above 0.5 (chance) | [0.704, 0.789] | holds |
+| U2: final model beats plain PE-Core | +0.096 | holds |
+| U3: the score falls between 0.60 and 0.75 | 0.747 | holds, by 0.003 |
+
+*U3 nearly failed by being too good. That shows the range was set cautiously, not tuned.*
+
+**What we are allowed to say** (the wording was fixed in advance): the model *"detects anomalies on
+an unseen dataset, without training"*, and *"the calm phrases and bank carried over to unseen data"*.
+Against plain CLIP the rule only allows *"no worse"*, even though the gap is +0.161, because the rule
+needs two benchmarks and a single test has one. We keep to the rule as written.
+
+**Looked at afterwards (not pre-registered, so it describes rather than tests):**
+- Better than plain PE-Core in **20 of 29 scenes**; median scene score 0.788 → 0.823; never below chance
+  in any scene (lowest 0.514).
+- Each bank type alone beats chance. **Falling** is strongest (0.766), close to UBnormal's
+  "having a seizure" and "laying down". **Vehicle among pedestrians** is weakest (0.542).
+
+**Against published UBnormal results** (all checked in their papers; all use UBnormal's own
+training data, ours used none):
+
+| Method | Micro AUROC |
+|---|---|
+| Georgescu et al. (the benchmark's authors) | 59.3 |
+| FPDM | 62.7 |
+| OVVAD | 62.94 |
+| Bertasius et al., fine-tuned | 68.5 |
+| STG-NF | 71.8 |
+| AnomalyRuler | 71.9 |
+| **Ours (frozen, no UBnormal data)** | **74.7** |
+
+> **Say "above", not "better":** STG-NF and AnomalyRuler are inside our interval (70.4–78.9).
+
 ---
 
-# Part 6 — Defending it: 20 likely questions
+# Part 6 — Defending it: 26 likely questions
 
 **1. What does your system do, in one line?**
 It gives every CCTV frame an anomaly score by comparing it with calm descriptions of normal scenes and
@@ -396,7 +497,8 @@ test on an unseen dataset matters.
 
 **7. Didn't you tune on the test data?**
 The four datasets shaped my choices, so I call those results exploratory. To deal with that, I froze the
-model and will test it once on UBnormal, which played no part in any decision.
+model and tested it once on UBnormal, which played no part in any decision. It scored 0.747, and all
+three predictions I had written down beforehand held.
 
 **8. Why is NWPU only 63.9?**
 NWPU is hard for everyone. Its own authors reach 68.2 with training, and trained one-class methods score
@@ -436,20 +538,50 @@ When the same picture means something different in a different place, like a car
 footpath. Anomaly detection is full of it, while most domain adaptation deals with appearance changes instead.
 
 **17. Is this novel?**
-The individual parts come from earlier work. What's new is testing one training-free setup on crime *and*
-campus benchmarks, with rules written in advance and confidence intervals, and showing where it works
-and where it doesn't.
+The individual parts come from earlier work, and I credit them (calm phrases from NOVA, concrete actions
+from ASK-Hint). What's new: measuring that a scene description mostly *calibrates* cameras; showing that
+where text enters the prompts can *reverse* its effect; and testing one fixed, training-free setup on
+crime and campus data with rules written in advance, then on a benchmark sealed before testing. I know
+of no other training-free paper that reports a sealed test.
 
 **18. What would you do with more time?**
 Score parts of the frame, for small objects. Try a video encoder, for motion. Test on more unseen datasets.
 
 **19. Would it work in real life?**
-It needs no setup data and runs one frame through one encoder, so it's light. Its weak spots are small
-objects and motion, and the sealed test will show how it handles new scenes.
+It needs no setup data and runs one frame through one encoder, so it's light. On 29 scenes it had never
+seen it scored 0.747 with no setup. Its weak spots are small objects and motion, and it has not yet been
+tested on real footage from a brand-new site; UBnormal is computer-generated.
 
 **20. What is the one result you are proudest of?**
-XD-Violence going from 41.7 to 72.2 without a captioning model, decided by a rule I wrote before seeing
-any number.
+The sealed test: I froze the model, then scored a dataset I had never touched exactly once, and it came
+out as predicted (0.747). Close second: XD-Violence going from 41.7 to 72.2, decided by a rule written
+before any number.
+
+**21. What does 0.747 mean in plain words?**
+Pick one unusual frame and one normal frame from UBnormal at random. About 75 times in 100, the model
+gives the unusual one the higher score. Guessing would be 50.
+
+**22. Did you look at UBnormal before testing?**
+No video or label. But I did read the UBnormal paper on 3 November, to plan the test, and that paper lists
+its anomaly types. The phrase bank was written on 5 November. I state this openly in the paper.
+
+**23. Your result is above every published UBnormal number. So you beat them?**
+"Above", not "better". STG-NF (71.8) and AnomalyRuler (71.9) lie inside my interval (70.4–78.9). Also, all
+of them trained on UBnormal's own data, and mine used none, so they are not equally informed.
+
+**24. Why do you only say "no worse" than plain CLIP when the gap is +0.161?**
+Because the rule I wrote before the test says "better" needs significant gains on two benchmarks, and a
+single test has one. I apply the rule as written, even when it costs me a stronger sentence.
+
+**25. Why two papers? How are they different?**
+Paper 1 is the diagnosis: what a scene sentence does with CLIP, why it mostly calibrates, and why it broke
+on XD. Paper 2 is the fix: one fixed list on PE-Core, developed under rules and verified on the sealed
+test. Paper 2 cites Paper 1 and does not repeat it.
+
+**26. Did you use AI tools?**
+Yes: an AI assistant for coding help and drafting text, declared in both papers, and an LLM wrote the
+phrase bank, which the paper says. Every number comes from runs logged in Git with a manifest, and I
+can walk through any of them.
 
 ---
 
@@ -460,7 +592,8 @@ any number.
 *"CCTV cameras record far more than anyone can watch. My system scores each moment for how unusual it
 looks. It uses a ready-made AI model that understands pictures and words, and compares each frame with
 calm descriptions of normal scenes and concrete descriptions of trouble, like a fight or a fire. Nothing
-is trained, so it can be used on a new camera straight away."*
+is trained, so it can be used on a new camera straight away. I locked it and tested it once on a dataset
+it had never seen, and it worked as I had predicted."*
 
 ## 7.2 The 2-minute version (a technical interviewer)
 
@@ -472,7 +605,8 @@ is trained, so it can be used on a new camera straight away."*
 4. **Story:** a per-camera sentence broke XD because it was written from frames already showing
    violence. The new text fixed it: 41.7 → 72.2.
 5. **Rigour:** one idea at a time, rules committed first, confidence intervals, six failures reported.
-6. **Next:** the model is frozen, with one sealed test on unseen UBnormal.
+6. **Proof:** frozen, then scored once on unseen UBnormal: 0.747, +0.096 over the same encoder alone,
+   all three pre-registered predictions held.
 
 ## 7.3 The whiteboard version
 
@@ -542,6 +676,10 @@ does that with an AI model instead of a guard, and nobody has to train it first.
 | Concept shift | The same picture means something different elsewhere |
 | Pre-registration | Writing the rules and predictions before seeing results |
 | Sealed test | One test on data never used for any decision |
+| UBnormal | The sealed-test dataset: 29 computer-generated scenes, never used for any choice |
+| Micro / macro AUROC | Micro: all frames of all videos ranked together. Macro: inside each video, then averaged |
+| Gates | Safety checks that stop the test if any frozen file changed or old scores don't reproduce |
+| Post hoc | Looked at after the result; describes, does not test |
 | PE-Core | Meta's 2025 encoder used in the final model |
 | C | The eight calm normal phrases |
 | B | The 48-phrase bank of concrete actions |
@@ -565,10 +703,13 @@ Cover the answers and say each one out loud.
 | 9 | Name three dropped ideas | Any three: labels, two encoders, scoring by type, templates, scene choice, camera memory |
 | 10 | Why is NWPU hard? | Small and scene-dependent anomalies; trained methods only reach 62–68 |
 | 11 | Why not copy NOVA? | Tailored to crime datasets; its scoring cost 8 points on ShanghaiTech |
-| 12 | What is the sealed test? | One frozen run on unseen UBnormal, reported whatever it shows |
+| 12 | What is the sealed test, and its result? | One frozen run on unseen UBnormal: 0.747, +0.096 over plain PE-Core, all 3 predictions held |
 | 13 | AUROC in one sentence? | Chance a random anomalous frame outscores a random normal one |
 | 14 | Calibration or re-ranking: which is stronger evidence? | Re-ranking; it shows the event itself is seen |
-| 15 | Three limits? | Chosen on these datasets; the bank isn't independent; one frame at a time |
+| 15 | Three limits? | Development numbers chosen on those datasets; the bank isn't independent; one frame at a time |
+| 16 | Why "above", not "better", on UBnormal? | STG-NF 71.8 and AnomalyRuler 71.9 are inside our interval |
+| 17 | Which idea is NOVA's, and is it credited? | Calm, low-motion normal phrases; yes |
+| 18 | What do Paper 1 and Paper 2 each say? | 1: the sentence mostly calibrates and breaks on XD. 2: one fixed list works better and holds on unseen data |
 
 ---
 
@@ -576,12 +717,15 @@ Cover the answers and say each one out loud.
 
 | What | Where |
 |---|---|
-| Final model's rules and freeze | `docs/10_phase3/PREREG_sealed_ubnormal.md` |
+| Final model's rules, freeze and sealed result | `docs/10_phase3/PREREG_sealed_ubnormal.md` (dated addenda) |
+| Sealed test code and result | `notebooks/sealed_ubnormal.py`, `results/runs/analysis/sealed_ubnormal.json` |
+| The two papers and the IEEE report | `docs/09_paper/paper1_concept_shift.tex`, `paper2_frozen_normality.tex`, `report_ieee_combined.tex` |
+| Calm phrases (C) and the bank (B) in code | `da_zvad/prompts/fixes.py` (`CALM_NORMAL`), `da_zvad/prompts/ideas.py` (`BANK`) |
 | The improvement round, step by step | `docs/10_phase3/PREREG_ideas.md` |
 | The fixes run that found C | `docs/10_phase3/PREREG_fixes.md` |
 | Phrases (C, the second wording, B) | `da_zvad/prompts/fixes.py`, `da_zvad/prompts/ideas.py` |
 | Experiment code | `notebooks/ideas_sweep.py`, `notebooks/fixes_sweep.py` |
 | Results | `results/runs/analysis/ideas_step*`, `fixes_*` |
 | Published numbers, checked | `docs/07_reference_papers/PROVENANCE.md` |
-| Presentation | `docs/06_presentations/DA-ZVAD_Phase4_Review.pptx` |
+| Presentation and script | `docs/06_presentations/DA-ZVAD_Final_Review.pptx`, `DA-ZVAD_Final_Presentation_Script.docx` |
 | Detailed earlier handbook | `docs/08_understanding/00_HANDBOOK.md` |

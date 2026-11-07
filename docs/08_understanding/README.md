@@ -6,8 +6,10 @@ Three documents.
 
 The current handbook, in plain language, for the final model (PE-Core + calm phrases +
 phrase bank). It has a one-page summary with a memory card, the story from the first idea
-to the freeze, the final model step by step, results and how to defend them, 20 likely
-questions with answers, ways to teach it, a glossary and a self-quiz.
+to the sealed UBnormal test (0.747), the two papers and the report, the final model step
+by step, results and how to defend them, 26 likely questions with answers, ways to teach
+it, a glossary and a self-quiz. Word version: `DA-ZVAD_Handbook_Nov2026.docx`
+(`DA-ZVAD_Handbook.docx` is the October edition of the older handbook).
 
 ## `00_HANDBOOK.md` — the detailed reference for Phases 1–3
 
