@@ -431,10 +431,285 @@ def ubnormal(out, export_path):
     return paths
 
 
+# ------------------------------------------------------------------ UBnormal ablations (post hoc)
+def _ub_setup(export_path):
+    """Per-video features and labels from the export, and a scorer that reproduces the sealed run."""
+    sys.path.insert(0, ROOT)
+    from da_zvad.temporal import moving_average
+    from sklearn.metrics import roc_auc_score
+    z = np.load(export_path, allow_pickle=True)
+    step = int(z["step"])
+    so = np.r_[0, np.cumsum(z["n_sampled"])]
+    fo = np.r_[0, np.cumsum(z["n_frames"])]
+    nv = len(z["names"])
+    gts = [z["gt_full"][fo[i]:fo[i + 1]].astype(int) for i in range(nv)]
+    feats = {"pe": z["F_pe"].astype(np.float64), "vit": z["F_vit"].astype(np.float64)}
+    unit = lambda v: v / np.linalg.norm(v)
+
+    def hold(s, n):
+        full = np.repeat(s, step)[:n]
+        return np.r_[full, np.full(n - len(full), s[-1])] if len(full) < n else full
+
+    def margins(F, N, A, agg="mean", lam=100.0):
+        if agg == "mean":
+            return F @ unit(A.mean(0)) - F @ unit(N.mean(0))
+        SA, SN = F @ A.T, F @ N.T
+        if agg == "max":
+            return SA.max(1) - SN.max(1)
+        lme = lambda S: (np.log(np.exp(lam * (S - S.max(1, keepdims=True))).mean(1)) / lam + S.max(1))
+        return lme(SA) - lme(SN)                                   # log-mean-exp over phrases
+
+    def full_scores(N, A, enc="pe", w=5, lam=100.0, agg="mean"):
+        m = margins(feats[enc], N, A, agg, lam)
+        out = []
+        for i in range(nv):
+            s = 1.0 / (1.0 + np.exp(-lam * m[so[i]:so[i + 1]]))
+            out.append(hold(moving_average(s, w), len(gts[i])))
+        return out
+
+    def micro(full):
+        return roc_auc_score(np.concatenate(gts), np.concatenate(full))
+
+    T = {"general": z["T_pe_base_normal"].astype(np.float64), "calm11": z["T_pe_calm_normal"].astype(np.float64),
+         "base_a": z["T_pe_base_abnormal"].astype(np.float64), "bank": z["T_pe_bank"].astype(np.float64),
+         "vit_n": z["T_vit_base_normal"].astype(np.float64), "vit_a": z["T_vit_base_abnormal"].astype(np.float64)}
+    return z, gts, T, full_scores, micro
+
+
+def ablation(out, export_path):
+    sys.path.insert(0, os.path.join(ROOT, "notebooks"))
+    import sealed_ubnormal as su
+    z, gts, T, full_scores, micro = _ub_setup(export_path)
+    sealed = j("sealed_ubnormal.json")["primary_micro_auroc"]
+    calm = T["calm11"]
+    # gate: the rebuilt scorer reproduces all four sealed figures exactly
+    ref = {"B": full_scores(calm, T["bank"]), "C": full_scores(calm, T["base_a"]),
+           "pe_plain": full_scores(T["general"], T["base_a"]),
+           "vit_plain": full_scores(T["vit_n"], T["vit_a"], enc="vit")}
+    for k, f in ref.items():
+        if abs(micro(f) - sealed[k]) > 1e-9:
+            raise SystemExit("ablation scorer does not reproduce sealed %s: %.10f vs %.10f" % (k, micro(f), sealed[k]))
+    print("  rebuilt scorer reproduces all four sealed micro AUROCs exactly")
+    phr = [str(p) for p in z["phrases_calm_normal"]]
+    gen_idx, calm_idx = list(range(3)), list(range(3, 11))
+    places, people = calm_idx[:4], calm_idx[4:]
+    ty = z["bank_type_of_phrase"]
+    types = [str(t) for t in z["bank_types"]]
+    res = {"note": "post hoc, UBnormal test split, micro AUROC over all frames; not used to change the model"}
+
+    # (1) components, with paired bootstrap against the final model
+    comp = [("Final: general + calm (11) vs bank (48)", calm, T["bank"]),
+            ("without the bank (vs 3 general abnormal phrases)", calm, T["base_a"]),
+            ("without the calm phrases (3 general vs bank)", T["general"], T["bank"]),
+            ("without both (plain PE-Core)", T["general"], T["base_a"]),
+            ("calm phrases only, no general phrases (8 vs bank)", calm[calm_idx], T["bank"]),
+            ("quiet places only (3 general + 4 vs bank)", calm[gen_idx + places], T["bank"]),
+            ("calm people only (3 general + 4 vs bank)", calm[gen_idx + people], T["bank"]),
+            ("bank plus the 3 general abnormal phrases", calm, np.r_[T["bank"], T["base_a"]])]
+    fulls = {name: full_scores(N, A) for name, N, A in comp}
+    draws = su.bootstrap(fulls, gts, list(fulls))
+    base = comp[0][0]
+    res["components"] = []
+    for name, _N, _A in comp:
+        p = micro(fulls[name])
+        d = draws[name] - draws[base]
+        res["components"].append(dict(name=name, auroc=p, diff=p - micro(fulls[base]),
+                                      ci=[float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5))]))
+    # (2) smoothing window, (3) temperature, (4) phrase aggregation
+    res["window"] = {w: micro(full_scores(calm, T["bank"], w=w)) for w in (1, 3, 5, 9, 15, 31)}
+    res["lambda"] = {l: micro(full_scores(calm, T["bank"], lam=l)) for l in (1, 10, 30, 100, 300)}
+    res["aggregation"] = {a: micro(full_scores(calm, T["bank"], agg=a)) for a in ("mean", "lme", "max")}
+    # (5) phrases per type (the first k of each type), (6) leave one type out
+    res["per_type_k"] = {k: micro(full_scores(calm, T["bank"][np.isin(np.arange(48), [i for t in range(12)
+                                                for i in np.where(ty == t)[0][:k]])])) for k in (1, 2, 3, 4)}
+    res["leave_one_out"] = {types[t]: micro(full_scores(calm, T["bank"][ty != t])) for t in range(12)}
+    json.dump(res, open(os.path.join(RES, "ubnormal_ablation.json"), "w"), indent=1)
+    print("  wrote results/runs/analysis/ubnormal_ablation.json")
+    for r in res["components"]:
+        print("  %-55s %.4f  %+.4f [%+.4f, %+.4f]" % (r["name"], r["auroc"], r["diff"], *r["ci"]))
+    for key in ("window", "lambda", "aggregation", "per_type_k"):
+        print("  %-12s" % key, "  ".join("%s:%.4f" % kv for kv in res[key].items()))
+    print("  leave-one-out", "  ".join("%s:%.4f" % kv for kv in res["leave_one_out"].items()))
+
+    # figure: four panels
+    fig, axs = plt.subplots(2, 2, figsize=(6.9, 4.3))
+    axs = axs.flat
+    fin = res["window"][5]
+    for ax, key, xl, ticks in ((axs[0], "window", "smoothing window w (sampled frames)", None),
+                               (axs[1], "per_type_k", "phrases per anomaly type", None)):
+        xs = list(res[key].keys()); ys = list(res[key].values())
+        ax.plot(range(len(xs)), ys, color=FINAL, lw=1.6, marker="o", ms=4)
+        sel = xs.index(5 if key == "window" else 4)
+        ax.plot([sel], [ys[sel]], marker="D", ms=6.5, color=FINAL, markeredgecolor="white")
+        ax.set_xticks(range(len(xs))); ax.set_xticklabels([str(x) for x in xs], fontsize=6.6)
+        ax.set_xlabel(xl, fontsize=6.8); clean(ax)
+    for ax in (axs[0], axs[1]):
+        ax.set_ylabel("micro AUROC (UBnormal)", fontsize=7)
+    axs[0].set_title("(a) smoothing window (diamond: frozen choice)", fontsize=7.6, loc="left")
+    axs[1].set_title("(b) bank size (diamond: frozen choice)", fontsize=7.6, loc="left")
+    ag = res["aggregation"]; lab = {"mean": "mean of phrase vectors (ours)", "lme": "log-mean-exp of similarities",
+                                    "max": "maximum similarity"}
+    yy = np.arange(3)[::-1]
+    axs[2].barh(yy, list(ag.values()), color=[FINAL, OTHER, OTHER], height=0.55)
+    axs[2].set_yticks(yy); axs[2].set_yticklabels([lab[k] for k in ag], fontsize=6.6)
+    axs[2].set_xlim(min(ag.values()) - 0.03, max(ag.values()) + 0.02)
+    for y_, v in zip(yy, ag.values()):
+        axs[2].text(v + 0.002, y_, "%.3f" % v, va="center", fontsize=6.4)
+    axs[2].set_xlabel("micro AUROC (UBnormal)", fontsize=6.8)
+    axs[2].set_title("(c) how phrases are pooled on each side", fontsize=7.6, loc="left"); clean(axs[2])
+    lo_ = sorted(res["leave_one_out"].items(), key=lambda kv: kv[1])
+    yy = np.arange(len(lo_))
+    axs[3].barh(yy, [v - fin for _k, v in lo_], color=[PE if v < fin else CALM for _k, v in lo_], height=0.65)
+    axs[3].axvline(0, color=INK, lw=0.7)
+    axs[3].set_yticks(yy); axs[3].set_yticklabels([k for k, _v in lo_], fontsize=6.2)
+    axs[3].set_xlabel("change in micro AUROC when one type is removed", fontsize=6.8)
+    axs[3].set_title("(d) leave one anomaly type out", fontsize=7.6, loc="left"); clean(axs[3])
+    for ax in axs:
+        ax.tick_params(labelsize=6.3)
+    fig.tight_layout(h_pad=1.2, w_pad=1.0)
+    p = os.path.join(out, "fig_p2_ablation.png")
+    figsave.save(fig, p); plt.close(fig)
+    return p
+
+
+# ------------------------------------------------------------------ qualitative score curves (dev)
+def qualitative(out, labels_path):
+    """Score curves for four test videos chosen by a stated rule (not by eye)."""
+    from sklearn.metrics import roc_auc_score, auc, precision_recall_curve
+    lab = np.load(labels_path, allow_pickle=True)
+
+    def load(ds):
+        sB = np.load(os.path.join(RES, "ideas_step3_scores_%s.npz" % ds), allow_pickle=True)
+        sV = np.load(os.path.join(RES, "fixes_scores_%s_vitl.npz" % ds), allow_pickle=True)
+        sP = np.load(os.path.join(RES, "fixes_scores_%s_pe-l.npz" % ds), allow_pickle=True)
+        names = [str(n) for n in lab[ds + "_names"]]
+        for zz in (sB, sV, sP):
+            if [str(n) for n in zz["names"]] != names:
+                raise SystemExit("video order differs for " + ds)
+        off = np.r_[0, np.cumsum(sB["lengths"])]
+        return names, off, sB, sV, sP
+
+    # gate: the stored scores reproduce the published figures (XD: Paper 1's 0.624 / 0.417)
+    names, off, sB, sV, sP = load("xd_violence")
+    wpos, wneg = lab["xd_violence_wpos"].astype(float), lab["xd_violence_wneg"].astype(float)
+    yv = np.r_[np.ones(len(wpos)), np.zeros(len(wneg))]; w = np.r_[wpos, wneg]; k = w > 0
+    ap = lambda s: auc(*precision_recall_curve(yv[k], np.r_[s, s][k], sample_weight=w[k])[1::-1])
+    got = {"B": ap(sB["B"]), "vit_none": ap(sV["base"]), "vit_llava": ap(sV["llava"])}
+    want = {"B": j("ideas_step3_xd_violence.json")["point"]["B"], "vit_none": 0.624, "vit_llava": 0.417}
+    for kk in got:
+        tol = 1e-3 if kk == "B" else 5e-4
+        if abs(got[kk] - want[kk]) > tol:
+            raise SystemExit("XD %s AP %.4f does not reproduce %.4f" % (kk, got[kk], want[kk]))
+    print("  XD stored scores reproduce AP: final %.4f, ViT-L none %.4f, ViT-L + LLaVA %.4f" %
+          (got["B"], got["vit_none"], got["vit_llava"]))
+
+    def per_video(ds, a, b):
+        names, off, sB, sV, sP = load(ds)
+        L = lab[ds + "_L"].astype(int)
+        rows = []
+        for i, n in enumerate(names):
+            y = L[off[i]:off[i + 1]]
+            if y.min() == y.max():
+                continue
+            sa, sb = a(sB, sV, sP)[off[i]:off[i + 1]], b(sB, sV, sP)[off[i]:off[i + 1]]
+            rows.append((roc_auc_score(y, sb) - roc_auc_score(y, sa), i, n))
+        return rows, names, off, L
+
+    picks = []
+    # (a) XD: the largest gain over the LLaVA-sentence system among videos violent in their first 3 sampled frames
+    rows, names, off, L = per_video("xd_violence", lambda B, V, P: V["llava"], lambda B, V, P: B["B"])
+    rows = [r for r in rows if L[off[r[1]]:off[r[1]] + 3].all()]
+    picks.append(("xd_violence", max(rows), "llava", "(a) XD-Violence: violence already in the first frames"))
+    # (b), (c): the median gain over plain PE-Core
+    for ds, title in (("shanghaitech", "(b) ShanghaiTech: median gain"), ("ucf_crime", "(c) UCF-Crime: median gain")):
+        rows, *_ = per_video(ds, lambda B, V, P: P["base"], lambda B, V, P: B["B"])
+        rows.sort()
+        picks.append((ds, rows[len(rows) // 2], "base", title))
+    # (d) NWPU: the largest loss against plain PE-Core (a failure case)
+    rows, *_ = per_video("nwpu_campus", lambda B, V, P: P["base"], lambda B, V, P: B["B"])
+    picks.append(("nwpu_campus", min(rows), "base", "(d) NWPU Campus: largest loss (failure case)"))
+
+    fig, axs = plt.subplots(2, 2, figsize=(6.9, 4.1))
+    info = []
+    for ax, (ds, (gain, i, n), ref, title) in zip(axs.flat, picks):
+        names, off, sB, sV, sP = load(ds)
+        L = lab[ds + "_L"].astype(int)
+        sl = slice(off[i], off[i + 1])
+        y = L[sl]
+        x = np.arange(len(y))
+        for a0 in np.where(np.diff(np.r_[0, y, 0]) == 1)[0]:
+            a1 = a0 + np.argmax(np.r_[y, 0][a0:] == 0)
+            ax.axvspan(a0 - 0.5, a1 - 0.5, color="#F3DDE8", lw=0)
+        other = sV["llava"][sl] if ref == "llava" else sP["base"][sl]
+        ax.plot(x, other, color=VIT if ref == "llava" else PE, lw=1.1,
+                label="ViT-L/14 + LLaVA description" if ref == "llava" else "plain PE-Core")
+        ax.plot(x, sB["B"][sl], color=FINAL, lw=1.5, label="final model")
+        ax.set_title(title, fontsize=7.4, loc="left")
+        ax.set_xlim(0, len(y) - 1)
+        ax.set_xlabel("sampled frame", fontsize=6.6); ax.set_ylabel("score", fontsize=6.6)
+        ax.tick_params(labelsize=6.2); clean(ax)
+        ax.legend(fontsize=5.9, loc="upper left", frameon=True, framealpha=0.9, edgecolor=GRID)
+        info.append(dict(dataset=ds, video=n, within_video_auroc_gain=float(gain), reference=ref))
+    fig.tight_layout(h_pad=0.9, w_pad=0.9)
+    p = os.path.join(out, "fig_p2_qualitative.png")
+    figsave.save(fig, p); plt.close(fig)
+    json.dump(info, open(os.path.join(RES, "qualitative_picks.json"), "w"), indent=1)
+    for d in info:
+        print("  %-13s %-60s gain %+.3f" % (d["dataset"], d["video"][:60], d["within_video_auroc_gain"]))
+    return p
+
+
+# ------------------------------------------------------------------ the benchmarks at a glance
+def datasets(out, labels_path, export_path):
+    lab = np.load(labels_path, allow_pickle=True)
+    z = np.load(export_path, allow_pickle=True)
+    rows = []
+    for ds in DEV:
+        L = lab[ds + "_L"].astype(int)
+        sB = np.load(os.path.join(RES, "ideas_step3_scores_%s.npz" % ds), allow_pickle=True)
+        off = np.r_[0, np.cumsum(sB["lengths"])]
+        per = [L[off[i]:off[i + 1]] for i in range(len(off) - 1)]
+        rows.append((ds, len(per), L.mean(), np.mean([p.max() for p in per]),
+                     [p.mean() for p in per if p.max() > 0]))
+    fo = np.r_[0, np.cumsum(z["n_frames"])]
+    per = [z["gt_full"][fo[i]:fo[i + 1]].astype(int) for i in range(len(fo) - 1)]
+    rows.append(("ubnormal", len(per), z["gt_full"].mean(), np.mean([p.max() for p in per]),
+                 [p.mean() for p in per if p.max() > 0]))
+    fig, axs = plt.subplots(1, 3, figsize=(6.9, 2.3), gridspec_kw=dict(width_ratios=[1, 1, 1.35]))
+    nm = [NAME[r[0]].replace(" (AP)", "") for r in rows]
+    cols = [OTHER] * 4 + [FINAL]
+    yy = np.arange(len(rows))[::-1]
+    axs[0].barh(yy, [100 * r[2] for r in rows], color=cols, height=0.6)
+    axs[0].set_title("(a) anomalous frames (%)", fontsize=7.6, loc="left")
+    axs[1].barh(yy, [100 * r[3] for r in rows], color=cols, height=0.6)
+    axs[1].set_title("(b) test videos with an anomaly (%)", fontsize=7.6, loc="left")
+    for ax, key in ((axs[0], 2), (axs[1], 3)):
+        for y_, r in zip(yy, rows):
+            ax.text(100 * r[key] + 1, y_, "%.0f" % (100 * r[key]), va="center", fontsize=6.2)
+        ax.set_yticks(yy); ax.set_yticklabels(nm, fontsize=6.6); ax.set_xlim(0, 100); clean(ax)
+    bp = axs[2].boxplot([[100 * v for v in r[4]] for r in rows][::-1], vert=False, widths=0.55,
+                        patch_artist=True, showfliers=False, medianprops=dict(color=INK, lw=1))
+    for patch, c in zip(bp["boxes"], cols[::-1]):
+        patch.set_facecolor(c); patch.set_alpha(0.55); patch.set_edgecolor(c)
+    axs[2].set_yticks(range(1, len(rows) + 1)); axs[2].set_yticklabels(nm[::-1], fontsize=6.6)
+    axs[2].set_title("(c) anomalous share of each\nanomalous video (%)", fontsize=7.4, loc="left")
+    clean(axs[2])
+    for ax in axs:
+        ax.tick_params(labelsize=6.3)
+    fig.tight_layout(w_pad=0.8)
+    p = os.path.join(out, "fig_p2_datasets.png")
+    figsave.save(fig, p); plt.close(fig)
+    for r in rows:
+        print("  %-13s videos %4d  anomalous frames %5.1f%%  videos with anomaly %5.1f%%  median share %5.1f%%" %
+              (r[0], r[1], 100 * r[2], 100 * r[3], 100 * np.median(r[4])))
+    return p
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("which", nargs="+", choices=["progression", "forest", "timeline", "dev_roc",
-                                                 "comparison", "ubnormal"])
+                                                 "comparison", "ubnormal", "ablation", "qualitative",
+                                                 "datasets"])
     ap.add_argument("--labels")
     ap.add_argument("--export")
     ap.add_argument("--out", default=OUT)
@@ -444,5 +719,11 @@ if __name__ == "__main__":
             print(dev_roc(a.out, a.labels))
         elif w == "ubnormal":
             print(ubnormal(a.out, a.export))
+        elif w == "ablation":
+            print(ablation(a.out, a.export))
+        elif w == "qualitative":
+            print(qualitative(a.out, a.labels))
+        elif w == "datasets":
+            print(datasets(a.out, a.labels, a.export))
         else:
             print(globals()[w](a.out))

@@ -18,6 +18,8 @@
 % text height is the available width, so it prints at full size and stays legible
 \usepackage{rotating}
 \usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
 
 \makeatletter
 \@ifundefined{printorcid}{}{\renewcommand{\printorcid}{}}
@@ -158,10 +160,12 @@ benchmark, UBnormal \citep{acsintoae2022ubnormal}, downloaded and scored, once.
         each development step to a single scored run on a benchmark obtained after
         freezing, with every number and every claim fixed in advance
         (Sections~\ref{sec:protocol} and~\ref{sec:sealed}).
-  \item \textbf{A record of what failed.} Scoring by anomaly type, scene-chosen
-        phrases, per-side templates, a camera memory and encoder averaging all failed
-        the development rule, and are reported with their numbers
-        (Section~\ref{sec:dev-failed}).
+  \item \textbf{A record of what failed, and an ablation of what remains.} Scoring by
+        anomaly type, scene-chosen phrases, per-side templates, a camera memory and
+        encoder averaging all failed the development rule, and are reported with their
+        numbers (Section~\ref{sec:dev-failed}); an ablation of the frozen model shows
+        that both ingredients are needed on unseen data and that the bank works by
+        breadth (Section~\ref{sec:ablation}).
 \end{enumerate}
 
 % =====================================================================
@@ -203,6 +207,35 @@ ASK-Hint \citep{zou2026askhint} & guiding questions grouped by anomaly category 
 Flashback \citep{lee2025flashback} & memory of LLM-generated captions, built offline & no & no \\
 Scene description \citep{sarangi2026concept} & a caption of each camera's first frames & yes & no \\
 \textbf{This work} & \textbf{59 fixed phrases, the same for every camera} & \textbf{no} & \textbf{no} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Table~\ref{tbl:litsum} summarises the works this paper builds on: for each, its year
+and venue, its central idea, and the limitation that matters for a text prior that must
+be fixed in advance and serve every camera.
+
+\begin{table}[width=\linewidth,cols=5,pos=htbp]
+\caption{Works this paper builds on, read from the standpoint of a fixed,
+camera-agnostic text prior. The last column is the property that work lacks for that
+purpose, not a general criticism of it.}\label{tbl:litsum}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}W{2.3cm} l W{1.5cm} Z Z@{}}
+\toprule
+\textbf{Work} & \textbf{Year} & \textbf{Venue} & \textbf{Central idea} & \textbf{Missing for a fixed, camera-agnostic prior} \\
+\midrule
+CLIP \citep{radford2021clip} & 2021 & ICML & Contrastive image--text space; zero-shot labels from text & Text must still be chosen for the task \\
+UBnormal \citep{acsintoae2022ubnormal} & 2022 & CVPR & Rendered benchmark whose test anomalies differ from its training ones & A benchmark, not a method; used here as the sealed test \\
+WinCLIP \citep{jeong2023winclip} & 2023 & CVPR & Normal and abnormal prompt ensembles for zero-shot defects & Industrial images; no notion of scene or time \\
+LAVAD \citep{zanella2024lavad} & 2024 & CVPR & Captions of every frame, scored by a language model & Text derived from each target video; heavy at test time \\
+AnomalyRuler \citep{yang2024anomalyruler} & 2024 & arXiv & Rules of normality induced by GPT-4 from a few normal frames & Needs frames of the target scene \\
+VERA \citep{ye2025vera} & 2025 & CVPR & Guiding questions learned on training videos & Text optimised on labelled data \\
+Flashback \citep{lee2025flashback} & 2025 & arXiv & Retrieval from a memory of generated captions & A large memory and a video encoder \\
+PE-Core \citep{bolya2025pe} & 2025 & NeurIPS & A stronger contrastive image--text encoder & An encoder, not a text prior \\
+AnyAnomaly \citep{anyanomaly2025} & 2026 & WACV & The user names the anomaly to look for & The anomaly classes must be known in advance \\
+ASK-Hint \citep{zou2026askhint} & 2026 & WACV & Action-centric questions to a large vision-language model & A large model queried at test time \\
+NOVA \citep{yin2026nova} & 2026 & arXiv & Calm, low-motion normal prompts; visual anchor per video & Phrases written per anomaly class; anchor from each test video \\
+Song and Lee \citep{song2026vlmanswer} & 2026 & arXiv & A model's yes/no answer compresses the ranking & Concerns the score, not the text \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -265,6 +298,35 @@ From these follow four requirements for the text prior.
   \item \textbf{No model at test time}: detection costs one image-encoder pass per
         sampled frame, and the text is encoded once.
 \end{enumerate}
+
+\subsection{Problem setting}
+\label{sec:setting}
+A video is a sequence of frames $X=(x_1,\dots,x_T)$ with frame labels
+$y_t\in\{0,1\}$, where $1$ marks an anomaly; labels are used only for evaluation. A
+\emph{text prior} is a pair of phrase sets $\mathcal{T}=(P^{+},P^{-})$, normal and
+abnormal. A training-free detector with frozen parameters $\theta$ maps a video and a
+text prior to one score per frame,
+\begin{equation}
+\tilde{s}_{1:T} \;=\; f_\theta\big(X;\,\mathcal{T}\big), \qquad \theta\ \text{fixed}.
+\label{eq:detector}
+\end{equation}
+The first study let the text depend on the camera, $\mathcal{T}=\mathcal{T}(c_k)$,
+with $c_k$ a description written from camera $k$'s opening frames. Here the text prior is
+\emph{camera-agnostic}: one $\mathcal{T}$ for every camera and every dataset, chosen
+before any target video is seen (R1). Choosing it is itself a selection problem, so the
+benchmarks are split by role. A development set $\mathcal{D}_{\mathrm{dev}}$ (four
+benchmarks) is used to choose $\mathcal{T}$ under a rule $\mathcal{R}$ fixed in advance,
+and a sealed test set $\mathcal{D}_{\mathrm{test}}$ (UBnormal) is used once, after the
+choice is frozen:
+\begin{equation}
+\mathcal{T}^{\star} = \mathcal{R}\big(\{\mathcal{T}_1,\mathcal{T}_2,\dots\};\,
+\mathcal{D}_{\mathrm{dev}}\big), \qquad
+\text{reported:}\ \ M\big(f_\theta(\cdot\,;\mathcal{T}^{\star});\,\mathcal{D}_{\mathrm{test}}\big),
+\label{eq:selection}
+\end{equation}
+where $M$ is the evaluation measure (Section~\ref{sec:metrics}). Figures on
+$\mathcal{D}_{\mathrm{dev}}$ guided the choice and are exploratory; only the figure on
+$\mathcal{D}_{\mathrm{test}}$ estimates how the frozen prior performs on new data.
 
 % =====================================================================
 \section{Method}
@@ -373,12 +435,14 @@ s_t \;=\; \sigma(\lambda\, m_t),
 \end{equation}
 where $\sigma$ is the logistic function; this equals the two-way softmax over the two
 scaled similarities. The scores are smoothed by a centred moving average of $w$
-sampled frames, truncated at the ends of the video,
+sampled frames, in which the first and last scores of a video are repeated to fill the
+window at its ends,
 \begin{equation}
-\tilde{s}_t \;=\; \frac{1}{|\mathcal{W}_t|}\sum_{k\in\mathcal{W}_t} s_k, \qquad
-\mathcal{W}_t=\{k : |k-t|\le \lfloor w/2\rfloor,\ 1\le k\le T\}.
+\tilde{s}_t \;=\; \frac{1}{w}\sum_{j=-\lfloor w/2\rfloor}^{\lfloor w/2\rfloor}
+s_{\min(T,\,\max(1,\,t+j))};
 \label{eq:smooth2}
 \end{equation}
+for a video shorter than $w$ sampled frames, $w$ is set to its length.
 Every sixteenth frame is scored and $w=5$ (about three seconds of video at 25--30
 frames per second). ShanghaiTech keeps its benchmark protocol: every second frame,
 $w=31$ and min--max normalisation of each clip before pooling. On every other
@@ -389,6 +453,62 @@ Detection costs one image-encoder pass per sampled frame and two inner products;
 59 phrases are encoded once. The model uses no captioning or language model, no
 description of the site, no frames or labels from the target benchmark, and no
 gradient update. A new camera is connected and scored with no input beyond its video.
+
+\subsection{Inputs and outputs}
+\label{sec:io2}
+Table~\ref{tbl:io2} lists what the detector consumes and returns. Two things are
+absent from the input column that were present in the first study: a description of the
+scene, and any frame of the target camera used before detection.
+
+\begin{table}[width=\linewidth,cols=3,pos=htbp]
+\caption{What the detector consumes and returns. $D=1024$ for PE-Core-L/14.}\label{tbl:io2}
+\small
+\begin{tabularx}{\linewidth}{@{}l l Z@{}}
+\toprule
+\textbf{Item} & \textbf{Form} & \textbf{Details} \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Inputs}} \\
+Video frames $x_t$ & RGB image & Every 16th decoded frame (ShanghaiTech: every 2nd); the encoder's released preprocessing resizes the whole frame to $336\times336$ without cropping (bilinear) and normalises each channel to mean $0.5$ and standard deviation $0.5$, so, unlike CLIP's centre crop, no part of a wide frame is cut away \\
+Text prior $\mathcal{T}$ & 59 phrases & $P^{+}$: 3 general + 8 calm phrases (Table~\ref{tbl:normal}); $P^{-}$: 48 concrete actions (Table~\ref{tbl:bank}); identical for every video \\
+Settings & Scalars & $\lambda=100$; $w=5$ (ShanghaiTech: $w=31$ and per-clip min--max normalisation); alarm threshold $\tau$, used only for deployment \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Computed once}} \\
+Prototypes $e^{+}, e^{-}$ & Unit vectors in $\mathbb{R}^{D}$ & Equation~\eqref{eq:proto}; shared by every camera \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Computed per frame}} \\
+Embedding $v_t$ & Unit vector in $\mathbb{R}^{D}$ & One image-encoder pass \\
+Margin $m_t$, score $s_t$ & Number; number in $(0,1)$ & Equation~\eqref{eq:margin} \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Outputs}} \\
+Smoothed score $\tilde{s}_t$ & Number in $(0,1)$ & Equation~\eqref{eq:smooth2}; higher means more anomalous; this is what is evaluated \\
+Alarms & Frame intervals & Runs with $\tilde{s}_t\ge\tau$; not used in any evaluation, which is threshold-free \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\emph{An illustrative frame.} Suppose a frame's similarity to the normal prototype is
+$0.210$ and to the abnormal prototype $0.240$ (illustrative values). The margin is
+$+0.030$, and $\sigma(100\times0.030)=\sigma(3)\approx0.95$, so the frame leans clearly
+towards the abnormal side; a frame with the two similarities reversed scores about
+$0.05$. Because $\lambda$ is large, small differences in cosine similarity become large
+differences in score, and the smoothing then decides whether a high score lasts long
+enough to matter. Algorithm~\ref{alg:infer2} gives the whole procedure.
+
+\begin{algorithm}[t]
+\caption{Detection with the frozen text prior, for one video}\label{alg:infer2}
+\begin{algorithmic}[1]
+\Require sampled frames $x_{1..T}$; phrase sets $P^{+}$, $P^{-}$; frozen encoders $E_{\mathrm{img}}$, $E_{\mathrm{txt}}$; $\lambda$, $w$
+\Ensure smoothed scores $\tilde{s}_{1..T}$
+\State $e^{+}\gets \mathrm{normalise}\big(\sum_{p\in P^{+}}E_{\mathrm{txt}}(p)\big)$;\quad
+       $e^{-}\gets \mathrm{normalise}\big(\sum_{p\in P^{-}}E_{\mathrm{txt}}(p)\big)$ \Comment{once, for all cameras}
+\For{$t=1$ \textbf{to} $T$}
+  \State $v_t\gets E_{\mathrm{img}}(x_t)$
+  \State $s_t\gets \sigma\big(\lambda(\langle v_t,e^{-}\rangle-\langle v_t,e^{+}\rangle)\big)$
+\EndFor
+\State $\tilde{s}\gets\textproc{MovingAverage}(s,\,w)$ \Comment{ends padded with the first and last score}
+\State \Return $\tilde{s}$
+\end{algorithmic}
+\end{algorithm}
 
 % =====================================================================
 \section{Development and Evaluation Protocol}
@@ -418,16 +538,84 @@ UBnormal \citep{acsintoae2022ubnormal} & \textbf{sealed test} & 211 videos (158 
 \end{tabularx}
 \end{table}
 
-\subsection{Metrics and uncertainty}
-Frame-level AUROC is computed over the frames of all videos pooled (the micro
-average). XD-Violence is scored by its official frame-level average precision. On
-UBnormal, following its authors' evaluation code, every frame is scored: each sampled
-frame's smoothed score is held for the fifteen frames that follow it, and the macro
-average (AUROC within each video, averaged, with the authors' padding of one normal
-and one anomalous frame per video) is reported as well. Uncertainty comes from a
-paired bootstrap over videos: $B=1000$ resamples with a fixed seed, both conditions
-scored on the same resamples, and the 95\% interval read from the 2.5th and 97.5th
-percentiles. A difference is significant when its interval excludes zero.
+The five benchmarks differ in more than their content (Fig.~\ref{fig:datasets}). In
+UCF-Crime fewer than one frame in ten is anomalous and about half the videos contain no
+anomaly at all; in UBnormal more than half of all frames are anomalous, and within an
+anomalous video the anomaly usually lasts most of it. Every ShanghaiTech test clip
+contains an anomaly. These differences matter for evaluation: a pooled measure is
+sensitive to how scores of normal-only videos sit against those of anomalous ones,
+which is why the calibration audit of Section~\ref{sec:dev-audit} is needed, and why the
+macro measure is reported alongside the micro one on UBnormal.
+
+\begin{figure}[pos=htbp]
+\centering
+\includegraphics[width=\linewidth]{fig_p2_datasets}
+\caption{The five test splits at a glance, computed from the frame labels at the
+sampling used for scoring (UBnormal: every frame). (a) Share of anomalous frames. (b)
+Share of test videos that contain any anomaly. (c) For videos that contain an anomaly,
+the share of the video it covers (box: quartiles; whiskers: range).}\label{fig:datasets}
+\end{figure}
+
+\subsection{Evaluation metrics and uncertainty}
+\label{sec:metrics}
+Anomalies are rare in most benchmarks (Fig.~\ref{fig:datasets}a), so accuracy is
+uninformative, and every measure used here is threshold-free. Let $\mathcal{A}$ and
+$\mathcal{N}$ be the anomalous and normal frames being evaluated, with smoothed scores
+$\tilde{s}_i$.
+
+\emph{Frame-level AUROC} is the probability that an anomalous frame scores above a normal
+one,
+\begin{equation}
+\mathrm{AUROC}=\frac{1}{|\mathcal{A}|\,|\mathcal{N}|}\sum_{i\in\mathcal{A}}\sum_{j\in\mathcal{N}}
+\Big(\mathbf{1}[\tilde{s}_i>\tilde{s}_j]+\tfrac12\,\mathbf{1}[\tilde{s}_i=\tilde{s}_j]\Big),
+\label{eq:auroc2}
+\end{equation}
+so $0.5$ is chance and $1$ a perfect ranking. The \emph{micro} AUROC pools the frames of
+all videos into one ranking; it is the convention on every benchmark used here and the
+figure reported unless stated otherwise. The \emph{macro} AUROC applies
+Equation~\eqref{eq:auroc2} within each video $v$ and averages over the $V$ videos,
+\begin{equation}
+\mathrm{AUROC}_{\mathrm{macro}}=\frac{1}{V}\sum_{v=1}^{V}\mathrm{AUROC}\big(\mathcal{A}_v,\mathcal{N}_v\big),
+\label{eq:macro}
+\end{equation}
+which a per-video shift of all scores cannot change. On UBnormal the macro figure
+follows the authors' evaluation code, which pads every video with one normal and one
+anomalous frame so that videos with a single class can be scored.
+
+\emph{Average precision} is XD-Violence's official measure,
+\begin{equation}
+\mathrm{AP}=\int_0^1 \mathrm{P}(r)\,\mathrm{d}r,\qquad
+\mathrm{P}(\tau)=\frac{|\{i\in\mathcal{A}:\tilde{s}_i\ge\tau\}|}{|\{i:\tilde{s}_i\ge\tau\}|},\quad
+r(\tau)=\frac{|\{i\in\mathcal{A}:\tilde{s}_i\ge\tau\}|}{|\mathcal{A}|},
+\label{eq:ap2}
+\end{equation}
+computed as the official code does, with each 16-frame snippet's score assigned to its
+frames.
+
+\emph{Scoring every frame on UBnormal.} UBnormal's protocol labels every frame, while the
+detector scores every sixteenth. Each sampled frame's smoothed score is held for the
+fifteen frames that follow it,
+\begin{equation}
+\hat{s}_{u} \;=\; \tilde{s}_{\lfloor u/16\rfloor}, \qquad u=0,1,\dots,U-1,
+\label{eq:hold}
+\end{equation}
+where $u$ indexes all $U$ frames of the video and $\tilde{s}$ is indexed from zero, and
+the last sampled score is held to the end. This choice was fixed before the test; the
+AUROC over the sampled frames alone differs by at most $0.003$ for any condition
+(Table~\ref{tbl:sealed}).
+
+\emph{Uncertainty.} Frames within a video are strongly correlated, so uncertainty comes
+from resampling whole videos. For two conditions $a$ and $b$ scored on the same $n$ test
+videos, $B=1000$ resamples $\mathcal{V}^{(1)},\dots,\mathcal{V}^{(B)}$ of $n$ videos are
+drawn with replacement (fixed seed), both conditions are scored on each, and
+\begin{equation}
+\Delta^{(k)} = M_a\big(\mathcal{V}^{(k)}\big)-M_b\big(\mathcal{V}^{(k)}\big),\qquad
+\mathrm{CI}_{95} = \big[\,q_{0.025}(\Delta),\;q_{0.975}(\Delta)\,\big],
+\label{eq:boot}
+\end{equation}
+with $q$ the empirical quantile. A difference is \emph{significant} when its interval
+excludes zero. Pairing removes the variation that both conditions share, so a paired
+interval is much narrower than the two separate intervals would suggest.
 
 \subsection{The development round and its rule}
 \label{sec:rule}
@@ -444,7 +632,26 @@ $\Delta_d = M_d(x)-M_d(b)$ over the four development benchmarks $d$ satisfied
 \end{equation}
 A change must help on most benchmarks, clearly on at least two, and clearly hurt on
 none. Each run first reproduced the stored scores of the current best to within
-$10^{-5}$ before scoring anything new.
+$10^{-5}$ before scoring anything new. Algorithm~\ref{alg:protocol} summarises the whole
+procedure, from the first development step to the sealed result.
+
+\begin{algorithm}[t]
+\caption{Development under committed rules, then one sealed test}\label{alg:protocol}
+\begin{algorithmic}[1]
+\Require candidate changes $x_1, x_2, \dots$ in a fixed order; development set $\mathcal{D}_{\mathrm{dev}}$; keep rule (Eq.~\ref{eq:rule})
+\State $b \gets$ plain PE-Core with the base prompts
+\For{each candidate $x$}
+  \State commit to Git: $x$, the reference $b$, the predictions and the rule \Comment{before any score of $x$ exists}
+  \State \textbf{if} the stored scores of $b$ are not reproduced within $10^{-5}$ \textbf{then stop}
+  \State score $x$ and $b$ on $\mathcal{D}_{\mathrm{dev}}$; paired bootstrap intervals $\mathrm{CI}_d$ (Eq.~\ref{eq:boot})
+  \State \textbf{if} the rule passes \textbf{then} $b \gets x$ \Comment{kept}; report $x$ either way
+\EndFor
+\State freeze: record the hashes of the files that define $b$, the test protocol, the predictions and the permitted wording
+\State commit the test code with its gates; only then obtain $\mathcal{D}_{\mathrm{test}}$
+\State \textbf{if} any hash differs or the development scores are not reproduced \textbf{then stop}
+\State score $b$ on $\mathcal{D}_{\mathrm{test}}$ once; report the result in the pre-registered wording
+\end{algorithmic}
+\end{algorithm}
 
 \subsection{Freezing and the sealed test}
 \label{sec:freeze}
@@ -465,6 +672,18 @@ Figure~\ref{fig:timeline} shows the sequence with the commit of each step.
 the model's files to the words allowed for each outcome, was committed before the
 first UBnormal file existed on any of our machines.}\label{fig:timeline}
 \end{figure}
+
+\subsection{Implementation}
+All experiments ran on one NVIDIA A40 GPU under PyTorch 2.3.1. Both encoders are loaded
+through \texttt{open\_clip} with their released weights and preprocessing:
+PE-Core-L/14 at $336\times336$ pixels and CLIP ViT-L/14 trained on LAION-2B. Image
+embeddings are computed once per benchmark and cached, separately from scores, because the
+image encoder is the only expensive step and does not depend on the text; every text
+condition in this paper is then scored from the same cached embeddings, which is also
+what makes the reproduction gates exact. Each run writes a manifest with the code
+commit, whether the working tree was clean, the hardware, the library versions, the
+configuration and the frame and label counts of each benchmark. The bootstrap uses
+1000 resamples with seed 20261104 throughout.
 
 % =====================================================================
 \section{Development Results}
@@ -612,6 +831,35 @@ precision--recall curve on XD-Violence, for the final model and the two plain
 encoders. Legends give the area of each curve (AUROC; AP on XD-Violence).}
 \label{fig:devroc}
 \end{figure}
+
+\subsection{Score curves on single videos}
+\label{sec:dev-qual}
+Areas under curves summarise thousands of frames. Figure~\ref{fig:qual} shows what the
+scores look like inside single test videos. To avoid choosing examples by eye, each video
+was picked by a rule, stated in the caption, applied to the within-video AUROC.
+
+\begin{figure}[pos=htbp]
+\centering
+\includegraphics[width=\linewidth]{fig_p2_qualitative}
+\caption{Smoothed scores inside four development test videos; shading marks the
+labelled anomaly. (a) XD-Violence, against the first study's ViT-L/14 + LLaVA system:
+of the videos violent within their first three sampled frames, the one with the largest
+gain (a film excerpt). (b) ShanghaiTech and (c) UCF-Crime, against plain PE-Core: the
+video with the median gain. (d) NWPU Campus, against plain PE-Core: the video with the
+largest loss, a failure case.}\label{fig:qual}
+\end{figure}
+
+Panel (a) is the first study's failure in one video. The description, written from frames
+that already show the fight, tells the detector the fight is normal, and its score stays
+low and erratic throughout; the fixed prior scores the whole event high. Panel (b) shows
+the typical gain on campus footage: both detectors find the event, but the final model
+suppresses the two broad rises of plain PE-Core outside it, which is the within-video
+re-ranking measured in Section~\ref{sec:dev-audit}. Panel (c) shows the typical UCF-Crime
+video, where the two detectors largely agree. Panel (d) is the worst case on NWPU Campus:
+the final model's score falls during the labelled event and peaks just after it, while
+plain PE-Core barely moves. A fixed list has no way to know what
+this scene's labels count as anomalous, the limitation discussed in
+Section~\ref{sec:discussion}.
 
 \subsection{What was tried and not kept}
 \label{sec:dev-failed}
@@ -792,6 +1040,123 @@ STG-NF's $71.8$ and AnomalyRuler's $71.9$ both lie inside our 95\% interval of
 $[70.4, 78.9]$. We therefore say ``above'' and not ``better''. The figures are also not
 equally earned: every published method has seen UBnormal's training data, and ours has
 seen nothing of UBnormal at all.
+
+% =====================================================================
+\section{Ablation Study}
+\label{sec:ablation}
+% =====================================================================
+
+The development round (Section~\ref{sec:dev}) added one component at a time and kept it
+only if the rule passed. This section takes the finished model apart: each ingredient is
+removed in turn, and each design choice is varied with the others held fixed. The
+component ablation uses the development benchmarks and the sealed run; the design
+ablations are computed after the sealed test, on UBnormal's per-frame features, by a
+script that first reproduced all four sealed micro AUROCs exactly. They are post hoc,
+describe the frozen model rather than test it, and were not used to change it.
+
+\subsection{Removing each ingredient}
+Table~\ref{tbl:ablation} removes the bank, the calm phrases, or both, and swaps the
+encoder. Every ingredient is needed on the sealed test. Without the bank the model loses
+$-0.060\ci{-0.102}{-0.016}$; without the calm phrases (the 48 actions against the three
+general normal phrases) it loses $-0.090\ci{-0.127}{-0.052}$; without both it falls to
+plain PE-Core, $-0.096\ci{-0.142}{-0.051}$. The order of importance matches development
+on XD-Violence, where the calm phrases added $+0.141$ and the bank $+0.088$. The encoder
+swap shows the other half of the result: the same eight calm phrases on CLIP ViT-L/14
+change no development benchmark significantly, so neither the text nor the encoder
+alone is the improvement; their combination is.
+
+\begin{table}[width=\linewidth,cols=6,pos=htbp]
+\caption{Component ablation: AUROC (AP on XD-Violence; micro AUROC on UBnormal). C:
+eight calm normal phrases; B: the 48-action bank. $^{\dagger}$Computed after the sealed
+test from the same features (post hoc); the other UBnormal entries are pre-registered
+conditions of the sealed run. A dash means not run: development added B only on top of
+C, and the sealed run did not include ViT-L/14 with C.}\label{tbl:ablation}
+\small
+\begin{tabularx}{\linewidth}{@{}Z c c c c c@{}}
+\toprule
+\textbf{Configuration} & \textbf{ShanghaiTech} & \textbf{UCF-Crime} & \textbf{XD-Violence} & \textbf{NWPU Campus} & \textbf{UBnormal} \\
+\midrule
+\textbf{Final: PE-Core + C + B} & \textbf{0.783} & \textbf{0.856} & \textbf{0.722} & 0.639 & \textbf{0.747} \\
+$-$ bank (PE-Core + C) & 0.757 & 0.817 & 0.635 & \textbf{0.669} & 0.687 \\
+$-$ calm phrases (PE-Core + B) & --- & --- & --- & --- & 0.657$^{\dagger}$ \\
+$-$ both (plain PE-Core) & 0.666 & 0.847 & 0.494 & 0.617 & 0.651 \\
+\midrule
+CLIP ViT-L/14 + C & 0.724 & 0.735 & 0.614 & 0.653 & --- \\
+CLIP ViT-L/14, base prompts & 0.707 & 0.756 & 0.624 & 0.659 & 0.586 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Design choices}
+Table~\ref{tbl:ablation-design} and Fig.~\ref{fig:ablation} vary one choice at a time on
+UBnormal; differences are against the frozen model's $0.7475$, with paired intervals for
+the phrase-set variants.
+
+\begin{table}[width=\linewidth,cols=3,pos=htbp]
+\caption{Design ablations on the UBnormal test split, micro AUROC over all frames. Post
+hoc: computed after the sealed result and not used to change the model. Differences are
+against the frozen model ($0.7475$); 95\% paired video-level intervals are given for the
+phrase-set variants.}\label{tbl:ablation-design}
+\small
+\begin{tabularx}{\linewidth}{@{}Z c l@{}}
+\toprule
+\textbf{Variant (all else as frozen)} & \textbf{AUROC} & \textbf{Difference} \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{Normal side (frozen: 3 general + 4 quiet places + 4 calm people)}} \\
+8 calm phrases, without the 3 general & 0.756 & $+0.008\ci{-0.004}{+0.022}$ \\
+3 general + 4 quiet places only & 0.708 & $\mathbf{-0.039}\ci{-0.055}{-0.025}$ \\
+3 general + 4 calm people only & 0.749 & $+0.002\ci{-0.014}{+0.019}$ \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{Abnormal side (frozen: 12 types $\times$ 4 actions)}} \\
+Bank + the 3 general abnormal phrases & 0.748 & $+0.001\ci{-0.003}{+0.004}$ \\
+First 1 / 2 / 3 phrases of each type & 0.715 / 0.731 / 0.744 & $-0.032$ / $-0.016$ / $-0.004$ \\
+One type left out: worst (falling) / best (theft) & 0.731 / 0.752 & $-0.017$ / $+0.004$ \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{Scoring (frozen: mean of phrase vectors, $\lambda=100$, $w=5$)}} \\
+Log-mean-exp of phrase similarities / maximum similarity & 0.713 / 0.698 & $-0.035$ / $-0.050$ \\
+$\lambda = 1$ / $10$ / $30$ / $300$ & 0.751 / 0.751 / 0.751 / 0.742 & $+0.003$ / $+0.003$ / $+0.003$ / $-0.006$ \\
+$w = 1$ / $3$ / $9$ / $15$ / $31$ & 0.740 / 0.750 / 0.742 / 0.733 / 0.713 & $-0.008$ / $+0.002$ / $-0.005$ / $-0.015$ / $-0.034$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[pos=htbp]
+\centering
+\includegraphics[width=\linewidth]{fig_p2_ablation}
+\caption{Design ablations on UBnormal (post hoc). (a) Smoothing window. (b) Number of
+phrases per anomaly type, keeping the first $k$ of each type. (c) How phrases are pooled
+on each side. (d) Change in micro AUROC when one anomaly type's four phrases are removed.
+Diamonds and purple bars mark the frozen choices.}\label{fig:ablation}
+\end{figure}
+
+\paragraph{Which calm phrases matter.} On UBnormal the four calm-people phrases carry the
+normal side: keeping only the quiet places costs $-0.039$, significantly, while keeping
+only the people costs nothing. The three general phrases from the first study could be
+dropped (+0.008, within noise).
+
+\paragraph{The bank works by breadth.} Every extra phrase per type helps, from $0.715$
+with one to $0.747$ with four, and no single type carries the result: removing any one
+changes the score by at most $0.017$. The largest loss comes from removing
+\emph{falling}, the type closest to UBnormal's ``having a seizure'' and ``laying down''.
+Removing four types (theft, vandalism, weapon, road accident) raises the score slightly,
+by $0.004$ at most.
+
+\paragraph{Pooling into one prototype is the right rule.} Comparing each frame with every
+phrase and pooling the similarities, by the maximum or by a soft maximum, is worse by
+$0.035$ to $0.050$. This repeats the first study's finding that per-prompt maximum
+pooling lost to mean-pooled prototypes \citep{sarangi2026concept}: an average of many
+phrases is a steadier reference than the single phrase a frame happens to match best.
+
+\paragraph{Smoothing and temperature.} A window of three to five sampled frames is best,
+and longer windows blur short events away ($-0.034$ at $w=31$). The temperature matters
+little: the sigmoid is monotone, so $\lambda$ changes the ranking of frames only through
+the smoothing that follows it.
+
+\paragraph{What the ablation does not license.} Three variants score marginally above the
+frozen model: no general phrases, $w=3$, and $\lambda\le30$. All differences are at most
+$0.008$, the one tested is within noise, and all were found on the test set after the
+fact. Choosing any of them now would be selection on the test data, which the sealed
+protocol exists to prevent; a further change would need a new sealed test.
 
 % =====================================================================
 \section{Comparison Across Benchmarks}

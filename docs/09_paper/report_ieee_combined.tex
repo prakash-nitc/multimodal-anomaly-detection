@@ -280,7 +280,7 @@ AnyAnomaly \cite{anyanomaly2025} & 2026 & WACV & The user names the anomaly; thr
 ASK-Hint \cite{zou2026askhint} & 2026 & WACV & Action-centric, fine-grained prompts for frozen VLMs & Deployment scene not isolated & Scene-conditioned prompting \\
 NOVA \cite{yin2026nova} & 2026 & arXiv & Prompt banks per anomaly class; calm normal prompts; visual anchor & Banks per class; anchor from each test video & Normal side without class lists \\
 Song and Lee \cite{song2026vlmanswer} & 2026 & arXiv & A VLM's yes/no answer is not an anomaly score & Score design, not adaptation & Rank-preserving scores \\
-PE-Core \cite{bolya2025pe} & 2025 & arXiv & Perception Encoder: a stronger contrastive image--text model & Best features inside the network & Use as a frozen VAD encoder \\
+PE-Core \cite{bolya2025pe} & 2025 & NeurIPS & Perception Encoder: a stronger contrastive image--text model & Best features inside the network & Use as a frozen VAD encoder \\
 \bottomrule
 \end{tabularx}
 \end{table*}
@@ -421,12 +421,13 @@ s_t = \frac{\exp(\lambda\langle v_t, e^{-}\rangle)}
 \end{equation}
 with $\lambda=100$, CLIP's learned logit scale. The scores are then smoothed,
 \begin{equation}
-\tilde{s}_t=\frac{1}{|\mathcal{W}_t|}\sum_{k\in\mathcal{W}_t}s_k,\qquad
-\mathcal{W}_t=[t-\lfloor w/2\rfloor,\,t+\lfloor w/2\rfloor]\cap[1,T].
+\tilde{s}_t=\frac{1}{w}\sum_{j=-\lfloor w/2\rfloor}^{\lfloor w/2\rfloor}
+s_{\min(T,\,\max(1,\,t+j))},
 \label{eq:smooth}
 \end{equation}
-Every second frame is scored on ShanghaiTech and CUHK Avenue ($w=31$), and every
-sixteenth elsewhere ($w=5$). Both windows span roughly two to three seconds. The
+with the first and last scores repeated at the ends of the video. Every second frame
+is scored on ShanghaiTech and CUHK Avenue ($w=31$), and every sixteenth elsewhere
+($w=5$). Both windows span roughly two to three seconds. The
 pipeline fits in about 7\,GB of GPU memory.
 
 \begin{algorithm}[!t]

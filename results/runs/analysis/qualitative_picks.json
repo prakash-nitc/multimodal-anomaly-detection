@@ -1,0 +1,26 @@
+[
+ {
+  "dataset": "xd_violence",
+  "video": "xd_violence/Rush.Hour.3.2007.BluRay__#01-12-16_01-12-36_label_B1-0-0",
+  "within_video_auroc_gain": 0.9655172413793104,
+  "reference": "llava"
+ },
+ {
+  "dataset": "shanghaitech",
+  "video": "shanghaitech/07_0005",
+  "within_video_auroc_gain": 0.03611698379140238,
+  "reference": "base"
+ },
+ {
+  "dataset": "ucf_crime",
+  "video": "ucf_crime/Burglary037_x264",
+  "within_video_auroc_gain": 0.02138455962305197,
+  "reference": "base"
+ },
+ {
+  "dataset": "nwpu_campus",
+  "video": "nwpu_campus/D158_13",
+  "within_video_auroc_gain": -0.6293103448275863,
+  "reference": "base"
+ }
+]

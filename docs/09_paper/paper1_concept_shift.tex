@@ -716,14 +716,12 @@ stages are executed in order.
         $s = (s_1,\dots,s_T)$ is smoothed by a centred moving average of width
         $w$,
         \begin{equation}
-        \tilde{s}_t \;=\; \frac{1}{|\mathcal{W}_t|}
-                          \sum_{k \in \mathcal{W}_t} s_k ,
-        \qquad
-        \mathcal{W}_t = \left[t - \lfloor w/2 \rfloor,\;
-                              t + \lfloor w/2 \rfloor\right] \cap [1,T],
+        \tilde{s}_t \;=\; \frac{1}{w}\sum_{j=-\lfloor w/2\rfloor}^{\lfloor w/2\rfloor}
+                          s_{\min(T,\,\max(1,\,t+j))},
         \label{eq:smooth}
         \end{equation}
-        which suppresses isolated single-frame excursions while preserving
+        with the first and last scores of the sequence repeated to fill the window at
+        its ends; this suppresses isolated single-frame excursions while preserving
         events that persist across several frames. The operator has no learnable
         parameters, so the temporal stage adds no training requirement.
 

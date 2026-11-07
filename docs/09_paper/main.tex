@@ -806,14 +806,12 @@ stages are executed in order.
         $s = (s_1,\dots,s_T)$ is smoothed by a centred moving average of width
         $w$,
         \begin{equation}
-        \tilde{s}_t \;=\; \frac{1}{|\mathcal{W}_t|}
-                          \sum_{k \in \mathcal{W}_t} s_k ,
-        \qquad
-        \mathcal{W}_t = \left[t - \lfloor w/2 \rfloor,\;
-                              t + \lfloor w/2 \rfloor\right] \cap [1,T],
+        \tilde{s}_t \;=\; \frac{1}{w}\sum_{j=-\lfloor w/2\rfloor}^{\lfloor w/2\rfloor}
+                          s_{\min(T,\,\max(1,\,t+j))},
         \label{eq:smooth}
         \end{equation}
-        which suppresses isolated single-frame excursions while preserving
+        with the first and last scores of the sequence repeated to fill the window at
+        its ends; this suppresses isolated single-frame excursions while preserving
         events that persist across several frames. The operator has no learnable
         parameters, so the temporal stage adds no training requirement.
 
@@ -2012,7 +2010,7 @@ second uses no descriptor and no captioning model.}\label{tbl:phase4}
 \midrule
 ViT-L/14, no descriptor                         & 0.707 & 0.756 & 0.624 & 0.659 \\
 ViT-L/14, generated descriptor per video/camera & 0.751 & 0.824 & 0.417 & 0.667 \\
-PE-Core, no descriptor                          & 0.666 & 0.847 & 0.494 & 0.618 \\
+PE-Core, no descriptor                          & 0.666 & 0.847 & 0.494 & 0.617 \\
 PE-Core + calm normal phrases (C)               & 0.757 & 0.817 & 0.635 & 0.669 \\
 \textbf{PE-Core + C + action bank (B)}          & \textbf{0.783} & \textbf{0.856} & \textbf{0.722} & 0.639 \\
 \bottomrule
